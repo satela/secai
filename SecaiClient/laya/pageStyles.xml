@@ -1,0 +1,14 @@
+<page>
+   <item name="test/TestScene.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="login/LogPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/RegisterPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/CityAreaItemUI.scene" props="" ifExport="加载模式" aName=""/>
+   <item name="login/CityAreaItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="PicManagePanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="UpLoadPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/ResetPwdPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="uploadpic/UpLoadItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="uploadpic/UpLoadPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="picManager/PicShortItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="picManager/DirectItem.scene" props="" ifExport="内嵌模式" aName=""/>
+</page>

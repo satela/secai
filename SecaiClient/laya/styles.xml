@@ -1,0 +1,5 @@
+<res>
+   <item name="button/clubDayoption.png" type="Button" compress="0" pack="0" quality="80" props="" picType="0" scale="0"/>
+   <item name="commers/inputbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,39,19,46" picType="0" scale="0"/>
+   <item name="comp/textinput.png" type="TextInput" compress="0" pack="0" quality="80" props="sizeGrid=6,15,7,14" picType="0" scale="0"/>
+</res>
