@@ -18,6 +18,9 @@ package model
 		
 		public static const getVerifyCode:String = "api/getcode?";
 		
+		public static const uploadPic:String = "files/upload";
+
+		
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)
@@ -30,10 +33,14 @@ package model
 			
 		}
 		
-		private function newRequest(url:String,caller:Object=null,complete:Function=null,param:Object=null,requestType:String="text"):void{
+		private function newRequest(url:String,caller:Object=null,complete:Function=null,param:Object=null,requestType:String="text",onProgressFun:Function = null):void{
 			
 			var request:HttpRequest=new HttpRequest();
-			request.on(Event.PROGRESS, this, onHttpRequestProgress);
+			request.on(Event.PROGRESS, this, function(e:Object)
+			{
+				if(onProgressFun != null)
+					onProgressFun(e);
+			});
 			request.on(Event.COMPLETE, this,onRequestCompete,[caller, complete,request]);
 			
 			//var self:HttpModel=this;
@@ -61,7 +68,7 @@ package model
 			}
 			console.log(url+param);
 			request["retrytime"]=0;
-			request.send(url, param, requestType?'post':'get', requestType);
+			request.send(url, param, requestType?'post':'get', "text");
 		}
 		
 		private function onHttpRequestError(url:String,caller:Object,complete:Function,param:Object,requestType:String,request:HttpRequest,e:Object=null):void
@@ -82,7 +89,7 @@ package model
 			request.offAll();
 		}
 		
-		public  function Request(url:String,caller:Object=null,complete:Function=null,param:Object=null,type:String="get"):void{
+		public  function Request(url:String,caller:Object=null,complete:Function=null,param:Object=null,type:String="get",onProgressFun:Function = null):void{
 			newRequest(url,caller,complete,param,type);
 		}
 		// --- Static Functions ------------------------------------------------------------------------------------------------------------------------------------ //

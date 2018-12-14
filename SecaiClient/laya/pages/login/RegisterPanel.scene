@@ -2,7 +2,7 @@
     "x":0,
     "type":"View",
     "selectedBox":3,
-    "selecteID":77,
+    "selecteID":66,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -827,90 +827,6 @@
                 },
                 {
                     "x":30,
-                    "type":"Image",
-                    "searchKey":"Image,provbox",
-                    "props":{"y":595.5,"x":773,"width":219,"var":"provbox","skin":"commers/blackbg.png","height":359},
-                    "nodeParent":3,
-                    "label":"provbox",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":62,
-                    "child":[
-                        {
-                            "type":"List",
-                            "searchKey":"List,provList",
-                            "props":{"var":"provList","top":0,"right":0,"left":0,"bottom":0},
-                            "nodeParent":62,
-                            "label":"provList",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":63,
-                            "child":[
-                                ]
-                        }],
-                    "$HIDDEN":true
-                },
-                {
-                    "x":30,
-                    "type":"Image",
-                    "searchKey":"Image,citybox",
-                    "props":{"y":595.5,"x":1001,"width":219,"var":"citybox","skin":"commers/blackbg.png","height":359},
-                    "nodeParent":3,
-                    "label":"citybox",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":64,
-                    "child":[
-                        {
-                            "type":"List",
-                            "searchKey":"List,cityList",
-                            "props":{"var":"cityList","top":0,"right":0,"left":0,"bottom":0},
-                            "nodeParent":64,
-                            "label":"cityList",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":65,
-                            "child":[
-                                ]
-                        }],
-                    "$HIDDEN":true
-                },
-                {
-                    "x":30,
-                    "type":"Image",
-                    "searchKey":"Image,areabox",
-                    "props":{"y":595.5,"x":1229.76171875,"width":219,"var":"areabox","skin":"commers/blackbg.png","height":359},
-                    "nodeParent":3,
-                    "label":"areabox",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":66,
-                    "child":[
-                        {
-                            "type":"List",
-                            "searchKey":"List,areaList",
-                            "props":{"var":"areaList","top":0,"right":0,"left":0,"bottom":0},
-                            "nodeParent":66,
-                            "label":"areaList",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":67,
-                            "child":[
-                                ]
-                        }],
-                    "$HIDDEN":true
-                },
-                {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnClose",
                     "props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},
@@ -964,6 +880,90 @@
                     "compId":77,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image,provbox",
+                    "props":{"y":195,"x":773,"width":219,"var":"provbox","skin":"commers/blackbg.png","height":359,"alpha":0.8},
+                    "nodeParent":3,
+                    "label":"provbox",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":62,
+                    "child":[
+                        {
+                            "type":"List",
+                            "searchKey":"List,provList",
+                            "props":{"var":"provList","top":0,"right":0,"left":0,"bottom":0},
+                            "nodeParent":62,
+                            "label":"provList",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":63,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image,citybox",
+                    "props":{"y":195,"x":1001,"width":219,"var":"citybox","skin":"commers/blackbg.png","height":359,"alpha":0.8},
+                    "nodeParent":3,
+                    "label":"citybox",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":64,
+                    "child":[
+                        {
+                            "type":"List",
+                            "searchKey":"List,cityList",
+                            "props":{"var":"cityList","top":0,"right":0,"left":0,"bottom":0},
+                            "nodeParent":64,
+                            "label":"cityList",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":65,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image,areabox",
+                    "props":{"y":195,"x":1230,"width":219,"var":"areabox","skin":"commers/blackbg.png","height":359,"alpha":0.8},
+                    "nodeParent":3,
+                    "label":"areabox",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":66,
+                    "child":[
+                        {
+                            "type":"List",
+                            "searchKey":"List,areaList",
+                            "props":{"var":"areaList","top":0,"right":0,"left":0,"bottom":0},
+                            "nodeParent":66,
+                            "label":"areaList",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":67,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
                 }],
             "$HIDDEN":false
         },

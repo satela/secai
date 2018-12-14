@@ -9,6 +9,7 @@ package script
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
+	import ui.usercenter.UserMainPanelUI;
 
 	public class ViewManager
 	{
@@ -25,6 +26,10 @@ package script
 		public static const VIEW_MYPICPANEL:String = "myPicUploadView";//图片资源管理界面
 
 		public static const VIEW_PICMANAGER:String = "picmanagerView";//图片管理下单界面
+
+		//public static const VIEW_PICMANAGER:String = "picmanagerView";//图片管理下单界面
+
+		public static const VIEW_USERCENTER:String = "userCenterPanel";//用户中心
 
 		
 		public var viewDict:Object;
@@ -49,6 +54,7 @@ package script
 			viewDict[VIEW_CHANGEPWD] = ResetPwdPanelUI;
 			viewDict[VIEW_MYPICPANEL] = UpLoadPanelUI;
 			viewDict[VIEW_PICMANAGER] = PicManagePanelUI;
+			viewDict[VIEW_USERCENTER] = UserMainPanelUI;
 
 		}
 		

@@ -5,6 +5,8 @@ package script.picUpload
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
+	import model.HttpRequestUtil;
+	
 	import script.ViewManager;
 	
 	import ui.uploadpic.UpLoadPanelUI;
@@ -14,6 +16,8 @@ package script.picUpload
 		private var uiSkin:UpLoadPanelUI;
 		private var fileListData:Array;
 
+		private var allFileData:Array;
+		private var curUploadIndex:int = 0;
 		public function UpLoadAndOrderContrl()
 		{
 			super();
@@ -24,6 +28,8 @@ package script.picUpload
 			
 			uiSkin = this.owner as UpLoadPanelUI; 
 			uiSkin.btnClose.on(Event.CLICK,this,onCloseScene);
+			uiSkin.btnBegin.on(Event.CLICK,this,onBeginUpload);
+
 			uiSkin.bgimg.alpha = 0.7;
 			uiSkin.fileList.itemRender = FileUpLoadItem;
 			uiSkin.fileList.vScrollBarSkin = "";
@@ -51,6 +57,7 @@ package script.picUpload
 			{
 				if(file.files.length <= 0)
 					return;
+				allFileData = [];
 				fileReader.readAsBinaryString(file.files[0]);
 				
 				fileListData = [];
@@ -66,12 +73,30 @@ package script.picUpload
 			{  
 				if(Browser.window.FileReader.DONE==fileReader.readyState)
 				{
+					allFileData.push(fileReader.result);
 					//var bytearr:ByteArray = new ByteArray();
 					//bytearr.readBytes(fileReader.result);
 				}
 			}
 		}
 		
+		private function onBeginUpload():void
+		{
+			if(allFileData && allFileData.length > curUploadIndex)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic,this,onCompleteUpload,allFileData[curUploadIndex],"post",onProgressHandler);
+			}
+		}
+		
+		private function onCompleteUpload(e:Object):void
+		{
+			onBeginUpload();
+		}
+		
+		private function onProgressHandler(e:Object):void
+		{
+			
+		}
 		private function updateFileItem(cell:FileUpLoadItem):void 
 		{
 			cell.setData(cell.dataSource);

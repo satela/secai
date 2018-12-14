@@ -58,8 +58,9 @@ package script {
 		
 		private function onShowUpload():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
-			
+			//ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
+
 			
 		}
 		private function onShowLogin(e:Event):void

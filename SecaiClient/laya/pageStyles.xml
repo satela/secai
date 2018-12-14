@@ -11,4 +11,7 @@
    <item name="uploadpic/UpLoadPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="picManager/PicShortItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="picManager/DirectItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="PaintOrderPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/UserMainPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/EnterPrizeInfoPane.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>
