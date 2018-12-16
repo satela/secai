@@ -10,6 +10,7 @@ package {
 	import script.MainPageControl;
 	import laya.html.dom.HTMLDivElement;
 	import script.picUpload.PicManagerControl;
+	import script.picUpload.PictureCheckControl;
 	import script.picUpload.UpLoadAndOrderContrl;
 	/**
 	 * 游戏初始化配置
@@ -21,7 +22,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "usercenter/UserMainPanel.scene";
+		public static var startScene:* = "picManager/PicShortItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -38,6 +39,7 @@ package {
 			reg("script.MainPageControl",MainPageControl);
 			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
+			reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 		}
 		GameConfig.init();

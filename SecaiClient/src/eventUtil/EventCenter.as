@@ -11,7 +11,11 @@ package eventUtil
 	{
 		public static const LOGIN_SUCESS:String = "LOGIN_SUCESS";
 		
-		
+		public static const SELECT_FOLDER:String = "SELECT_FOLDER";
+
+		public static const UPDATE_FILE_LIST:String = "UPDATE_FILE_LIST";
+
+		public static const SELECT_PIC_ORDER:String = "SELECT_PIC_ORDER";
 
 		private static var _eventCenter:EventCenter;
 		

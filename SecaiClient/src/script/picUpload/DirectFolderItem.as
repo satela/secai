@@ -3,11 +3,16 @@ package script.picUpload
 	
 	import laya.events.Event;
 	
+	import model.picmanagerModel.PicInfoVo;
+	
 	import ui.picManager.DirectItemUI;
 	
 	public class DirectFolderItem extends DirectItemUI
 	{
 		private var isSeleted:Boolean = false;
+		
+		public var directData:PicInfoVo;
+		
 		public function DirectFolderItem()
 		{
 			super();
@@ -15,7 +20,8 @@ package script.picUpload
 		
 		public function setData(filedata:Object):void
 		{
-			this.foldname.text = filedata as String;
+			directData = filedata as PicInfoVo;
+			this.foldname.text = (filedata as PicInfoVo).directName;
 			
 			this.on(Event.MOUSE_OVER,this,onMouseOver);
 			this.on(Event.MOUSE_OUT,this,onMouseOut);

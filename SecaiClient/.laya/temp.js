@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -855,6 +855,7 @@ var GameConfig=(function(){
 		reg("script.MainPageControl",MainPageControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
+		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 	}
 
@@ -864,7 +865,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/UserMainPanel.scene";
+	GameConfig.startScene="picManager/PicShortItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1296,11 +1297,12 @@ var ViewManager=(function(){
 		this.viewDict["myPicUploadView"]=UpLoadPanelUI;
 		this.viewDict["picmanagerView"]=PicManagePanelUI;
 		this.viewDict["userCenterPanel"]=UserMainPanelUI;
+		this.viewDict["picCheckView"]=PicCheckPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
 	var __proto=ViewManager.prototype;
-	__proto.openView=function(viewClass,closeOther){
+	__proto.openView=function(viewClass,closeOther,params){
 		(closeOther===void 0)&& (closeOther=false);
 		if(this.openViewList[viewClass] !=null)
 			return;
@@ -1315,6 +1317,9 @@ var ViewManager=(function(){
 			this.openViewList={};
 		};
 		var view=new this.viewDict[viewClass]();
+		var control=view.getComponent(Script);
+		if(control !=null)
+			control["param"]=params;
 		this.viewContainer.addChild(view);
 		this.openViewList[viewClass]=view;
 	}
@@ -1342,8 +1347,92 @@ var ViewManager=(function(){
 	ViewManager.VIEW_CHANGEPWD="changepwdview";
 	ViewManager.VIEW_MYPICPANEL="myPicUploadView";
 	ViewManager.VIEW_PICMANAGER="picmanagerView";
+	ViewManager.VIEW_PICTURE_CHECK="picCheckView";
 	ViewManager.VIEW_USERCENTER="userCenterPanel";
 	return ViewManager;
+})()
+
+
+//class model.picmanagerModel.PicInfoVo
+var PicInfoVo=(function(){
+	function PicInfoVo(fileinfo,dtype){
+		this.picType=0;
+		// 0 目录 1 图片
+		this.directName="";
+		//目录名 全目录 类似 1|2|3
+		this.parentDirect="";
+		this.directId="";
+		this.fid="";
+		this.picType=dtype;
+		if(this.picType==0){
+			this.directName=fileinfo.dname;
+			this.parentDirect=fileinfo.dpath;
+			this.directId=fileinfo.did;
+		}
+		else{
+			this.fid=fileinfo.fid;
+			this.directName=fileinfo.fname;
+			this.parentDirect=fileinfo.fpath;
+		}
+	}
+
+	__class(PicInfoVo,'model.picmanagerModel.PicInfoVo');
+	var __proto=PicInfoVo.prototype;
+	__getset(0,__proto,'dpath',function(){
+		return this.parentDirect+this.directId+"|";
+	});
+
+	return PicInfoVo;
+})()
+
+
+//class model.picmanagerModel.DirectoryFileModel
+var DirectoryFileModel=(function(){
+	function DirectoryFileModel(){
+		this.topDirectList=[];
+		//一级目录
+		this.directoryList=null;
+		this.curFileList=[];
+		this.curSelectDir=null;
+		this.haselectPic=[];
+		this.directoryList=[];
+	}
+
+	__class(DirectoryFileModel,'model.picmanagerModel.DirectoryFileModel');
+	var __proto=DirectoryFileModel.prototype;
+	//一级目录
+	__proto.initTopDirectoryList=function(dirInfo){
+		this.topDirectList=[];
+		var dirList=dirInfo.dirs;
+		for(var i=0;i < dirList.length;i++){
+			this.topDirectList.push(new PicInfoVo(dirList[i],0));
+		}
+	}
+
+	__proto.addNewTopDir=function(dir){
+		this.topDirectList.push(new PicInfoVo(dir,0));
+	}
+
+	__proto.initCurDirFiles=function(fileinfo){
+		this.curFileList=[];
+		var dirList=fileinfo.dirs;
+		for(var i=0;i < dirList.length;i++){
+			this.curFileList.push(new PicInfoVo(dirList[i],0));
+		};
+		var picList=fileinfo.files;
+		for(i=0;i < picList.length;i++){
+			this.curFileList.push(new PicInfoVo(picList[i],1));
+		}
+	}
+
+	__getset(1,DirectoryFileModel,'instance',function(){
+		if(DirectoryFileModel._instance==null)
+			DirectoryFileModel._instance=new DirectoryFileModel();
+		return DirectoryFileModel._instance;
+	});
+
+	DirectoryFileModel._instance=null;
+	return DirectoryFileModel;
 })()
 
 
@@ -1415,7 +1504,13 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.loginInUrl="account/login?";
 	HttpRequestUtil.loginOutUrl="account/logout?";
 	HttpRequestUtil.getVerifyCode="api/getcode?";
-	HttpRequestUtil.uploadPic="files/upload";
+	HttpRequestUtil.createDirectory="dir/create?";
+	HttpRequestUtil.deleteDirectory="dir/remove?";
+	HttpRequestUtil.getDirectoryList="dir/list?";
+	HttpRequestUtil.uploadPic="file/add?";
+	HttpRequestUtil.deletePic="file/delete?";
+	HttpRequestUtil.biggerPicUrl="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+	HttpRequestUtil.smallerrPicUrl="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	return HttpRequestUtil;
 })()
 
@@ -25662,6 +25757,9 @@ var EventCenter=(function(_super){
 	},laya.events.EventDispatcher._$SET_instance);
 
 	EventCenter.LOGIN_SUCESS="LOGIN_SUCESS";
+	EventCenter.SELECT_FOLDER="SELECT_FOLDER";
+	EventCenter.UPDATE_FILE_LIST="UPDATE_FILE_LIST";
+	EventCenter.SELECT_PIC_ORDER="SELECT_PIC_ORDER";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -31812,9 +31910,10 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.onShowUpload=function(){
-		ViewManager.instance.openView("userCenterPanel",true);
+		ViewManager.instance.openView("picmanagerView",true);
 	}
 
+	//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 	__proto.onShowLogin=function(e){
 		if(!Userdata.instance.isLogin)
 			ViewManager.instance.openView("loginview");
@@ -31877,6 +31976,7 @@ var MainPageControl=(function(_super){
 var LogPanelControl=(function(_super){
 	function LogPanelControl(){
 		this.uiSKin=null;
+		this.param=null;
 		LogPanelControl.__super.call(this);
 	}
 
@@ -31945,6 +32045,11 @@ var PicManagerControl=(function(_super){
 	function PicManagerControl(){
 		this.uiSkin=null;
 		this.createbox=null;
+		//private var DirectoryFileModel.instance.curSelectDir:PicInfoVo;
+		this.isCreateTopDir=true;
+		//是否创建一级目录
+		this.directTree=[];
+		this.param=null;
 		PicManagerControl.__super.call(this);
 	}
 
@@ -31952,14 +32057,16 @@ var PicManagerControl=(function(_super){
 	var __proto=PicManagerControl.prototype;
 	__proto.onStart=function(){
 		var _$this=this;
+		this.directTree=[];
 		this.uiSkin=this.owner;
 		this.uiSkin.btnNewDir.on("click",this,this.onCreateNewDirect);
+		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
 		this.createbox=this.uiSkin.boxNewFolder;
 		this.createbox.visible=false;
 		this.uiSkin.firstpage.underline=true;
 		this.uiSkin.firstpage.underlineColor="#121212";
 		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
-		this.uiSkin.input_folename.maxChars=50;
+		this.uiSkin.input_folename.maxChars=10;
 		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
 		this.uiSkin.folderList.itemRender=DirectFolderItem;
 		this.uiSkin.folderList.vScrollBarSkin="";
@@ -31972,19 +32079,75 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.selectEnable=false;
 		this.uiSkin.picList.spaceY=0;
 		this.uiSkin.picList.renderHandler=new Handler(this,this.updatePicInfoItem);
+		this.uiSkin.flder0.visible=false;
+		this.uiSkin.flder1.visible=false;
+		this.uiSkin.flder2.visible=false;
+		for(var i=0;i < 3;i++)
+		this.uiSkin["flder"+i].on("click",this,this.onClickTopDirectLbl,[i]);
 		this.uiSkin.btnUploadPic.on("click",this,this.onShowUploadView);
-		Laya.timer.once(10,null,function(){
-			_$this.uiSkin.folderList.array=["南京","武打片","日本","电视","你妹的"];
+		Laya.timer.once(10,this,function(){
+			_$this.uiSkin.folderList.array=[];
 			_$this.uiSkin.picList.array=[];
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
 		});
+		this.uiSkin.htmltext.style.fontSize=20;
+		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
 		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
+		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
+		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
+		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		DirectoryFileModel.instance.haselectPic=[];
+	}
+
+	__proto.seletPicToOrder=function(fid){
+		var index=DirectoryFileModel.instance.haselectPic.indexOf(fid);
+		if(index < 0){
+			DirectoryFileModel.instance.haselectPic.push(fid);
+		}
+		else
+		DirectoryFileModel.instance.haselectPic.splice(index,1);
+		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>"+DirectoryFileModel.instance.haselectPic.length+"</span>"+"<span color='#222222' size='20'>张图片</span>";
+	}
+
+	__proto.onGetTopDirListBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			DirectoryFileModel.instance.initTopDirectoryList(result);
+			this.uiSkin.folderList.array=DirectoryFileModel.instance.topDirectList;
+			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+			if(DirectoryFileModel.instance.topDirectList.length > 0){
+				DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList [0];
+				this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+				this.updateCurDirectLabel();
+				(this.uiSkin.folderList.cells [0]).ShowSelected=true;
+				this.getFileList();
+			}
+		}
+	}
+
+	__proto.getFileList=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
+	}
+
+	__proto.onGetDirFileListBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			DirectoryFileModel.instance.initCurDirFiles(result);
+			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+		}
 	}
 
 	__proto.onBackToMain=function(){
+		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
+		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
 		ViewManager.instance.closeView("picmanagerView");
 	}
 
 	__proto.onShowUploadView=function(){
+		if(DirectoryFileModel.instance.curSelectDir==null){
+			ViewManager.showAlert("请先创建一个目录");
+			return;
+		}
 		ViewManager.instance.openView("myPicUploadView");
 	}
 
@@ -31992,8 +32155,31 @@ var PicManagerControl=(function(_super){
 		if(this.uiSkin.input_folename.text=="")
 			return;
 		else{
-			this.uiSkin.folderList.addItem(this.uiSkin.input_folename.text);
+			if(!this.isCreateTopDir)
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
+			else
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
 			this.createbox.visible=false;
+		}
+	}
+
+	__proto.onCreateDirBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(this.isCreateTopDir){
+				var picinfo=new PicInfoVo(result.dir,0);
+				this.uiSkin.folderList.addItem(picinfo);
+				if(DirectoryFileModel.instance.topDirectList.length==1){
+					(this.uiSkin.folderList.cells [0]).ShowSelected=true;
+					DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList[0];
+					this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+					this.updateCurDirectLabel();
+				}
+			}
+			else{
+				picinfo=new PicInfoVo(result.dir,0);
+				this.uiSkin.picList.addItem(picinfo);
+			}
 		}
 	}
 
@@ -32004,6 +32190,40 @@ var PicManagerControl=(function(_super){
 			item.ShowSelected=false;
 		}
 		(this.uiSkin.folderList.cells [index]).ShowSelected=true;
+		var picinfo=(this.uiSkin.folderList.cells [index]).directData;
+		DirectoryFileModel.instance.curSelectDir=(this.uiSkin.folderList.cells [index]).directData;
+		this.directTree=[];
+		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.onSelectChildFolder=function(filedata){
+		DirectoryFileModel.instance.curSelectDir=filedata;
+		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.onClickTopDirectLbl=function(index){
+		if(index==this.directTree.length-1)
+			return;
+		DirectoryFileModel.instance.curSelectDir=this.directTree[index];
+		this.directTree.splice(index+1,this.directTree.length-index-1);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.updateCurDirectLabel=function(){
+		this.uiSkin.flder0.visible=false;
+		this.uiSkin.flder1.visible=false;
+		this.uiSkin.flder2.visible=false;
+		for(var i=0;i < this.directTree.length;i++){
+			if(i < 3){
+				this.uiSkin["flder"+i].text=this.directTree[i].directName+">";
+				this.uiSkin["flder"+i].visible=true;
+			}
+		}
 	}
 
 	__proto.updateDirectItem=function(cell){
@@ -32019,10 +32239,42 @@ var PicManagerControl=(function(_super){
 	}
 
 	__proto.onCreateNewDirect=function(){
+		this.isCreateTopDir=true;
+		this.createbox.visible=true;
+	}
+
+	__proto.onCreateNewFolder=function(){
+		this.isCreateTopDir=false;
 		this.createbox.visible=true;
 	}
 
 	return PicManagerControl;
+})(Script)
+
+
+//class script.picUpload.PictureCheckControl extends laya.components.Script
+var PictureCheckControl=(function(_super){
+	function PictureCheckControl(){
+		this.uiSkin=null;
+		this.param=null;
+		PictureCheckControl.__super.call(this);
+	}
+
+	__class(PictureCheckControl,'script.picUpload.PictureCheckControl',_super);
+	var __proto=PictureCheckControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.closeBtn.on("click",this,this.onClosePanel);
+		if(this.param !=null){
+			this.uiSkin.img.skin="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+(this.param).fid+".jpg";
+		}
+	}
+
+	__proto.onClosePanel=function(){
+		ViewManager.instance.closeView("picCheckView");
+	}
+
+	return PictureCheckControl;
 })(Script)
 
 
@@ -33526,6 +33778,7 @@ var Sprite=(function(_super){
 var ResetPwdControl=(function(_super){
 	function ResetPwdControl(){
 		this.uiSkin=null;
+		this.param=null;
 		ResetPwdControl.__super.call(this);
 	}
 
@@ -33552,6 +33805,7 @@ var RegisterCntrol=(function(_super){
 		this.cityname="";
 		this.areaname="";
 		this.verifycode=null;
+		this.param=null;
 		this.phonecode="";
 		RegisterCntrol.__super.call(this);
 	}
@@ -33744,6 +33998,9 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.fileListData=null;
 		this.allFileData=null;
 		this.curUploadIndex=0;
+		this.file=null;
+		this.param=null;
+		this.isUploading=false;
 		UpLoadAndOrderContrl.__super.call(this);
 	}
 
@@ -33752,7 +34009,7 @@ var UpLoadAndOrderContrl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
 		this.uiSkin.btnClose.on("click",this,this.onCloseScene);
-		this.uiSkin.btnBegin.on("click",this,this.onBeginUpload);
+		this.uiSkin.btnBegin.on("click",this,this.onClickBegin);
 		this.uiSkin.bgimg.alpha=0.7;
 		this.uiSkin.fileList.itemRender=FileUpLoadItem;
 		this.uiSkin.fileList.vScrollBarSkin="";
@@ -33761,54 +34018,70 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.uiSkin.fileList.renderHandler=new Handler(this,this.updateFileItem);
 		this.uiSkin.fileList.array=[];
 		this.initFileOpen();
+		Browser.window.uploadApp=this;
 	}
 
 	__proto.initFileOpen=function(){
 		var _$this=this;
-		var file=Browser.document.createElement("input");
-		file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:360px;top:48";
-		file.multiple="multiple";
-		file.accept=".jpg,.jpeg,.png,.tif";
-		file.type="file";
-		file.style.position="absolute";
-		file.style.zIndex=999;
-		Browser.document.body.appendChild(file);
-		file.onchange=function (e){
-			if(file.files.length <=0)
+		this.file=Browser.document.createElement("input");
+		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
+		this.file.multiple="multiple";
+		this.file.accept=".jpg,.jpeg,.png,.tif";
+		this.file.type="file";
+		this.file.style.position="absolute";
+		this.file.style.zIndex=999;
+		Browser.document.body.appendChild(this.file);
+		this.file.onchange=function (e){
+			if(_$this.isUploading)
 				return;
-			_$this.allFileData=[];
-			fileReader.readAsBinaryString(file.files[0]);
+			if(_$this.file.files.length <=0)
+				return;
+			_$this.curUploadIndex=0;
 			_$this.fileListData=[];
-			for(var i=0;i < file.files.length;i++){
-				_$this.fileListData.push(file.files[i]);
+			for(var i=0;i < _$this.file.files.length;i++){
+				_$this.fileListData.push(_$this.file.files[i]);
 			}
 			_$this.uiSkin.fileList.array=_$this.fileListData;
 		};
-		var fileReader=new Browser.window.FileReader();
-		fileReader.onload=function (evt){
-			if(Browser.window.FileReader.DONE==fileReader.readyState){
-				_$this.allFileData.push(fileReader.result);
-			}
-		}
 	}
 
-	//bytearr.readBytes(fileReader.result);
+	// }
+	__proto.onClickBegin=function(){
+		if(this.isUploading)
+			return;
+		this.isUploading=true;
+		this.onBeginUpload();
+	}
+
 	__proto.onBeginUpload=function(){
-		if(this.allFileData && this.allFileData.length > this.curUploadIndex){
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"files/upload",this,this.onCompleteUpload,this.allFileData[this.curUploadIndex],"post",this.onProgressHandler);
+		if(this.fileListData && this.fileListData.length > this.curUploadIndex){
+			Browser.window.uploadPic({path:DirectoryFileModel.instance.curSelectDir.dpath,file:this.fileListData[this.curUploadIndex]});
+		}
+		else{
+			this.isUploading=false;
 		}
 	}
 
 	__proto.onCompleteUpload=function(e){
+		(this.uiSkin.fileList.cells [this.curUploadIndex]).updateProgress("100");
+		this.curUploadIndex++;
 		this.onBeginUpload();
 	}
 
-	__proto.onProgressHandler=function(e){}
+	__proto.onProgressHandler=function(e){
+		if(Number(e)>=100)
+			e="99";
+		(this.uiSkin.fileList.cells [this.curUploadIndex]).updateProgress(e.toString());
+		console.log("up progress"+JSON.stringify(e));
+	}
+
 	__proto.updateFileItem=function(cell){
 		cell.setData(cell.dataSource);
 	}
 
 	__proto.onCloseScene=function(){
+		Browser.window.uploadApp=null;
+		EventCenter.instance.event("UPDATE_FILE_LIST");
 		ViewManager.instance.closeView("myPicUploadView");
 	}
 
@@ -45588,7 +45861,7 @@ var DirectItemUI=(function(_super){
 		this.createView(DirectItemUI.uiView);
 	}
 
-	DirectItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":270,"var":"outimg","skin":"commers/blackbg.png","height":30},"compId":3},{"type":"Label","props":{"y":0,"x":0,"width":270,"var":"foldname","text":"我的图片","height":24,"fontSize":24,"color":"#eaf3ec","alpha":0.8,"align":"center"},"compId":5}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
+	DirectItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","height":30},"compId":3,"child":[{"type":"Label","props":{"y":4,"var":"foldname","text":"我的图片","right":2,"left":2,"height":24,"fontSize":20,"color":"#eaf3ec","alpha":0.8,"align":"center"},"compId":5}]}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
 	return DirectItemUI;
 })(View)
 
@@ -45599,6 +45872,7 @@ var PicShortItemUI=(function(_super){
 		this.sel=null;
 		this.img=null;
 		this.fileinfo=null;
+		this.btndelete=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -45609,7 +45883,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":204,"var":"sel","skin":"commers/sel.png","sizeGrid":"10,10,10,10","height":204},"compId":6},{"type":"Image","props":{"y":2,"x":2,"width":200,"var":"img","skin":"comp/image.png","height":200},"compId":3},{"type":"Label","props":{"y":212,"x":0,"wordWrap":true,"width":200,"var":"fileinfo","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#eee6e6","align":"center"},"compId":4}],"loadList":["commers/sel.png","comp/image.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":200},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":3,"x":3,"width":150,"var":"img","height":150},"compId":3},{"type":"Label","props":{"y":154,"x":17.5,"wordWrap":true,"width":121,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -45643,6 +45917,7 @@ var PicManagePanelUI=(function(_super){
 		this.flder0=null;
 		this.flder1=null;
 		this.flder2=null;
+		this.htmltext=null;
 		this.radiosel=null;
 		this.btnorder=null;
 		this.picList=null;
@@ -45660,7 +45935,7 @@ var PicManagePanelUI=(function(_super){
 		this.createView(PicManagePanelUI.uiView);
 	}
 
-	PicManagePanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"x":0,"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":53}]},{"type":"Button","props":{"y":82,"x":325,"width":150,"var":"btnNewDir","skin":"comp/button.png","labelSize":20,"label":"新建一级目录","height":40},"compId":13},{"type":"Button","props":{"y":82,"x":603,"width":115,"var":"btnUploadPic","skin":"comp/button.png","labelSize":20,"label":"上传图片","height":40},"compId":14},{"type":"Sprite","props":{"y":131,"x":320,"width":274,"texture":"commers/whitebg.png","height":404},"compId":11,"child":[{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":12}]},{"type":"Button","props":{"y":82,"x":729,"width":115,"var":"btnNewFolder","skin":"comp/button.png","labelSize":20,"label":"新建目录","height":40},"compId":15},{"type":"Label","props":{"y":90,"x":872,"width":75,"var":"flder0","text":"南京>","height":24,"fontSize":24,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":972,"width":122,"var":"flder1","text":"南京>","height":24,"fontSize":24,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":1101,"width":122,"var":"flder2","text":"南京>","height":24,"fontSize":24,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":96,"x":1244,"width":181,"innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":82,"x":1501,"width":115,"var":"btnorder","skin":"comp/button.png","labelSize":20,"label":"喷印下单","height":40},"compId":21},{"type":"List","props":{"x":611,"width":995,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":4,"bottom":0},"compId":22},{"type":"Box","props":{"var":"boxNewFolder","top":0,"right":0,"left":0,"bottom":0},"compId":48,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.7},"compId":44},{"type":"Image","props":{"y":345,"x":710,"width":500,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","height":200},"compId":45,"child":[{"type":"Image","props":{"top":5,"skin":"commers/whitebg.png","right":5,"left":5,"bottom":5,"alpha":0.8},"compId":46},{"type":"TextInput","props":{"y":65,"x":37,"width":312,"var":"input_folename","skin":"comp/textinput.png","prompt":"请输入目录名称","height":46,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":49},{"type":"Button","props":{"y":67,"x":362,"width":100,"var":"btnSureCreate","skin":"comp/button.png","labelSize":24,"label":"确定","height":40},"compId":50},{"type":"Button","props":{"y":5,"x":454,"width":40,"var":"btnCloseInput","skin":"comp/btn_close.png","labelSize":24,"height":40},"compId":51}]}]}]},{"type":"Script","props":{"runtime":"script.picUpload.PicManagerControl"},"compId":23}],"loadList":["commers/whitebg.png","comp/label.png","comp/button.png","comp/checkbox.png","commers/blackbg.png","commers/sel.png","comp/textinput.png","comp/btn_close.png"],"loadList3D":[]};
+	PicManagePanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"x":0,"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":53}]},{"type":"Button","props":{"y":82,"x":325,"width":150,"var":"btnNewDir","skin":"comp/button.png","labelSize":20,"label":"新建一级目录","height":40},"compId":13},{"type":"Button","props":{"y":82,"x":603,"width":115,"var":"btnUploadPic","skin":"comp/button.png","labelSize":20,"label":"上传图片","height":40},"compId":14},{"type":"Sprite","props":{"y":131,"x":320,"width":154,"height":387},"compId":11,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":152,"lineWidth":1,"lineColor":"#141313","height":384,"fillColor":"#fdfbfb"},"compId":54},{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":12}]},{"type":"Button","props":{"y":82,"x":729,"width":115,"var":"btnNewFolder","skin":"comp/button.png","labelSize":20,"label":"新建目录","height":40},"compId":15},{"type":"Label","props":{"y":90,"x":872,"width":100,"var":"flder0","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":987,"width":100,"var":"flder1","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":1101,"width":100,"var":"flder2","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":88,"x":1252,"width":181,"var":"htmltext","innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":82,"x":1501,"width":115,"var":"btnorder","skin":"comp/button.png","labelSize":20,"label":"喷印下单","height":40},"compId":21},{"type":"List","props":{"x":611,"width":995,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":6,"bottom":0},"compId":22},{"type":"Box","props":{"var":"boxNewFolder","top":0,"right":0,"left":0,"bottom":0},"compId":48,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.7},"compId":44},{"type":"Image","props":{"y":345,"x":710,"width":500,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","height":200},"compId":45,"child":[{"type":"Image","props":{"top":5,"skin":"commers/whitebg.png","right":5,"left":5,"bottom":5,"alpha":0.8},"compId":46},{"type":"TextInput","props":{"y":65,"x":37,"width":312,"var":"input_folename","skin":"comp/textinput.png","prompt":"请输入目录名称","height":46,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":49},{"type":"Button","props":{"y":67,"x":362,"width":100,"var":"btnSureCreate","skin":"comp/button.png","labelSize":24,"label":"确定","height":40},"compId":50},{"type":"Button","props":{"y":5,"x":454,"width":40,"var":"btnCloseInput","skin":"comp/btn_close.png","labelSize":24,"height":40},"compId":51}]}]}]},{"type":"Script","props":{"runtime":"script.picUpload.PicManagerControl"},"compId":23}],"loadList":["commers/whitebg.png","comp/label.png","comp/button.png","comp/checkbox.png","commers/blackbg.png","commers/sel.png","comp/textinput.png","comp/btn_close.png"],"loadList3D":[]};
 	return PicManagePanelUI;
 })(View)
 
@@ -45728,8 +46003,28 @@ var UpLoadItemUI=(function(_super){
 		this.createView(UpLoadItemUI.uiView);
 	}
 
-	UpLoadItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.1,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
+	UpLoadItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
 	return UpLoadItemUI;
+})(View)
+
+
+//class ui.picManager.PicCheckPanelUI extends laya.ui.View
+var PicCheckPanelUI=(function(_super){
+	function PicCheckPanelUI(){
+		this.img=null;
+		this.closeBtn=null;
+		PicCheckPanelUI.__super.call(this);
+	}
+
+	__class(PicCheckPanelUI,'ui.picManager.PicCheckPanelUI',_super);
+	var __proto=PicCheckPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(PicCheckPanelUI.uiView);
+	}
+
+	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Image","props":{"y":36,"x":560,"width":800,"var":"img","height":800},"compId":4},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
+	return PicCheckPanelUI;
 })(View)
 
 
@@ -50189,12 +50484,73 @@ var CityAreaItem=(function(_super){
 //class script.picUpload.PicInfoItem extends ui.picManager.PicShortItemUI
 var PicInfoItem=(function(_super){
 	function PicInfoItem(){
+		this.picInfo=null;
 		PicInfoItem.__super.call(this);
 	}
 
 	__class(PicInfoItem,'script.picUpload.PicInfoItem',_super);
 	var __proto=PicInfoItem.prototype;
-	__proto.setData=function(filedata){}
+	__proto.setData=function(filedata){
+		this.picInfo=filedata;
+		this.offAll();
+		this.on("doubleclick",this,this.onDoubleClick);
+		this.on("click",this,this.onClickHandler);
+		this.on("mouseover",this,this.onMouseOverHandler);
+		this.btndelete.visible=true;
+		this.btndelete.on("click",this,this.onDeleteHandler);
+		this.sel.visible=DirectoryFileModel.instance.haselectPic.indexOf(this.picInfo.fid)>=0;
+		if(this.picInfo.picType==0){
+			this.img.skin="commers/fold.png";
+			this.fileinfo.text=this.picInfo.directName;
+		}
+		else{
+			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
+			this.fileinfo.text=this.picInfo.directName;
+		}
+	}
+
+	__proto.onDeleteHandler=function(e){
+		e.stopPropagation();
+		if(this.sel.visible){
+			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
+		}
+		if(this.picInfo.picType==1)
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/delete?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+		else
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+	}
+
+	__proto.onDeleteFileBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
+	}
+
+	__proto.onMouseOutHandler=function(){
+		this.btndelete.visible=false;
+	}
+
+	__proto.onMouseOverHandler=function(){
+		this.btndelete.visible=true;
+	}
+
+	__proto.onClickHandler=function(){
+		if(this.picInfo.picType==1){
+			this.sel.visible=!this.sel.visible;
+			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
+		}
+	}
+
+	__proto.onDoubleClick=function(){
+		if(this.picInfo.picType==0){
+			EventCenter.instance.event("SELECT_FOLDER",this.picInfo);
+		}
+		else{
+			ViewManager.instance.openView("picCheckView",false,this.picInfo);
+		}
+	}
+
 	return PicInfoItem;
 })(PicShortItemUI)
 
@@ -50203,13 +50559,15 @@ var PicInfoItem=(function(_super){
 var DirectFolderItem=(function(_super){
 	function DirectFolderItem(){
 		this.isSeleted=false;
+		this.directData=null;
 		DirectFolderItem.__super.call(this);
 	}
 
 	__class(DirectFolderItem,'script.picUpload.DirectFolderItem',_super);
 	var __proto=DirectFolderItem.prototype;
 	__proto.setData=function(filedata){
-		this.foldname.text=filedata;
+		this.directData=filedata;
+		this.foldname.text=(filedata).directName;
 		this.on("mouseover",this,this.onMouseOver);
 		this.on("mouseout",this,this.onMouseOut);
 	}
@@ -50258,6 +50616,14 @@ var FileUpLoadItem=(function(_super){
 		sizestr=((filedata.size/1024).toFixed(2)).toString()+"k";
 		this.prgbar.value=0;
 		this.filesize.text=sizestr;
+	}
+
+	__proto.updateProgress=function(progs){
+		var pp=Number(progs);
+		if(pp > 100)
+			pp=100;
+		this.prgbar.value=pp/100;
+		this.prog.text=progs+"%";
 	}
 
 	return FileUpLoadItem;

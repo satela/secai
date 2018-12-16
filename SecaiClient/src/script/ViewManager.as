@@ -1,5 +1,6 @@
 package script
 {
+	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.ui.View;
 	import laya.utils.Browser;
@@ -8,6 +9,7 @@ package script
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
+	import ui.picManager.PicCheckPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 
@@ -26,6 +28,8 @@ package script
 		public static const VIEW_MYPICPANEL:String = "myPicUploadView";//图片资源管理界面
 
 		public static const VIEW_PICMANAGER:String = "picmanagerView";//图片管理下单界面
+
+		public static const VIEW_PICTURE_CHECK:String = "picCheckView";//图片预览
 
 		//public static const VIEW_PICMANAGER:String = "picmanagerView";//图片管理下单界面
 
@@ -55,6 +59,7 @@ package script
 			viewDict[VIEW_MYPICPANEL] = UpLoadPanelUI;
 			viewDict[VIEW_PICMANAGER] = PicManagePanelUI;
 			viewDict[VIEW_USERCENTER] = UserMainPanelUI;
+			viewDict[VIEW_PICTURE_CHECK] = PicCheckPanelUI;
 
 		}
 		
@@ -63,7 +68,7 @@ package script
 			Browser.window.alert(mesg);
 
 		}
-		public function openView(viewClass:String,closeOther:Boolean=false):void
+		public function openView(viewClass:String,closeOther:Boolean=false,params:Object = null):void
 		{
 			if(openViewList[viewClass] != null)
 				return;
@@ -78,6 +83,9 @@ package script
 				openViewList = {};
 			}
 			var view:View = new viewDict[viewClass]();
+			var control:Script = view.getComponent(Script);
+			if(control != null)
+			control["param"] = params;
 			viewContainer.addChild(view);
 			openViewList[viewClass] = view;
 		}

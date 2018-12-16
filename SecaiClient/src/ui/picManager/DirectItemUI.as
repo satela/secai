@@ -7,7 +7,7 @@ package ui.picManager {
 		public var outimg:Image;
 		public var foldname:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":270,"var":"outimg","skin":"commers/blackbg.png","height":30},"compId":3},{"type":"Label","props":{"y":0,"x":0,"width":270,"var":"foldname","text":"我的图片","height":24,"fontSize":24,"color":"#eaf3ec","alpha":0.8,"align":"center"},"compId":5}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","height":30},"compId":3,"child":[{"type":"Label","props":{"y":4,"var":"foldname","text":"我的图片","right":2,"left":2,"height":24,"fontSize":20,"color":"#eaf3ec","alpha":0.8,"align":"center"},"compId":5}]}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

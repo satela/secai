@@ -10,6 +10,8 @@ package script.login
 	public class ResetPwdControl extends Script
 	{
 		private var uiSkin:ResetPwdPanelUI;
+		public var param:Object;
+
 		public function ResetPwdControl()
 		{
 			super();

@@ -23,7 +23,8 @@ package script.login
 		private var areaname:String = "";
 		
 		private var verifycode:Object;
-		
+		public var param:Object;
+
 		private var phonecode:String = "";
 		public function RegisterCntrol()
 		{

@@ -25,5 +25,14 @@ package script.picUpload
 			this.prgbar.value = 0;
 			this.filesize.text = sizestr;
 		}
+		
+		public function updateProgress(progs:String):void
+		{
+			var pp:Number = Number(progs);
+			if(pp > 100)
+				pp = 100;
+			this.prgbar.value = pp/100;
+			this.prog.text = progs + "%";
+		}
 	}
 }

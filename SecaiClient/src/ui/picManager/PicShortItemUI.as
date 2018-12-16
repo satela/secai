@@ -7,8 +7,9 @@ package ui.picManager {
 		public var sel:Image;
 		public var img:Image;
 		public var fileinfo:Label;
+		public var btndelete:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":204,"var":"sel","skin":"commers/sel.png","sizeGrid":"10,10,10,10","height":204},"compId":6},{"type":"Image","props":{"y":2,"x":2,"width":200,"var":"img","skin":"comp/image.png","height":200},"compId":3},{"type":"Label","props":{"y":212,"x":0,"wordWrap":true,"width":200,"var":"fileinfo","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#eee6e6","align":"center"},"compId":4}],"loadList":["commers/sel.png","comp/image.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":156,"height":200},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":3,"x":3,"width":150,"var":"img","height":150},"compId":3},{"type":"Label","props":{"y":154,"x":17.5,"wordWrap":true,"width":121,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

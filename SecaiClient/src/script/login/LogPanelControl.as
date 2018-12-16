@@ -18,6 +18,8 @@ package script.login
 	public class LogPanelControl extends Script
 	{
 		private var uiSKin:LogPanelUI;
+		public var param:Object;
+
 		public function LogPanelControl()
 		{
 			//super();

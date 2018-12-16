@@ -7,7 +7,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static const httpUrl:String = "http://47.101.178.87/";
+		public static const httpUrl:String = "http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	
 		
 		public static const registerUrl:String = "account/create";
 		
@@ -18,9 +18,16 @@ package model
 		
 		public static const getVerifyCode:String = "api/getcode?";
 		
-		public static const uploadPic:String = "files/upload";
 
-		
+		public static const createDirectory:String = "dir/create?";
+		public static const deleteDirectory:String = "dir/remove?";
+		public static const getDirectoryList:String = "dir/list?";
+		public static const uploadPic:String = "file/add?";
+		public static const deletePic:String = "file/delete?";
+
+		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)
