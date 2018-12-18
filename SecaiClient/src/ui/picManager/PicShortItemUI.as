@@ -6,10 +6,12 @@ package ui.picManager {
 	public class PicShortItemUI extends View {
 		public var sel:Image;
 		public var img:Image;
-		public var fileinfo:Label;
+		public var filename:Label;
 		public var btndelete:Button;
+		public var fileinfo:Label;
+		public var picClassTxt:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":156,"height":200},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":3,"x":3,"width":150,"var":"img","height":150},"compId":3},{"type":"Label","props":{"y":154,"x":17.5,"wordWrap":true,"width":121,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

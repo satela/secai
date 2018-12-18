@@ -153,7 +153,8 @@ package script.picUpload
 			// TODO Auto Generated method stub
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
-			
+			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_PICMANAGER);
 		}
 		

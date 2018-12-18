@@ -23,7 +23,7 @@ package model
 		public static const deleteDirectory:String = "dir/remove?";
 		public static const getDirectoryList:String = "dir/list?";
 		public static const uploadPic:String = "file/add?";
-		public static const deletePic:String = "file/delete?";
+		public static const deletePic:String = "file/remove?";
 
 		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";

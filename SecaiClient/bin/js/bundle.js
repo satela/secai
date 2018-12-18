@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -867,6 +867,7 @@ var GameConfig=(function(){
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
+		reg("utils.PopUpWindowControl",PopUpWindowControl);
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 	}
 
@@ -876,7 +877,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="picManager/PicShortItem.scene";
+	GameConfig.startScene="PopUpDialog.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1296,19 +1297,20 @@ var ViewManager=(function(){
 	function ViewManager(){
 		this.viewContainer=null;
 		this.openViewList=null;
-		//用户中心
+		//确认框
 		this.viewDict=null;
 		this.viewContainer=new Sprite();
 		Laya.stage.addChild(this.viewContainer);
 		this.openViewList={};
 		this.viewDict=new Object();
-		this.viewDict["loginview"]=LogPanelUI;
-		this.viewDict["registerview"]=RegisterPanelUI;
-		this.viewDict["changepwdview"]=ResetPwdPanelUI;
-		this.viewDict["myPicUploadView"]=UpLoadPanelUI;
-		this.viewDict["picmanagerView"]=PicManagePanelUI;
-		this.viewDict["userCenterPanel"]=UserMainPanelUI;
-		this.viewDict["picCheckView"]=PicCheckPanelUI;
+		this.viewDict["VIEW_lOGPANEL"]=LogPanelUI;
+		this.viewDict["VIEW_REGPANEL"]=RegisterPanelUI;
+		this.viewDict["VIEW_CHANGEPWD"]=ResetPwdPanelUI;
+		this.viewDict["VIEW_MYPICPANEL"]=UpLoadPanelUI;
+		this.viewDict["VIEW_PICMANAGER"]=PicManagePanelUI;
+		this.viewDict["VIEW_USERCENTER"]=UserMainPanelUI;
+		this.viewDict["VIEW_PICTURE_CHECK"]=PicCheckPanelUI;
+		this.viewDict["VIEW_POPUPDIALOG"]=PopUpDialogUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1353,13 +1355,14 @@ var ViewManager=(function(){
 	}
 
 	ViewManager._instance=null;
-	ViewManager.VIEW_lOGPANEL="loginview";
-	ViewManager.VIEW_REGPANEL="registerview";
-	ViewManager.VIEW_CHANGEPWD="changepwdview";
-	ViewManager.VIEW_MYPICPANEL="myPicUploadView";
-	ViewManager.VIEW_PICMANAGER="picmanagerView";
-	ViewManager.VIEW_PICTURE_CHECK="picCheckView";
-	ViewManager.VIEW_USERCENTER="userCenterPanel";
+	ViewManager.VIEW_lOGPANEL="VIEW_lOGPANEL";
+	ViewManager.VIEW_REGPANEL="VIEW_REGPANEL";
+	ViewManager.VIEW_CHANGEPWD="VIEW_CHANGEPWD";
+	ViewManager.VIEW_MYPICPANEL="VIEW_MYPICPANEL";
+	ViewManager.VIEW_PICMANAGER="VIEW_PICMANAGER";
+	ViewManager.VIEW_PICTURE_CHECK="VIEW_PICTURE_CHECK";
+	ViewManager.VIEW_USERCENTER="VIEW_USERCENTER";
+	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
 
@@ -1374,6 +1377,11 @@ var PicInfoVo=(function(){
 		this.parentDirect="";
 		this.directId="";
 		this.fid="";
+		this.picWidth=0;
+		this.picHeight=0;
+		this.colorType="";
+		this.picClass="";
+		this.dpi=NaN;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1382,6 +1390,11 @@ var PicInfoVo=(function(){
 		}
 		else{
 			this.fid=fileinfo.fid;
+			var fattr=JSON.parse(fileinfo.fattr);
+			this.picWidth=fattr.width;
+			this.picHeight=fattr.height;
+			this.dpi=fattr.dpi;
+			this.picClass=fileinfo.ftype;
 			this.directName=fileinfo.fname;
 			this.parentDirect=fileinfo.fpath;
 		}
@@ -1519,7 +1532,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.deleteDirectory="dir/remove?";
 	HttpRequestUtil.getDirectoryList="dir/list?";
 	HttpRequestUtil.uploadPic="file/add?";
-	HttpRequestUtil.deletePic="file/delete?";
+	HttpRequestUtil.deletePic="file/remove?";
 	HttpRequestUtil.biggerPicUrl="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.smallerrPicUrl="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	return HttpRequestUtil;
@@ -26172,6 +26185,335 @@ var SoundChannel=(function(_super){
 })(EventDispatcher)
 
 
+/**
+*<code>Texture</code> 是一个纹理处理类。
+*/
+//class laya.resource.Texture extends laya.events.EventDispatcher
+var Texture=(function(_super){
+	function Texture(bitmap,uv,sourceWidth,sourceHeight){
+		/**@private uv的范围*/
+		this.uvrect=[0,0,1,1];
+		/**@private */
+		this._w=0;
+		/**@private */
+		this._h=0;
+		/**@private */
+		this._destroyed=false;
+		/**@private */
+		//this._bitmap=null;
+		/**@private */
+		//this._uv=null;
+		/**@private */
+		this._referenceCount=0;
+		/**@private [NATIVE]*/
+		//this._nativeObj=null;
+		/**@private 唯一ID*/
+		//this.$_GID=NaN;
+		/**沿 X 轴偏移量。*/
+		this.offsetX=0;
+		/**沿 Y 轴偏移量。*/
+		this.offsetY=0;
+		/**原始宽度（包括被裁剪的透明区域）。*/
+		this.sourceWidth=0;
+		/**原始高度（包括被裁剪的透明区域）。*/
+		this.sourceHeight=0;
+		/**图片地址*/
+		//this.url=null;
+		/**@private */
+		this.scaleRate=1;
+		Texture.__super.call(this);
+		(sourceWidth===void 0)&& (sourceWidth=0);
+		(sourceHeight===void 0)&& (sourceHeight=0);
+		this.setTo(bitmap,uv,sourceWidth,sourceHeight);
+	}
+
+	__class(Texture,'laya.resource.Texture',_super);
+	var __proto=Texture.prototype;
+	/**
+	*@private
+	*/
+	__proto._addReference=function(){
+		this._bitmap && this._bitmap._addReference();
+		this._referenceCount++;
+	}
+
+	/**
+	*@private
+	*/
+	__proto._removeReference=function(){
+		this._bitmap && this._bitmap._removeReference();
+		this._referenceCount--;
+	}
+
+	/**
+	*@private
+	*/
+	__proto._getSource=function(){
+		if (this._destroyed || !this._bitmap)
+			return null;
+		this.recoverBitmap();
+		return this._bitmap.destroyed ? null :this.bitmap._getSource();
+	}
+
+	/**
+	*@private
+	*/
+	__proto._onLoaded=function(complete,context){
+		if (!context){
+			}else if (context==this){
+			}else if ((context instanceof laya.resource.Texture )){
+			var tex=context;
+			Texture._create(context,0,0,tex.width,tex.height,0,0,tex.sourceWidth,tex.sourceHeight,this);
+			}else {
+			this.bitmap=context;
+			this.sourceWidth=this._w=context.width;
+			this.sourceHeight=this._h=context.height;
+		}
+		complete && complete.run();
+		this.event("ready",this);
+	}
+
+	/**
+	*获取是否可以使用。
+	*/
+	__proto.getIsReady=function(){
+		return this._destroyed ? false :(this._bitmap ? true :false);
+	}
+
+	/**
+	*设置此对象的位图资源、UV数据信息。
+	*@param bitmap 位图资源
+	*@param uv UV数据信息
+	*/
+	__proto.setTo=function(bitmap,uv,sourceWidth,sourceHeight){
+		(sourceWidth===void 0)&& (sourceWidth=0);
+		(sourceHeight===void 0)&& (sourceHeight=0);
+		this.bitmap=bitmap;
+		this.sourceWidth=sourceWidth;
+		this.sourceHeight=sourceHeight;
+		if (bitmap){
+			this._w=bitmap.width;
+			this._h=bitmap.height;
+			this.sourceWidth=this.sourceWidth || this._w;
+			this.sourceHeight=this.sourceHeight || this._h;
+			var _this=this;
+		}
+		this.uv=uv || Texture.DEF_UV;
+	}
+
+	/**
+	*加载指定地址的图片。
+	*@param url 图片地址。
+	*@param complete 加载完成回调
+	*/
+	__proto.load=function(url,complete){
+		if (!this._destroyed)
+			Laya.loader.load(url,Handler.create(this,this._onLoaded,[complete]),null,"htmlimage",1,false,null,true);
+	}
+
+	/**
+	*获取Texture上的某个区域的像素点
+	*@param x
+	*@param y
+	*@param width
+	*@param height
+	*@return 返回像素点集合
+	*/
+	__proto.getPixels=function(x,y,width,height){
+		if (Render.isWebGL){
+			return RunDriver.getTexturePixels(this,x,y,width,height);
+			}else if (Render.isConchApp){
+			return this._nativeObj.getImageData(x,y,width,height);
+			}else {
+			var texw=this.width;
+			var texh=this.height;
+			if (x+width > texw)width-=(x+width)-texw;
+			if (y+height > texh)height-=(y+height)-texh;
+			if (width <=0 || height <=0)return null;
+			Browser.canvas.size(width,height);
+			Browser.canvas.clear();
+			Browser.context.drawImage(this.bitmap._source,x,y,width,height,0,0,width,height);
+			var info=Browser.context.getImageData(0,0,width,height);
+			return info.data;
+		}
+	}
+
+	/**
+	*通过url强制恢复bitmap。
+	*/
+	__proto.recoverBitmap=function(){
+		if (!this._destroyed && (!this._bitmap || this._bitmap.destroyed)&& this.url)
+			this.load(this.url);
+	}
+
+	/**
+	*强制释放Bitmap,无论是否被引用。
+	*/
+	__proto.disposeBitmap=function(){
+		if (!this._destroyed && this._bitmap){
+			this._bitmap.destroy();
+		}
+	}
+
+	/**
+	*销毁纹理。
+	*/
+	__proto.destroy=function(){
+		if (!this._destroyed){
+			this._destroyed=true;
+			if (this.bitmap){
+				this.bitmap._removeReference(this._referenceCount);
+				this.bitmap=null;
+			}
+			if (this.url && this===Laya.loader.getRes(this.url))
+				Laya.loader.clearRes(this.url);
+		}
+	}
+
+	/**实际高度。*/
+	__getset(0,__proto,'height',function(){
+		if (this._h)
+			return this._h;
+		if (!this.bitmap)return 0;
+		return (this.uv && this.uv!==Texture.DEF_UV)? (this.uv[5]-this.uv[1])*this.bitmap.height :this.bitmap.height;
+		},function(value){
+		this._h=value;
+		this.sourceHeight || (this.sourceHeight=value);
+	});
+
+	__getset(0,__proto,'uv',function(){
+		return this._uv;
+		},function(value){
+		this.uvrect[0]=Math.min(value[0],value[2],value[4],value[6]);
+		this.uvrect[1]=Math.min(value[1],value[3],value[5],value[7]);
+		this.uvrect[2]=Math.max(value[0],value[2],value[4],value[6])-this.uvrect[0];
+		this.uvrect[3]=Math.max(value[1],value[3],value[5],value[7])-this.uvrect[1];
+		this._uv=value;
+	});
+
+	/**实际宽度。*/
+	__getset(0,__proto,'width',function(){
+		if (this._w)
+			return this._w;
+		if (!this.bitmap)return 0;
+		return (this.uv && this.uv!==Texture.DEF_UV)? (this.uv[2]-this.uv[0])*this.bitmap.width :this.bitmap.width;
+		},function(value){
+		this._w=value;
+		this.sourceWidth || (this.sourceWidth=value);
+	});
+
+	/**
+	*设置位图。
+	*@param 位图。
+	*/
+	/**
+	*获取位图。
+	*@return 位图。
+	*/
+	__getset(0,__proto,'bitmap',function(){
+		return this._bitmap;
+		},function(value){
+		this._bitmap && this._bitmap._removeReference(this._referenceCount);
+		this._bitmap=value;
+		value && (value._addReference(this._referenceCount));
+	});
+
+	/**
+	*获取是否已经销毁。
+	*@return 是否已经销毁。
+	*/
+	__getset(0,__proto,'destroyed',function(){
+		return this._destroyed;
+	});
+
+	Texture.moveUV=function(offsetX,offsetY,uv){
+		for (var i=0;i < 8;i+=2){
+			uv[i]+=offsetX;
+			uv[i+1]+=offsetY;
+		}
+		return uv;
+	}
+
+	Texture.create=function(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight){
+		(offsetX===void 0)&& (offsetX=0);
+		(offsetY===void 0)&& (offsetY=0);
+		(sourceWidth===void 0)&& (sourceWidth=0);
+		(sourceHeight===void 0)&& (sourceHeight=0);
+		return Texture._create(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight);
+	}
+
+	Texture._create=function(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight,outTexture){
+		(offsetX===void 0)&& (offsetX=0);
+		(offsetY===void 0)&& (offsetY=0);
+		(sourceWidth===void 0)&& (sourceWidth=0);
+		(sourceHeight===void 0)&& (sourceHeight=0);
+		var btex=(source instanceof laya.resource.Texture );
+		var uv=btex ? source.uv :Texture.DEF_UV;
+		var bitmap=btex ? source.bitmap :source;
+		if (bitmap.width && (x+width)> bitmap.width)
+			width=bitmap.width-x;
+		if (bitmap.height && (y+height)> bitmap.height)
+			height=bitmap.height-y;
+		var tex;
+		if (outTexture){
+			tex=outTexture;
+			tex.setTo(bitmap,null,sourceWidth || width,sourceHeight || height);
+			}else {
+			tex=new Texture(bitmap,null,sourceWidth || width,sourceHeight || height)
+		}
+		tex.width=width;
+		tex.height=height;
+		tex.offsetX=offsetX;
+		tex.offsetY=offsetY;
+		var dwidth=1 / bitmap.width;
+		var dheight=1 / bitmap.height;
+		x *=dwidth;
+		y *=dheight;
+		width *=dwidth;
+		height *=dheight;
+		var u1=tex.uv[0],v1=tex.uv[1],u2=tex.uv[4],v2=tex.uv[5];
+		var inAltasUVWidth=(u2-u1),inAltasUVHeight=(v2-v1);
+		var oriUV=Texture.moveUV(uv[0],uv[1],[x,y,x+width,y,x+width,y+height,x,y+height]);
+		tex.uv=[u1+oriUV[0] *inAltasUVWidth,v1+oriUV[1] *inAltasUVHeight,u2-(1-oriUV[2])*inAltasUVWidth,v1+oriUV[3] *inAltasUVHeight,u2-(1-oriUV[4])*inAltasUVWidth,v2-(1-oriUV[5])*inAltasUVHeight,u1+oriUV[6] *inAltasUVWidth,v2-(1-oriUV[7])*inAltasUVHeight];
+		var bitmapScale=bitmap.scaleRate;
+		if (bitmapScale && bitmapScale !=1){
+			tex.sourceWidth /=bitmapScale;
+			tex.sourceHeight /=bitmapScale;
+			tex.width /=bitmapScale;
+			tex.height /=bitmapScale;
+			tex.scaleRate=bitmapScale;
+			}else {
+			tex.scaleRate=1;
+		}
+		return tex;
+	}
+
+	Texture.createFromTexture=function(texture,x,y,width,height){
+		var texScaleRate=texture.scaleRate;
+		if (texScaleRate !=1){
+			x *=texScaleRate;
+			y *=texScaleRate;
+			width *=texScaleRate;
+			height *=texScaleRate;
+		};
+		var rect=Rectangle.TEMP.setTo(x-texture.offsetX,y-texture.offsetY,width,height);
+		var result=rect.intersection(Texture._rect1.setTo(0,0,texture.width,texture.height),Texture._rect2);
+		if (result)
+			var tex=Texture.create(texture,result.x,result.y,result.width,result.height,result.x-rect.x,result.y-rect.y,width,height);
+		else
+		return null;
+		return tex;
+	}
+
+	Texture.DEF_UV=[0,0,1.0,0,1.0,1.0,0,1.0];
+	Texture.NO_UV=[0,0,0,0,0,0,0,0];
+	Texture.INV_UV=[0,1,1.0,1,1.0,0.0,0,0.0];
+	Texture._rect1=new Rectangle();
+	Texture._rect2=new Rectangle();
+	return Texture;
+})(EventDispatcher)
+
+
 //class laya.webgl.canvas.WebGLContext2D extends laya.resource.Context
 var WebGLContext2D=(function(_super){
 	var ContextParams;
@@ -27774,335 +28116,6 @@ var WebGLContext2D=(function(_super){
 
 	return WebGLContext2D;
 })(Context)
-
-
-/**
-*<code>Texture</code> 是一个纹理处理类。
-*/
-//class laya.resource.Texture extends laya.events.EventDispatcher
-var Texture=(function(_super){
-	function Texture(bitmap,uv,sourceWidth,sourceHeight){
-		/**@private uv的范围*/
-		this.uvrect=[0,0,1,1];
-		/**@private */
-		this._w=0;
-		/**@private */
-		this._h=0;
-		/**@private */
-		this._destroyed=false;
-		/**@private */
-		//this._bitmap=null;
-		/**@private */
-		//this._uv=null;
-		/**@private */
-		this._referenceCount=0;
-		/**@private [NATIVE]*/
-		//this._nativeObj=null;
-		/**@private 唯一ID*/
-		//this.$_GID=NaN;
-		/**沿 X 轴偏移量。*/
-		this.offsetX=0;
-		/**沿 Y 轴偏移量。*/
-		this.offsetY=0;
-		/**原始宽度（包括被裁剪的透明区域）。*/
-		this.sourceWidth=0;
-		/**原始高度（包括被裁剪的透明区域）。*/
-		this.sourceHeight=0;
-		/**图片地址*/
-		//this.url=null;
-		/**@private */
-		this.scaleRate=1;
-		Texture.__super.call(this);
-		(sourceWidth===void 0)&& (sourceWidth=0);
-		(sourceHeight===void 0)&& (sourceHeight=0);
-		this.setTo(bitmap,uv,sourceWidth,sourceHeight);
-	}
-
-	__class(Texture,'laya.resource.Texture',_super);
-	var __proto=Texture.prototype;
-	/**
-	*@private
-	*/
-	__proto._addReference=function(){
-		this._bitmap && this._bitmap._addReference();
-		this._referenceCount++;
-	}
-
-	/**
-	*@private
-	*/
-	__proto._removeReference=function(){
-		this._bitmap && this._bitmap._removeReference();
-		this._referenceCount--;
-	}
-
-	/**
-	*@private
-	*/
-	__proto._getSource=function(){
-		if (this._destroyed || !this._bitmap)
-			return null;
-		this.recoverBitmap();
-		return this._bitmap.destroyed ? null :this.bitmap._getSource();
-	}
-
-	/**
-	*@private
-	*/
-	__proto._onLoaded=function(complete,context){
-		if (!context){
-			}else if (context==this){
-			}else if ((context instanceof laya.resource.Texture )){
-			var tex=context;
-			Texture._create(context,0,0,tex.width,tex.height,0,0,tex.sourceWidth,tex.sourceHeight,this);
-			}else {
-			this.bitmap=context;
-			this.sourceWidth=this._w=context.width;
-			this.sourceHeight=this._h=context.height;
-		}
-		complete && complete.run();
-		this.event("ready",this);
-	}
-
-	/**
-	*获取是否可以使用。
-	*/
-	__proto.getIsReady=function(){
-		return this._destroyed ? false :(this._bitmap ? true :false);
-	}
-
-	/**
-	*设置此对象的位图资源、UV数据信息。
-	*@param bitmap 位图资源
-	*@param uv UV数据信息
-	*/
-	__proto.setTo=function(bitmap,uv,sourceWidth,sourceHeight){
-		(sourceWidth===void 0)&& (sourceWidth=0);
-		(sourceHeight===void 0)&& (sourceHeight=0);
-		this.bitmap=bitmap;
-		this.sourceWidth=sourceWidth;
-		this.sourceHeight=sourceHeight;
-		if (bitmap){
-			this._w=bitmap.width;
-			this._h=bitmap.height;
-			this.sourceWidth=this.sourceWidth || this._w;
-			this.sourceHeight=this.sourceHeight || this._h;
-			var _this=this;
-		}
-		this.uv=uv || Texture.DEF_UV;
-	}
-
-	/**
-	*加载指定地址的图片。
-	*@param url 图片地址。
-	*@param complete 加载完成回调
-	*/
-	__proto.load=function(url,complete){
-		if (!this._destroyed)
-			Laya.loader.load(url,Handler.create(this,this._onLoaded,[complete]),null,"htmlimage",1,false,null,true);
-	}
-
-	/**
-	*获取Texture上的某个区域的像素点
-	*@param x
-	*@param y
-	*@param width
-	*@param height
-	*@return 返回像素点集合
-	*/
-	__proto.getPixels=function(x,y,width,height){
-		if (Render.isWebGL){
-			return RunDriver.getTexturePixels(this,x,y,width,height);
-			}else if (Render.isConchApp){
-			return this._nativeObj.getImageData(x,y,width,height);
-			}else {
-			var texw=this.width;
-			var texh=this.height;
-			if (x+width > texw)width-=(x+width)-texw;
-			if (y+height > texh)height-=(y+height)-texh;
-			if (width <=0 || height <=0)return null;
-			Browser.canvas.size(width,height);
-			Browser.canvas.clear();
-			Browser.context.drawImage(this.bitmap._source,x,y,width,height,0,0,width,height);
-			var info=Browser.context.getImageData(0,0,width,height);
-			return info.data;
-		}
-	}
-
-	/**
-	*通过url强制恢复bitmap。
-	*/
-	__proto.recoverBitmap=function(){
-		if (!this._destroyed && (!this._bitmap || this._bitmap.destroyed)&& this.url)
-			this.load(this.url);
-	}
-
-	/**
-	*强制释放Bitmap,无论是否被引用。
-	*/
-	__proto.disposeBitmap=function(){
-		if (!this._destroyed && this._bitmap){
-			this._bitmap.destroy();
-		}
-	}
-
-	/**
-	*销毁纹理。
-	*/
-	__proto.destroy=function(){
-		if (!this._destroyed){
-			this._destroyed=true;
-			if (this.bitmap){
-				this.bitmap._removeReference(this._referenceCount);
-				this.bitmap=null;
-			}
-			if (this.url && this===Laya.loader.getRes(this.url))
-				Laya.loader.clearRes(this.url);
-		}
-	}
-
-	/**实际高度。*/
-	__getset(0,__proto,'height',function(){
-		if (this._h)
-			return this._h;
-		if (!this.bitmap)return 0;
-		return (this.uv && this.uv!==Texture.DEF_UV)? (this.uv[5]-this.uv[1])*this.bitmap.height :this.bitmap.height;
-		},function(value){
-		this._h=value;
-		this.sourceHeight || (this.sourceHeight=value);
-	});
-
-	__getset(0,__proto,'uv',function(){
-		return this._uv;
-		},function(value){
-		this.uvrect[0]=Math.min(value[0],value[2],value[4],value[6]);
-		this.uvrect[1]=Math.min(value[1],value[3],value[5],value[7]);
-		this.uvrect[2]=Math.max(value[0],value[2],value[4],value[6])-this.uvrect[0];
-		this.uvrect[3]=Math.max(value[1],value[3],value[5],value[7])-this.uvrect[1];
-		this._uv=value;
-	});
-
-	/**实际宽度。*/
-	__getset(0,__proto,'width',function(){
-		if (this._w)
-			return this._w;
-		if (!this.bitmap)return 0;
-		return (this.uv && this.uv!==Texture.DEF_UV)? (this.uv[2]-this.uv[0])*this.bitmap.width :this.bitmap.width;
-		},function(value){
-		this._w=value;
-		this.sourceWidth || (this.sourceWidth=value);
-	});
-
-	/**
-	*设置位图。
-	*@param 位图。
-	*/
-	/**
-	*获取位图。
-	*@return 位图。
-	*/
-	__getset(0,__proto,'bitmap',function(){
-		return this._bitmap;
-		},function(value){
-		this._bitmap && this._bitmap._removeReference(this._referenceCount);
-		this._bitmap=value;
-		value && (value._addReference(this._referenceCount));
-	});
-
-	/**
-	*获取是否已经销毁。
-	*@return 是否已经销毁。
-	*/
-	__getset(0,__proto,'destroyed',function(){
-		return this._destroyed;
-	});
-
-	Texture.moveUV=function(offsetX,offsetY,uv){
-		for (var i=0;i < 8;i+=2){
-			uv[i]+=offsetX;
-			uv[i+1]+=offsetY;
-		}
-		return uv;
-	}
-
-	Texture.create=function(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight){
-		(offsetX===void 0)&& (offsetX=0);
-		(offsetY===void 0)&& (offsetY=0);
-		(sourceWidth===void 0)&& (sourceWidth=0);
-		(sourceHeight===void 0)&& (sourceHeight=0);
-		return Texture._create(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight);
-	}
-
-	Texture._create=function(source,x,y,width,height,offsetX,offsetY,sourceWidth,sourceHeight,outTexture){
-		(offsetX===void 0)&& (offsetX=0);
-		(offsetY===void 0)&& (offsetY=0);
-		(sourceWidth===void 0)&& (sourceWidth=0);
-		(sourceHeight===void 0)&& (sourceHeight=0);
-		var btex=(source instanceof laya.resource.Texture );
-		var uv=btex ? source.uv :Texture.DEF_UV;
-		var bitmap=btex ? source.bitmap :source;
-		if (bitmap.width && (x+width)> bitmap.width)
-			width=bitmap.width-x;
-		if (bitmap.height && (y+height)> bitmap.height)
-			height=bitmap.height-y;
-		var tex;
-		if (outTexture){
-			tex=outTexture;
-			tex.setTo(bitmap,null,sourceWidth || width,sourceHeight || height);
-			}else {
-			tex=new Texture(bitmap,null,sourceWidth || width,sourceHeight || height)
-		}
-		tex.width=width;
-		tex.height=height;
-		tex.offsetX=offsetX;
-		tex.offsetY=offsetY;
-		var dwidth=1 / bitmap.width;
-		var dheight=1 / bitmap.height;
-		x *=dwidth;
-		y *=dheight;
-		width *=dwidth;
-		height *=dheight;
-		var u1=tex.uv[0],v1=tex.uv[1],u2=tex.uv[4],v2=tex.uv[5];
-		var inAltasUVWidth=(u2-u1),inAltasUVHeight=(v2-v1);
-		var oriUV=Texture.moveUV(uv[0],uv[1],[x,y,x+width,y,x+width,y+height,x,y+height]);
-		tex.uv=[u1+oriUV[0] *inAltasUVWidth,v1+oriUV[1] *inAltasUVHeight,u2-(1-oriUV[2])*inAltasUVWidth,v1+oriUV[3] *inAltasUVHeight,u2-(1-oriUV[4])*inAltasUVWidth,v2-(1-oriUV[5])*inAltasUVHeight,u1+oriUV[6] *inAltasUVWidth,v2-(1-oriUV[7])*inAltasUVHeight];
-		var bitmapScale=bitmap.scaleRate;
-		if (bitmapScale && bitmapScale !=1){
-			tex.sourceWidth /=bitmapScale;
-			tex.sourceHeight /=bitmapScale;
-			tex.width /=bitmapScale;
-			tex.height /=bitmapScale;
-			tex.scaleRate=bitmapScale;
-			}else {
-			tex.scaleRate=1;
-		}
-		return tex;
-	}
-
-	Texture.createFromTexture=function(texture,x,y,width,height){
-		var texScaleRate=texture.scaleRate;
-		if (texScaleRate !=1){
-			x *=texScaleRate;
-			y *=texScaleRate;
-			width *=texScaleRate;
-			height *=texScaleRate;
-		};
-		var rect=Rectangle.TEMP.setTo(x-texture.offsetX,y-texture.offsetY,width,height);
-		var result=rect.intersection(Texture._rect1.setTo(0,0,texture.width,texture.height),Texture._rect2);
-		if (result)
-			var tex=Texture.create(texture,result.x,result.y,result.width,result.height,result.x-rect.x,result.y-rect.y,width,height);
-		else
-		return null;
-		return tex;
-	}
-
-	Texture.DEF_UV=[0,0,1.0,0,1.0,1.0,0,1.0];
-	Texture.NO_UV=[0,0,0,0,0,0,0,0];
-	Texture.INV_UV=[0,1,1.0,1,1.0,0.0,0,0.0];
-	Texture._rect1=new Rectangle();
-	Texture._rect2=new Rectangle();
-	return Texture;
-})(EventDispatcher)
 
 
 /**
@@ -31157,6 +31170,135 @@ var Widget=(function(_super){
 
 /**
 *@private
+*场景资源加载器
+*/
+//class laya.net.SceneLoader extends laya.events.EventDispatcher
+var SceneLoader=(function(_super){
+	function SceneLoader(){
+		this.totalCount=0;
+		this._completeHandler=null;
+		this._toLoadList=null;
+		this._isLoading=false;
+		this._curUrl=null;
+		SceneLoader.__super.call(this);
+		this._completeHandler=new Handler(this,this.onOneLoadComplete);
+		this.reset();
+	}
+
+	__class(SceneLoader,'laya.net.SceneLoader',_super);
+	var __proto=SceneLoader.prototype;
+	__proto.reset=function(){
+		this._toLoadList=[];
+		this._isLoading=false;
+		this.totalCount=0;
+	}
+
+	__proto.load=function(url,is3D,ifCheck){
+		(is3D===void 0)&& (is3D=false);
+		(ifCheck===void 0)&& (ifCheck=true);
+		if ((url instanceof Array)){
+			var i=0,len=0;
+			len=url.length;
+			for (i=0;i < len;i++){
+				this._addToLoadList(url[i],is3D);
+			}
+			}else {
+			this._addToLoadList(url,is3D);
+		}
+		if(ifCheck)
+			this._checkNext();
+	}
+
+	__proto._addToLoadList=function(url,is3D){
+		(is3D===void 0)&& (is3D=false);
+		if (this._toLoadList.indexOf(url)>=0)return;
+		if (Loader.getRes(url))return;
+		if (is3D){
+			this._toLoadList.push({url:url});
+		}else
+		this._toLoadList.push(url);
+		this.totalCount++;
+	}
+
+	__proto._checkNext=function(){
+		if (!this._isLoading){
+			if (this._toLoadList.length==0){
+				this.event("complete");
+				return;
+			};
+			var tItem;
+			tItem=this._toLoadList.pop();
+			if ((typeof tItem=='string')){
+				this.loadOne(tItem);
+				}else{
+				this.loadOne(tItem.url,true);
+			}
+		}
+	}
+
+	__proto.loadOne=function(url,is3D){
+		(is3D===void 0)&& (is3D=false);
+		this._curUrl=url;
+		var type=Utils.getFileExtension(this._curUrl);
+		if (is3D){
+			Laya.loader.create(url,this._completeHandler);
+		}else
+		if (SceneLoader.LoadableExtensions[type]){
+			Laya.loader.load(url,this._completeHandler,null,SceneLoader.LoadableExtensions[type]);
+			}else if (url !=AtlasInfoManager.getFileLoadPath(url)|| SceneLoader.No3dLoadTypes[type] || !LoaderManager.createMap[type]){
+			Laya.loader.load(url,this._completeHandler);
+			}else {
+			Laya.loader.create(url,this._completeHandler);
+		}
+	}
+
+	__proto.onOneLoadComplete=function(){
+		this._isLoading=false;
+		if (!Loader.getRes(this._curUrl)){
+			console.log("Fail to load:",this._curUrl);
+		};
+		var type=Utils.getFileExtension(this._curUrl);
+		if (SceneLoader.LoadableExtensions[type]){
+			var dataO;
+			dataO=Loader.getRes(this._curUrl);
+			if (dataO&&((dataO instanceof laya.components.Prefab ))){
+				dataO=dataO.json;
+			}
+			if (dataO){
+				if (dataO.loadList){
+					this.load(dataO.loadList,false,false);
+				}
+				if (dataO.loadList3D){
+					this.load(dataO.loadList3D,true,false);
+				}
+			}
+		}
+		this.event("progress",this.getProgress());
+		this._checkNext();
+	}
+
+	__proto.getProgress=function(){
+		return this.loadedCount / this.totalCount;
+	}
+
+	__getset(0,__proto,'loadedCount',function(){
+		return this.totalCount-this.leftCount;
+	});
+
+	__getset(0,__proto,'leftCount',function(){
+		if (this._isLoading)return this._toLoadList.length+1;
+		return this._toLoadList.length;
+	});
+
+	__static(SceneLoader,
+	['LoadableExtensions',function(){return this.LoadableExtensions={"scene":"json","scene3d":"json","ani":"json","ui":"json","prefab":"prefab"};},'No3dLoadTypes',function(){return this.No3dLoadTypes={"png":true,"jpg":true,"txt":true};}
+	]);
+	return SceneLoader;
+})(EventDispatcher)
+
+
+/**
+*@private
 */
 //class laya.html.dom.HTMLDivParser extends laya.html.dom.HTMLElement
 var HTMLDivParser=(function(_super){
@@ -31296,135 +31438,6 @@ var HTMLDivParser=(function(_super){
 
 	return HTMLDivParser;
 })(HTMLElement)
-
-
-/**
-*@private
-*场景资源加载器
-*/
-//class laya.net.SceneLoader extends laya.events.EventDispatcher
-var SceneLoader=(function(_super){
-	function SceneLoader(){
-		this.totalCount=0;
-		this._completeHandler=null;
-		this._toLoadList=null;
-		this._isLoading=false;
-		this._curUrl=null;
-		SceneLoader.__super.call(this);
-		this._completeHandler=new Handler(this,this.onOneLoadComplete);
-		this.reset();
-	}
-
-	__class(SceneLoader,'laya.net.SceneLoader',_super);
-	var __proto=SceneLoader.prototype;
-	__proto.reset=function(){
-		this._toLoadList=[];
-		this._isLoading=false;
-		this.totalCount=0;
-	}
-
-	__proto.load=function(url,is3D,ifCheck){
-		(is3D===void 0)&& (is3D=false);
-		(ifCheck===void 0)&& (ifCheck=true);
-		if ((url instanceof Array)){
-			var i=0,len=0;
-			len=url.length;
-			for (i=0;i < len;i++){
-				this._addToLoadList(url[i],is3D);
-			}
-			}else {
-			this._addToLoadList(url,is3D);
-		}
-		if(ifCheck)
-			this._checkNext();
-	}
-
-	__proto._addToLoadList=function(url,is3D){
-		(is3D===void 0)&& (is3D=false);
-		if (this._toLoadList.indexOf(url)>=0)return;
-		if (Loader.getRes(url))return;
-		if (is3D){
-			this._toLoadList.push({url:url});
-		}else
-		this._toLoadList.push(url);
-		this.totalCount++;
-	}
-
-	__proto._checkNext=function(){
-		if (!this._isLoading){
-			if (this._toLoadList.length==0){
-				this.event("complete");
-				return;
-			};
-			var tItem;
-			tItem=this._toLoadList.pop();
-			if ((typeof tItem=='string')){
-				this.loadOne(tItem);
-				}else{
-				this.loadOne(tItem.url,true);
-			}
-		}
-	}
-
-	__proto.loadOne=function(url,is3D){
-		(is3D===void 0)&& (is3D=false);
-		this._curUrl=url;
-		var type=Utils.getFileExtension(this._curUrl);
-		if (is3D){
-			Laya.loader.create(url,this._completeHandler);
-		}else
-		if (SceneLoader.LoadableExtensions[type]){
-			Laya.loader.load(url,this._completeHandler,null,SceneLoader.LoadableExtensions[type]);
-			}else if (url !=AtlasInfoManager.getFileLoadPath(url)|| SceneLoader.No3dLoadTypes[type] || !LoaderManager.createMap[type]){
-			Laya.loader.load(url,this._completeHandler);
-			}else {
-			Laya.loader.create(url,this._completeHandler);
-		}
-	}
-
-	__proto.onOneLoadComplete=function(){
-		this._isLoading=false;
-		if (!Loader.getRes(this._curUrl)){
-			console.log("Fail to load:",this._curUrl);
-		};
-		var type=Utils.getFileExtension(this._curUrl);
-		if (SceneLoader.LoadableExtensions[type]){
-			var dataO;
-			dataO=Loader.getRes(this._curUrl);
-			if (dataO&&((dataO instanceof laya.components.Prefab ))){
-				dataO=dataO.json;
-			}
-			if (dataO){
-				if (dataO.loadList){
-					this.load(dataO.loadList,false,false);
-				}
-				if (dataO.loadList3D){
-					this.load(dataO.loadList3D,true,false);
-				}
-			}
-		}
-		this.event("progress",this.getProgress());
-		this._checkNext();
-	}
-
-	__proto.getProgress=function(){
-		return this.loadedCount / this.totalCount;
-	}
-
-	__getset(0,__proto,'loadedCount',function(){
-		return this.totalCount-this.leftCount;
-	});
-
-	__getset(0,__proto,'leftCount',function(){
-		if (this._isLoading)return this._toLoadList.length+1;
-		return this._toLoadList.length;
-	});
-
-	__static(SceneLoader,
-	['LoadableExtensions',function(){return this.LoadableExtensions={"scene":"json","scene3d":"json","ani":"json","ui":"json","prefab":"prefab"};},'No3dLoadTypes',function(){return this.No3dLoadTypes={"png":true,"jpg":true,"txt":true};}
-	]);
-	return SceneLoader;
-})(EventDispatcher)
 
 
 /**
@@ -31921,19 +31934,19 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.onShowUpload=function(){
-		ViewManager.instance.openView("picmanagerView",true);
+		ViewManager.instance.openView("VIEW_PICMANAGER",true);
 	}
 
 	//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 	__proto.onShowLogin=function(e){
 		if(!Userdata.instance.isLogin)
-			ViewManager.instance.openView("loginview");
+			ViewManager.instance.openView("VIEW_lOGPANEL");
 	}
 
 	//this.owner.addChild(new LogPanelUI());
 	__proto.onShowReg=function(e){
 		if(!Userdata.instance.isLogin)
-			ViewManager.instance.openView("registerview");
+			ViewManager.instance.openView("VIEW_REGPANEL");
 		else{
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"account/logout?",this,this.onLoginOutBack,"","post");
 		}
@@ -32030,21 +32043,21 @@ var LogPanelControl=(function(_super){
 			Userdata.instance.isLogin=true;
 			ViewManager.showAlert("登陆成功");
 			EventCenter.instance.event("LOGIN_SUCESS",this.uiSKin.input_account.text);
-			ViewManager.instance.closeView("loginview");
+			ViewManager.instance.closeView("VIEW_lOGPANEL");
 		}
 	}
 
 	__proto.onRegister=function(){
-		ViewManager.instance.openView("registerview",true);
+		ViewManager.instance.openView("VIEW_REGPANEL",true);
 	}
 
 	__proto.onResetpwd=function(){
-		ViewManager.instance.openView("changepwdview",true);
+		ViewManager.instance.openView("VIEW_CHANGEPWD",true);
 	}
 
 	__proto.onEnable=function(){}
 	__proto.onCloseScene=function(){
-		ViewManager.instance.closeView("loginview");
+		ViewManager.instance.closeView("VIEW_lOGPANEL");
 	}
 
 	return LogPanelControl;
@@ -32151,7 +32164,8 @@ var PicManagerControl=(function(_super){
 	__proto.onBackToMain=function(){
 		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
-		ViewManager.instance.closeView("picmanagerView");
+		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		ViewManager.instance.closeView("VIEW_PICMANAGER");
 	}
 
 	__proto.onShowUploadView=function(){
@@ -32159,7 +32173,7 @@ var PicManagerControl=(function(_super){
 			ViewManager.showAlert("请先创建一个目录");
 			return;
 		}
-		ViewManager.instance.openView("myPicUploadView");
+		ViewManager.instance.openView("VIEW_MYPICPANEL");
 	}
 
 	__proto.onSureCreeate=function(){
@@ -32276,13 +32290,22 @@ var PictureCheckControl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
 		this.uiSkin.closeBtn.on("click",this,this.onClosePanel);
+		this.uiSkin.mainpanel.vScrollBarSkin="";
 		if(this.param !=null){
 			this.uiSkin.img.skin="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+(this.param).fid+".jpg";
+			if(this.param.picWidth > this.param.picHeight){
+				this.uiSkin.img.width=1000;
+				this.uiSkin.img.height=1000/this.param.picWidth *this.param.picHeight;
+			}
+			else{
+				this.uiSkin.img.height=1000;
+				this.uiSkin.img.width=1000/this.param.picHeight *this.param.picWidth;
+			}
 		}
 	}
 
 	__proto.onClosePanel=function(){
-		ViewManager.instance.closeView("picCheckView");
+		ViewManager.instance.closeView("VIEW_PICTURE_CHECK");
 	}
 
 	return PictureCheckControl;
@@ -33785,6 +33808,44 @@ var Sprite=(function(_super){
 })(Node)
 
 
+//class utils.PopUpWindowControl extends laya.components.Script
+var PopUpWindowControl=(function(_super){
+	function PopUpWindowControl(){
+		this.uiSkin=null;
+		this.param=null;
+		PopUpWindowControl.__super.call(this);
+	}
+
+	__class(PopUpWindowControl,'utils.PopUpWindowControl',_super);
+	var __proto=PopUpWindowControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.closebtn.on("click",this,this.onCloseScene);
+		this.uiSkin.msgtxt.text=this.param.msg;
+		this.uiSkin.okbtn.on("click",this,this.onConfirmHandler);
+		this.uiSkin.cancelbtn.on("click",this,this.onCancelHandler);
+	}
+
+	__proto.onConfirmHandler=function(){
+		if(this.param.callback !=null)
+			(this.param.callback).call(this.param.caller,true);
+		this.onCloseScene();
+	}
+
+	__proto.onCancelHandler=function(){
+		if(this.param.callback !=null)
+			(this.param.callback).call(this.param.caller,false);
+		this.onCloseScene();
+	}
+
+	__proto.onCloseScene=function(){
+		ViewManager.instance.closeView("VIEW_POPUPDIALOG");
+	}
+
+	return PopUpWindowControl;
+})(Script)
+
+
 //class script.login.ResetPwdControl extends laya.components.Script
 var ResetPwdControl=(function(_super){
 	function ResetPwdControl(){
@@ -33801,7 +33862,7 @@ var ResetPwdControl=(function(_super){
 	}
 
 	__proto.onCloseScen=function(){
-		ViewManager.instance.closeView("changepwdview");
+		ViewManager.instance.closeView("VIEW_CHANGEPWD");
 	}
 
 	return ResetPwdControl;
@@ -33906,7 +33967,7 @@ var RegisterCntrol=(function(_super){
 
 	__proto.onCloseScene=function(){
 		Browser.document.body.removeChild(this.verifycode);
-		ViewManager.instance.closeView("registerview");
+		ViewManager.instance.closeView("VIEW_REGPANEL");
 	}
 
 	//this.owner.removeSelf();
@@ -33938,7 +33999,7 @@ var RegisterCntrol=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Browser.window.alert("注册成功！");
-			ViewManager.instance.openView("loginview",true);
+			ViewManager.instance.openView("VIEW_lOGPANEL",true);
 		}
 	}
 
@@ -34093,7 +34154,7 @@ var UpLoadAndOrderContrl=(function(_super){
 	__proto.onCloseScene=function(){
 		Browser.window.uploadApp=null;
 		EventCenter.instance.event("UPDATE_FILE_LIST");
-		ViewManager.instance.closeView("myPicUploadView");
+		ViewManager.instance.closeView("VIEW_MYPICPANEL");
 	}
 
 	return UpLoadAndOrderContrl;
@@ -37725,486 +37786,6 @@ var AnimationBase=(function(_super){
 })(Sprite)
 
 
-//class laya.webgl.shader.Shader extends laya.webgl.shader.BaseShader
-var Shader=(function(_super){
-	function Shader(vs,ps,saveName,nameMap,bindAttrib){
-		//存储预编译结果，可以通过名字获得内容,目前不支持#ifdef嵌套和条件
-		this._attribInfo=null;
-		this.customCompile=false;
-		//this._nameMap=null;
-		//shader参数别名，语义
-		//this._vs=null;
-		//this._ps=null;
-		this._curActTexIndex=0;
-		//this._reCompile=false;
-		//存储一些私有变量
-		this.tag={};
-		//this._vshader=null;
-		//this._pshader=null;
-		this._program=null;
-		this._params=null;
-		this._paramsMap={};
-		Shader.__super.call(this);
-		if ((!vs)|| (!ps))throw "Shader Error";
-		this._attribInfo=bindAttrib;
-		if (Render.isConchApp){
-			this.customCompile=true;
-		}
-		this._id=++Shader._count;
-		this._vs=vs;
-		this._ps=ps;
-		this._nameMap=nameMap ? nameMap :{};
-		saveName !=null && (Shader.sharders[saveName]=this);
-		this.recreateResource();
-		this.lock=true;
-	}
-
-	__class(Shader,'laya.webgl.shader.Shader',_super);
-	var __proto=Shader.prototype;
-	__proto.recreateResource=function(){
-		this._compile();
-		this._setGPUMemory(0);
-	}
-
-	//TODO:coverage
-	__proto._disposeResource=function(){
-		WebGL.mainContext.deleteShader(this._vshader);
-		WebGL.mainContext.deleteShader(this._pshader);
-		WebGL.mainContext.deleteProgram(this._program);
-		this._vshader=this._pshader=this._program=null;
-		this._params=null;
-		this._paramsMap={};
-		this._setGPUMemory(0);
-		this._curActTexIndex=0;
-	}
-
-	__proto._compile=function(){
-		if (!this._vs || !this._ps || this._params)
-			return;
-		this._reCompile=true;
-		this._params=[];
-		var result;
-		if (this.customCompile)
-			result=ShaderCompile.preGetParams(this._vs,this._ps);
-		var gl=WebGL.mainContext;
-		this._program=gl.createProgram();
-		this._vshader=Shader._createShader(gl,this._vs,0x8B31);
-		this._pshader=Shader._createShader(gl,this._ps,0x8B30);
-		gl.attachShader(this._program,this._vshader);
-		gl.attachShader(this._program,this._pshader);
-		var one,i=0,j=0,n=0,location;
-		var attribDescNum=this._attribInfo?this._attribInfo.length:0;
-		for (i=0;i < attribDescNum;i+=2){
-			gl.bindAttribLocation(this._program,this._attribInfo[i+1],this._attribInfo[i]);
-		}
-		gl.linkProgram(this._program);
-		if (!this.customCompile && !gl.getProgramParameter(this._program,0x8B82)){
-			throw gl.getProgramInfoLog(this._program);
-		};
-		var nUniformNum=this.customCompile ? result.uniforms.length :gl.getProgramParameter(this._program,0x8B86);
-		for (i=0;i < nUniformNum;i++){
-			var uniform=this.customCompile ? result.uniforms[i] :gl.getActiveUniform(this._program,i);
-			location=gl.getUniformLocation(this._program,uniform.name);
-			one={vartype:"uniform",glfun:null,ivartype:1,location:location,name:uniform.name,type:uniform.type,isArray:false,isSame:false,preValue:null,indexOfParams:0};
-			if (one.name.indexOf('[0]')> 0){
-				one.name=one.name.substr(0,one.name.length-3);
-				one.isArray=true;
-				one.location=gl.getUniformLocation(this._program,one.name);
-			}
-			this._params.push(one);
-		}
-		for (i=0,n=this._params.length;i < n;i++){
-			one=this._params[i];
-			one.indexOfParams=i;
-			one.index=1;
-			one.value=[one.location,null];
-			one.codename=one.name;
-			one.name=this._nameMap[one.codename] ? this._nameMap[one.codename] :one.codename;
-			this._paramsMap[one.name]=one;
-			one._this=this;
-			one.uploadedValue=[];
-			switch (one.type){
-				case 0x1404:
-					one.fun=one.isArray ? this._uniform1iv :this._uniform1i;
-					break ;
-				case 0x1406:
-					one.fun=one.isArray ? this._uniform1fv :this._uniform1f;
-					break ;
-				case 0x8B50:
-					one.fun=one.isArray ? this._uniform_vec2v:this._uniform_vec2;
-					break ;
-				case 0x8B51:
-					one.fun=one.isArray ? this._uniform_vec3v:this._uniform_vec3;
-					break ;
-				case 0x8B52:
-					one.fun=one.isArray ? this._uniform_vec4v:this._uniform_vec4;
-					break ;
-				case 0x8B5E:
-					one.fun=this._uniform_sampler2D;
-					break ;
-				case 0x8B60:
-					one.fun=this._uniform_samplerCube;
-					break ;
-				case 0x8B5C:
-					one.glfun=gl.uniformMatrix4fv;
-					one.fun=this._uniformMatrix4fv;
-					break ;
-				case 0x8B56:
-					one.fun=this._uniform1i;
-					break ;
-				case 0x8B5A:
-				case 0x8B5B:
-					throw new Error("compile shader err!");
-				default :
-					throw new Error("compile shader err!");
-				}
-		}
-	}
-
-	//TODO:coverage
-	__proto.getUniform=function(name){
-		return this._paramsMap[name];
-	}
-
-	//TODO:coverage
-	__proto._uniform1f=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value){
-			WebGL.mainContext.uniform1f(one.location,uploadedValue[0]=value);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform1fv=function(one,value){
-		if (value.length < 4){
-			var uploadedValue=one.uploadedValue;
-			if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
-				WebGL.mainContext.uniform1fv(one.location,value);
-				uploadedValue[0]=value[0];
-				uploadedValue[1]=value[1];
-				uploadedValue[2]=value[2];
-				uploadedValue[3]=value[3];
-				return 1;
-			}
-			return 0;
-			}else {
-			WebGL.mainContext.uniform1fv(one.location,value);
-			return 1;
-		}
-	}
-
-	__proto._uniform_vec2=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1]){
-			WebGL.mainContext.uniform2f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1]);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec2v=function(one,value){
-		if (value.length < 2){
-			var uploadedValue=one.uploadedValue;
-			if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
-				WebGL.mainContext.uniform2fv(one.location,value);
-				uploadedValue[0]=value[0];
-				uploadedValue[1]=value[1];
-				uploadedValue[2]=value[2];
-				uploadedValue[3]=value[3];
-				return 1;
-			}
-			return 0;
-			}else {
-			WebGL.mainContext.uniform2fv(one.location,value);
-			return 1;
-		}
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec3=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2]){
-			WebGL.mainContext.uniform3f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2]);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec3v=function(one,value){
-		WebGL.mainContext.uniform3fv(one.location,value);
-		return 1;
-	}
-
-	__proto._uniform_vec4=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
-			WebGL.mainContext.uniform4f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2],uploadedValue[3]=value[3]);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec4v=function(one,value){
-		WebGL.mainContext.uniform4fv(one.location,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniformMatrix2fv=function(one,value){
-		WebGL.mainContext.uniformMatrix2fv(one.location,false,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniformMatrix3fv=function(one,value){
-		WebGL.mainContext.uniformMatrix3fv(one.location,false,value);
-		return 1;
-	}
-
-	__proto._uniformMatrix4fv=function(one,value){
-		WebGL.mainContext.uniformMatrix4fv(one.location,false,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniform1i=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value){
-			WebGL.mainContext.uniform1i(one.location,uploadedValue[0]=value);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform1iv=function(one,value){
-		WebGL.mainContext.uniform1iv(one.location,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniform_ivec2=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1]){
-			WebGL.mainContext.uniform2i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1]);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform_ivec2v=function(one,value){
-		WebGL.mainContext.uniform2iv(one.location,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec3i=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2]){
-			WebGL.mainContext.uniform3i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2]);
-			return 1;
-		}
-		return 0;
-	}
-
-	__proto._uniform_vec3vi=function(one,value){
-		WebGL.mainContext.uniform3iv(one.location,value);
-		return 1;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec4i=function(one,value){
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
-			WebGL.mainContext.uniform4i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2],uploadedValue[3]=value[3]);
-			return 1;
-		}
-		return 0;
-	}
-
-	//TODO:coverage
-	__proto._uniform_vec4vi=function(one,value){
-		WebGL.mainContext.uniform4iv(one.location,value);
-		return 1;
-	}
-
-	__proto._uniform_sampler2D=function(one,value){
-		var gl=WebGL.mainContext;
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]==null){
-			uploadedValue[0]=this._curActTexIndex;
-			gl.uniform1i(one.location,this._curActTexIndex);
-			WebGLContext.activeTexture(gl,0x84C0+this._curActTexIndex);
-			WebGLContext.bindTexture(gl,0x0DE1,value);
-			this._curActTexIndex++;
-			return 1;
-			}else {
-			WebGLContext.activeTexture(gl,0x84C0+uploadedValue[0]);
-			WebGLContext.bindTexture(gl,0x0DE1,value);
-			return 0;
-		}
-	}
-
-	//TODO:coverage
-	__proto._uniform_samplerCube=function(one,value){
-		var gl=WebGL.mainContext;
-		var uploadedValue=one.uploadedValue;
-		if (uploadedValue[0]==null){
-			uploadedValue[0]=this._curActTexIndex;
-			gl.uniform1i(one.location,this._curActTexIndex);
-			WebGLContext.activeTexture(gl,0x84C0+this._curActTexIndex);
-			WebGLContext.bindTexture(gl,0x8513,value);
-			this._curActTexIndex++;
-			return 1;
-			}else {
-			WebGLContext.activeTexture(gl,0x84C0+uploadedValue[0]);
-			WebGLContext.bindTexture(gl,0x8513,value);
-			return 0;
-		}
-	}
-
-	//TODO:coverage
-	__proto._noSetValue=function(one){
-		console.log("no....:"+one.name);
-	}
-
-	//TODO:coverage
-	__proto.uploadOne=function(name,value){
-		WebGLContext.useProgram(WebGL.mainContext,this._program);
-		var one=this._paramsMap[name];
-		one.fun.call(this,one,value);
-	}
-
-	__proto.uploadTexture2D=function(value){
-		var CTX=WebGLContext;
-		if(CTX._activeTextures[0]!==value){
-			CTX.bindTexture(WebGL.mainContext,CTX.TEXTURE_2D,value);
-			CTX._activeTextures[0]=value;
-		}
-	}
-
-	/**
-	*提交shader到GPU
-	*@param shaderValue
-	*/
-	__proto.upload=function(shaderValue,params){
-		BaseShader.activeShader=BaseShader.bindShader=this;
-		var gl=WebGL.mainContext;
-		WebGLContext.useProgram(gl,this._program);
-		if (this._reCompile){
-			params=this._params;
-			this._reCompile=false;
-			}else {
-			params=params || this._params;
-		};
-		var one,value,n=params.length,shaderCall=0;
-		for (var i=0;i < n;i++){
-			one=params[i];
-			if ((value=shaderValue[one.name])!==null)
-				shaderCall+=one.fun.call(this,one,value);
-		}
-		Stat.shaderCall+=shaderCall;
-	}
-
-	//TODO:coverage
-	__proto.uploadArray=function(shaderValue,length,_bufferUsage){
-		BaseShader.activeShader=this;
-		BaseShader.bindShader=this;
-		WebGLContext.useProgram(WebGL.mainContext,this._program);
-		var params=this._params,value;
-		var one,shaderCall=0;
-		for (var i=length-2;i >=0;i-=2){
-			one=this._paramsMap[shaderValue[i]];
-			if (!one)
-				continue ;
-			value=shaderValue[i+1];
-			if (value !=null){
-				_bufferUsage && _bufferUsage[one.name] && _bufferUsage[one.name].bind();
-				shaderCall+=one.fun.call(this,one,value);
-			}
-		}
-		Stat.shaderCall+=shaderCall;
-	}
-
-	//TODO:coverage
-	__proto.getParams=function(){
-		return this._params;
-	}
-
-	//TODO:coverage
-	__proto.setAttributesLocation=function(attribDesc){
-		this._attribInfo=attribDesc;
-	}
-
-	Shader.getShader=function(name){
-		return Shader.sharders[name];
-	}
-
-	Shader.create=function(vs,ps,saveName,nameMap,bindAttrib){
-		return new Shader(vs,ps,saveName,nameMap,bindAttrib);
-	}
-
-	Shader.withCompile=function(nameID,define,shaderName,createShader){
-		if (shaderName && Shader.sharders[shaderName])
-			return Shader.sharders[shaderName];
-		var pre=Shader._preCompileShader[0.0002 *nameID];
-		if (!pre)
-			throw new Error("withCompile shader err!"+nameID);
-		return pre.createShader(define,shaderName,createShader,null);
-	}
-
-	Shader.withCompile2D=function(nameID,mainID,define,shaderName,createShader,bindAttrib){
-		if (shaderName && Shader.sharders[shaderName])
-			return Shader.sharders[shaderName];
-		var pre=Shader._preCompileShader[0.0002 *nameID+mainID];
-		if (!pre)
-			throw new Error("withCompile shader err!"+nameID+" "+mainID);
-		return pre.createShader(define,shaderName,createShader,bindAttrib);
-	}
-
-	Shader.addInclude=function(fileName,txt){
-		ShaderCompile.addInclude(fileName,txt);
-	}
-
-	Shader.preCompile=function(nameID,vs,ps,nameMap){
-		var id=0.0002 *nameID;
-		Shader._preCompileShader[id]=new ShaderCompile(vs,ps,nameMap);
-	}
-
-	Shader.preCompile2D=function(nameID,mainID,vs,ps,nameMap){
-		var id=0.0002 *nameID+mainID;
-		Shader._preCompileShader[id]=new ShaderCompile(vs,ps,nameMap);
-	}
-
-	Shader._createShader=function(gl,str,type){
-		var shader=gl.createShader(type);
-		gl.shaderSource(shader,str);
-		gl.compileShader(shader);
-		if(gl.getShaderParameter(shader,0x8B81)){
-			return shader;
-			}else{
-			console.log(gl.getShaderInfoLog(shader));
-			return null;
-		}
-	}
-
-	Shader._count=0;
-	Shader._preCompileShader={};
-	Shader.SHADERNAME2ID=0.0002;
-	Shader.sharders=new Array(0x20);
-	__static(Shader,
-	['nameKey',function(){return this.nameKey=new StringKey();}
-	]);
-	return Shader;
-})(BaseShader)
-
-
 /**
 *<p> <code>Stage</code> 是舞台类，显示列表的根节点，所有显示对象都在舞台上显示。通过 Laya.stage 单例访问。</p>
 *<p>Stage提供几种适配模式，不同的适配模式会产生不同的画布大小，画布越大，渲染压力越大，所以要选择合适的适配方案。</p>
@@ -38893,6 +38474,486 @@ var Stage=(function(_super){
 	]);
 	return Stage;
 })(Sprite)
+
+
+//class laya.webgl.shader.Shader extends laya.webgl.shader.BaseShader
+var Shader=(function(_super){
+	function Shader(vs,ps,saveName,nameMap,bindAttrib){
+		//存储预编译结果，可以通过名字获得内容,目前不支持#ifdef嵌套和条件
+		this._attribInfo=null;
+		this.customCompile=false;
+		//this._nameMap=null;
+		//shader参数别名，语义
+		//this._vs=null;
+		//this._ps=null;
+		this._curActTexIndex=0;
+		//this._reCompile=false;
+		//存储一些私有变量
+		this.tag={};
+		//this._vshader=null;
+		//this._pshader=null;
+		this._program=null;
+		this._params=null;
+		this._paramsMap={};
+		Shader.__super.call(this);
+		if ((!vs)|| (!ps))throw "Shader Error";
+		this._attribInfo=bindAttrib;
+		if (Render.isConchApp){
+			this.customCompile=true;
+		}
+		this._id=++Shader._count;
+		this._vs=vs;
+		this._ps=ps;
+		this._nameMap=nameMap ? nameMap :{};
+		saveName !=null && (Shader.sharders[saveName]=this);
+		this.recreateResource();
+		this.lock=true;
+	}
+
+	__class(Shader,'laya.webgl.shader.Shader',_super);
+	var __proto=Shader.prototype;
+	__proto.recreateResource=function(){
+		this._compile();
+		this._setGPUMemory(0);
+	}
+
+	//TODO:coverage
+	__proto._disposeResource=function(){
+		WebGL.mainContext.deleteShader(this._vshader);
+		WebGL.mainContext.deleteShader(this._pshader);
+		WebGL.mainContext.deleteProgram(this._program);
+		this._vshader=this._pshader=this._program=null;
+		this._params=null;
+		this._paramsMap={};
+		this._setGPUMemory(0);
+		this._curActTexIndex=0;
+	}
+
+	__proto._compile=function(){
+		if (!this._vs || !this._ps || this._params)
+			return;
+		this._reCompile=true;
+		this._params=[];
+		var result;
+		if (this.customCompile)
+			result=ShaderCompile.preGetParams(this._vs,this._ps);
+		var gl=WebGL.mainContext;
+		this._program=gl.createProgram();
+		this._vshader=Shader._createShader(gl,this._vs,0x8B31);
+		this._pshader=Shader._createShader(gl,this._ps,0x8B30);
+		gl.attachShader(this._program,this._vshader);
+		gl.attachShader(this._program,this._pshader);
+		var one,i=0,j=0,n=0,location;
+		var attribDescNum=this._attribInfo?this._attribInfo.length:0;
+		for (i=0;i < attribDescNum;i+=2){
+			gl.bindAttribLocation(this._program,this._attribInfo[i+1],this._attribInfo[i]);
+		}
+		gl.linkProgram(this._program);
+		if (!this.customCompile && !gl.getProgramParameter(this._program,0x8B82)){
+			throw gl.getProgramInfoLog(this._program);
+		};
+		var nUniformNum=this.customCompile ? result.uniforms.length :gl.getProgramParameter(this._program,0x8B86);
+		for (i=0;i < nUniformNum;i++){
+			var uniform=this.customCompile ? result.uniforms[i] :gl.getActiveUniform(this._program,i);
+			location=gl.getUniformLocation(this._program,uniform.name);
+			one={vartype:"uniform",glfun:null,ivartype:1,location:location,name:uniform.name,type:uniform.type,isArray:false,isSame:false,preValue:null,indexOfParams:0};
+			if (one.name.indexOf('[0]')> 0){
+				one.name=one.name.substr(0,one.name.length-3);
+				one.isArray=true;
+				one.location=gl.getUniformLocation(this._program,one.name);
+			}
+			this._params.push(one);
+		}
+		for (i=0,n=this._params.length;i < n;i++){
+			one=this._params[i];
+			one.indexOfParams=i;
+			one.index=1;
+			one.value=[one.location,null];
+			one.codename=one.name;
+			one.name=this._nameMap[one.codename] ? this._nameMap[one.codename] :one.codename;
+			this._paramsMap[one.name]=one;
+			one._this=this;
+			one.uploadedValue=[];
+			switch (one.type){
+				case 0x1404:
+					one.fun=one.isArray ? this._uniform1iv :this._uniform1i;
+					break ;
+				case 0x1406:
+					one.fun=one.isArray ? this._uniform1fv :this._uniform1f;
+					break ;
+				case 0x8B50:
+					one.fun=one.isArray ? this._uniform_vec2v:this._uniform_vec2;
+					break ;
+				case 0x8B51:
+					one.fun=one.isArray ? this._uniform_vec3v:this._uniform_vec3;
+					break ;
+				case 0x8B52:
+					one.fun=one.isArray ? this._uniform_vec4v:this._uniform_vec4;
+					break ;
+				case 0x8B5E:
+					one.fun=this._uniform_sampler2D;
+					break ;
+				case 0x8B60:
+					one.fun=this._uniform_samplerCube;
+					break ;
+				case 0x8B5C:
+					one.glfun=gl.uniformMatrix4fv;
+					one.fun=this._uniformMatrix4fv;
+					break ;
+				case 0x8B56:
+					one.fun=this._uniform1i;
+					break ;
+				case 0x8B5A:
+				case 0x8B5B:
+					throw new Error("compile shader err!");
+				default :
+					throw new Error("compile shader err!");
+				}
+		}
+	}
+
+	//TODO:coverage
+	__proto.getUniform=function(name){
+		return this._paramsMap[name];
+	}
+
+	//TODO:coverage
+	__proto._uniform1f=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value){
+			WebGL.mainContext.uniform1f(one.location,uploadedValue[0]=value);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform1fv=function(one,value){
+		if (value.length < 4){
+			var uploadedValue=one.uploadedValue;
+			if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
+				WebGL.mainContext.uniform1fv(one.location,value);
+				uploadedValue[0]=value[0];
+				uploadedValue[1]=value[1];
+				uploadedValue[2]=value[2];
+				uploadedValue[3]=value[3];
+				return 1;
+			}
+			return 0;
+			}else {
+			WebGL.mainContext.uniform1fv(one.location,value);
+			return 1;
+		}
+	}
+
+	__proto._uniform_vec2=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1]){
+			WebGL.mainContext.uniform2f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1]);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec2v=function(one,value){
+		if (value.length < 2){
+			var uploadedValue=one.uploadedValue;
+			if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
+				WebGL.mainContext.uniform2fv(one.location,value);
+				uploadedValue[0]=value[0];
+				uploadedValue[1]=value[1];
+				uploadedValue[2]=value[2];
+				uploadedValue[3]=value[3];
+				return 1;
+			}
+			return 0;
+			}else {
+			WebGL.mainContext.uniform2fv(one.location,value);
+			return 1;
+		}
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec3=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2]){
+			WebGL.mainContext.uniform3f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2]);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec3v=function(one,value){
+		WebGL.mainContext.uniform3fv(one.location,value);
+		return 1;
+	}
+
+	__proto._uniform_vec4=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
+			WebGL.mainContext.uniform4f(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2],uploadedValue[3]=value[3]);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec4v=function(one,value){
+		WebGL.mainContext.uniform4fv(one.location,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniformMatrix2fv=function(one,value){
+		WebGL.mainContext.uniformMatrix2fv(one.location,false,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniformMatrix3fv=function(one,value){
+		WebGL.mainContext.uniformMatrix3fv(one.location,false,value);
+		return 1;
+	}
+
+	__proto._uniformMatrix4fv=function(one,value){
+		WebGL.mainContext.uniformMatrix4fv(one.location,false,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniform1i=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value){
+			WebGL.mainContext.uniform1i(one.location,uploadedValue[0]=value);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform1iv=function(one,value){
+		WebGL.mainContext.uniform1iv(one.location,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniform_ivec2=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1]){
+			WebGL.mainContext.uniform2i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1]);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform_ivec2v=function(one,value){
+		WebGL.mainContext.uniform2iv(one.location,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec3i=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2]){
+			WebGL.mainContext.uniform3i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2]);
+			return 1;
+		}
+		return 0;
+	}
+
+	__proto._uniform_vec3vi=function(one,value){
+		WebGL.mainContext.uniform3iv(one.location,value);
+		return 1;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec4i=function(one,value){
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]!==value[0] || uploadedValue[1]!==value[1] || uploadedValue[2]!==value[2] || uploadedValue[3]!==value[3]){
+			WebGL.mainContext.uniform4i(one.location,uploadedValue[0]=value[0],uploadedValue[1]=value[1],uploadedValue[2]=value[2],uploadedValue[3]=value[3]);
+			return 1;
+		}
+		return 0;
+	}
+
+	//TODO:coverage
+	__proto._uniform_vec4vi=function(one,value){
+		WebGL.mainContext.uniform4iv(one.location,value);
+		return 1;
+	}
+
+	__proto._uniform_sampler2D=function(one,value){
+		var gl=WebGL.mainContext;
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]==null){
+			uploadedValue[0]=this._curActTexIndex;
+			gl.uniform1i(one.location,this._curActTexIndex);
+			WebGLContext.activeTexture(gl,0x84C0+this._curActTexIndex);
+			WebGLContext.bindTexture(gl,0x0DE1,value);
+			this._curActTexIndex++;
+			return 1;
+			}else {
+			WebGLContext.activeTexture(gl,0x84C0+uploadedValue[0]);
+			WebGLContext.bindTexture(gl,0x0DE1,value);
+			return 0;
+		}
+	}
+
+	//TODO:coverage
+	__proto._uniform_samplerCube=function(one,value){
+		var gl=WebGL.mainContext;
+		var uploadedValue=one.uploadedValue;
+		if (uploadedValue[0]==null){
+			uploadedValue[0]=this._curActTexIndex;
+			gl.uniform1i(one.location,this._curActTexIndex);
+			WebGLContext.activeTexture(gl,0x84C0+this._curActTexIndex);
+			WebGLContext.bindTexture(gl,0x8513,value);
+			this._curActTexIndex++;
+			return 1;
+			}else {
+			WebGLContext.activeTexture(gl,0x84C0+uploadedValue[0]);
+			WebGLContext.bindTexture(gl,0x8513,value);
+			return 0;
+		}
+	}
+
+	//TODO:coverage
+	__proto._noSetValue=function(one){
+		console.log("no....:"+one.name);
+	}
+
+	//TODO:coverage
+	__proto.uploadOne=function(name,value){
+		WebGLContext.useProgram(WebGL.mainContext,this._program);
+		var one=this._paramsMap[name];
+		one.fun.call(this,one,value);
+	}
+
+	__proto.uploadTexture2D=function(value){
+		var CTX=WebGLContext;
+		if(CTX._activeTextures[0]!==value){
+			CTX.bindTexture(WebGL.mainContext,CTX.TEXTURE_2D,value);
+			CTX._activeTextures[0]=value;
+		}
+	}
+
+	/**
+	*提交shader到GPU
+	*@param shaderValue
+	*/
+	__proto.upload=function(shaderValue,params){
+		BaseShader.activeShader=BaseShader.bindShader=this;
+		var gl=WebGL.mainContext;
+		WebGLContext.useProgram(gl,this._program);
+		if (this._reCompile){
+			params=this._params;
+			this._reCompile=false;
+			}else {
+			params=params || this._params;
+		};
+		var one,value,n=params.length,shaderCall=0;
+		for (var i=0;i < n;i++){
+			one=params[i];
+			if ((value=shaderValue[one.name])!==null)
+				shaderCall+=one.fun.call(this,one,value);
+		}
+		Stat.shaderCall+=shaderCall;
+	}
+
+	//TODO:coverage
+	__proto.uploadArray=function(shaderValue,length,_bufferUsage){
+		BaseShader.activeShader=this;
+		BaseShader.bindShader=this;
+		WebGLContext.useProgram(WebGL.mainContext,this._program);
+		var params=this._params,value;
+		var one,shaderCall=0;
+		for (var i=length-2;i >=0;i-=2){
+			one=this._paramsMap[shaderValue[i]];
+			if (!one)
+				continue ;
+			value=shaderValue[i+1];
+			if (value !=null){
+				_bufferUsage && _bufferUsage[one.name] && _bufferUsage[one.name].bind();
+				shaderCall+=one.fun.call(this,one,value);
+			}
+		}
+		Stat.shaderCall+=shaderCall;
+	}
+
+	//TODO:coverage
+	__proto.getParams=function(){
+		return this._params;
+	}
+
+	//TODO:coverage
+	__proto.setAttributesLocation=function(attribDesc){
+		this._attribInfo=attribDesc;
+	}
+
+	Shader.getShader=function(name){
+		return Shader.sharders[name];
+	}
+
+	Shader.create=function(vs,ps,saveName,nameMap,bindAttrib){
+		return new Shader(vs,ps,saveName,nameMap,bindAttrib);
+	}
+
+	Shader.withCompile=function(nameID,define,shaderName,createShader){
+		if (shaderName && Shader.sharders[shaderName])
+			return Shader.sharders[shaderName];
+		var pre=Shader._preCompileShader[0.0002 *nameID];
+		if (!pre)
+			throw new Error("withCompile shader err!"+nameID);
+		return pre.createShader(define,shaderName,createShader,null);
+	}
+
+	Shader.withCompile2D=function(nameID,mainID,define,shaderName,createShader,bindAttrib){
+		if (shaderName && Shader.sharders[shaderName])
+			return Shader.sharders[shaderName];
+		var pre=Shader._preCompileShader[0.0002 *nameID+mainID];
+		if (!pre)
+			throw new Error("withCompile shader err!"+nameID+" "+mainID);
+		return pre.createShader(define,shaderName,createShader,bindAttrib);
+	}
+
+	Shader.addInclude=function(fileName,txt){
+		ShaderCompile.addInclude(fileName,txt);
+	}
+
+	Shader.preCompile=function(nameID,vs,ps,nameMap){
+		var id=0.0002 *nameID;
+		Shader._preCompileShader[id]=new ShaderCompile(vs,ps,nameMap);
+	}
+
+	Shader.preCompile2D=function(nameID,mainID,vs,ps,nameMap){
+		var id=0.0002 *nameID+mainID;
+		Shader._preCompileShader[id]=new ShaderCompile(vs,ps,nameMap);
+	}
+
+	Shader._createShader=function(gl,str,type){
+		var shader=gl.createShader(type);
+		gl.shaderSource(shader,str);
+		gl.compileShader(shader);
+		if(gl.getShaderParameter(shader,0x8B81)){
+			return shader;
+			}else{
+			console.log(gl.getShaderInfoLog(shader));
+			return null;
+		}
+	}
+
+	Shader._count=0;
+	Shader._preCompileShader={};
+	Shader.SHADERNAME2ID=0.0002;
+	Shader.sharders=new Array(0x20);
+	__static(Shader,
+	['nameKey',function(){return this.nameKey=new StringKey();}
+	]);
+	return Shader;
+})(BaseShader)
 
 
 //class laya.webgl.utils.Buffer2D extends laya.webgl.utils.Buffer
@@ -45882,8 +45943,10 @@ var PicShortItemUI=(function(_super){
 	function PicShortItemUI(){
 		this.sel=null;
 		this.img=null;
-		this.fileinfo=null;
+		this.filename=null;
 		this.btndelete=null;
+		this.fileinfo=null;
+		this.picClassTxt=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -45894,7 +45957,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":200},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":3,"x":3,"width":150,"var":"img","height":150},"compId":3},{"type":"Label","props":{"y":154,"x":17.5,"wordWrap":true,"width":121,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","height":45,"fontSize":18,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -46019,9 +46082,32 @@ var UpLoadItemUI=(function(_super){
 })(View)
 
 
+//class ui.PopUpDialogUI extends laya.ui.View
+var PopUpDialogUI=(function(_super){
+	function PopUpDialogUI(){
+		this.msgtxt=null;
+		this.okbtn=null;
+		this.cancelbtn=null;
+		this.closebtn=null;
+		PopUpDialogUI.__super.call(this);
+	}
+
+	__class(PopUpDialogUI,'ui.PopUpDialogUI',_super);
+	var __proto=PopUpDialogUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(PopUpDialogUI.uiView);
+	}
+
+	PopUpDialogUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Image","props":{"width":920,"top":200,"skin":"commers/whitebg.png","right":500,"left":500,"height":374,"bottom":506,"alpha":0.8},"compId":4,"child":[{"type":"Label","props":{"y":34,"x":50,"width":820,"var":"msgtxt","valign":"middle","text":"这是一个确定弹窗","right":50,"overflow":"scroll","left":50,"height":208,"fontSize":22,"align":"center"},"compId":5},{"type":"Sprite","props":{"y":294,"x":236},"compId":8,"child":[{"type":"Button","props":{"width":100,"var":"okbtn","skin":"comp/button.png","labelSize":24,"label":"确定","height":30},"compId":6},{"type":"Button","props":{"x":348,"width":100,"var":"cancelbtn","skin":"comp/button.png","labelSize":24,"label":"取消","height":30},"compId":7}]},{"type":"Button","props":{"y":0,"x":870,"width":50,"var":"closebtn","skin":"comp/button.png","labelSize":24,"label":"X","height":40},"compId":9}]},{"type":"Script","props":{"runtime":"utils.PopUpWindowControl"},"compId":10}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
+	return PopUpDialogUI;
+})(View)
+
+
 //class ui.picManager.PicCheckPanelUI extends laya.ui.View
 var PicCheckPanelUI=(function(_super){
 	function PicCheckPanelUI(){
+		this.mainpanel=null;
 		this.img=null;
 		this.closeBtn=null;
 		PicCheckPanelUI.__super.call(this);
@@ -46034,7 +46120,7 @@ var PicCheckPanelUI=(function(_super){
 		this.createView(PicCheckPanelUI.uiView);
 	}
 
-	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Image","props":{"y":36,"x":560,"width":800,"var":"img","height":800},"compId":4},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
+	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6},{"type":"Panel","props":{"var":"mainpanel","top":0,"right":0,"left":0,"bottom":100},"compId":7,"child":[{"type":"Image","props":{"y":571,"x":980,"width":1000,"var":"img","height":999,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return PicCheckPanelUI;
 })(View)
 
@@ -50513,22 +50599,50 @@ var PicInfoItem=(function(_super){
 		if(this.picInfo.picType==0){
 			this.img.skin="commers/fold.png";
 			this.fileinfo.text=this.picInfo.directName;
+			this.filename.visible=false;
+			this.picClassTxt.visible=false;
+			this.img.width=150;
+			this.img.height=150;
 		}
 		else{
+			this.filename.visible=true;
+			this.filename.text=this.picInfo.directName;
+			if(this.picInfo.picWidth > this.picInfo.picHeight){
+				this.img.width=150;
+				this.img.height=150/this.picInfo.picWidth *this.picInfo.picHeight;
+			}
+			else{
+				this.img.height=150;
+				this.img.width=150/this.picInfo.picHeight *this.picInfo.picWidth;
+			}
 			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
-			this.fileinfo.text=this.picInfo.directName;
+			var str="长:"+(this.picInfo.picWidth/this.picInfo.dpi).toFixed(1).toString()+";宽:"+(this.picInfo.picHeight/this.picInfo.dpi).toFixed(1).toString()+"\n";
+			str+="dpi:"+this.picInfo.dpi;
+			this.fileinfo.text=str;
+			this.picClassTxt.text=this.picInfo.picClass;
+			this.picClassTxt.visible=true;
 		}
 	}
 
+	//this.fileinfo.text=picInfo.directName;
 	__proto.onDeleteHandler=function(e){
 		e.stopPropagation();
-		if(this.sel.visible){
-			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
-		}
 		if(this.picInfo.picType==1)
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/delete?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该图片吗？",caller:this,callback:this.confirmDelete});
 		else
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该目录吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(result){
+		if(result){
+			if(this.sel.visible){
+				EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
+			}
+			if(this.picInfo.picType==1)
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+			else
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+		}
 	}
 
 	__proto.onDeleteFileBack=function(data){
@@ -50558,7 +50672,7 @@ var PicInfoItem=(function(_super){
 			EventCenter.instance.event("SELECT_FOLDER",this.picInfo);
 		}
 		else{
-			ViewManager.instance.openView("picCheckView",false,this.picInfo);
+			ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.picInfo);
 		}
 	}
 
@@ -51168,7 +51282,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,EventCenter,View,GameConfig,LoaderManager,SceneUtils,CallLater,Timer,GraphicAnimation,LocalStorage,Path,WebGLContext2D]);
+	Laya.__init([EventDispatcher,CharBook,View,GameConfig,LoaderManager,SceneUtils,CallLater,Timer,GraphicAnimation,LocalStorage,Path,WebGLContext2D,EventCenter]);
 	/**LayaGameStart**/
 	new Main();
 

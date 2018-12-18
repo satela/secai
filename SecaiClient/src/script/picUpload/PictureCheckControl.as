@@ -26,10 +26,24 @@ package script.picUpload
 			uiSkin = this.owner as PicCheckPanelUI;
 			
 			uiSkin.closeBtn.on(Event.CLICK,this,onClosePanel);
-			
+			uiSkin.mainpanel.vScrollBarSkin = "";
 			if(param != null)
 			{
 				this.uiSkin.img.skin = HttpRequestUtil.biggerPicUrl + (param as PicInfoVo).fid + ".jpg";
+				
+				if(param.picWidth > param.picHeight)
+				{
+					this.uiSkin.img.width = 1000;
+					
+					this.uiSkin.img.height = 1000/param.picWidth * param.picHeight;
+					
+				}
+				else
+				{
+					this.uiSkin.img.height = 1000;
+					this.uiSkin.img.width = 1000/param.picHeight * param.picWidth;
+					
+				}
 			}
 			
 		}

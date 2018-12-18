@@ -12,6 +12,15 @@ package model.picmanagerModel
 
 		public var fid:String = "";
 		
+		public var picWidth:int;
+		public var picHeight:int;
+		
+		public var colorType:String = "";
+		
+		public var picClass:String = "";
+		public var dpi:Number;
+		
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -24,6 +33,11 @@ package model.picmanagerModel
 			else
 			{
 				fid = fileinfo.fid;
+				var fattr:Object = JSON.parse(fileinfo.fattr);
+				picWidth = fattr.width;
+				picHeight = fattr.height;
+				dpi = fattr.dpi;
+				picClass = fileinfo.ftype;
 				
 				directName = fileinfo.fname;
 				parentDirect = fileinfo.fpath;

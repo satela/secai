@@ -41,11 +41,43 @@ package script.picUpload
 			{
 				this.img.skin = "commers/fold.png";
 				this.fileinfo.text = picInfo.directName;
+				this.filename.visible = false;
+				this.picClassTxt.visible = false;
+				this.img.width = 150;
+				this.img.height = 150;
 			}
 			else
 			{
+				this.filename.visible = true;
+				this.filename.text =  picInfo.directName;
+				
+				if(picInfo.picWidth > picInfo.picHeight)
+				{
+					this.img.width = 150;
+					//this.img.x = 0;
+					
+					this.img.height = 150/picInfo.picWidth * picInfo.picHeight;
+					//this.img.y = (150 - this.img.height)/2;
+					
+				}
+				else
+				{
+					this.img.height = 150;
+					//this.img.y = 0;
+					this.img.width = 150/picInfo.picHeight * picInfo.picWidth;
+					//this.img.x = 
+
+				}
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
-				this.fileinfo.text = picInfo.directName;
+				
+				var str:String = "长:" + (picInfo.picWidth/picInfo.dpi).toFixed(1).toString() + ";宽:" +  (picInfo.picHeight/picInfo.dpi).toFixed(1).toString() + "\n";
+				
+				str += "dpi:" + picInfo.dpi;
+				this.fileinfo.text = str;
+				
+				this.picClassTxt.text = picInfo.picClass;
+				this.picClassTxt.visible = true;
+				//this.fileinfo.text = picInfo.directName;
 
 			}
 		}
@@ -54,16 +86,27 @@ package script.picUpload
 		{
 			// TODO Auto Generated method stub
 			e.stopPropagation();
-			if(this.sel.visible)
-			{
-				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo.fid);
-			}
 			if(picInfo.picType == 1)
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deletePic,this,onDeleteFileBack,"fid=" + picInfo.fid,"post");
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"确定删除该图片吗？",caller:this,callback:confirmDelete});
 			else
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deleteDirectory,this,onDeleteFileBack,"path=" + picInfo.dpath,"post");
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"确定删除该目录吗？",caller:this,callback:confirmDelete});
 
-				
+		
+		}
+		
+		private function confirmDelete(result:Boolean):void
+		{
+			if(result)
+			{
+				if(this.sel.visible)
+				{
+					EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo.fid);
+				}
+				if(picInfo.picType == 1)
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deletePic,this,onDeleteFileBack,"fid=" + picInfo.fid,"post");
+				else
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deleteDirectory,this,onDeleteFileBack,"path=" + picInfo.dpath,"post");
+			}
 		}
 		
 		private function onDeleteFileBack(data:Object):void
