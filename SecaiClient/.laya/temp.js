@@ -853,6 +853,7 @@ var GameConfig=(function(){
 		reg("script.login.RegisterCntrol",RegisterCntrol);
 		reg("script.login.ResetPwdControl",ResetPwdControl);
 		reg("script.MainPageControl",MainPageControl);
+		reg("script.order.PaintOrderControl",PaintOrderControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
@@ -866,7 +867,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PopUpDialog.scene";
+	GameConfig.startScene="PaintOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1300,6 +1301,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_USERCENTER"]=UserMainPanelUI;
 		this.viewDict["VIEW_PICTURE_CHECK"]=PicCheckPanelUI;
 		this.viewDict["VIEW_POPUPDIALOG"]=PopUpDialogUI;
+		this.viewDict["VIEW_PAINT_ORDER"]=PaintOrderPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1315,6 +1317,7 @@ var ViewManager=(function(){
 			for(var $each_oldview in this.openViewList){
 				oldview=this.openViewList[$each_oldview];
 				this.viewContainer.removeChild(oldview);
+				(oldview).destroy(true);
 			}
 			this.openViewList={};
 		};
@@ -1330,7 +1333,9 @@ var ViewManager=(function(){
 		if(this.openViewList[viewClass]==null)
 			ViewManager.showAlert("不存在的界面");
 		this.viewContainer.removeChild(this.openViewList[viewClass]);
+		(this.openViewList [viewClass]).destroy(true);
 		this.openViewList[viewClass]=null;
+		delete this.openViewList[viewClass];
 	}
 
 	__getset(1,ViewManager,'instance',function(){
@@ -1350,6 +1355,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_MYPICPANEL="VIEW_MYPICPANEL";
 	ViewManager.VIEW_PICMANAGER="VIEW_PICMANAGER";
 	ViewManager.VIEW_PICTURE_CHECK="VIEW_PICTURE_CHECK";
+	ViewManager.VIEW_PAINT_ORDER="VIEW_PAINT_ORDER";
 	ViewManager.VIEW_USERCENTER="VIEW_USERCENTER";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
@@ -1368,7 +1374,7 @@ var PicInfoVo=(function(){
 		this.fid="";
 		this.picWidth=0;
 		this.picHeight=0;
-		this.colorType="";
+		this.colorspace="";
 		this.picClass="";
 		this.dpi=NaN;
 		this.picType=dtype;
@@ -1382,6 +1388,7 @@ var PicInfoVo=(function(){
 			var fattr=JSON.parse(fileinfo.fattr);
 			this.picWidth=fattr.width;
 			this.picHeight=fattr.height;
+			this.colorspace=fattr.colorspace;
 			this.dpi=fattr.dpi;
 			this.picClass=fileinfo.ftype;
 			this.directName=fileinfo.fname;
@@ -1407,7 +1414,7 @@ var DirectoryFileModel=(function(){
 		this.directoryList=null;
 		this.curFileList=[];
 		this.curSelectDir=null;
-		this.haselectPic=[];
+		this.haselectPic={};
 		this.directoryList=[];
 	}
 
@@ -1446,6 +1453,36 @@ var DirectoryFileModel=(function(){
 
 	DirectoryFileModel._instance=null;
 	return DirectoryFileModel;
+})()
+
+
+//class model.orderModel.PicOrderItemVo
+var PicOrderItemVo=(function(){
+	function PicOrderItemVo(picvo){
+		this.indexNum=0;
+		this.picinfo=null;
+		this.materialID=0;
+		//材料id
+		this.materialName=null;
+		//材料名称
+		this.editWidth=NaN;
+		this.editHeight=NaN;
+		this.technolegs=null;
+		this.techStr="";
+		this.vipPrice=NaN;
+		this.price=NaN;
+		this.paitNum=1;
+		//下单数量
+		this.totalPrice=NaN;
+		this.picinfo=picvo;
+		var num=Math.random()*8;
+		for(var i=0;i < 2;i++){
+			this.techStr+="工艺"+i+"\n";
+		}
+	}
+
+	__class(PicOrderItemVo,'model.orderModel.PicOrderItemVo');
+	return PicOrderItemVo;
 })()
 
 
@@ -32053,254 +32090,6 @@ var LogPanelControl=(function(_super){
 })(Script)
 
 
-//class script.picUpload.PicManagerControl extends laya.components.Script
-var PicManagerControl=(function(_super){
-	function PicManagerControl(){
-		this.uiSkin=null;
-		this.createbox=null;
-		//private var DirectoryFileModel.instance.curSelectDir:PicInfoVo;
-		this.isCreateTopDir=true;
-		//是否创建一级目录
-		this.directTree=[];
-		this.param=null;
-		PicManagerControl.__super.call(this);
-	}
-
-	__class(PicManagerControl,'script.picUpload.PicManagerControl',_super);
-	var __proto=PicManagerControl.prototype;
-	__proto.onStart=function(){
-		var _$this=this;
-		this.directTree=[];
-		this.uiSkin=this.owner;
-		this.uiSkin.btnNewDir.on("click",this,this.onCreateNewDirect);
-		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
-		this.createbox=this.uiSkin.boxNewFolder;
-		this.createbox.visible=false;
-		this.uiSkin.firstpage.underline=true;
-		this.uiSkin.firstpage.underlineColor="#121212";
-		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
-		this.uiSkin.input_folename.maxChars=10;
-		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
-		this.uiSkin.folderList.itemRender=DirectFolderItem;
-		this.uiSkin.folderList.vScrollBarSkin="";
-		this.uiSkin.folderList.selectEnable=true;
-		this.uiSkin.folderList.spaceY=2;
-		this.uiSkin.folderList.renderHandler=new Handler(this,this.updateDirectItem);
-		this.uiSkin.folderList.selectHandler=new Handler(this,this.onSlecteDirect);
-		this.uiSkin.picList.itemRender=PicInfoItem;
-		this.uiSkin.picList.vScrollBarSkin="";
-		this.uiSkin.picList.selectEnable=false;
-		this.uiSkin.picList.spaceY=0;
-		this.uiSkin.picList.renderHandler=new Handler(this,this.updatePicInfoItem);
-		this.uiSkin.flder0.visible=false;
-		this.uiSkin.flder1.visible=false;
-		this.uiSkin.flder2.visible=false;
-		for(var i=0;i < 3;i++)
-		this.uiSkin["flder"+i].on("click",this,this.onClickTopDirectLbl,[i]);
-		this.uiSkin.btnUploadPic.on("click",this,this.onShowUploadView);
-		Laya.timer.once(10,this,function(){
-			_$this.uiSkin.folderList.array=[];
-			_$this.uiSkin.picList.array=[];
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
-		});
-		this.uiSkin.htmltext.style.fontSize=20;
-		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
-		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
-		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
-		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
-		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
-		DirectoryFileModel.instance.haselectPic=[];
-	}
-
-	__proto.seletPicToOrder=function(fid){
-		var index=DirectoryFileModel.instance.haselectPic.indexOf(fid);
-		if(index < 0){
-			DirectoryFileModel.instance.haselectPic.push(fid);
-		}
-		else
-		DirectoryFileModel.instance.haselectPic.splice(index,1);
-		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>"+DirectoryFileModel.instance.haselectPic.length+"</span>"+"<span color='#222222' size='20'>张图片</span>";
-	}
-
-	__proto.onGetTopDirListBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			DirectoryFileModel.instance.initTopDirectoryList(result);
-			this.uiSkin.folderList.array=DirectoryFileModel.instance.topDirectList;
-			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
-			if(DirectoryFileModel.instance.topDirectList.length > 0){
-				DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList [0];
-				this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-				this.updateCurDirectLabel();
-				(this.uiSkin.folderList.cells [0]).ShowSelected=true;
-				this.getFileList();
-			}
-		}
-	}
-
-	__proto.getFileList=function(){
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
-	}
-
-	__proto.onGetDirFileListBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			DirectoryFileModel.instance.initCurDirFiles(result);
-			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
-		}
-	}
-
-	__proto.onBackToMain=function(){
-		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
-		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
-		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
-		ViewManager.instance.closeView("VIEW_PICMANAGER");
-	}
-
-	__proto.onShowUploadView=function(){
-		if(DirectoryFileModel.instance.curSelectDir==null){
-			ViewManager.showAlert("请先创建一个目录");
-			return;
-		}
-		ViewManager.instance.openView("VIEW_MYPICPANEL");
-	}
-
-	__proto.onSureCreeate=function(){
-		if(this.uiSkin.input_folename.text=="")
-			return;
-		else{
-			if(!this.isCreateTopDir)
-				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
-			else
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
-			this.createbox.visible=false;
-		}
-	}
-
-	__proto.onCreateDirBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			if(this.isCreateTopDir){
-				var picinfo=new PicInfoVo(result.dir,0);
-				this.uiSkin.folderList.addItem(picinfo);
-				if(DirectoryFileModel.instance.topDirectList.length==1){
-					(this.uiSkin.folderList.cells [0]).ShowSelected=true;
-					DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList[0];
-					this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-					this.updateCurDirectLabel();
-				}
-			}
-			else{
-				picinfo=new PicInfoVo(result.dir,0);
-				this.uiSkin.picList.addItem(picinfo);
-			}
-		}
-	}
-
-	__proto.onSlecteDirect=function(index){
-		var item;
-		for(var $each_item in this.uiSkin.folderList.cells){
-			item=this.uiSkin.folderList.cells[$each_item];
-			item.ShowSelected=false;
-		}
-		(this.uiSkin.folderList.cells [index]).ShowSelected=true;
-		var picinfo=(this.uiSkin.folderList.cells [index]).directData;
-		DirectoryFileModel.instance.curSelectDir=(this.uiSkin.folderList.cells [index]).directData;
-		this.directTree=[];
-		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-		this.updateCurDirectLabel();
-		this.getFileList();
-	}
-
-	__proto.onSelectChildFolder=function(filedata){
-		DirectoryFileModel.instance.curSelectDir=filedata;
-		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-		this.updateCurDirectLabel();
-		this.getFileList();
-	}
-
-	__proto.onClickTopDirectLbl=function(index){
-		if(index==this.directTree.length-1)
-			return;
-		DirectoryFileModel.instance.curSelectDir=this.directTree[index];
-		this.directTree.splice(index+1,this.directTree.length-index-1);
-		this.updateCurDirectLabel();
-		this.getFileList();
-	}
-
-	__proto.updateCurDirectLabel=function(){
-		this.uiSkin.flder0.visible=false;
-		this.uiSkin.flder1.visible=false;
-		this.uiSkin.flder2.visible=false;
-		for(var i=0;i < this.directTree.length;i++){
-			if(i < 3){
-				this.uiSkin["flder"+i].text=this.directTree[i].directName+">";
-				this.uiSkin["flder"+i].visible=true;
-			}
-		}
-	}
-
-	__proto.updateDirectItem=function(cell){
-		cell.setData(cell.dataSource);
-	}
-
-	__proto.updatePicInfoItem=function(cell){
-		cell.setData(cell.dataSource);
-	}
-
-	__proto.onCloseCreateFolder=function(){
-		this.createbox.visible=false;
-	}
-
-	__proto.onCreateNewDirect=function(){
-		this.isCreateTopDir=true;
-		this.createbox.visible=true;
-	}
-
-	__proto.onCreateNewFolder=function(){
-		this.isCreateTopDir=false;
-		this.createbox.visible=true;
-	}
-
-	return PicManagerControl;
-})(Script)
-
-
-//class script.picUpload.PictureCheckControl extends laya.components.Script
-var PictureCheckControl=(function(_super){
-	function PictureCheckControl(){
-		this.uiSkin=null;
-		this.param=null;
-		PictureCheckControl.__super.call(this);
-	}
-
-	__class(PictureCheckControl,'script.picUpload.PictureCheckControl',_super);
-	var __proto=PictureCheckControl.prototype;
-	__proto.onStart=function(){
-		this.uiSkin=this.owner;
-		this.uiSkin.closeBtn.on("click",this,this.onClosePanel);
-		this.uiSkin.mainpanel.vScrollBarSkin="";
-		if(this.param !=null){
-			this.uiSkin.img.skin="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+(this.param).fid+".jpg";
-			if(this.param.picWidth > this.param.picHeight){
-				this.uiSkin.img.width=1000;
-				this.uiSkin.img.height=1000/this.param.picWidth *this.param.picHeight;
-			}
-			else{
-				this.uiSkin.img.height=1000;
-				this.uiSkin.img.width=1000/this.param.picHeight *this.param.picWidth;
-			}
-		}
-	}
-
-	__proto.onClosePanel=function(){
-		ViewManager.instance.closeView("VIEW_PICTURE_CHECK");
-	}
-
-	return PictureCheckControl;
-})(Script)
-
-
 /**
 *<p> <code>Sprite</code> 是基本的显示图形的显示列表节点。 <code>Sprite</code> 默认没有宽高，默认不接受鼠标事件。通过 <code>graphics</code> 可以绘制图片或者矢量图，支持旋转，缩放，位移等操作。<code>Sprite</code>同时也是容器类，可用来添加多个子节点。</p>
 *<p>注意： <code>Sprite</code> 默认没有宽高，可以通过<code>getBounds</code>函数获取；也可手动设置宽高；还可以设置<code>autoSize=true</code>，然后再获取宽高。<code>Sprite</code>的宽高一般用于进行碰撞检测和排版，并不影响显示图像大小，如果需要更改显示图像大小，请使用 <code>scaleX</code> ， <code>scaleY</code> ， <code>scale</code>。</p>
@@ -33797,6 +33586,275 @@ var Sprite=(function(_super){
 })(Node)
 
 
+//class script.picUpload.PicManagerControl extends laya.components.Script
+var PicManagerControl=(function(_super){
+	function PicManagerControl(){
+		this.uiSkin=null;
+		this.createbox=null;
+		//private var DirectoryFileModel.instance.curSelectDir:PicInfoVo;
+		this.isCreateTopDir=true;
+		//是否创建一级目录
+		this.directTree=[];
+		this.param=null;
+		PicManagerControl.__super.call(this);
+	}
+
+	__class(PicManagerControl,'script.picUpload.PicManagerControl',_super);
+	var __proto=PicManagerControl.prototype;
+	__proto.onStart=function(){
+		var _$this=this;
+		this.directTree=[];
+		this.uiSkin=this.owner;
+		this.uiSkin.btnNewDir.on("click",this,this.onCreateNewDirect);
+		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
+		this.uiSkin.btnorder.on("click",this,this.onshowOrder);
+		this.createbox=this.uiSkin.boxNewFolder;
+		this.createbox.visible=false;
+		this.uiSkin.firstpage.underline=true;
+		this.uiSkin.firstpage.underlineColor="#121212";
+		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
+		this.uiSkin.input_folename.maxChars=10;
+		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
+		this.uiSkin.folderList.itemRender=DirectFolderItem;
+		this.uiSkin.folderList.vScrollBarSkin="";
+		this.uiSkin.folderList.selectEnable=true;
+		this.uiSkin.folderList.spaceY=2;
+		this.uiSkin.folderList.renderHandler=new Handler(this,this.updateDirectItem);
+		this.uiSkin.folderList.selectHandler=new Handler(this,this.onSlecteDirect);
+		this.uiSkin.picList.itemRender=PicInfoItem;
+		this.uiSkin.picList.vScrollBarSkin="";
+		this.uiSkin.picList.selectEnable=false;
+		this.uiSkin.picList.spaceY=0;
+		this.uiSkin.picList.renderHandler=new Handler(this,this.updatePicInfoItem);
+		this.uiSkin.flder0.visible=false;
+		this.uiSkin.flder1.visible=false;
+		this.uiSkin.flder2.visible=false;
+		for(var i=0;i < 3;i++)
+		this.uiSkin["flder"+i].on("click",this,this.onClickTopDirectLbl,[i]);
+		this.uiSkin.btnUploadPic.on("click",this,this.onShowUploadView);
+		Laya.timer.once(10,this,function(){
+			_$this.uiSkin.folderList.array=[];
+			_$this.uiSkin.picList.array=[];
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
+		});
+		this.uiSkin.htmltext.style.fontSize=20;
+		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
+		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
+		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
+		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
+		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		DirectoryFileModel.instance.haselectPic={};
+		this.uiSkin.on("removed",this,this.onRemovedFromStage);
+	}
+
+	__proto.onshowOrder=function(){
+		ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
+	}
+
+	__proto.seletPicToOrder=function(fvo){
+		var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
+		if(hasfic){
+			delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+		}
+		else
+		DirectoryFileModel.instance.haselectPic[fvo.fid]=fvo;
+		var num=0;
+		var picvo;
+		for(var $each_picvo in DirectoryFileModel.instance.haselectPic){
+			picvo=DirectoryFileModel.instance.haselectPic[$each_picvo];
+			num++;
+		}
+		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>"+num+"</span>"+"<span color='#222222' size='20'>张图片</span>";
+	}
+
+	__proto.onGetTopDirListBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			DirectoryFileModel.instance.initTopDirectoryList(result);
+			this.uiSkin.folderList.array=DirectoryFileModel.instance.topDirectList;
+			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+			if(DirectoryFileModel.instance.topDirectList.length > 0){
+				DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList [0];
+				this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+				this.updateCurDirectLabel();
+				(this.uiSkin.folderList.cells [0]).ShowSelected=true;
+				this.getFileList();
+			}
+		}
+	}
+
+	__proto.getFileList=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
+	}
+
+	__proto.onGetDirFileListBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			DirectoryFileModel.instance.initCurDirFiles(result);
+			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+		}
+	}
+
+	__proto.onBackToMain=function(){
+		ViewManager.instance.closeView("VIEW_PICMANAGER");
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
+		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
+		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+	}
+
+	__proto.onRemovedFromStage=function(){
+		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
+		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
+		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+	}
+
+	__proto.onShowUploadView=function(){
+		if(DirectoryFileModel.instance.curSelectDir==null){
+			ViewManager.showAlert("请先创建一个目录");
+			return;
+		}
+		ViewManager.instance.openView("VIEW_MYPICPANEL");
+	}
+
+	__proto.onSureCreeate=function(){
+		if(this.uiSkin.input_folename.text=="")
+			return;
+		else{
+			if(!this.isCreateTopDir)
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
+			else
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
+			this.createbox.visible=false;
+		}
+	}
+
+	__proto.onCreateDirBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(this.isCreateTopDir){
+				var picinfo=new PicInfoVo(result.dir,0);
+				this.uiSkin.folderList.addItem(picinfo);
+				if(DirectoryFileModel.instance.topDirectList.length==1){
+					(this.uiSkin.folderList.cells [0]).ShowSelected=true;
+					DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList[0];
+					this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+					this.updateCurDirectLabel();
+				}
+			}
+			else{
+				picinfo=new PicInfoVo(result.dir,0);
+				this.uiSkin.picList.addItem(picinfo);
+			}
+		}
+	}
+
+	__proto.onSlecteDirect=function(index){
+		var item;
+		for(var $each_item in this.uiSkin.folderList.cells){
+			item=this.uiSkin.folderList.cells[$each_item];
+			item.ShowSelected=false;
+		}
+		(this.uiSkin.folderList.cells [index]).ShowSelected=true;
+		var picinfo=(this.uiSkin.folderList.cells [index]).directData;
+		DirectoryFileModel.instance.curSelectDir=(this.uiSkin.folderList.cells [index]).directData;
+		this.directTree=[];
+		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.onSelectChildFolder=function(filedata){
+		DirectoryFileModel.instance.curSelectDir=filedata;
+		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.onClickTopDirectLbl=function(index){
+		if(index==this.directTree.length-1)
+			return;
+		DirectoryFileModel.instance.curSelectDir=this.directTree[index];
+		this.directTree.splice(index+1,this.directTree.length-index-1);
+		this.updateCurDirectLabel();
+		this.getFileList();
+	}
+
+	__proto.updateCurDirectLabel=function(){
+		this.uiSkin.flder0.visible=false;
+		this.uiSkin.flder1.visible=false;
+		this.uiSkin.flder2.visible=false;
+		for(var i=0;i < this.directTree.length;i++){
+			if(i < 3){
+				this.uiSkin["flder"+i].text=this.directTree[i].directName+">";
+				this.uiSkin["flder"+i].visible=true;
+			}
+		}
+	}
+
+	__proto.updateDirectItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.updatePicInfoItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onCloseCreateFolder=function(){
+		this.createbox.visible=false;
+	}
+
+	__proto.onCreateNewDirect=function(){
+		this.isCreateTopDir=true;
+		this.createbox.visible=true;
+	}
+
+	__proto.onCreateNewFolder=function(){
+		this.isCreateTopDir=false;
+		this.createbox.visible=true;
+	}
+
+	return PicManagerControl;
+})(Script)
+
+
+//class script.picUpload.PictureCheckControl extends laya.components.Script
+var PictureCheckControl=(function(_super){
+	function PictureCheckControl(){
+		this.uiSkin=null;
+		this.param=null;
+		PictureCheckControl.__super.call(this);
+	}
+
+	__class(PictureCheckControl,'script.picUpload.PictureCheckControl',_super);
+	var __proto=PictureCheckControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.closeBtn.on("click",this,this.onClosePanel);
+		this.uiSkin.mainpanel.vScrollBarSkin="";
+		if(this.param !=null){
+			this.uiSkin.img.skin="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+(this.param).fid+".jpg";
+			if(this.param.picWidth > this.param.picHeight){
+				this.uiSkin.img.width=1000;
+				this.uiSkin.img.height=1000/this.param.picWidth *this.param.picHeight;
+			}
+			else{
+				this.uiSkin.img.height=1000;
+				this.uiSkin.img.width=1000/this.param.picHeight *this.param.picWidth;
+			}
+		}
+	}
+
+	__proto.onClosePanel=function(){
+		ViewManager.instance.closeView("VIEW_PICTURE_CHECK");
+	}
+
+	return PictureCheckControl;
+})(Script)
+
+
 //class utils.PopUpWindowControl extends laya.components.Script
 var PopUpWindowControl=(function(_super){
 	function PopUpWindowControl(){
@@ -33832,6 +33890,39 @@ var PopUpWindowControl=(function(_super){
 	}
 
 	return PopUpWindowControl;
+})(Script)
+
+
+//class script.order.PaintOrderControl extends laya.components.Script
+var PaintOrderControl=(function(_super){
+	function PaintOrderControl(){
+		this.uiSkin=null;
+		this.param=null;
+		PaintOrderControl.__super.call(this);
+	}
+
+	__class(PaintOrderControl,'script.order.PaintOrderControl',_super);
+	var __proto=PaintOrderControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.firstpage.on("click",this,this.onClosePanel);
+		this.uiSkin.panel_main.vScrollBarSkin="";
+		this.uiSkin.mainvbox.autoSize=true;
+		var i=1;
+		var fvo;
+		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
+			fvo=DirectoryFileModel.instance.haselectPic[$each_fvo];
+			var ovo=new PicOrderItemVo(fvo);
+			ovo.indexNum=i++;
+			this.uiSkin.ordervbox.addChild(new PicOrderItem(ovo));
+		}
+	}
+
+	__proto.onClosePanel=function(){
+		ViewManager.instance.closeView("VIEW_PAINT_ORDER");
+	}
+
+	return PaintOrderControl;
 })(Script)
 
 
@@ -34165,47 +34256,6 @@ var BaseShader=(function(_super){
 	BaseShader.activeShader=null;
 	BaseShader.bindShader=null;
 	return BaseShader;
-})(Resource)
-
-
-/**
-*@private
-*<code>Bitmap</code> 图片资源类。
-*/
-//class laya.resource.Bitmap extends laya.resource.Resource
-var Bitmap=(function(_super){
-	function Bitmap(){
-		/**@private */
-		//this._width=NaN;
-		/**@private */
-		//this._height=NaN;
-		Bitmap.__super.call(this);
-		this._width=-1;
-		this._height=-1;
-	}
-
-	__class(Bitmap,'laya.resource.Bitmap',_super);
-	var __proto=Bitmap.prototype;
-	//TODO:coverage
-	__proto._getSource=function(){
-		throw "Bitmap: must override it.";
-	}
-
-	/**
-	*获取宽度。
-	*/
-	__getset(0,__proto,'width',function(){
-		return this._width;
-	});
-
-	/***
-	*获取高度。
-	*/
-	__getset(0,__proto,'height',function(){
-		return this._height;
-	});
-
-	return Bitmap;
 })(Resource)
 
 
@@ -34999,6 +35049,47 @@ var ConchSpriteAdpt=(function(_super){
 	]);
 	return ConchSpriteAdpt;
 })(Node)
+
+
+/**
+*@private
+*<code>Bitmap</code> 图片资源类。
+*/
+//class laya.resource.Bitmap extends laya.resource.Resource
+var Bitmap=(function(_super){
+	function Bitmap(){
+		/**@private */
+		//this._width=NaN;
+		/**@private */
+		//this._height=NaN;
+		Bitmap.__super.call(this);
+		this._width=-1;
+		this._height=-1;
+	}
+
+	__class(Bitmap,'laya.resource.Bitmap',_super);
+	var __proto=Bitmap.prototype;
+	//TODO:coverage
+	__proto._getSource=function(){
+		throw "Bitmap: must override it.";
+	}
+
+	/**
+	*获取宽度。
+	*/
+	__getset(0,__proto,'width',function(){
+		return this._width;
+	});
+
+	/***
+	*获取高度。
+	*/
+	__getset(0,__proto,'height',function(){
+		return this._height;
+	});
+
+	return Bitmap;
+})(Resource)
 
 
 //class laya.webgl.utils.Buffer extends laya.resource.Resource
@@ -40080,6 +40171,41 @@ var View=(function(_super){
 	}
 
 	return View;
+})(Scene)
+
+
+//class ui.order.OrderItemUI extends laya.display.Scene
+var OrderItemUI=(function(_super){
+	function OrderItemUI(){
+		this.numindex=null;
+		this.fileimg=null;
+		this.filename=null;
+		this.mattxt=null;
+		this.changemat=null;
+		this.architype=null;
+		this.changearchitxt=null;
+		this.viprice=null;
+		this.price=null;
+		this.inputnum=null;
+		this.total=null;
+		this.operatebox=null;
+		this.addmsg=null;
+		this.deleteorder=null;
+		this.editbox=null;
+		this.editwidth=null;
+		this.editheight=null;
+		OrderItemUI.__super.call(this);
+	}
+
+	__class(OrderItemUI,'ui.order.OrderItemUI',_super);
+	var __proto=OrderItemUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.createView(OrderItemUI.uiView);
+	}
+
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":2,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":22,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":21,"x":360,"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":46,"x":420,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":7},{"type":"Label","props":{"x":726,"width":176,"var":"architype","valign":"middle","top":1,"text":"户外材料--白胶车贴","height":40,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":45,"x":778,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":13},{"type":"Label","props":{"y":30,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":30,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":30,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":30,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":20,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":20,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]}],"loadList":["comp/image.png","comp/textinput.png"],"loadList3D":[]};
+	return OrderItemUI;
 })(Scene)
 
 
@@ -45837,6 +45963,31 @@ var CityAreaItemUI=(function(_super){
 })(View)
 
 
+//class ui.PaintOrderPanelUI extends laya.ui.View
+var PaintOrderPanelUI=(function(_super){
+	function PaintOrderPanelUI(){
+		this.firstpage=null;
+		this.panel_main=null;
+		this.btnaddpic=null;
+		this.mainvbox=null;
+		this.ordervbox=null;
+		this.btn_addattach=null;
+		this.partvbox=null;
+		PaintOrderPanelUI.__super.call(this);
+	}
+
+	__class(PaintOrderPanelUI,'ui.PaintOrderPanelUI',_super);
+	var __proto=PaintOrderPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(PaintOrderPanelUI.uiView);
+	}
+
+	PaintOrderPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080,"fontSize":24},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Sprite","props":{"y":65,"x":320},"compId":20,"child":[{"type":"Image","props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},"compId":11},{"type":"Label","props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":12},{"type":"Label","props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":13},{"type":"Label","props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":14},{"type":"Label","props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":15},{"type":"Label","props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":16},{"type":"Label","props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":17},{"type":"Label","props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":18},{"type":"Label","props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":19}]},{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":10}]},{"type":"Panel","props":{"var":"panel_main","top":160,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Box","props":{"y":0,"x":320},"compId":24,"child":[{"type":"Label","props":{"text":"收货信息","fontSize":30},"compId":21},{"type":"Text","props":{"y":5,"x":132,"text":"更改收货信息","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":22},{"type":"Label","props":{"y":42,"width":1046,"text":"收货信息","height":30,"fontSize":24},"compId":23}]},{"type":"Box","props":{"y":80,"x":320},"compId":26,"child":[{"type":"Label","props":{"text":"输出中心","fontSize":30},"compId":27},{"type":"Text","props":{"y":5,"x":132,"text":"更改输出中心","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":28},{"type":"Label","props":{"y":42,"x":0,"width":425,"text":"收货信息","height":30,"fontSize":24},"compId":29},{"type":"Button","props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},"compId":30}]},{"type":"Box","props":{"y":160,"x":320,"width":1280,"height":112},"compId":31,"child":[{"type":"Label","props":{"text":"批量修改","fontSize":30},"compId":32},{"type":"Image","props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},"compId":36},{"type":"Label","props":{"y":44,"x":162,"text":"商品名称","fontSize":24},"compId":37},{"type":"Label","props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},"compId":38},{"type":"Label","props":{"y":44,"x":1180,"text":"数量","fontSize":24},"compId":39},{"type":"Label","props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},"compId":40},{"type":"Text","props":{"y":83,"x":456,"text":"更好材料","fontSize":20,"color":"#3028ea","runtime":"laya.display.Text"},"compId":41},{"type":"Label","props":{"y":74,"x":540,"text":"|","fontSize":30},"compId":42},{"type":"Label","props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},"compId":43},{"type":"Text","props":{"y":83,"x":1006,"text":"更换工艺","fontSize":20,"color":"#3028ea","runtime":"laya.display.Text"},"compId":44},{"type":"TextInput","props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":45}]},{"type":"Label","props":{"y":282,"x":320,"text":"产品清单","fontSize":30},"compId":46},{"type":"Button","props":{"y":280,"x":462,"width":100,"var":"btnaddpic","skin":"comp/button.png","labelSize":20,"label":"添加产品","height":30},"compId":47},{"type":"Label","props":{"y":286,"x":582,"width":714,"text":"绿色字体为自动识别选择，请仔细核对。注：文件名的信息越详细，识别越精准。","height":30,"fontSize":20,"color":"#325a2d"},"compId":48},{"type":"Box","props":{"y":334,"x":320},"compId":62,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":49},{"type":"Label","props":{"y":10,"text":"序号","fontSize":24},"compId":50},{"type":"Label","props":{"y":10,"x":74,"text":"稿件","fontSize":24},"compId":51},{"type":"Label","props":{"y":10,"x":209,"text":"稿件名","fontSize":24},"compId":52},{"type":"Label","props":{"y":10,"x":436,"text":"材料","fontSize":24},"compId":53},{"type":"Label","props":{"y":10,"x":595,"text":"图片编辑","fontSize":24},"compId":54},{"type":"Label","props":{"y":10,"x":783,"text":"工艺","fontSize":24},"compId":55},{"type":"Label","props":{"y":10,"x":897,"text":"会员价","fontSize":24},"compId":56},{"type":"Label","props":{"y":10,"x":986,"text":"数量","fontSize":24},"compId":57},{"type":"Label","props":{"y":10,"x":1051,"text":"单价","fontSize":24},"compId":58},{"type":"Label","props":{"y":10,"x":1119,"text":"总价","fontSize":24},"compId":59},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":60}]},{"type":"VBox","props":{"y":383,"x":320,"width":1280,"var":"mainvbox","space":10},"compId":63,"child":[{"type":"VBox","props":{"var":"ordervbox","space":20,"right":0,"left":0},"compId":64},{"type":"VBox","props":{"y":100,"x":0,"space":10,"right":0,"left":0},"compId":65,"child":[{"type":"Box","props":{"y":50,"x":0},"compId":68,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":69},{"type":"Label","props":{"y":10,"x":89,"text":"商品名称","fontSize":24},"compId":70},{"type":"Label","props":{"y":10,"x":344,"text":"物料规格","fontSize":24},"compId":72},{"type":"Label","props":{"y":10,"x":578,"text":"数量","fontSize":24},"compId":77},{"type":"Label","props":{"y":10,"x":773,"text":"单价","fontSize":24},"compId":78},{"type":"Label","props":{"y":10,"x":1017,"text":"总价","fontSize":24},"compId":79},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":80}]},{"type":"Box","props":{"y":0,"x":0},"compId":83,"child":[{"type":"Label","props":{"y":0,"x":0,"text":"配件清单","fontSize":30},"compId":66},{"type":"Button","props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},"compId":67}]}]},{"type":"VBox","props":{"y":200,"x":0,"var":"partvbox","right":0,"left":0},"compId":82},{"type":"Box","props":{"y":319,"x":0},"compId":84,"child":[{"type":"Label","props":{"text":"配送方式","fontSize":30},"compId":85},{"type":"Text","props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":86},{"type":"Label","props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},"compId":87}]},{"type":"Box","props":{"y":400,"x":0},"compId":91,"child":[{"type":"Label","props":{"text":"添加批量备注","fontSize":30},"compId":89},{"type":"Label","props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},"compId":90}]},{"type":"TextInput","props":{"y":441,"x":0,"width":1280,"valign":"top","text":"请添加备注","skin":"comp/textinput.png","height":93,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":92},{"type":"Label","props":{"y":543,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},"compId":93},{"type":"Box","props":{"y":591,"x":959},"compId":96,"child":[{"type":"Button","props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},"compId":94},{"type":"Button","props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},"compId":95}]}]}]},{"type":"Script","props":{"runtime":"script.order.PaintOrderControl"},"compId":97}],"loadList":["commers/whitebg.png","commers/blackbg.png","comp/label.png","comp/button.png","comp/textinput.png"],"loadList3D":[]};
+	return PaintOrderPanelUI;
+})(View)
+
+
 //class ui.login.LogPanelUI extends laya.ui.View
 var LogPanelUI=(function(_super){
 	function LogPanelUI(){
@@ -45936,6 +46087,7 @@ var PicShortItemUI=(function(_super){
 		this.btndelete=null;
 		this.fileinfo=null;
 		this.picClassTxt=null;
+		this.colorspacetxt=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -45946,7 +46098,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"colorspacetxt","valign":"middle","text":"jpeg","right":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"right"},"compId":11}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -45967,6 +46119,37 @@ var UserMainPanelUI=(function(_super){
 	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"lineColor":"#252323","height":666,"fillColor":"#f8f3f3"},"compId":12},{"type":"Label","props":{"y":113,"x":389,"text":"用户中心","fontSize":24,"color":"#f8f0ef"},"compId":14},{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"height":48,"fillColor":"#c50505"},"compId":13},{"type":"VBox","props":{"y":148,"x":321,"space":2},"compId":5,"child":[{"type":"Box","props":{"y":50,"x":2,"width":232,"height":127},"compId":20,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},"compId":17,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":16}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":26,"child":[{"type":"Label","props":{"text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":43,"text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":19}]}]},{"type":"Box","props":{"y":182,"x":2,"width":232,"height":171},"compId":21,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},"compId":22,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":23}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":27,"child":[{"type":"Label","props":{"y":0,"text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":24},{"type":"Label","props":{"y":44,"text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":25},{"type":"Label","props":{"y":88,"text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":28}]}]},{"type":"Box","props":{"y":353,"x":2,"width":232,"height":127},"compId":29,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},"compId":30,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":31}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":32,"child":[{"type":"Label","props":{"y":0,"text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":33},{"type":"Label","props":{"y":44,"text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":34}]}]},{"type":"Box","props":{"y":508,"x":2,"width":232,"height":117},"compId":36,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},"compId":37,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":38}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":39,"child":[{"type":"Label","props":{"y":0,"text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":40},{"type":"Label","props":{"y":33,"text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":41}]}]}]},{"type":"Image","props":{"y":1,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":6,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":7},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":10},{"type":"Text","props":{"y":19,"x":210,"text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":11}]},{"type":"Rect","props":{"y":140,"x":600,"width":800,"lineWidth":1,"lineColor":"#322f2f","height":1,"fillColor":"#453a3a"},"compId":48},{"type":"Label","props":{"y":108,"x":603,"text":"企业资料","fontSize":24,"color":"#c3221f"},"compId":49}]}],"loadList":["commers/whitebg.png","comp/label.png"],"loadList3D":[]};
 	return UserMainPanelUI;
 })(View)
+
+
+//class script.order.PicOrderItem extends ui.order.OrderItemUI
+var PicOrderItem=(function(_super){
+	function PicOrderItem(vo){
+		this.ordervo=null;
+		PicOrderItem.__super.call(this);
+		this.ordervo=vo;
+		this.initItem();
+	}
+
+	__class(PicOrderItem,'script.order.PicOrderItem',_super);
+	var __proto=PicOrderItem.prototype;
+	__proto.initItem=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		this.filename.text=this.ordervo.picinfo.directName;
+		this.architype.text=this.ordervo.techStr;
+		if(this.architype.textField.textHeight > 40)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=40;
+		this.changearchitxt.y=this.architype.y+this.architype.height-15;
+		if(this.architype.height > 60)
+			this.height=this.architype.height+20;
+		else
+		this.height=60;
+	}
+
+	return PicOrderItem;
+})(OrderItemUI)
 
 
 //class ui.PicManagePanelUI extends laya.ui.View
@@ -48510,327 +48693,6 @@ var FontClip=(function(_super){
 
 
 /**
-*<code>Panel</code> 是一个面板容器类。
-*/
-//class laya.ui.Panel extends laya.ui.Box
-var Panel=(function(_super){
-	function Panel(){
-		/**@private */
-		this._content=null;
-		/**@private */
-		this._vScrollBar=null;
-		/**@private */
-		this._hScrollBar=null;
-		/**@private */
-		this._scrollChanged=false;
-		/**@private */
-		this._usedCache=null;
-		Panel.__super.call(this);
-		this.width=this.height=100;
-	}
-
-	__class(Panel,'laya.ui.Panel',_super);
-	var __proto=Panel.prototype;
-	/**@inheritDoc */
-	__proto.destroy=function(destroyChild){
-		(destroyChild===void 0)&& (destroyChild=true);
-		laya.ui.UIComponent.prototype.destroy.call(this,destroyChild);
-		this._content && this._content.destroy(destroyChild);
-		this._vScrollBar && this._vScrollBar.destroy(destroyChild);
-		this._hScrollBar && this._hScrollBar.destroy(destroyChild);
-		this._vScrollBar=null;
-		this._hScrollBar=null;
-		this._content=null;
-	}
-
-	/**@inheritDoc */
-	__proto.destroyChildren=function(){
-		this._content.destroyChildren();
-	}
-
-	/**@inheritDoc */
-	__proto.createChildren=function(){
-		laya.display.Node.prototype.addChild.call(this,this._content=new Box());
-	}
-
-	/**@inheritDoc */
-	__proto.addChild=function(child){
-		child.on("resize",this,this.onResize);
-		this._setScrollChanged();
-		return this._content.addChild(child);
-	}
-
-	/**
-	*@private
-	*子对象的 <code>Event.RESIZE</code> 事件侦听处理函数。
-	*/
-	__proto.onResize=function(){
-		this._setScrollChanged();
-	}
-
-	/**@inheritDoc */
-	__proto.addChildAt=function(child,index){
-		child.on("resize",this,this.onResize);
-		this._setScrollChanged();
-		return this._content.addChildAt(child,index);
-	}
-
-	/**@inheritDoc */
-	__proto.removeChild=function(child){
-		child.off("resize",this,this.onResize);
-		this._setScrollChanged();
-		return this._content.removeChild(child);
-	}
-
-	/**@inheritDoc */
-	__proto.removeChildAt=function(index){
-		this.getChildAt(index).off("resize",this,this.onResize);
-		this._setScrollChanged();
-		return this._content.removeChildAt(index);
-	}
-
-	/**@inheritDoc */
-	__proto.removeChildren=function(beginIndex,endIndex){
-		(beginIndex===void 0)&& (beginIndex=0);
-		(endIndex===void 0)&& (endIndex=0x7fffffff);
-		this._content.removeChildren(beginIndex,endIndex);
-		this._setScrollChanged();
-		return this;
-	}
-
-	/**@inheritDoc */
-	__proto.getChildAt=function(index){
-		return this._content.getChildAt(index);
-	}
-
-	/**@inheritDoc */
-	__proto.getChildByName=function(name){
-		return this._content.getChildByName(name);
-	}
-
-	/**@inheritDoc */
-	__proto.getChildIndex=function(child){
-		return this._content.getChildIndex(child);
-	}
-
-	/**@private */
-	__proto.changeScroll=function(){
-		this._scrollChanged=false;
-		var contentW=this.contentWidth || 1;
-		var contentH=this.contentHeight || 1;
-		var vscroll=this._vScrollBar;
-		var hscroll=this._hScrollBar;
-		var vShow=vscroll && contentH > this._height;
-		var hShow=hscroll && contentW > this._width;
-		var showWidth=vShow ? this._width-vscroll.width :this._width;
-		var showHeight=hShow ? this._height-hscroll.height :this._height;
-		if (vscroll){
-			vscroll.x=this._width-vscroll.width;
-			vscroll.y=0;
-			vscroll.height=this._height-(hShow ? hscroll.height :0);
-			vscroll.scrollSize=Math.max(this._height *0.033,1);
-			vscroll.thumbPercent=showHeight / contentH;
-			vscroll.setScroll(0,contentH-showHeight,vscroll.value);
-		}
-		if (hscroll){
-			hscroll.x=0;
-			hscroll.y=this._height-hscroll.height;
-			hscroll.width=this._width-(vShow ? vscroll.width :0);
-			hscroll.scrollSize=Math.max(this._width *0.033,1);
-			hscroll.thumbPercent=showWidth / contentW;
-			hscroll.setScroll(0,contentW-showWidth,hscroll.value);
-		}
-	}
-
-	/**@inheritDoc */
-	__proto._sizeChanged=function(){
-		laya.ui.UIComponent.prototype._sizeChanged.call(this);
-		this.setContentSize(this._width,this._height);
-	}
-
-	/**
-	*@private
-	*设置内容的宽度、高度（以像素为单位）。
-	*@param width 宽度。
-	*@param height 高度。
-	*/
-	__proto.setContentSize=function(width,height){
-		var content=this._content;
-		content.width=width;
-		content.height=height;
-		content._style.scrollRect || (content.scrollRect=Rectangle.create());
-		content._style.scrollRect.setTo(0,0,width,height);
-		content.scrollRect=content.scrollRect;
-	}
-
-	/**
-	*@private
-	*滚动条的<code><code>Event.MOUSE_DOWN</code>事件侦听处理函数。</code>事件侦听处理函数。
-	*@param scrollBar 滚动条对象。
-	*@param e Event 对象。
-	*/
-	__proto.onScrollBarChange=function(scrollBar){
-		var rect=this._content._style.scrollRect;
-		if (rect){
-			var start=Math.round(scrollBar.value);
-			scrollBar.isVertical ? rect.y=start :rect.x=start;
-			this._content.scrollRect=rect;
-		}
-	}
-
-	/**
-	*<p>滚动内容容器至设定的垂直、水平方向滚动条位置。</p>
-	*@param x 水平方向滚动条属性value值。滚动条位置数字。
-	*@param y 垂直方向滚动条属性value值。滚动条位置数字。
-	*/
-	__proto.scrollTo=function(x,y){
-		(x===void 0)&& (x=0);
-		(y===void 0)&& (y=0);
-		if (this.vScrollBar)this.vScrollBar.value=y;
-		if (this.hScrollBar)this.hScrollBar.value=x;
-	}
-
-	/**
-	*刷新滚动内容。
-	*/
-	__proto.refresh=function(){
-		this.changeScroll();
-	}
-
-	__proto.onScrollStart=function(){
-		this._usedCache || (this._usedCache=Laya.superGet(Box,this,'cacheAs'));
-		Laya.superSet(Box,this,'cacheAs',"none");
-		this._hScrollBar && this._hScrollBar.once("end",this,this.onScrollEnd);
-		this._vScrollBar && this._vScrollBar.once("end",this,this.onScrollEnd);
-	}
-
-	__proto.onScrollEnd=function(){
-		Laya.superSet(Box,this,'cacheAs',this._usedCache);
-	}
-
-	/**@private */
-	__proto._setScrollChanged=function(){
-		if (!this._scrollChanged){
-			this._scrollChanged=true;
-			this.callLater(this.changeScroll);
-		}
-	}
-
-	/**@inheritDoc */
-	__getset(0,__proto,'numChildren',function(){
-		return this._content.numChildren;
-	});
-
-	/**
-	*水平方向滚动条皮肤。
-	*/
-	__getset(0,__proto,'hScrollBarSkin',function(){
-		return this._hScrollBar ? this._hScrollBar.skin :null;
-		},function(value){
-		if (this._hScrollBar==null){
-			laya.display.Node.prototype.addChild.call(this,this._hScrollBar=new HScrollBar());
-			this._hScrollBar.on("change",this,this.onScrollBarChange,[this._hScrollBar]);
-			this._hScrollBar.target=this._content;
-			this._setScrollChanged();
-		}
-		this._hScrollBar.skin=value;
-	});
-
-	/**
-	*@private
-	*获取内容宽度（以像素为单位）。
-	*/
-	__getset(0,__proto,'contentWidth',function(){
-		var max=0;
-		for (var i=this._content.numChildren-1;i >-1;i--){
-			var comp=this._content.getChildAt(i);
-			max=Math.max(comp._x+comp.width *comp.scaleX,max);
-		}
-		return max;
-	});
-
-	/**
-	*@private
-	*获取内容高度（以像素为单位）。
-	*/
-	__getset(0,__proto,'contentHeight',function(){
-		var max=0;
-		for (var i=this._content.numChildren-1;i >-1;i--){
-			var comp=this._content.getChildAt(i);
-			max=Math.max(comp._y+comp.height *comp.scaleY,max);
-		}
-		return max;
-	});
-
-	/**
-	*@inheritDoc
-	*/
-	__getset(0,__proto,'width',_super.prototype._$get_width,function(value){
-		Laya.superSet(Box,this,'width',value);
-		this._setScrollChanged();
-	});
-
-	/**
-	*水平方向滚动条对象。
-	*/
-	__getset(0,__proto,'hScrollBar',function(){
-		return this._hScrollBar;
-	});
-
-	/**
-	*获取内容容器对象。
-	*/
-	__getset(0,__proto,'content',function(){
-		return this._content;
-	});
-
-	/**@inheritDoc */
-	__getset(0,__proto,'height',_super.prototype._$get_height,function(value){
-		Laya.superSet(Box,this,'height',value);
-		this._setScrollChanged();
-	});
-
-	/**
-	*垂直方向滚动条皮肤。
-	*/
-	__getset(0,__proto,'vScrollBarSkin',function(){
-		return this._vScrollBar ? this._vScrollBar.skin :null;
-		},function(value){
-		if (this._vScrollBar==null){
-			laya.display.Node.prototype.addChild.call(this,this._vScrollBar=new VScrollBar());
-			this._vScrollBar.on("change",this,this.onScrollBarChange,[this._vScrollBar]);
-			this._vScrollBar.target=this._content;
-			this._setScrollChanged();
-		}
-		if (value && value !=" ")
-			this._vScrollBar.skin=value;
-	});
-
-	/**
-	*垂直方向滚动条对象。
-	*/
-	__getset(0,__proto,'vScrollBar',function(){
-		return this._vScrollBar;
-	});
-
-	/**@inheritDoc */
-	__getset(0,__proto,'cacheAs',_super.prototype._$get_cacheAs,function(value){
-		Laya.superSet(Box,this,'cacheAs',value);
-		this._usedCache=null;
-		if (value!=="none"){
-			this._hScrollBar && this._hScrollBar.on("start",this,this.onScrollStart);
-			this._vScrollBar && this._vScrollBar.on("start",this,this.onScrollStart);
-			}else {
-			this._hScrollBar && this._hScrollBar.off("start",this,this.onScrollStart);
-			this._vScrollBar && this._vScrollBar.off("start",this,this.onScrollStart);
-		}
-	});
-
-	return Panel;
-})(Box)
-
-
-/**
 *<code>Dialog</code> 组件是一个弹出对话框，实现对话框弹出，拖动，模式窗口功能。
 *可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭等
 *通过设置zOrder属性，可以更改弹出的层次
@@ -49162,6 +49024,327 @@ var Dialog=(function(_super){
 	Dialog._manager=null;
 	return Dialog;
 })(View)
+
+
+/**
+*<code>Panel</code> 是一个面板容器类。
+*/
+//class laya.ui.Panel extends laya.ui.Box
+var Panel=(function(_super){
+	function Panel(){
+		/**@private */
+		this._content=null;
+		/**@private */
+		this._vScrollBar=null;
+		/**@private */
+		this._hScrollBar=null;
+		/**@private */
+		this._scrollChanged=false;
+		/**@private */
+		this._usedCache=null;
+		Panel.__super.call(this);
+		this.width=this.height=100;
+	}
+
+	__class(Panel,'laya.ui.Panel',_super);
+	var __proto=Panel.prototype;
+	/**@inheritDoc */
+	__proto.destroy=function(destroyChild){
+		(destroyChild===void 0)&& (destroyChild=true);
+		laya.ui.UIComponent.prototype.destroy.call(this,destroyChild);
+		this._content && this._content.destroy(destroyChild);
+		this._vScrollBar && this._vScrollBar.destroy(destroyChild);
+		this._hScrollBar && this._hScrollBar.destroy(destroyChild);
+		this._vScrollBar=null;
+		this._hScrollBar=null;
+		this._content=null;
+	}
+
+	/**@inheritDoc */
+	__proto.destroyChildren=function(){
+		this._content.destroyChildren();
+	}
+
+	/**@inheritDoc */
+	__proto.createChildren=function(){
+		laya.display.Node.prototype.addChild.call(this,this._content=new Box());
+	}
+
+	/**@inheritDoc */
+	__proto.addChild=function(child){
+		child.on("resize",this,this.onResize);
+		this._setScrollChanged();
+		return this._content.addChild(child);
+	}
+
+	/**
+	*@private
+	*子对象的 <code>Event.RESIZE</code> 事件侦听处理函数。
+	*/
+	__proto.onResize=function(){
+		this._setScrollChanged();
+	}
+
+	/**@inheritDoc */
+	__proto.addChildAt=function(child,index){
+		child.on("resize",this,this.onResize);
+		this._setScrollChanged();
+		return this._content.addChildAt(child,index);
+	}
+
+	/**@inheritDoc */
+	__proto.removeChild=function(child){
+		child.off("resize",this,this.onResize);
+		this._setScrollChanged();
+		return this._content.removeChild(child);
+	}
+
+	/**@inheritDoc */
+	__proto.removeChildAt=function(index){
+		this.getChildAt(index).off("resize",this,this.onResize);
+		this._setScrollChanged();
+		return this._content.removeChildAt(index);
+	}
+
+	/**@inheritDoc */
+	__proto.removeChildren=function(beginIndex,endIndex){
+		(beginIndex===void 0)&& (beginIndex=0);
+		(endIndex===void 0)&& (endIndex=0x7fffffff);
+		this._content.removeChildren(beginIndex,endIndex);
+		this._setScrollChanged();
+		return this;
+	}
+
+	/**@inheritDoc */
+	__proto.getChildAt=function(index){
+		return this._content.getChildAt(index);
+	}
+
+	/**@inheritDoc */
+	__proto.getChildByName=function(name){
+		return this._content.getChildByName(name);
+	}
+
+	/**@inheritDoc */
+	__proto.getChildIndex=function(child){
+		return this._content.getChildIndex(child);
+	}
+
+	/**@private */
+	__proto.changeScroll=function(){
+		this._scrollChanged=false;
+		var contentW=this.contentWidth || 1;
+		var contentH=this.contentHeight || 1;
+		var vscroll=this._vScrollBar;
+		var hscroll=this._hScrollBar;
+		var vShow=vscroll && contentH > this._height;
+		var hShow=hscroll && contentW > this._width;
+		var showWidth=vShow ? this._width-vscroll.width :this._width;
+		var showHeight=hShow ? this._height-hscroll.height :this._height;
+		if (vscroll){
+			vscroll.x=this._width-vscroll.width;
+			vscroll.y=0;
+			vscroll.height=this._height-(hShow ? hscroll.height :0);
+			vscroll.scrollSize=Math.max(this._height *0.033,1);
+			vscroll.thumbPercent=showHeight / contentH;
+			vscroll.setScroll(0,contentH-showHeight,vscroll.value);
+		}
+		if (hscroll){
+			hscroll.x=0;
+			hscroll.y=this._height-hscroll.height;
+			hscroll.width=this._width-(vShow ? vscroll.width :0);
+			hscroll.scrollSize=Math.max(this._width *0.033,1);
+			hscroll.thumbPercent=showWidth / contentW;
+			hscroll.setScroll(0,contentW-showWidth,hscroll.value);
+		}
+	}
+
+	/**@inheritDoc */
+	__proto._sizeChanged=function(){
+		laya.ui.UIComponent.prototype._sizeChanged.call(this);
+		this.setContentSize(this._width,this._height);
+	}
+
+	/**
+	*@private
+	*设置内容的宽度、高度（以像素为单位）。
+	*@param width 宽度。
+	*@param height 高度。
+	*/
+	__proto.setContentSize=function(width,height){
+		var content=this._content;
+		content.width=width;
+		content.height=height;
+		content._style.scrollRect || (content.scrollRect=Rectangle.create());
+		content._style.scrollRect.setTo(0,0,width,height);
+		content.scrollRect=content.scrollRect;
+	}
+
+	/**
+	*@private
+	*滚动条的<code><code>Event.MOUSE_DOWN</code>事件侦听处理函数。</code>事件侦听处理函数。
+	*@param scrollBar 滚动条对象。
+	*@param e Event 对象。
+	*/
+	__proto.onScrollBarChange=function(scrollBar){
+		var rect=this._content._style.scrollRect;
+		if (rect){
+			var start=Math.round(scrollBar.value);
+			scrollBar.isVertical ? rect.y=start :rect.x=start;
+			this._content.scrollRect=rect;
+		}
+	}
+
+	/**
+	*<p>滚动内容容器至设定的垂直、水平方向滚动条位置。</p>
+	*@param x 水平方向滚动条属性value值。滚动条位置数字。
+	*@param y 垂直方向滚动条属性value值。滚动条位置数字。
+	*/
+	__proto.scrollTo=function(x,y){
+		(x===void 0)&& (x=0);
+		(y===void 0)&& (y=0);
+		if (this.vScrollBar)this.vScrollBar.value=y;
+		if (this.hScrollBar)this.hScrollBar.value=x;
+	}
+
+	/**
+	*刷新滚动内容。
+	*/
+	__proto.refresh=function(){
+		this.changeScroll();
+	}
+
+	__proto.onScrollStart=function(){
+		this._usedCache || (this._usedCache=Laya.superGet(Box,this,'cacheAs'));
+		Laya.superSet(Box,this,'cacheAs',"none");
+		this._hScrollBar && this._hScrollBar.once("end",this,this.onScrollEnd);
+		this._vScrollBar && this._vScrollBar.once("end",this,this.onScrollEnd);
+	}
+
+	__proto.onScrollEnd=function(){
+		Laya.superSet(Box,this,'cacheAs',this._usedCache);
+	}
+
+	/**@private */
+	__proto._setScrollChanged=function(){
+		if (!this._scrollChanged){
+			this._scrollChanged=true;
+			this.callLater(this.changeScroll);
+		}
+	}
+
+	/**@inheritDoc */
+	__getset(0,__proto,'numChildren',function(){
+		return this._content.numChildren;
+	});
+
+	/**
+	*水平方向滚动条皮肤。
+	*/
+	__getset(0,__proto,'hScrollBarSkin',function(){
+		return this._hScrollBar ? this._hScrollBar.skin :null;
+		},function(value){
+		if (this._hScrollBar==null){
+			laya.display.Node.prototype.addChild.call(this,this._hScrollBar=new HScrollBar());
+			this._hScrollBar.on("change",this,this.onScrollBarChange,[this._hScrollBar]);
+			this._hScrollBar.target=this._content;
+			this._setScrollChanged();
+		}
+		this._hScrollBar.skin=value;
+	});
+
+	/**
+	*@private
+	*获取内容宽度（以像素为单位）。
+	*/
+	__getset(0,__proto,'contentWidth',function(){
+		var max=0;
+		for (var i=this._content.numChildren-1;i >-1;i--){
+			var comp=this._content.getChildAt(i);
+			max=Math.max(comp._x+comp.width *comp.scaleX,max);
+		}
+		return max;
+	});
+
+	/**
+	*@private
+	*获取内容高度（以像素为单位）。
+	*/
+	__getset(0,__proto,'contentHeight',function(){
+		var max=0;
+		for (var i=this._content.numChildren-1;i >-1;i--){
+			var comp=this._content.getChildAt(i);
+			max=Math.max(comp._y+comp.height *comp.scaleY,max);
+		}
+		return max;
+	});
+
+	/**
+	*@inheritDoc
+	*/
+	__getset(0,__proto,'width',_super.prototype._$get_width,function(value){
+		Laya.superSet(Box,this,'width',value);
+		this._setScrollChanged();
+	});
+
+	/**
+	*水平方向滚动条对象。
+	*/
+	__getset(0,__proto,'hScrollBar',function(){
+		return this._hScrollBar;
+	});
+
+	/**
+	*获取内容容器对象。
+	*/
+	__getset(0,__proto,'content',function(){
+		return this._content;
+	});
+
+	/**@inheritDoc */
+	__getset(0,__proto,'height',_super.prototype._$get_height,function(value){
+		Laya.superSet(Box,this,'height',value);
+		this._setScrollChanged();
+	});
+
+	/**
+	*垂直方向滚动条皮肤。
+	*/
+	__getset(0,__proto,'vScrollBarSkin',function(){
+		return this._vScrollBar ? this._vScrollBar.skin :null;
+		},function(value){
+		if (this._vScrollBar==null){
+			laya.display.Node.prototype.addChild.call(this,this._vScrollBar=new VScrollBar());
+			this._vScrollBar.on("change",this,this.onScrollBarChange,[this._vScrollBar]);
+			this._vScrollBar.target=this._content;
+			this._setScrollChanged();
+		}
+		if (value && value !=" ")
+			this._vScrollBar.skin=value;
+	});
+
+	/**
+	*垂直方向滚动条对象。
+	*/
+	__getset(0,__proto,'vScrollBar',function(){
+		return this._vScrollBar;
+	});
+
+	/**@inheritDoc */
+	__getset(0,__proto,'cacheAs',_super.prototype._$get_cacheAs,function(value){
+		Laya.superSet(Box,this,'cacheAs',value);
+		this._usedCache=null;
+		if (value!=="none"){
+			this._hScrollBar && this._hScrollBar.on("start",this,this.onScrollStart);
+			this._vScrollBar && this._vScrollBar.on("start",this,this.onScrollStart);
+			}else {
+			this._hScrollBar && this._hScrollBar.off("start",this,this.onScrollStart);
+			this._vScrollBar && this._vScrollBar.off("start",this,this.onScrollStart);
+		}
+	});
+
+	return Panel;
+})(Box)
 
 
 /**
@@ -50584,12 +50767,13 @@ var PicInfoItem=(function(_super){
 		this.on("mouseover",this,this.onMouseOverHandler);
 		this.btndelete.visible=true;
 		this.btndelete.on("click",this,this.onDeleteHandler);
-		this.sel.visible=DirectoryFileModel.instance.haselectPic.indexOf(this.picInfo.fid)>=0;
+		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid);
 		if(this.picInfo.picType==0){
 			this.img.skin="commers/fold.png";
 			this.fileinfo.text=this.picInfo.directName;
 			this.filename.visible=false;
 			this.picClassTxt.visible=false;
+			this.colorspacetxt.visible=false;
 			this.img.width=150;
 			this.img.height=150;
 		}
@@ -50610,6 +50794,8 @@ var PicInfoItem=(function(_super){
 			this.fileinfo.text=str;
 			this.picClassTxt.text=this.picInfo.picClass;
 			this.picClassTxt.visible=true;
+			this.colorspacetxt.text=this.picInfo.colorspace;
+			this.colorspacetxt.visible=true;
 		}
 	}
 
@@ -50625,7 +50811,7 @@ var PicInfoItem=(function(_super){
 	__proto.confirmDelete=function(result){
 		if(result){
 			if(this.sel.visible){
-				EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
+				EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo);
 			}
 			if(this.picInfo.picType==1)
 				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
@@ -50652,7 +50838,7 @@ var PicInfoItem=(function(_super){
 	__proto.onClickHandler=function(){
 		if(this.picInfo.picType==1){
 			this.sel.visible=!this.sel.visible;
-			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo.fid);
+			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo);
 		}
 	}
 

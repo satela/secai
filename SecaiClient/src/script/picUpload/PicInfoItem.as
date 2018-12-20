@@ -36,13 +36,15 @@ package script.picUpload
 			
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 
-			this.sel.visible = DirectoryFileModel.instance.haselectPic.indexOf(picInfo.fid) >= 0;
+			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
 			if(picInfo.picType == 0)
 			{
 				this.img.skin = "commers/fold.png";
 				this.fileinfo.text = picInfo.directName;
 				this.filename.visible = false;
 				this.picClassTxt.visible = false;
+				this.colorspacetxt.visible = false;
+
 				this.img.width = 150;
 				this.img.height = 150;
 			}
@@ -53,19 +55,14 @@ package script.picUpload
 				
 				if(picInfo.picWidth > picInfo.picHeight)
 				{
-					this.img.width = 150;
-					//this.img.x = 0;
-					
+					this.img.width = 150;					
 					this.img.height = 150/picInfo.picWidth * picInfo.picHeight;
-					//this.img.y = (150 - this.img.height)/2;
 					
 				}
 				else
 				{
 					this.img.height = 150;
-					//this.img.y = 0;
 					this.img.width = 150/picInfo.picHeight * picInfo.picWidth;
-					//this.img.x = 
 
 				}
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
@@ -77,6 +74,10 @@ package script.picUpload
 				
 				this.picClassTxt.text = picInfo.picClass;
 				this.picClassTxt.visible = true;
+				
+				this.colorspacetxt.text = picInfo.colorspace;
+				this.colorspacetxt.visible = true;
+				
 				//this.fileinfo.text = picInfo.directName;
 
 			}
@@ -100,7 +101,7 @@ package script.picUpload
 			{
 				if(this.sel.visible)
 				{
-					EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo.fid);
+					EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo);
 				}
 				if(picInfo.picType == 1)
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deletePic,this,onDeleteFileBack,"fid=" + picInfo.fid,"post");
@@ -138,7 +139,7 @@ package script.picUpload
 			if(this.picInfo.picType == 1)
 			{
 				this.sel.visible = !this.sel.visible;
-				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo.fid);
+				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo);
 
 			}
 		}

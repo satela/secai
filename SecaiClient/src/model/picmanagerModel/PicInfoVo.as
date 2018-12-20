@@ -15,7 +15,7 @@ package model.picmanagerModel
 		public var picWidth:int;
 		public var picHeight:int;
 		
-		public var colorType:String = "";
+		public var colorspace:String = "";
 		
 		public var picClass:String = "";
 		public var dpi:Number;
@@ -36,6 +36,7 @@ package model.picmanagerModel
 				var fattr:Object = JSON.parse(fileinfo.fattr);
 				picWidth = fattr.width;
 				picHeight = fattr.height;
+				colorspace = fattr.colorspace;
 				dpi = fattr.dpi;
 				picClass = fileinfo.ftype;
 				

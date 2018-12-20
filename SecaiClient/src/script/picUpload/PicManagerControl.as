@@ -42,6 +42,7 @@ package script.picUpload
 			uiSkin.btnNewDir.on(Event.CLICK,this,onCreateNewDirect);
 			
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
+			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
 
 			createbox = uiSkin.boxNewFolder;
 			createbox.visible = false;
@@ -91,20 +92,31 @@ package script.picUpload
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
-			DirectoryFileModel.instance.haselectPic = [];
+			DirectoryFileModel.instance.haselectPic = {};
+			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
 		}
 		
-		private function seletPicToOrder(fid:String):void
+		private function onshowOrder():void
 		{
-			var index:int = DirectoryFileModel.instance.haselectPic.indexOf(fid);
-			if( index < 0)
+			// TODO Auto Generated method stub
+			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+		}
+		
+		private function seletPicToOrder(fvo:PicInfoVo):void
+		{
+			var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
+			if( hasfic)
 			{
-				DirectoryFileModel.instance.haselectPic.push(fid);
+				delete DirectoryFileModel.instance.haselectPic[fvo.fid];
 			}
 			else
-				DirectoryFileModel.instance.haselectPic.splice(index,1);
-			
-			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + DirectoryFileModel.instance.haselectPic.length + "</span>" + "<span color='#222222' size='20'>张图片</span>";
+				DirectoryFileModel.instance.haselectPic[fvo.fid] = fvo;
+			var num:int = 0;
+			for each(var picvo in DirectoryFileModel.instance.haselectPic)
+			{
+				num++;
+			}
+			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
 
 		}
 		private function onGetTopDirListBack(data:Object):void
@@ -151,13 +163,21 @@ package script.picUpload
 		private function onBackToMain():void
 		{
 			// TODO Auto Generated method stub
+			ViewManager.instance.closeView(ViewManager.VIEW_PICMANAGER);
+		}
+		override public function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
+			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
+			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+		}
+		private function onRemovedFromStage():void
+		{
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
 
-			ViewManager.instance.closeView(ViewManager.VIEW_PICMANAGER);
 		}
-		
 		private function onShowUploadView():void
 		{
 			// TODO Auto Generated method stub

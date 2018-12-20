@@ -8,6 +8,7 @@ package {
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
+	import script.order.PaintOrderControl;
 	import laya.html.dom.HTMLDivElement;
 	import script.picUpload.PicManagerControl;
 	import script.picUpload.PictureCheckControl;
@@ -23,7 +24,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "PopUpDialog.scene";
+		public static var startScene:* = "PaintOrderPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -38,6 +39,7 @@ package {
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);
+			reg("script.order.PaintOrderControl",PaintOrderControl);
 			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);

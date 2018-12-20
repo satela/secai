@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":46,
+    "selectedBox":63,
+    "selecteID":64,
     "searchKey":"View",
-    "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
+    "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
-    "maxID":47,
+    "maxID":98,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -30,11 +30,222 @@
         },
         {
             "x":15,
-            "type":"Panel",
-            "searchKey":"Panel",
-            "props":{"top":0,"right":0,"left":0,"bottom":100},
+            "type":"Sprite",
+            "searchKey":"Sprite",
+            "props":{"y":65,"x":320},
             "nodeParent":2,
-            "label":"Panel",
+            "label":"Sprite",
+            "isOpen":false,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":20,
+            "child":[
+                {
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},
+                    "nodeParent":20,
+                    "label":"Image",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":11,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":12,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":13,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":14,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":15,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":16,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":17,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":18,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},
+                    "nodeParent":20,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":19,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image",
+            "props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},
+            "nodeParent":2,
+            "label":"Image",
+            "isOpen":false,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":5,
+            "child":[
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},
+                    "nodeParent":5,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":6,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},
+                    "nodeParent":5,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":7,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":17,"text":"|","right":117,"fontSize":20},
+                    "nodeParent":5,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":8,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},
+                    "nodeParent":5,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":9,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Text",
+                    "searchKey":"Text,firstpage",
+                    "props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20},
+                    "nodeParent":5,
+                    "label":"firstpage",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":10,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Panel",
+            "searchKey":"Panel,panel_main",
+            "props":{"var":"panel_main","top":160,"right":0,"left":0,"bottom":100},
+            "nodeParent":2,
+            "label":"panel_main",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
@@ -43,225 +254,9 @@
             "child":[
                 {
                     "x":30,
-                    "type":"Image",
-                    "searchKey":"Image",
-                    "props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},
-                    "nodeParent":4,
-                    "label":"Image",
-                    "isOpen":true,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":5,
-                    "child":[
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},
-                            "nodeParent":5,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":6,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},
-                            "nodeParent":5,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":7,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":17,"text":"|","right":117,"fontSize":20},
-                            "nodeParent":5,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":8,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},
-                            "nodeParent":5,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":9,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":19,"x":210,"text":"首页","mouseEnabled":true,"fontSize":20},
-                            "nodeParent":5,
-                            "label":"Text",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":10,
-                            "child":[
-                                ]
-                        }]
-                },
-                {
-                    "x":30,
-                    "type":"Sprite",
-                    "searchKey":"Sprite",
-                    "props":{"y":65,"x":320},
-                    "nodeParent":4,
-                    "label":"Sprite",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":20,
-                    "child":[
-                        {
-                            "type":"Image",
-                            "searchKey":"Image",
-                            "props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},
-                            "nodeParent":20,
-                            "label":"Image",
-                            "isOpen":true,
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":11,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":12,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":13,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":14,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":15,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":16,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":17,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":18,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#efe6e6","align":"center"},
-                            "nodeParent":20,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":19,
-                            "child":[
-                                ]
-                        }]
-                },
-                {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":178,"x":320},
+                    "props":{"y":0,"x":320},
                     "nodeParent":4,
                     "label":"Box",
                     "isOpen":null,
@@ -314,17 +309,16 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":258,"x":320},
+                    "props":{"y":80,"x":320},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":26,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"text":"输出中心","fontSize":30},
@@ -338,7 +332,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "searchKey":"Text",
                             "props":{"y":5,"x":132,"text":"更改输出中心","fontSize":24,"color":"#3028ea"},
@@ -352,7 +345,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":42,"x":0,"width":425,"text":"收货信息","height":30,"fontSize":24},
@@ -366,7 +358,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button",
                             "props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},
@@ -384,17 +375,16 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":338,"x":320,"width":1280,"height":112},
+                    "props":{"y":160,"x":320,"width":1280,"height":112},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":31,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"text":"批量修改","fontSize":30},
@@ -408,7 +398,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},
@@ -422,7 +411,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44,"x":162,"text":"商品名称","fontSize":24},
@@ -436,7 +424,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},
@@ -450,7 +437,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44,"x":1180,"text":"数量","fontSize":24},
@@ -464,10 +450,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":83,"x":0,"width":415,"text":"输出中心","height":20,"fontSize":20,"align":"center"},
+                            "props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},
                             "nodeParent":31,
                             "label":"Label",
                             "isDirectory":false,
@@ -478,10 +463,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "searchKey":"Text",
-                            "props":{"y":83,"x":416,"text":"更改输出中心","fontSize":20,"color":"#3028ea"},
+                            "props":{"y":83,"x":456,"text":"更好材料","fontSize":20,"color":"#3028ea"},
                             "nodeParent":31,
                             "label":"Text",
                             "isDirectory":false,
@@ -492,7 +476,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":74,"x":540,"text":"|","fontSize":30},
@@ -506,10 +489,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":83,"x":572,"width":424,"text":"输出中心","height":20,"fontSize":20,"align":"center"},
+                            "props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},
                             "nodeParent":31,
                             "label":"Label",
                             "isDirectory":false,
@@ -520,10 +502,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "searchKey":"Text",
-                            "props":{"y":83,"x":996,"text":"更改输出中心","fontSize":20,"color":"#3028ea"},
+                            "props":{"y":83,"x":1006,"text":"更换工艺","fontSize":20,"color":"#3028ea"},
                             "nodeParent":31,
                             "label":"Text",
                             "isDirectory":false,
@@ -534,7 +515,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput",
                             "props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20},
@@ -552,7 +532,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":460,"x":320,"text":"产品清单","fontSize":30},
+                    "props":{"y":282,"x":320,"text":"产品清单","fontSize":30},
                     "nodeParent":4,
                     "label":"Label",
                     "isDirectory":false,
@@ -561,7 +541,589 @@
                     "compId":46,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,btnaddpic",
+                    "props":{"y":280,"x":462,"width":100,"var":"btnaddpic","skin":"comp/button.png","labelSize":20,"label":"添加产品","height":30},
+                    "nodeParent":4,
+                    "label":"btnaddpic",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":47,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":286,"x":582,"width":714,"text":"绿色字体为自动识别选择，请仔细核对。注：文件名的信息越详细，识别越精准。","height":30,"fontSize":20,"color":"#325a2d"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":48,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":334,"x":320},
+                    "nodeParent":4,
+                    "label":"Box",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":62,
+                    "child":[
+                        {
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},
+                            "nodeParent":62,
+                            "label":"Image",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":49,
+                            "child":[
+                                ],
+                            "$LOCKED":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"text":"序号","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":50,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":74,"text":"稿件","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":51,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":209,"text":"稿件名","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":52,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":436,"text":"材料","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":53,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":595,"text":"图片编辑","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":54,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":783,"text":"工艺","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":55,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":897,"text":"会员价","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":56,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":986,"text":"数量","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":57,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":1051,"text":"单价","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":58,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":1119,"text":"总价","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":59,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":1207,"text":"操作","fontSize":24},
+                            "nodeParent":62,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":60,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"VBox",
+                    "searchKey":"VBox,mainvbox",
+                    "props":{"y":383,"x":320,"width":1280,"var":"mainvbox","space":10},
+                    "nodeParent":4,
+                    "label":"mainvbox",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":63,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"VBox",
+                            "searchKey":"VBox,ordervbox",
+                            "props":{"var":"ordervbox","space":20,"right":0,"left":0},
+                            "nodeParent":63,
+                            "label":"ordervbox",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":64,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "x":45,
+                            "type":"VBox",
+                            "searchKey":"VBox",
+                            "props":{"y":100,"x":0,"space":10,"right":0,"left":0},
+                            "nodeParent":63,
+                            "label":"VBox",
+                            "isOpen":false,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":65,
+                            "child":[
+                                {
+                                    "type":"Box",
+                                    "searchKey":"Box",
+                                    "props":{"y":50,"x":0},
+                                    "nodeParent":65,
+                                    "label":"Box",
+                                    "isOpen":false,
+                                    "isDirectory":true,
+                                    "isAniNode":true,
+                                    "hasChild":true,
+                                    "compId":68,
+                                    "child":[
+                                        {
+                                            "type":"Image",
+                                            "searchKey":"Image",
+                                            "props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},
+                                            "nodeParent":68,
+                                            "label":"Image",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":69,
+                                            "child":[
+                                                ],
+                                            "$LOCKED":true
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":89,"text":"商品名称","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":70,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":344,"text":"物料规格","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":72,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":578,"text":"数量","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":77,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":773,"text":"单价","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":78,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":1017,"text":"总价","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":79,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":10,"x":1207,"text":"操作","fontSize":24},
+                                            "nodeParent":68,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":80,
+                                            "child":[
+                                                ]
+                                        }]
+                                },
+                                {
+                                    "type":"Box",
+                                    "searchKey":"Box",
+                                    "props":{"y":0,"x":0},
+                                    "nodeParent":65,
+                                    "label":"Box",
+                                    "isOpen":null,
+                                    "isDirectory":true,
+                                    "isAniNode":true,
+                                    "hasChild":true,
+                                    "compId":83,
+                                    "child":[
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label",
+                                            "props":{"y":0,"x":0,"text":"配件清单","fontSize":30},
+                                            "nodeParent":83,
+                                            "label":"Label",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":66,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Button",
+                                            "searchKey":"Button,btn_addattach",
+                                            "props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},
+                                            "nodeParent":83,
+                                            "label":"btn_addattach",
+                                            "isOpen":true,
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":67,
+                                            "child":[
+                                                ]
+                                        }]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"VBox",
+                            "searchKey":"VBox,partvbox",
+                            "props":{"y":200,"x":0,"var":"partvbox","right":0,"left":0},
+                            "nodeParent":63,
+                            "label":"partvbox",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":82,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":319,"x":0},
+                            "nodeParent":63,
+                            "label":"Box",
+                            "isOpen":false,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":84,
+                            "child":[
+                                {
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"配送方式","fontSize":30},
+                                    "nodeParent":84,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":85,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"Text",
+                                    "searchKey":"Text",
+                                    "props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea"},
+                                    "nodeParent":84,
+                                    "label":"Text",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":86,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},
+                                    "nodeParent":84,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":87,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":400,"x":0},
+                            "nodeParent":63,
+                            "label":"Box",
+                            "isOpen":false,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":91,
+                            "child":[
+                                {
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"添加批量备注","fontSize":30},
+                                    "nodeParent":91,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":89,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},
+                                    "nodeParent":91,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":90,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"TextInput",
+                            "searchKey":"TextInput",
+                            "props":{"y":441,"x":0,"width":1280,"valign":"top","text":"请添加备注","skin":"comp/textinput.png","height":93,"fontSize":20},
+                            "nodeParent":63,
+                            "label":"TextInput",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":92,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":543,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},
+                            "nodeParent":63,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":93,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":591,"x":959},
+                            "nodeParent":63,
+                            "label":"Box",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":96,
+                            "child":[
+                                {
+                                    "type":"Button",
+                                    "searchKey":"Button",
+                                    "props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},
+                                    "nodeParent":96,
+                                    "label":"Button",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":94,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"Button",
+                                    "searchKey":"Button",
+                                    "props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},
+                                    "nodeParent":96,
+                                    "label":"Button",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":95,
+                                    "child":[
+                                        ]
+                                }]
+                        }]
                 }]
+        },
+        {
+            "x":15,
+            "type":"Script",
+            "switchAble":true,
+            "source":"src/script/order/PaintOrderControl.as",
+            "searchKey":"Script,PaintOrderControl",
+            "removeAble":true,
+            "props":{},
+            "nodeParent":2,
+            "label":"PaintOrderControl",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":97,
+            "child":[
+                ]
         }],
     "animations":[
         {

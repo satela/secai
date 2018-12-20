@@ -5,6 +5,7 @@ package script
 	import laya.ui.View;
 	import laya.utils.Browser;
 	
+	import ui.PaintOrderPanelUI;
 	import ui.PicManagePanelUI;
 	import ui.PopUpDialogUI;
 	import ui.login.LogPanelUI;
@@ -32,7 +33,7 @@ package script
 
 		public static const VIEW_PICTURE_CHECK:String = "VIEW_PICTURE_CHECK";//图片预览
 
-		//public static const VIEW_PICMANAGER:String = "picmanagerView";//图片管理下单界面
+		public static const VIEW_PAINT_ORDER:String = "VIEW_PAINT_ORDER";//喷印下单
 
 		public static const VIEW_USERCENTER:String = "VIEW_USERCENTER";//用户中心
 
@@ -64,6 +65,7 @@ package script
 			viewDict[VIEW_USERCENTER] = UserMainPanelUI;
 			viewDict[VIEW_PICTURE_CHECK] = PicCheckPanelUI;
 			viewDict[VIEW_POPUPDIALOG] = PopUpDialogUI;
+			viewDict[VIEW_PAINT_ORDER] = PaintOrderPanelUI;
 
 		}
 		
@@ -83,6 +85,8 @@ package script
 				for each(var oldview in openViewList)
 				{
 					viewContainer.removeChild(oldview);
+					(oldview as View).destroy(true);
+					
 				}
 				openViewList = {};
 			}
@@ -99,7 +103,9 @@ package script
 			if(openViewList[viewClass] == null)
 				showAlert("不存在的界面");
 			viewContainer.removeChild(openViewList[viewClass]);
+			(openViewList[viewClass] as View).destroy(true);
 			openViewList[viewClass] = null;
+			delete openViewList[viewClass];
 
 		}
 	}

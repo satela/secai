@@ -12,7 +12,7 @@ package model.picmanagerModel
 		
 		public var curSelectDir:PicInfoVo;
 		
-		public var haselectPic:Array = [];
+		public var haselectPic:Object = {};
 		public static function get instance():DirectoryFileModel
 		{
 			if(_instance == null)
