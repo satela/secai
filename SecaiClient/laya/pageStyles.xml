@@ -18,4 +18,6 @@
    <item name="PopUpDialog.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/OrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/PartsItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectAddressPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectFactoryPanel.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

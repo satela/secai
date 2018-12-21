@@ -1,5 +1,7 @@
 package model
 {
+	import model.users.AddressVo;
+
 	public class Userdata
 	{
 		private static var _instance:Userdata;

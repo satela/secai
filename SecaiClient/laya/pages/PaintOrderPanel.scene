@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":63,
-    "selecteID":64,
+    "selectedBox":2,
+    "selecteID":26,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
@@ -259,13 +259,14 @@
                     "props":{"y":0,"x":320},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":null,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":24,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"text":"收货信息","fontSize":30},
@@ -279,11 +280,12 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":5,"x":132,"text":"更改收货信息","fontSize":24,"color":"#3028ea"},
+                            "searchKey":"Text,changemyadd",
+                            "props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","fontSize":24,"color":"#3028ea"},
                             "nodeParent":24,
-                            "label":"Text",
+                            "label":"changemyadd",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -292,11 +294,12 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":42,"width":1046,"text":"收货信息","height":30,"fontSize":24},
+                            "searchKey":"Label,myaddresstxt",
+                            "props":{"y":42,"width":1046,"var":"myaddresstxt","text":"收货信息","height":30,"fontSize":24},
                             "nodeParent":24,
-                            "label":"Label",
+                            "label":"myaddresstxt",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -312,13 +315,14 @@
                     "props":{"y":80,"x":320},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":26,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"text":"输出中心","fontSize":30},
@@ -332,11 +336,12 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":5,"x":132,"text":"更改输出中心","fontSize":24,"color":"#3028ea"},
+                            "searchKey":"Text,changefactory",
+                            "props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","fontSize":24,"color":"#3028ea"},
                             "nodeParent":26,
-                            "label":"Text",
+                            "label":"changefactory",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -345,11 +350,12 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":42,"x":0,"width":425,"text":"收货信息","height":30,"fontSize":24},
+                            "searchKey":"Label,factorytxt",
+                            "props":{"y":42,"x":0,"width":425,"var":"factorytxt","text":"收货信息","height":30,"fontSize":24},
                             "nodeParent":26,
-                            "label":"Label",
+                            "label":"factorytxt",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -358,6 +364,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button",
                             "props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},
@@ -777,13 +784,14 @@
                             "props":{"y":100,"x":0,"space":10,"right":0,"left":0},
                             "nodeParent":63,
                             "label":"VBox",
-                            "isOpen":false,
+                            "isOpen":true,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":65,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Box",
                                     "searchKey":"Box",
                                     "props":{"y":50,"x":0},
@@ -889,6 +897,7 @@
                                         }]
                                 },
                                 {
+                                    "x":60,
                                     "type":"Box",
                                     "searchKey":"Box",
                                     "props":{"y":0,"x":0},

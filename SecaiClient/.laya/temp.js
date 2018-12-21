@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1359,6 +1359,25 @@ var ViewManager=(function(){
 	ViewManager.VIEW_USERCENTER="VIEW_USERCENTER";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
+})()
+
+
+//class model.orderModel.PartItemVo
+var PartItemVo=(function(){
+	function PartItemVo(){
+		this.partIndex=0;
+		//序号
+		this.partId=0;
+		this.partName="X展架";
+		this.partSize="60*160";
+		this.partNum=1;
+		//数量
+		this.price=NaN;
+		this.total=NaN;
+	}
+
+	__class(PartItemVo,'model.orderModel.PartItemVo');
+	return PartItemVo;
 })()
 
 
@@ -28659,231 +28678,6 @@ var HTMLStyleElement=(function(_super){
 
 
 /**
-*<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
-*<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
-*/
-//class laya.filters.ColorFilter extends laya.filters.Filter
-var ColorFilter=(function(_super){
-	function ColorFilter(mat){
-		/**@private */
-		//this._mat=null;
-		/**@private */
-		//this._alpha=null;
-		/**当前使用的矩阵*/
-		//this._matrix=null;
-		ColorFilter.__super.call(this);
-		if (!mat)mat=this._copyMatrix(ColorFilter.IDENTITY_MATRIX);
-		this._mat=new Float32Array(16);
-		this._alpha=new Float32Array(4);
-		this.setByMatrix(mat);
-		this._action=new ColorFilterAction();
-		this._action.data=this;
-	}
-
-	__class(ColorFilter,'laya.filters.ColorFilter',_super);
-	var __proto=ColorFilter.prototype;
-	Laya.imps(__proto,{"laya.filters.IFilter":true})
-	/**
-	*设置为灰色滤镜
-	*/
-	__proto.gray=function(){
-		return this.setByMatrix(ColorFilter.GRAY_MATRIX);
-	}
-
-	/**
-	*设置为变色滤镜
-	*@param red 红色增量,范围:0~255
-	*@param green 绿色增量,范围:0~255
-	*@param blue 蓝色增量,范围:0~255
-	*@param alpha alpha,范围:0~1
-	*/
-	__proto.color=function(red,green,blue,alpha){
-		(red===void 0)&& (red=0);
-		(green===void 0)&& (green=0);
-		(blue===void 0)&& (blue=0);
-		(alpha===void 0)&& (alpha=1);
-		return this.setByMatrix([1,0,0,0,red,0,1,0,0,green,0,0,1,0,blue,0,0,0,1,alpha]);
-	}
-
-	/**
-	*设置矩阵数据
-	*@param matrix 由 20 个项目（排列成 4 x 5 矩阵）组成的数组
-	*@return this
-	*/
-	__proto.setByMatrix=function(matrix){
-		if (this._matrix !=matrix)this._copyMatrix(matrix);
-		var j=0;
-		var z=0;
-		for (var i=0;i < 20;i++){
-			if (i % 5 !=4){
-				this._mat[j++]=matrix[i];
-				}else {
-				this._alpha[z++]=matrix[i];
-			}
-		}
-		return this;
-	}
-
-	/**
-	*调整颜色，包括亮度，对比度，饱和度和色调
-	*@param brightness 亮度,范围:-100~100
-	*@param contrast 对比度,范围:-100~100
-	*@param saturation 饱和度,范围:-100~100
-	*@param hue 色调,范围:-180~180
-	*@return this
-	*/
-	__proto.adjustColor=function(brightness,contrast,saturation,hue){
-		this.adjustHue(hue);
-		this.adjustContrast(contrast);
-		this.adjustBrightness(brightness);
-		this.adjustSaturation(saturation);
-		return this;
-	}
-
-	/**
-	*调整亮度
-	*@param brightness 亮度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustBrightness=function(brightness){
-		brightness=this._clampValue(brightness,100);
-		if (brightness==0 || isNaN(brightness))return this;
-		return this._multiplyMatrix([1,0,0,0,brightness,0,1,0,0,brightness,0,0,1,0,brightness,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整对比度
-	*@param contrast 对比度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustContrast=function(contrast){
-		contrast=this._clampValue(contrast,100);
-		if (contrast==0 || isNaN(contrast))return this;
-		var x=NaN;
-		if (contrast < 0){
-			x=127+contrast / 100 *127
-			}else {
-			x=contrast % 1;
-			if (x==0){
-				x=ColorFilter.DELTA_INDEX[contrast];
-				}else {
-				x=ColorFilter.DELTA_INDEX[(contrast << 0)] *(1-x)+ColorFilter.DELTA_INDEX[(contrast << 0)+1] *x;
-			}
-			x=x *127+127;
-		};
-		var x1=x / 127;
-		var x2=(127-x)*0.5;
-		return this._multiplyMatrix([x1,0,0,0,x2,0,x1,0,0,x2,0,0,x1,0,x2,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整饱和度
-	*@param saturation 饱和度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustSaturation=function(saturation){
-		saturation=this._clampValue(saturation,100);
-		if (saturation==0 || isNaN(saturation))return this;
-		var x=1+((saturation > 0)? 3 *saturation / 100 :saturation / 100);
-		var dx=1-x;
-		var r=0.3086 *dx;
-		var g=0.6094 *dx;
-		var b=0.0820 *dx;
-		return this._multiplyMatrix([r+x,g,b,0,0,r,g+x,b,0,0,r,g,b+x,0,0,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整色调
-	*@param hue 色调,范围:-180~180
-	*@return this
-	*/
-	__proto.adjustHue=function(hue){
-		hue=this._clampValue(hue,180)/ 180 *Math.PI;
-		if (hue==0 || isNaN(hue))return this;
-		var cos=Math.cos(hue);
-		var sin=Math.sin(hue);
-		var r=0.213;
-		var g=0.715;
-		var b=0.072;
-		return this._multiplyMatrix([r+cos *(1-r)+sin *(-r),g+cos *(-g)+sin *(-g),b+cos *(-b)+sin *(1-b),0,0,r+cos *(-r)+sin *(0.143),g+cos *(1-g)+sin *(0.140),b+cos *(-b)+sin *(-0.283),0,0,r+cos *(-r)+sin *(-(1-r)),g+cos *(-g)+sin *(g),b+cos *(1-b)+sin *(b),0,0,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*重置成单位矩阵，去除滤镜效果
-	*/
-	__proto.reset=function(){
-		return this.setByMatrix(this._copyMatrix(ColorFilter.IDENTITY_MATRIX));
-	}
-
-	/**
-	*矩阵乘法
-	*@param matrix
-	*@return this
-	*/
-	__proto._multiplyMatrix=function(matrix){
-		var col=[];
-		this._matrix=this._fixMatrix(this._matrix);
-		for (var i=0;i < 5;i++){
-			for (var j=0;j < 5;j++){
-				col[j]=this._matrix[j+i *5];
-			}
-			for (j=0;j < 5;j++){
-				var val=0;
-				for (var k=0;k < 5;k++){
-					val+=matrix[j+k *5] *col[k];
-				}
-				this._matrix[j+i *5]=val;
-			}
-		}
-		return this.setByMatrix(this._matrix);
-	}
-
-	/**
-	*规范值的范围
-	*@param val 当前值
-	*@param limit 值的范围-limit~limit
-	*/
-	__proto._clampValue=function(val,limit){
-		return Math.min(limit,Math.max(-limit,val));
-	}
-
-	/**
-	*规范矩阵,将矩阵调整到正确的大小
-	*@param matrix 需要调整的矩阵
-	*/
-	__proto._fixMatrix=function(matrix){
-		if (matrix==null)return ColorFilter.IDENTITY_MATRIX;
-		if (matrix.length < 25)matrix=matrix.slice(0,matrix.length).concat(ColorFilter.IDENTITY_MATRIX.slice(matrix.length,25));
-		else if (matrix.length > 25)matrix=matrix.slice(0,25);
-		return matrix;
-	}
-
-	/**
-	*复制矩阵
-	*/
-	__proto._copyMatrix=function(matrix){
-		var len=25;
-		if (!this._matrix)this._matrix=[];
-		for (var i=0;i < len;i++){
-			this._matrix[i]=matrix[i];
-		}
-		return this._matrix;
-	}
-
-	/**@private */
-	__getset(0,__proto,'type',function(){
-		return 0x20;
-	});
-
-	ColorFilter.LENGTH=25;
-	__static(ColorFilter,
-	['DELTA_INDEX',function(){return this.DELTA_INDEX=[0,0.01,0.02,0.04,0.05,0.06,0.07,0.08,0.1,0.11,0.12,0.14,0.15,0.16,0.17,0.18,0.20,0.21,0.22,0.24,0.25,0.27,0.28,0.30,0.32,0.34,0.36,0.38,0.40,0.42,0.44,0.46,0.48,0.5,0.53,0.56,0.59,0.62,0.65,0.68,0.71,0.74,0.77,0.80,0.83,0.86,0.89,0.92,0.95,0.98,1.0,1.06,1.12,1.18,1.24,1.30,1.36,1.42,1.48,1.54,1.60,1.66,1.72,1.78,1.84,1.90,1.96,2.0,2.12,2.25,2.37,2.50,2.62,2.75,2.87,3.0,3.2,3.4,3.6,3.8,4.0,4.3,4.7,4.9,5.0,5.5,6.0,6.5,6.8,7.0,7.3,7.5,7.8,8.0,8.4,8.7,9.0,9.4,9.6,9.8,10.0];},'GRAY_MATRIX',function(){return this.GRAY_MATRIX=[0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0,0,0,1,0];},'IDENTITY_MATRIX',function(){return this.IDENTITY_MATRIX=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1];}
-	]);
-	return ColorFilter;
-})(Filter)
-
-
-/**
 *<p> <code>LoaderManager</code> 类用于用于批量加载资源。此类是单例，不要手动实例化此类，请通过Laya.loader访问。</p>
 *<p>全部队列加载完成，会派发 Event.COMPLETE 事件；如果队列中任意一个加载失败，会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
 *<p> <code>LoaderManager</code> 类提供了以下几种功能：<br/>
@@ -29430,6 +29224,231 @@ var LoaderManager=(function(_super){
 
 	return LoaderManager;
 })(EventDispatcher)
+
+
+/**
+*<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
+*<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
+*/
+//class laya.filters.ColorFilter extends laya.filters.Filter
+var ColorFilter=(function(_super){
+	function ColorFilter(mat){
+		/**@private */
+		//this._mat=null;
+		/**@private */
+		//this._alpha=null;
+		/**当前使用的矩阵*/
+		//this._matrix=null;
+		ColorFilter.__super.call(this);
+		if (!mat)mat=this._copyMatrix(ColorFilter.IDENTITY_MATRIX);
+		this._mat=new Float32Array(16);
+		this._alpha=new Float32Array(4);
+		this.setByMatrix(mat);
+		this._action=new ColorFilterAction();
+		this._action.data=this;
+	}
+
+	__class(ColorFilter,'laya.filters.ColorFilter',_super);
+	var __proto=ColorFilter.prototype;
+	Laya.imps(__proto,{"laya.filters.IFilter":true})
+	/**
+	*设置为灰色滤镜
+	*/
+	__proto.gray=function(){
+		return this.setByMatrix(ColorFilter.GRAY_MATRIX);
+	}
+
+	/**
+	*设置为变色滤镜
+	*@param red 红色增量,范围:0~255
+	*@param green 绿色增量,范围:0~255
+	*@param blue 蓝色增量,范围:0~255
+	*@param alpha alpha,范围:0~1
+	*/
+	__proto.color=function(red,green,blue,alpha){
+		(red===void 0)&& (red=0);
+		(green===void 0)&& (green=0);
+		(blue===void 0)&& (blue=0);
+		(alpha===void 0)&& (alpha=1);
+		return this.setByMatrix([1,0,0,0,red,0,1,0,0,green,0,0,1,0,blue,0,0,0,1,alpha]);
+	}
+
+	/**
+	*设置矩阵数据
+	*@param matrix 由 20 个项目（排列成 4 x 5 矩阵）组成的数组
+	*@return this
+	*/
+	__proto.setByMatrix=function(matrix){
+		if (this._matrix !=matrix)this._copyMatrix(matrix);
+		var j=0;
+		var z=0;
+		for (var i=0;i < 20;i++){
+			if (i % 5 !=4){
+				this._mat[j++]=matrix[i];
+				}else {
+				this._alpha[z++]=matrix[i];
+			}
+		}
+		return this;
+	}
+
+	/**
+	*调整颜色，包括亮度，对比度，饱和度和色调
+	*@param brightness 亮度,范围:-100~100
+	*@param contrast 对比度,范围:-100~100
+	*@param saturation 饱和度,范围:-100~100
+	*@param hue 色调,范围:-180~180
+	*@return this
+	*/
+	__proto.adjustColor=function(brightness,contrast,saturation,hue){
+		this.adjustHue(hue);
+		this.adjustContrast(contrast);
+		this.adjustBrightness(brightness);
+		this.adjustSaturation(saturation);
+		return this;
+	}
+
+	/**
+	*调整亮度
+	*@param brightness 亮度,范围:-100~100
+	*@return this
+	*/
+	__proto.adjustBrightness=function(brightness){
+		brightness=this._clampValue(brightness,100);
+		if (brightness==0 || isNaN(brightness))return this;
+		return this._multiplyMatrix([1,0,0,0,brightness,0,1,0,0,brightness,0,0,1,0,brightness,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*调整对比度
+	*@param contrast 对比度,范围:-100~100
+	*@return this
+	*/
+	__proto.adjustContrast=function(contrast){
+		contrast=this._clampValue(contrast,100);
+		if (contrast==0 || isNaN(contrast))return this;
+		var x=NaN;
+		if (contrast < 0){
+			x=127+contrast / 100 *127
+			}else {
+			x=contrast % 1;
+			if (x==0){
+				x=ColorFilter.DELTA_INDEX[contrast];
+				}else {
+				x=ColorFilter.DELTA_INDEX[(contrast << 0)] *(1-x)+ColorFilter.DELTA_INDEX[(contrast << 0)+1] *x;
+			}
+			x=x *127+127;
+		};
+		var x1=x / 127;
+		var x2=(127-x)*0.5;
+		return this._multiplyMatrix([x1,0,0,0,x2,0,x1,0,0,x2,0,0,x1,0,x2,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*调整饱和度
+	*@param saturation 饱和度,范围:-100~100
+	*@return this
+	*/
+	__proto.adjustSaturation=function(saturation){
+		saturation=this._clampValue(saturation,100);
+		if (saturation==0 || isNaN(saturation))return this;
+		var x=1+((saturation > 0)? 3 *saturation / 100 :saturation / 100);
+		var dx=1-x;
+		var r=0.3086 *dx;
+		var g=0.6094 *dx;
+		var b=0.0820 *dx;
+		return this._multiplyMatrix([r+x,g,b,0,0,r,g+x,b,0,0,r,g,b+x,0,0,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*调整色调
+	*@param hue 色调,范围:-180~180
+	*@return this
+	*/
+	__proto.adjustHue=function(hue){
+		hue=this._clampValue(hue,180)/ 180 *Math.PI;
+		if (hue==0 || isNaN(hue))return this;
+		var cos=Math.cos(hue);
+		var sin=Math.sin(hue);
+		var r=0.213;
+		var g=0.715;
+		var b=0.072;
+		return this._multiplyMatrix([r+cos *(1-r)+sin *(-r),g+cos *(-g)+sin *(-g),b+cos *(-b)+sin *(1-b),0,0,r+cos *(-r)+sin *(0.143),g+cos *(1-g)+sin *(0.140),b+cos *(-b)+sin *(-0.283),0,0,r+cos *(-r)+sin *(-(1-r)),g+cos *(-g)+sin *(g),b+cos *(1-b)+sin *(b),0,0,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*重置成单位矩阵，去除滤镜效果
+	*/
+	__proto.reset=function(){
+		return this.setByMatrix(this._copyMatrix(ColorFilter.IDENTITY_MATRIX));
+	}
+
+	/**
+	*矩阵乘法
+	*@param matrix
+	*@return this
+	*/
+	__proto._multiplyMatrix=function(matrix){
+		var col=[];
+		this._matrix=this._fixMatrix(this._matrix);
+		for (var i=0;i < 5;i++){
+			for (var j=0;j < 5;j++){
+				col[j]=this._matrix[j+i *5];
+			}
+			for (j=0;j < 5;j++){
+				var val=0;
+				for (var k=0;k < 5;k++){
+					val+=matrix[j+k *5] *col[k];
+				}
+				this._matrix[j+i *5]=val;
+			}
+		}
+		return this.setByMatrix(this._matrix);
+	}
+
+	/**
+	*规范值的范围
+	*@param val 当前值
+	*@param limit 值的范围-limit~limit
+	*/
+	__proto._clampValue=function(val,limit){
+		return Math.min(limit,Math.max(-limit,val));
+	}
+
+	/**
+	*规范矩阵,将矩阵调整到正确的大小
+	*@param matrix 需要调整的矩阵
+	*/
+	__proto._fixMatrix=function(matrix){
+		if (matrix==null)return ColorFilter.IDENTITY_MATRIX;
+		if (matrix.length < 25)matrix=matrix.slice(0,matrix.length).concat(ColorFilter.IDENTITY_MATRIX.slice(matrix.length,25));
+		else if (matrix.length > 25)matrix=matrix.slice(0,25);
+		return matrix;
+	}
+
+	/**
+	*复制矩阵
+	*/
+	__proto._copyMatrix=function(matrix){
+		var len=25;
+		if (!this._matrix)this._matrix=[];
+		for (var i=0;i < len;i++){
+			this._matrix[i]=matrix[i];
+		}
+		return this._matrix;
+	}
+
+	/**@private */
+	__getset(0,__proto,'type',function(){
+		return 0x20;
+	});
+
+	ColorFilter.LENGTH=25;
+	__static(ColorFilter,
+	['DELTA_INDEX',function(){return this.DELTA_INDEX=[0,0.01,0.02,0.04,0.05,0.06,0.07,0.08,0.1,0.11,0.12,0.14,0.15,0.16,0.17,0.18,0.20,0.21,0.22,0.24,0.25,0.27,0.28,0.30,0.32,0.34,0.36,0.38,0.40,0.42,0.44,0.46,0.48,0.5,0.53,0.56,0.59,0.62,0.65,0.68,0.71,0.74,0.77,0.80,0.83,0.86,0.89,0.92,0.95,0.98,1.0,1.06,1.12,1.18,1.24,1.30,1.36,1.42,1.48,1.54,1.60,1.66,1.72,1.78,1.84,1.90,1.96,2.0,2.12,2.25,2.37,2.50,2.62,2.75,2.87,3.0,3.2,3.4,3.6,3.8,4.0,4.3,4.7,4.9,5.0,5.5,6.0,6.5,6.8,7.0,7.3,7.5,7.8,8.0,8.4,8.7,9.0,9.4,9.6,9.8,10.0];},'GRAY_MATRIX',function(){return this.GRAY_MATRIX=[0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0,0,0,1,0];},'IDENTITY_MATRIX',function(){return this.IDENTITY_MATRIX=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1];}
+	]);
+	return ColorFilter;
+})(Filter)
 
 
 /**
@@ -33908,6 +33927,7 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.firstpage.on("click",this,this.onClosePanel);
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.mainvbox.autoSize=true;
+		this.uiSkin.btn_addattach.on("click",this,this.onAddPart);
 		var i=1;
 		var fvo;
 		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
@@ -33916,6 +33936,10 @@ var PaintOrderControl=(function(_super){
 			ovo.indexNum=i++;
 			this.uiSkin.ordervbox.addChild(new PicOrderItem(ovo));
 		}
+	}
+
+	__proto.onAddPart=function(){
+		this.uiSkin.partvbox.addChild(new PartItem(new PartItemVo()));
 	}
 
 	__proto.onClosePanel=function(){
@@ -40209,6 +40233,30 @@ var OrderItemUI=(function(_super){
 })(Scene)
 
 
+//class ui.order.PartsItemUI extends laya.display.Scene
+var PartsItemUI=(function(_super){
+	function PartsItemUI(){
+		this.pname=null;
+		this.psize=null;
+		this.inputnum=null;
+		this.pricetxt=null;
+		this.totaltxt=null;
+		this.btndelete=null;
+		PartsItemUI.__super.call(this);
+	}
+
+	__class(PartsItemUI,'ui.order.PartsItemUI',_super);
+	var __proto=PartsItemUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.createView(PartsItemUI.uiView);
+	}
+
+	PartsItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"var":"pname","text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"var":"psize","text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"var":"inputnum","text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"var":"pricetxt","text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"var":"totaltxt","text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"var":"btndelete","text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
+	return PartsItemUI;
+})(Scene)
+
+
 /**
 *<code>Box</code> 类是一个控件容器类。
 */
@@ -46103,24 +46151,6 @@ var PicShortItemUI=(function(_super){
 })(View)
 
 
-//class ui.usercenter.UserMainPanelUI extends laya.ui.View
-var UserMainPanelUI=(function(_super){
-	function UserMainPanelUI(){
-		UserMainPanelUI.__super.call(this);;
-	}
-
-	__class(UserMainPanelUI,'ui.usercenter.UserMainPanelUI',_super);
-	var __proto=UserMainPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(UserMainPanelUI.uiView);
-	}
-
-	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"lineColor":"#252323","height":666,"fillColor":"#f8f3f3"},"compId":12},{"type":"Label","props":{"y":113,"x":389,"text":"用户中心","fontSize":24,"color":"#f8f0ef"},"compId":14},{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"height":48,"fillColor":"#c50505"},"compId":13},{"type":"VBox","props":{"y":148,"x":321,"space":2},"compId":5,"child":[{"type":"Box","props":{"y":50,"x":2,"width":232,"height":127},"compId":20,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},"compId":17,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":16}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":26,"child":[{"type":"Label","props":{"text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":43,"text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":19}]}]},{"type":"Box","props":{"y":182,"x":2,"width":232,"height":171},"compId":21,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},"compId":22,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":23}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":27,"child":[{"type":"Label","props":{"y":0,"text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":24},{"type":"Label","props":{"y":44,"text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":25},{"type":"Label","props":{"y":88,"text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":28}]}]},{"type":"Box","props":{"y":353,"x":2,"width":232,"height":127},"compId":29,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},"compId":30,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":31}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":32,"child":[{"type":"Label","props":{"y":0,"text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":33},{"type":"Label","props":{"y":44,"text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":34}]}]},{"type":"Box","props":{"y":508,"x":2,"width":232,"height":117},"compId":36,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},"compId":37,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":38}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":39,"child":[{"type":"Label","props":{"y":0,"text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":40},{"type":"Label","props":{"y":33,"text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":41}]}]}]},{"type":"Image","props":{"y":1,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":6,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":7},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":10},{"type":"Text","props":{"y":19,"x":210,"text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":11}]},{"type":"Rect","props":{"y":140,"x":600,"width":800,"lineWidth":1,"lineColor":"#322f2f","height":1,"fillColor":"#453a3a"},"compId":48},{"type":"Label","props":{"y":108,"x":603,"text":"企业资料","fontSize":24,"color":"#c3221f"},"compId":49}]}],"loadList":["commers/whitebg.png","comp/label.png"],"loadList3D":[]};
-	return UserMainPanelUI;
-})(View)
-
-
 //class script.order.PicOrderItem extends ui.order.OrderItemUI
 var PicOrderItem=(function(_super){
 	function PicOrderItem(vo){
@@ -46150,6 +46180,24 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
+
+
+//class ui.usercenter.UserMainPanelUI extends laya.ui.View
+var UserMainPanelUI=(function(_super){
+	function UserMainPanelUI(){
+		UserMainPanelUI.__super.call(this);;
+	}
+
+	__class(UserMainPanelUI,'ui.usercenter.UserMainPanelUI',_super);
+	var __proto=UserMainPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(UserMainPanelUI.uiView);
+	}
+
+	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"lineColor":"#252323","height":666,"fillColor":"#f8f3f3"},"compId":12},{"type":"Label","props":{"y":113,"x":389,"text":"用户中心","fontSize":24,"color":"#f8f0ef"},"compId":14},{"type":"Rect","props":{"y":100,"x":320,"width":235,"lineWidth":1,"height":48,"fillColor":"#c50505"},"compId":13},{"type":"VBox","props":{"y":148,"x":321,"space":2},"compId":5,"child":[{"type":"Box","props":{"y":50,"x":2,"width":232,"height":127},"compId":20,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},"compId":17,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":16}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":26,"child":[{"type":"Label","props":{"text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":43,"text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":19}]}]},{"type":"Box","props":{"y":182,"x":2,"width":232,"height":171},"compId":21,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},"compId":22,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":23}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":27,"child":[{"type":"Label","props":{"y":0,"text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":24},{"type":"Label","props":{"y":44,"text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":25},{"type":"Label","props":{"y":88,"text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":28}]}]},{"type":"Box","props":{"y":353,"x":2,"width":232,"height":127},"compId":29,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},"compId":30,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":31}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":32,"child":[{"type":"Label","props":{"y":0,"text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":33},{"type":"Label","props":{"y":44,"text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":34}]}]},{"type":"Box","props":{"y":508,"x":2,"width":232,"height":117},"compId":36,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},"compId":37,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":38}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":39,"child":[{"type":"Label","props":{"y":0,"text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":40},{"type":"Label","props":{"y":33,"text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":41}]}]}]},{"type":"Image","props":{"y":1,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":6,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":7},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":10},{"type":"Text","props":{"y":19,"x":210,"text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":11}]},{"type":"Rect","props":{"y":140,"x":600,"width":800,"lineWidth":1,"lineColor":"#322f2f","height":1,"fillColor":"#453a3a"},"compId":48},{"type":"Label","props":{"y":108,"x":603,"text":"企业资料","fontSize":24,"color":"#c3221f"},"compId":49}]}],"loadList":["commers/whitebg.png","comp/label.png"],"loadList3D":[]};
+	return UserMainPanelUI;
+})(View)
 
 
 //class ui.PicManagePanelUI extends laya.ui.View
@@ -46208,6 +46256,25 @@ var ResetPwdPanelUI=(function(_super){
 	ResetPwdPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"x":0,"width":1920,"top":0,"bottom":100},"compId":4,"child":[{"type":"Label","props":{"y":12,"x":930,"text":"修改密码","fontSize":30,"font":"SimSun"},"compId":6},{"type":"Box","props":{"y":70,"x":660},"compId":7,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},"compId":8},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":9},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":10},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":11}]},{"type":"Box","props":{"y":153,"x":660},"compId":12,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"新密码","fontSize":20,"font":"Arial","align":"right"},"compId":13},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":14},{"type":"Label","props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":15},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":16}]},{"type":"Box","props":{"y":236,"x":660},"compId":17,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},"compId":18},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":19},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":20},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":21}]},{"type":"Box","props":{"y":313,"x":660},"compId":46,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},"compId":47},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":48},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":49},{"type":"Button","props":{"y":-1.5,"x":402,"width":150,"var":"btn_getcode","skin":"comp/button.png","label":"获取验证码","height":40},"compId":50}]},{"type":"Button","props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},"compId":68},{"type":"Button","props":{"y":414,"x":826,"width":150,"var":"btn_ok","skin":"comp/button.png","labelSize":24,"label":"确认修改","height":40},"compId":71}]},{"type":"Script","props":{"runtime":"script.login.ResetPwdControl"},"compId":72}],"loadList":["commers/whitebg.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
 	return ResetPwdPanelUI;
 })(View)
+
+
+//class script.order.PartItem extends ui.order.PartsItemUI
+var PartItem=(function(_super){
+	function PartItem(partvo){
+		this.partItemvo=null;
+		this.partItemvo=partvo;
+		PartItem.__super.call(this);
+	}
+
+	__class(PartItem,'script.order.PartItem',_super);
+	var __proto=PartItem.prototype;
+	__proto.initView=function(){
+		this.pname.text=this.partItemvo.partName;
+		this.psize.text=this.partItemvo.partSize;
+	}
+
+	return PartItem;
+})(PartsItemUI)
 
 
 //class ui.uploadpic.UpLoadPanelUI extends laya.ui.View

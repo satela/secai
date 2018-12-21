@@ -5,8 +5,14 @@ package ui.order {
 	import laya.display.Text;
 
 	public class PartsItemUI extends Scene {
+		public var pname:Label;
+		public var psize:Label;
+		public var inputnum:TextInput;
+		public var pricetxt:Label;
+		public var totaltxt:Label;
+		public var btndelete:Text;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"var":"pname","text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"var":"psize","text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"var":"inputnum","text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"var":"pricetxt","text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"var":"totaltxt","text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"var":"btndelete","text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);
