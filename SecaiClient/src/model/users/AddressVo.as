@@ -14,8 +14,14 @@ package model.users
 		
 		public var address:String = "汇腾南苑612好23号";
 		
+		
 		public function AddressVo()
 		{
+		}
+		
+		public function get addressDetail():String
+		{
+			return receiverName + "-" + phone + " " + province + " " + city + " " + town + " " + address;
 		}
 	}
 }

@@ -8,8 +8,11 @@ package {
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
-	import script.order.PaintOrderControl;
+	import script.order.SelectAddressControl;
+	import script.order.SelectFactoryControl;
 	import laya.html.dom.HTMLDivElement;
+	import script.order.SelectPicControl;
+	import script.order.PaintOrderControl;
 	import script.picUpload.PicManagerControl;
 	import script.picUpload.PictureCheckControl;
 	import utils.PopUpWindowControl;
@@ -24,7 +27,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/SelectAddressPanel.scene";
+		public static var startScene:* = "order/SelectPicPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -39,8 +42,11 @@ package {
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);
-			reg("script.order.PaintOrderControl",PaintOrderControl);
+			reg("script.order.SelectAddressControl",SelectAddressControl);
+			reg("script.order.SelectFactoryControl",SelectFactoryControl);
 			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
+			reg("script.order.SelectPicControl",SelectPicControl);
+			reg("script.order.PaintOrderControl",PaintOrderControl);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 			reg("utils.PopUpWindowControl",PopUpWindowControl);

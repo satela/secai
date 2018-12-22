@@ -801,7 +801,8 @@ package laya.display {
 		public function _setPivotX(value:Number):void
 		{
 			var style:SpriteStyle = getStyle();
-			style.pivotX = value;
+			if(style)
+				style.pivotX = value;
 		}
 		
 		/**@private */
@@ -814,6 +815,7 @@ package laya.display {
 		public function _setPivotY(value:Number):void
 		{
 			var style:SpriteStyle = getStyle();
+			if(style)
 			style.pivotY = value;
 		}
 		

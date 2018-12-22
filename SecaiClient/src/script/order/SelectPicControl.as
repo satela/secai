@@ -1,10 +1,9 @@
-package script.picUpload
+package script.order
 {
 	import eventUtil.EventCenter;
 	
 	import laya.components.Script;
 	import laya.events.Event;
-	import laya.ui.Box;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
@@ -12,43 +11,27 @@ package script.picUpload
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
+	import script.picUpload.DirectFolderItem;
+	import script.picUpload.PicInfoItem;
 	
-	import ui.PicManagePanelUI;
+	import ui.order.SelectPicPanelUI;
 	
-	public class PicManagerControl extends Script
+	public class SelectPicControl extends Script
 	{
-		private var uiSkin:PicManagePanelUI;
-		private var createbox:Box;
-				
-		private var isCreateTopDir:Boolean = true; //是否创建一级目录
+		private var uiSkin:SelectPicPanelUI;
 		
 		private var directTree:Array = [];
-		public var param:Object;
-
-		public function PicManagerControl()
+	
+		public function SelectPicControl()
 		{
 			super();
 		}
-		
 		override public function onStart():void
 		{
 			
+			uiSkin = this.owner as SelectPicPanelUI; 
+			
 			directTree = [];
-			uiSkin = this.owner as PicManagePanelUI; 
-			uiSkin.btnNewDir.on(Event.CLICK,this,onCreateNewDirect);
-			
-			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
-			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
-
-			createbox = uiSkin.boxNewFolder;
-			createbox.visible = false;
-			uiSkin.firstpage.underline = true;
-			uiSkin.firstpage.underlineColor = "#121212";
-			
-			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
-			
-			uiSkin.input_folename.maxChars = 10;
-			uiSkin.btnCloseInput.on(Event.CLICK,this,onCloseCreateFolder);
 
 			uiSkin.folderList.itemRender = DirectFolderItem;
 			uiSkin.folderList.vScrollBarSkin = "";
@@ -67,35 +50,32 @@ package script.picUpload
 			uiSkin.flder1.visible = false;
 			uiSkin.flder2.visible = false;
 			for(var i=0;i < 3;i++)
-			uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
-
+				uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 			
-			uiSkin.btnUploadPic.on(Event.CLICK,this,onShowUploadView);
-			
+		
 			Laya.timer.once(10,this,function():void
 			{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
 				uiSkin.folderList.array = [];
 				uiSkin.picList.array = [];
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
-
+				
 			});
 			
 			uiSkin.htmltext.style.fontSize = 20;
 			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
-			uiSkin.btnSureCreate.on(Event.CLICK,this,onSureCreeate);
+			
+			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
-
+			
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
-			DirectoryFileModel.instance.haselectPic = {};
-			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
 		}
 		
-		private function onshowOrder():void
+		private function onCloseView():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PIC_TO_ORDER);
 		}
 		
 		private function seletPicToOrder(fvo:PicInfoVo):void
@@ -113,7 +93,7 @@ package script.picUpload
 				num++;
 			}
 			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
-
+			
 		}
 		private function onGetTopDirListBack(data:Object):void
 		{
@@ -143,7 +123,7 @@ package script.picUpload
 		private function getFileList():void
 		{
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetDirFileListBack,"path=" + DirectoryFileModel.instance.curSelectDir.dpath,"post");
-
+			
 		}
 		
 		private function onGetDirFileListBack(data:Object):void
@@ -156,77 +136,15 @@ package script.picUpload
 				
 			}
 		}
-		private function onBackToMain():void
-		{
-			// TODO Auto Generated method stub
-			ViewManager.instance.closeView(ViewManager.VIEW_PICMANAGER);
-		}
+	
 		override public function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
 		}
-		private function onRemovedFromStage():void
-		{
-			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
-			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
-			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
-
-		}
-		private function onShowUploadView():void
-		{
-			// TODO Auto Generated method stub
-			if(DirectoryFileModel.instance.curSelectDir == null)
-			{
-				ViewManager.showAlert("请先创建一个目录");
-				return;
-			}
-			ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL);
-		}
-		
-		private function onSureCreeate():void
-		{
-			if(uiSkin.input_folename.text == "")
-				return;
-			else
-			{
-				if(!isCreateTopDir)
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.createDirectory,this,onCreateDirBack,"path=" + DirectoryFileModel.instance.curSelectDir.dpath + "&name=" + uiSkin.input_folename.text,"post");
-				else
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.createDirectory,this,onCreateDirBack,"path=0|" + "&name=" + uiSkin.input_folename.text,"post");
-
-				//uiSkin.folderList.addItem(uiSkin.input_folename.text);
-				createbox.visible = false;
-			}
-		}
-		
-		private function onCreateDirBack(data:Object):void
-		{
-			var result:Object = JSON.parse(data as String);
-			if(result.status == 0)
-			{
-				if(isCreateTopDir)
-				{
-					var picinfo:PicInfoVo = new PicInfoVo(result.dir,0);
-					uiSkin.folderList.addItem(picinfo);
-					if(DirectoryFileModel.instance.topDirectList.length == 1)
-					{
-						(uiSkin.folderList.cells[0] as DirectFolderItem).ShowSelected = true;
-						DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.topDirectList[0];
-						directTree.push(DirectoryFileModel.instance.curSelectDir);
-
-						updateCurDirectLabel();
-					}
-				}
-				else
-				{
-					 picinfo = new PicInfoVo(result.dir,0);
-					uiSkin.picList.addItem(picinfo);
-				}
-			}
-		}
-		
+	
+	
 		private function onSlecteDirect(index:int):void
 		{
 			for each(var item:DirectFolderItem in uiSkin.folderList.cells)
@@ -240,8 +158,8 @@ package script.picUpload
 			
 			directTree = [];
 			directTree.push(DirectoryFileModel.instance.curSelectDir);
-
-
+			
+			
 			updateCurDirectLabel();
 			getFileList();
 			
@@ -252,7 +170,7 @@ package script.picUpload
 			DirectoryFileModel.instance.curSelectDir = filedata;
 			
 			directTree.push(DirectoryFileModel.instance.curSelectDir);
-
+			
 			updateCurDirectLabel();
 			getFileList();
 		}
@@ -271,7 +189,7 @@ package script.picUpload
 			this.uiSkin.flder0.visible = false;
 			this.uiSkin.flder1.visible = false;
 			this.uiSkin.flder2.visible = false;
-
+			
 			//var dirstr:Array = (DirectoryFileModel.instance.curSelectDir.parentDirect + DirectoryFileModel.instance.curSelectDir.directName).split("|");
 			for(var i:int=0;i < directTree.length;i++)
 			{
@@ -293,25 +211,6 @@ package script.picUpload
 			cell.setData(cell.dataSource);
 		}
 		
-		private function onCloseCreateFolder():void
-		{
-			// TODO Auto Generated method stub
-			createbox.visible = false;
-		}		
 		
-		private function onCreateNewDirect():void
-		{
-			// TODO Auto Generated method stub
-			isCreateTopDir = true;
-			createbox.visible = true;
-			
-		}
-		
-		private function onCreateNewFolder():void
-		{
-			isCreateTopDir = false;
-			createbox.visible = true;
-		}
-			
 	}
 }

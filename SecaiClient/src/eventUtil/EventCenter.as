@@ -17,6 +17,8 @@ package eventUtil
 
 		public static const SELECT_PIC_ORDER:String = "SELECT_PIC_ORDER";
 
+		public static const SELECT_ORDER_ADDRESS:String = "SELECT_ORDER_ADDRESS";
+
 		private static var _eventCenter:EventCenter;
 		
 	

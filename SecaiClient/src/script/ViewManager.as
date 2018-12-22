@@ -13,6 +13,7 @@ package script
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectFactoryPanelUI;
+	import ui.order.SelectPicPanelUI;
 	import ui.picManager.PicCheckPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.UserMainPanelUI;
@@ -42,6 +43,7 @@ package script
 		public static const VIEW_SELECT_ADDRESS:String = "VIEW_SELECT_ADDRESS";//选择收货地址
 		
 		public static const VIEW_SELECT_FACTORY:String = "VIEW_SELECT_FACTORY";//选择输出中心
+		public static const VIEW_SELECT_PIC_TO_ORDER:String = "VIEW_SELECT_PIC_TO_ORDER";//添加喷印图片界面
 
 		
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
@@ -75,6 +77,8 @@ package script
 
 			viewDict[VIEW_SELECT_ADDRESS] = SelectAddressPanelUI;
 			viewDict[VIEW_SELECT_FACTORY] = SelectFactoryPanelUI;
+			viewDict[VIEW_SELECT_PIC_TO_ORDER] = SelectPicPanelUI;
+
 		}
 		
 		public static function showAlert(mesg:String):void
