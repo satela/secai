@@ -13,6 +13,7 @@ package script
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectFactoryPanelUI;
+	import ui.order.SelectMaterialPanelUI;
 	import ui.order.SelectPicPanelUI;
 	import ui.picManager.PicCheckPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
@@ -45,7 +46,8 @@ package script
 		public static const VIEW_SELECT_FACTORY:String = "VIEW_SELECT_FACTORY";//选择输出中心
 		public static const VIEW_SELECT_PIC_TO_ORDER:String = "VIEW_SELECT_PIC_TO_ORDER";//添加喷印图片界面
 
-		
+		public static const VIEW_SELECT_MATERIAL:String = "VIEW_SELECT_MATERIAL";//选择材料界面
+
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
 		public var viewDict:Object;
@@ -78,6 +80,7 @@ package script
 			viewDict[VIEW_SELECT_ADDRESS] = SelectAddressPanelUI;
 			viewDict[VIEW_SELECT_FACTORY] = SelectFactoryPanelUI;
 			viewDict[VIEW_SELECT_PIC_TO_ORDER] = SelectPicPanelUI;
+			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
 
 		}
 		

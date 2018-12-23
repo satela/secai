@@ -22,4 +22,7 @@
    <item name="order/SelectFactoryPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/AddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/SelectPicPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectMaterialPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/TabChooseBtn.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/MaterialNameItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

@@ -1203,6 +1203,7 @@ var GameConfig=(function(){
 		reg("script.MainPageControl",MainPageControl);
 		reg("script.order.SelectAddressControl",SelectAddressControl);
 		reg("script.order.SelectFactoryControl",SelectFactoryControl);
+		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.order.SelectPicControl",SelectPicControl);
 		reg("script.order.PaintOrderControl",PaintOrderControl);
@@ -1218,7 +1219,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/SelectPicPanel.scene";
+	GameConfig.startScene="order/SelectMaterialPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1254,6 +1255,19 @@ var Userdata=(function(){
 
 	Userdata._instance=null;
 	return Userdata;
+})()
+
+
+//class model.orderModel.MaterialItemVo
+var MaterialItemVo=(function(){
+	function MaterialItemVo(){
+		this.matName="PVP塑料管";
+		this.matId=1;
+		this.matClassType=1;
+	}
+
+	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
+	return MaterialItemVo;
 })()
 
 
@@ -1317,6 +1331,25 @@ var ChinaAreaModel=(function(){
 })()
 
 
+//class model.orderModel.MatetialClassVo
+var MatetialClassVo=(function(){
+	function MatetialClassVo(){
+		this.matclassname="喷绘材料";
+		this.childMatList=null;
+		this.childMatList=[];
+		var arr=["喷绘材料","布类材料","印刷材料"];
+		var ccc=Math.floor(Math.random()*arr.length);
+		this.matclassname=arr[ccc];
+		for(var i=0;i < 20;i++){
+			this.childMatList.push(new MaterialItemVo());
+		}
+	}
+
+	__class(MatetialClassVo,'model.orderModel.MatetialClassVo');
+	return MatetialClassVo;
+})()
+
+
 //class script.ViewManager
 var ViewManager=(function(){
 	function ViewManager(){
@@ -1340,6 +1373,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_ADDRESS"]=SelectAddressPanelUI;
 		this.viewDict["VIEW_SELECT_FACTORY"]=SelectFactoryPanelUI;
 		this.viewDict["VIEW_SELECT_PIC_TO_ORDER"]=SelectPicPanelUI;
+		this.viewDict["VIEW_SELECT_MATERIAL"]=SelectMaterialPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1398,6 +1432,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_ADDRESS="VIEW_SELECT_ADDRESS";
 	ViewManager.VIEW_SELECT_FACTORY="VIEW_SELECT_FACTORY";
 	ViewManager.VIEW_SELECT_PIC_TO_ORDER="VIEW_SELECT_PIC_TO_ORDER";
+	ViewManager.VIEW_SELECT_MATERIAL="VIEW_SELECT_MATERIAL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -29778,95 +29813,6 @@ var Sound=(function(_super){
 
 
 /**
-*用来画矢量的mesh。顶点格式固定为 x,y,rgba
-*/
-//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
-var MeshVG=(function(_super){
-	function MeshVG(){
-		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
-	}
-
-	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
-	var __proto=MeshVG.prototype;
-	/**
-	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
-	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
-	*@param rgba rgba颜色
-	*@param ib index数组。
-	*/
-	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
-		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
-		var f32pos=startpos >> 2;
-		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
-		var vbu32Arr=this._vb._uint32Array;
-		var ci=0;
-		var sz=points.length / 2;
-		for (var i=0;i < sz;i++){
-			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
-			vbu32Arr[f32pos++]=rgba;
-		}
-		this._vb.setNeedUpload();
-		this._ib.append(new Uint16Array(ib));
-		this._ib.setNeedUpload();
-		this.vertNum+=sz;
-		this.indexNum+=ib.length;
-	}
-
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this._ib.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshVG._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._ib.disposeResource();
-		this._vb.deleteBuffer();
-	}
-
-	MeshVG.getAMesh=function(){
-		if (laya.webgl.utils.MeshVG._POOL.length){
-			return laya.webgl.utils.MeshVG._POOL.pop();
-		}
-		return new MeshVG();
-	}
-
-	MeshVG.const_stride=12;
-	MeshVG._POOL=[];
-	__static(MeshVG,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,2,0,
-		0x1401,4,8];}
-	]);
-	return MeshVG;
-})(Mesh2D)
-
-
-/**
-*<code>UIEvent</code> 类用来定义UI组件类的事件类型。
-*/
-//class laya.ui.UIEvent extends laya.events.Event
-var UIEvent=(function(_super){
-	function UIEvent(){
-		UIEvent.__super.call(this);;
-	}
-
-	__class(UIEvent,'laya.ui.UIEvent',_super);
-	UIEvent.SHOW_TIP="showtip";
-	UIEvent.HIDE_TIP="hidetip";
-	return UIEvent;
-})(Event)
-
-
-/**
 *<p> <code>HttpRequest</code> 通过封装 HTML <code>XMLHttpRequest</code> 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。 <code>HttpRequest</code> 只提供以异步的形式返回 Web 服务器的响应，并且能够以文本或者二进制的形式返回内容。</p>
 *<p><b>注意：</b>建议每次请求都使用新的 <code>HttpRequest</code> 对象，因为每次调用该对象的send方法时，都会清空之前设置的数据，并重置 HTTP 请求的状态，这会导致之前还未返回响应的请求被重置，从而得不到之前请求的响应结果。</p>
 */
@@ -30030,6 +29976,95 @@ var HttpRequest=(function(_super){
 
 	return HttpRequest;
 })(EventDispatcher)
+
+
+/**
+*用来画矢量的mesh。顶点格式固定为 x,y,rgba
+*/
+//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
+var MeshVG=(function(_super){
+	function MeshVG(){
+		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
+	}
+
+	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
+	var __proto=MeshVG.prototype;
+	/**
+	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
+	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
+	*@param rgba rgba颜色
+	*@param ib index数组。
+	*/
+	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
+		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
+		var f32pos=startpos >> 2;
+		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
+		var vbu32Arr=this._vb._uint32Array;
+		var ci=0;
+		var sz=points.length / 2;
+		for (var i=0;i < sz;i++){
+			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
+			vbu32Arr[f32pos++]=rgba;
+		}
+		this._vb.setNeedUpload();
+		this._ib.append(new Uint16Array(ib));
+		this._ib.setNeedUpload();
+		this.vertNum+=sz;
+		this.indexNum+=ib.length;
+	}
+
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this._ib.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshVG._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._ib.disposeResource();
+		this._vb.deleteBuffer();
+	}
+
+	MeshVG.getAMesh=function(){
+		if (laya.webgl.utils.MeshVG._POOL.length){
+			return laya.webgl.utils.MeshVG._POOL.pop();
+		}
+		return new MeshVG();
+	}
+
+	MeshVG.const_stride=12;
+	MeshVG._POOL=[];
+	__static(MeshVG,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,2,0,
+		0x1401,4,8];}
+	]);
+	return MeshVG;
+})(Mesh2D)
+
+
+/**
+*<code>UIEvent</code> 类用来定义UI组件类的事件类型。
+*/
+//class laya.ui.UIEvent extends laya.events.Event
+var UIEvent=(function(_super){
+	function UIEvent(){
+		UIEvent.__super.call(this);;
+	}
+
+	__class(UIEvent,'laya.ui.UIEvent',_super);
+	UIEvent.SHOW_TIP="showtip";
+	UIEvent.HIDE_TIP="hidetip";
+	return UIEvent;
+})(Event)
 
 
 //class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
@@ -30198,71 +30233,6 @@ var SubmitCanvas=(function(_super){
 	SubmitCanvas.POOL=(SubmitCanvas.POOL=[],SubmitCanvas.POOL._length=0,SubmitCanvas.POOL);
 	return SubmitCanvas;
 })(Submit)
-
-
-/**
-*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
-*/
-//class laya.webgl.utils.MeshParticle2D extends laya.webgl.utils.Mesh2D
-var MeshParticle2D=(function(_super){
-	//TODO:coverage
-	function MeshParticle2D(maxNum){
-		MeshParticle2D.__super.call(this,laya.webgl.utils.MeshParticle2D.const_stride,maxNum*4*MeshParticle2D.const_stride,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshParticle2D._fixattriInfo);
-		this.createQuadIB(maxNum);
-		this._quadNum=maxNum;
-	}
-
-	__class(MeshParticle2D,'laya.webgl.utils.MeshParticle2D',_super);
-	var __proto=MeshParticle2D.prototype;
-	__proto.setMaxParticleNum=function(maxNum){
-		this._vb._resizeBuffer(maxNum *4 *MeshParticle2D.const_stride,false);
-		this.createQuadIB(maxNum);
-	}
-
-	//TODO:coverage
-	__proto.releaseMesh=function(){
-		debugger;
-		this._vb.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshParticle2D._POOL.push(this);
-	}
-
-	//TODO:coverage
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._vb.deleteBuffer();
-	}
-
-	MeshParticle2D.getAMesh=function(maxNum){
-		if (laya.webgl.utils.MeshParticle2D._POOL.length){
-			var ret=laya.webgl.utils.MeshParticle2D._POOL.pop();
-			ret.setMaxParticleNum(maxNum);
-			return ret;
-		}
-		return new MeshParticle2D(maxNum);
-	}
-
-	MeshParticle2D.const_stride=29*4;
-	MeshParticle2D._POOL=[];
-	__static(MeshParticle2D,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1406,3,16,
-		0x1406,3,28,
-		0x1406,4,40,
-		0x1406,4,56,
-		0x1406,3,72,
-		0x1406,2,84,
-		0x1406,4,92,
-		0x1406,1,108,
-		0x1406,1,112];}
-	]);
-	return MeshParticle2D;
-})(Mesh2D)
 
 
 /**
@@ -30436,6 +30406,71 @@ var AudioSound=(function(_super){
 	AudioSound._musicAudio=null;
 	return AudioSound;
 })(EventDispatcher)
+
+
+/**
+*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*/
+//class laya.webgl.utils.MeshParticle2D extends laya.webgl.utils.Mesh2D
+var MeshParticle2D=(function(_super){
+	//TODO:coverage
+	function MeshParticle2D(maxNum){
+		MeshParticle2D.__super.call(this,laya.webgl.utils.MeshParticle2D.const_stride,maxNum*4*MeshParticle2D.const_stride,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshParticle2D._fixattriInfo);
+		this.createQuadIB(maxNum);
+		this._quadNum=maxNum;
+	}
+
+	__class(MeshParticle2D,'laya.webgl.utils.MeshParticle2D',_super);
+	var __proto=MeshParticle2D.prototype;
+	__proto.setMaxParticleNum=function(maxNum){
+		this._vb._resizeBuffer(maxNum *4 *MeshParticle2D.const_stride,false);
+		this.createQuadIB(maxNum);
+	}
+
+	//TODO:coverage
+	__proto.releaseMesh=function(){
+		debugger;
+		this._vb.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshParticle2D._POOL.push(this);
+	}
+
+	//TODO:coverage
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._vb.deleteBuffer();
+	}
+
+	MeshParticle2D.getAMesh=function(maxNum){
+		if (laya.webgl.utils.MeshParticle2D._POOL.length){
+			var ret=laya.webgl.utils.MeshParticle2D._POOL.pop();
+			ret.setMaxParticleNum(maxNum);
+			return ret;
+		}
+		return new MeshParticle2D(maxNum);
+	}
+
+	MeshParticle2D.const_stride=29*4;
+	MeshParticle2D._POOL=[];
+	__static(MeshParticle2D,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1406,3,16,
+		0x1406,3,28,
+		0x1406,4,40,
+		0x1406,4,56,
+		0x1406,3,72,
+		0x1406,2,84,
+		0x1406,4,92,
+		0x1406,1,108,
+		0x1406,1,112];}
+	]);
+	return MeshParticle2D;
+})(Mesh2D)
 
 
 /**
@@ -31230,49 +31265,6 @@ var Widget=(function(_super){
 })(Component)
 
 
-//class laya.webgl.resource.CharRender_Native extends laya.webgl.resource.ICharRender
-var CharRender_Native=(function(_super){
-	function CharRender_Native(){
-		this.lastFont='';
-		CharRender_Native.__super.call(this);
-	}
-
-	__class(CharRender_Native,'laya.webgl.resource.CharRender_Native',_super);
-	var __proto=CharRender_Native.prototype;
-	//TODO:coverage
-	__proto.getWidth=function(str){
-		if (!window.conchTextCanvas)return 0;
-		if (this.lastFont !=CharBook._curFont){
-			window.conchTextCanvas.font=CharBook._curFont;
-			this.lastFont=CharBook._curFont;
-		}
-		return window.conchTextCanvas.measureText(str).width;
-	}
-
-	__proto.scale=function(sx,sy){}
-	//TODO:coverage
-	__proto.getCharBmp=function(char,font,lineWidth,colStr,strokeColStr,size,margin_left,margin_top,margin_right,margin_bottom){
-		if (!window.conchTextCanvas)return null;
-		if(this.lastFont!=font){
-			window.conchTextCanvas.font=CharBook._curFont;
-			this.lastFont=CharBook._curFont;
-		};
-		var w=size.width=window.conchTextCanvas.measureText(char).width;
-		var h=size.height;
-		w+=(margin_left+margin_right);
-		h+=(margin_top+margin_bottom);
-		var c1=ColorUtils.create(strokeColStr);
-		var nStrokeColor=c1.numColor;
-		var c2=ColorUtils.create(colStr);
-		var nTextColor=c2.numColor;
-		var textInfo=window.conchTextCanvas.getTextBitmapData(char,nTextColor,lineWidth>2?2:lineWidth,nStrokeColor);
-		return textInfo;
-	}
-
-	return CharRender_Native;
-})(ICharRender)
-
-
 /**
 *@private
 *场景资源加载器
@@ -31400,6 +31392,49 @@ var SceneLoader=(function(_super){
 	]);
 	return SceneLoader;
 })(EventDispatcher)
+
+
+//class laya.webgl.resource.CharRender_Native extends laya.webgl.resource.ICharRender
+var CharRender_Native=(function(_super){
+	function CharRender_Native(){
+		this.lastFont='';
+		CharRender_Native.__super.call(this);
+	}
+
+	__class(CharRender_Native,'laya.webgl.resource.CharRender_Native',_super);
+	var __proto=CharRender_Native.prototype;
+	//TODO:coverage
+	__proto.getWidth=function(str){
+		if (!window.conchTextCanvas)return 0;
+		if (this.lastFont !=CharBook._curFont){
+			window.conchTextCanvas.font=CharBook._curFont;
+			this.lastFont=CharBook._curFont;
+		}
+		return window.conchTextCanvas.measureText(str).width;
+	}
+
+	__proto.scale=function(sx,sy){}
+	//TODO:coverage
+	__proto.getCharBmp=function(char,font,lineWidth,colStr,strokeColStr,size,margin_left,margin_top,margin_right,margin_bottom){
+		if (!window.conchTextCanvas)return null;
+		if(this.lastFont!=font){
+			window.conchTextCanvas.font=CharBook._curFont;
+			this.lastFont=CharBook._curFont;
+		};
+		var w=size.width=window.conchTextCanvas.measureText(char).width;
+		var h=size.height;
+		w+=(margin_left+margin_right);
+		h+=(margin_top+margin_bottom);
+		var c1=ColorUtils.create(strokeColStr);
+		var nStrokeColor=c1.numColor;
+		var c2=ColorUtils.create(colStr);
+		var nTextColor=c2.numColor;
+		var textInfo=window.conchTextCanvas.getTextBitmapData(char,nTextColor,lineWidth>2?2:lineWidth,nStrokeColor);
+		return textInfo;
+	}
+
+	return CharRender_Native;
+})(ICharRender)
 
 
 /**
@@ -34608,22 +34643,73 @@ var UpLoadAndOrderContrl=(function(_super){
 })(Script)
 
 
-/**
-*...
-*@author ...
-*/
-//class laya.webgl.shader.BaseShader extends laya.resource.Resource
-var BaseShader=(function(_super){
-	//当前绑定的shader
-	function BaseShader(){
-		BaseShader.__super.call(this);
+//class script.order.SelectMaterialControl extends laya.components.Script
+var SelectMaterialControl=(function(_super){
+	function SelectMaterialControl(){
+		this.uiSkin=null;
+		SelectMaterialControl.__super.call(this);
 	}
 
-	__class(BaseShader,'laya.webgl.shader.BaseShader',_super);
-	BaseShader.activeShader=null;
-	BaseShader.bindShader=null;
-	return BaseShader;
-})(Resource)
+	__class(SelectMaterialControl,'script.order.SelectMaterialControl',_super);
+	var __proto=SelectMaterialControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.tablist.itemRender=MaterialClassBtn;
+		this.uiSkin.tablist.vScrollBarSkin="";
+		this.uiSkin.tablist.selectEnable=true;
+		this.uiSkin.tablist.spaceY=2;
+		this.uiSkin.tablist.renderHandler=new Handler(this,this.updateMatClassItem);
+		this.uiSkin.tablist.selectHandler=new Handler(this,this.onSlecteMatClass);
+		this.uiSkin.matlist.itemRender=MaterialItem;
+		this.uiSkin.matlist.vScrollBarSkin="";
+		this.uiSkin.matlist.selectEnable=true;
+		this.uiSkin.matlist.spaceY=10;
+		this.uiSkin.matlist.renderHandler=new Handler(this,this.updateMatNameItem);
+		this.uiSkin.matlist.selectHandler=new Handler(this,this.onSlecteMat);
+		var arr=[];
+		for(var i=0;i < 10;i++){
+			arr.push(new MatetialClassVo());
+		}
+		this.uiSkin.tablist.array=arr;
+		this.uiSkin.btncancel.on("click",this,this.onCloseView);
+		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
+	}
+
+	__proto.updateMatClassItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onSlecteMatClass=function(index){
+		var item;
+		for(var $each_item in this.uiSkin.tablist.cells){
+			item=this.uiSkin.tablist.cells[$each_item];
+			item.ShowSelected=item.matclassvo==this.uiSkin.tablist.array[index];
+		}
+		this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
+	}
+
+	__proto.updateMatNameItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onSlecteMat=function(index){
+		var item;
+		for(var $each_item in this.uiSkin.matlist.cells){
+			item=this.uiSkin.matlist.cells[$each_item];
+			item.ShowSelected=item.matvo==this.uiSkin.matlist.array[index];
+		}
+	}
+
+	__proto.onConfirmSelectAddress=function(index){
+		this.onCloseView();
+	}
+
+	__proto.onCloseView=function(){
+		ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
+	}
+
+	return SelectMaterialControl;
+})(Script)
 
 
 /**
@@ -35416,6 +35502,24 @@ var ConchSpriteAdpt=(function(_super){
 	]);
 	return ConchSpriteAdpt;
 })(Node)
+
+
+/**
+*...
+*@author ...
+*/
+//class laya.webgl.shader.BaseShader extends laya.resource.Resource
+var BaseShader=(function(_super){
+	//当前绑定的shader
+	function BaseShader(){
+		BaseShader.__super.call(this);
+	}
+
+	__class(BaseShader,'laya.webgl.shader.BaseShader',_super);
+	BaseShader.activeShader=null;
+	BaseShader.bindShader=null;
+	return BaseShader;
+})(Resource)
 
 
 /**
@@ -46399,6 +46503,25 @@ var SelectFactoryPanelUI=(function(_super){
 })(View)
 
 
+//class ui.order.TabChooseBtnUI extends laya.ui.View
+var TabChooseBtnUI=(function(_super){
+	function TabChooseBtnUI(){
+		this.selbtn=null;
+		TabChooseBtnUI.__super.call(this);
+	}
+
+	__class(TabChooseBtnUI,'ui.order.TabChooseBtnUI',_super);
+	var __proto=TabChooseBtnUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TabChooseBtnUI.uiView);
+	}
+
+	TabChooseBtnUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"var":"selbtn","stateNum":2,"skin":"button/clubDayoption.png","labelSize":26,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜"},"compId":3}],"loadList":["button/clubDayoption.png"],"loadList3D":[]};
+	return TabChooseBtnUI;
+})(View)
+
+
 //class ui.order.AddressItemUI extends laya.ui.View
 var AddressItemUI=(function(_super){
 	function AddressItemUI(){
@@ -46607,6 +46730,27 @@ var UserMainPanelUI=(function(_super){
 })(View)
 
 
+//class ui.order.MaterialNameItemUI extends laya.ui.View
+var MaterialNameItemUI=(function(_super){
+	function MaterialNameItemUI(){
+		this.blackrect=null;
+		this.redrect=null;
+		this.matname=null;
+		MaterialNameItemUI.__super.call(this);
+	}
+
+	__class(MaterialNameItemUI,'ui.order.MaterialNameItemUI',_super);
+	var __proto=MaterialNameItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(MaterialNameItemUI.uiView);
+	}
+
+	MaterialNameItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"var":"blackrect"},"compId":6,"child":[{"type":"Rect","props":{"y":-0.5,"x":-0.5,"width":200,"lineWidth":1,"lineColor":"0","height":39},"compId":7}]},{"type":"Sprite","props":{"y":0,"x":0,"var":"redrect"},"compId":5,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":200,"lineWidth":1,"lineColor":"#ff0000","height":39},"compId":3}]},{"type":"Label","props":{"y":2,"x":1,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+	return MaterialNameItemUI;
+})(View)
+
+
 //class ui.PicManagePanelUI extends laya.ui.View
 var PicManagePanelUI=(function(_super){
 	function PicManagePanelUI(){
@@ -46641,35 +46785,26 @@ var PicManagePanelUI=(function(_super){
 })(View)
 
 
-//class script.order.PicOrderItem extends ui.order.OrderItemUI
-var PicOrderItem=(function(_super){
-	function PicOrderItem(vo){
-		this.ordervo=null;
-		PicOrderItem.__super.call(this);
-		this.ordervo=vo;
-		this.initItem();
+//class ui.order.SelectMaterialPanelUI extends laya.ui.View
+var SelectMaterialPanelUI=(function(_super){
+	function SelectMaterialPanelUI(){
+		this.matlist=null;
+		this.btnok=null;
+		this.btncancel=null;
+		this.tablist=null;
+		SelectMaterialPanelUI.__super.call(this);
 	}
 
-	__class(PicOrderItem,'script.order.PicOrderItem',_super);
-	var __proto=PicOrderItem.prototype;
-	__proto.initItem=function(){
-		this.numindex.text=this.ordervo.indexNum.toString();
-		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
-		this.filename.text=this.ordervo.picinfo.directName;
-		this.architype.text=this.ordervo.techStr;
-		if(this.architype.textField.textHeight > 40)
-			this.architype.height=this.architype.textField.textHeight;
-		else
-		this.architype.height=40;
-		this.changearchitxt.y=this.architype.y+this.architype.height-15;
-		if(this.architype.height > 60)
-			this.height=this.architype.height+20;
-		else
-		this.height=60;
+	__class(SelectMaterialPanelUI,'ui.order.SelectMaterialPanelUI',_super);
+	var __proto=SelectMaterialPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(SelectMaterialPanelUI.uiView);
 	}
 
-	return PicOrderItem;
-})(OrderItemUI)
+	SelectMaterialPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":2,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":5},{"type":"Panel","props":{"y":0,"x":10,"top":-2,"right":0,"left":0,"bottom":100},"compId":6,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":8},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":9},{"type":"Label","props":{"y":119,"x":886,"text":"选择材料","fontSize":36,"color":"#eedfdf","bold":true},"compId":10},{"type":"List","props":{"y":370,"x":364,"width":1192,"var":"matlist","spaceY":10,"spaceX":10,"repeatX":5,"height":508},"compId":11},{"type":"Sprite","props":{"y":889,"x":824},"compId":12,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":13},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":14}]},{"type":"List","props":{"y":190,"x":364,"width":1192,"var":"tablist","repeatX":6,"height":164},"compId":15}]},{"type":"Script","props":{"runtime":"script.order.SelectMaterialControl"},"compId":16}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
+	return SelectMaterialPanelUI;
+})(View)
 
 
 //class ui.login.ResetPwdPanelUI extends laya.ui.View
@@ -46716,6 +46851,44 @@ var UpLoadPanelUI=(function(_super){
 	UpLoadPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":4},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":14,"child":[{"type":"Image","props":{"x":320,"width":1280,"top":0,"skin":"commers/blackbg.png","bottom":0},"compId":20},{"type":"Label","props":{"y":11,"x":359,"text":"您选择的文件：","fontSize":24,"color":"#f3e6e6"},"compId":5},{"type":"Button","props":{"y":5,"x":1860,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},"compId":6},{"type":"Button","props":{"y":48,"x":395,"width":98,"skin":"comp/button.png","labelSize":20,"label":"选择文件","height":33},"compId":7},{"type":"Button","props":{"y":48,"x":509,"width":98,"var":"btnBegin","skin":"comp/button.png","labelSize":20,"label":"开始上传","height":33},"compId":8},{"type":"List","props":{"y":97,"x":358,"width":938,"var":"fileList","repeatX":1,"height":584},"compId":9}]},{"type":"Script","props":{"runtime":"script.picUpload.UpLoadAndOrderContrl"},"compId":19}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return UpLoadPanelUI;
 })(View)
+
+
+//class script.order.PicOrderItem extends ui.order.OrderItemUI
+var PicOrderItem=(function(_super){
+	function PicOrderItem(vo){
+		this.ordervo=null;
+		PicOrderItem.__super.call(this);
+		this.ordervo=vo;
+		this.initItem();
+	}
+
+	__class(PicOrderItem,'script.order.PicOrderItem',_super);
+	var __proto=PicOrderItem.prototype;
+	__proto.initItem=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		this.filename.text=this.ordervo.picinfo.directName;
+		this.architype.text=this.ordervo.techStr;
+		this.changemat.underline=true;
+		this.changemat.underlineColor="#222222";
+		this.changemat.on("click",this,this.onShowMaterialView);
+		if(this.architype.textField.textHeight > 40)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=40;
+		this.changearchitxt.y=this.architype.y+this.architype.height-15;
+		if(this.architype.height > 60)
+			this.height=this.architype.height+20;
+		else
+		this.height=60;
+	}
+
+	__proto.onShowMaterialView=function(){
+		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
+	}
+
+	return PicOrderItem;
+})(OrderItemUI)
 
 
 //class ui.uploadpic.UpLoadItemUI extends laya.ui.View
@@ -51237,6 +51410,28 @@ var HSlider=(function(_super){
 })(Slider)
 
 
+//class script.order.MaterialClassBtn extends ui.order.TabChooseBtnUI
+var MaterialClassBtn=(function(_super){
+	function MaterialClassBtn(){
+		this.matclassvo=null;
+		MaterialClassBtn.__super.call(this);
+	}
+
+	__class(MaterialClassBtn,'script.order.MaterialClassBtn',_super);
+	var __proto=MaterialClassBtn.prototype;
+	__proto.setData=function(matName){
+		this.matclassvo=matName;
+		this.selbtn.label=this.matclassvo.matclassname;
+	}
+
+	__getset(0,__proto,'ShowSelected',null,function(value){
+		this.selbtn.selected=value;
+	});
+
+	return MaterialClassBtn;
+})(TabChooseBtnUI)
+
+
 //class script.order.SelAddressItem extends ui.order.AddressItemUI
 var SelAddressItem=(function(_super){
 	function SelAddressItem(){
@@ -51423,6 +51618,31 @@ var DirectFolderItem=(function(_super){
 
 	return DirectFolderItem;
 })(DirectItemUI)
+
+
+//class script.order.MaterialItem extends ui.order.MaterialNameItemUI
+var MaterialItem=(function(_super){
+	function MaterialItem(){
+		this.matvo=null;
+		MaterialItem.__super.call(this);
+	}
+
+	__class(MaterialItem,'script.order.MaterialItem',_super);
+	var __proto=MaterialItem.prototype;
+	__proto.setData=function(matName){
+		this.matvo=matName;
+		this.matname.text=this.matvo.matName;
+		this.blackrect.visible=false;
+		this.redrect.visible=false;
+	}
+
+	__getset(0,__proto,'ShowSelected',null,function(value){
+		this.blackrect.visible=!value;
+		this.redrect.visible=value;
+	});
+
+	return MaterialItem;
+})(MaterialNameItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI
