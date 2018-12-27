@@ -1,5 +1,7 @@
 package model.picmanagerModel
 {
+	import utils.UtilTool;
+
 	public class PicInfoVo
 	{
 		public var picType:int = 0;// 0 目录 1 图片
@@ -14,6 +16,9 @@ package model.picmanagerModel
 		
 		public var picWidth:int;
 		public var picHeight:int;
+		
+		public var picPhysicWidth:Number;
+		public var picPhysicHeight:Number;
 		
 		public var colorspace:String = "";
 		
@@ -37,7 +42,10 @@ package model.picmanagerModel
 				picWidth = fattr.width;
 				picHeight = fattr.height;
 				colorspace = fattr.colorspace;
-				dpi = fattr.dpi;
+				dpi = UtilTool.oneCutNineAdd(fattr.dpi);
+				picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
+				picPhysicHeight = UtilTool.oneCutNineAdd(picHeight/dpi*2.54);
+
 				picClass = fileinfo.ftype;
 				
 				directName = fileinfo.fname;

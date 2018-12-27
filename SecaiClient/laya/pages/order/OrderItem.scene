@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":2,
-    "selecteID":12,
+    "selectedBox":24,
+    "selecteID":13,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff","height":0},
     "nodeParent":-1,
-    "maxID":23,
+    "maxID":27,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -14,6 +14,20 @@
     "hasChild":true,
     "compId":2,
     "child":[
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image,bgimg",
+            "props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},
+            "nodeParent":2,
+            "label":"bgimg",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":26,
+            "child":[
+                ]
+        },
         {
             "x":15,
             "type":"Label",
@@ -32,9 +46,10 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,fileimg",
-            "props":{"y":2,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},
+            "props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},
             "nodeParent":2,
             "label":"fileimg",
+            "isOpen":true,
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
@@ -46,7 +61,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,filename",
-            "props":{"y":22,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},
+            "props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},
             "nodeParent":2,
             "label":"filename",
             "isDirectory":false,
@@ -59,64 +74,8 @@
         {
             "x":15,
             "type":"Label",
-            "searchKey":"Label,mattxt",
-            "props":{"y":21,"x":360,"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},
-            "nodeParent":2,
-            "label":"mattxt",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":6,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"Text",
-            "searchKey":"Text,changemat",
-            "props":{"y":46,"x":420,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28"},
-            "nodeParent":2,
-            "label":"changemat",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":7,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"Label",
-            "searchKey":"Label,architype",
-            "props":{"x":726,"width":176,"var":"architype","valign":"middle","top":1,"text":"户外材料--白胶车贴","height":40,"fontSize":18,"align":"center"},
-            "nodeParent":2,
-            "label":"architype",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":12,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"Text",
-            "searchKey":"Text,changearchitxt",
-            "props":{"y":45,"x":778,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28"},
-            "nodeParent":2,
-            "label":"changearchitxt",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":13,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"Label",
             "searchKey":"Label,viprice",
-            "props":{"y":30,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},
+            "props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},
             "nodeParent":2,
             "label":"viprice",
             "isDirectory":false,
@@ -130,7 +89,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,price",
-            "props":{"y":30,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},
+            "props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},
             "nodeParent":2,
             "label":"price",
             "isDirectory":false,
@@ -144,7 +103,7 @@
             "x":15,
             "type":"TextInput",
             "searchKey":"TextInput,inputnum",
-            "props":{"y":30,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18},
+            "props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18},
             "nodeParent":2,
             "label":"inputnum",
             "isDirectory":false,
@@ -158,7 +117,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,total",
-            "props":{"y":30,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},
+            "props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},
             "nodeParent":2,
             "label":"total",
             "isDirectory":false,
@@ -172,16 +131,17 @@
             "x":15,
             "type":"Box",
             "searchKey":"Box,operatebox",
-            "props":{"y":20,"x":1203,"var":"operatebox"},
+            "props":{"y":10,"x":1203,"var":"operatebox"},
             "nodeParent":2,
             "label":"operatebox",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":21,
             "child":[
                 {
+                    "x":30,
                     "type":"Text",
                     "searchKey":"Text,addmsg",
                     "props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28"},
@@ -195,6 +155,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "searchKey":"Text,deleteorder",
                     "props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28"},
@@ -212,7 +173,7 @@
             "x":15,
             "type":"Box",
             "searchKey":"Box,editbox",
-            "props":{"y":20,"x":577,"var":"editbox"},
+            "props":{"y":10,"x":577,"var":"editbox"},
             "nodeParent":2,
             "label":"editbox",
             "isOpen":null,
@@ -270,6 +231,88 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":11,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"VBox",
+            "searchKey":"VBox",
+            "props":{"y":10,"x":726,"space":0},
+            "nodeParent":2,
+            "label":"VBox",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":24,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,architype",
+                    "props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},
+                    "nodeParent":24,
+                    "label":"architype",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":12,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Text",
+                    "searchKey":"Text,changearchitxt",
+                    "props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28"},
+                    "nodeParent":24,
+                    "label":"changearchitxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":13,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Sprite",
+            "searchKey":"Sprite,matbox",
+            "props":{"y":12,"x":360,"var":"matbox"},
+            "nodeParent":2,
+            "label":"matbox",
+            "isOpen":null,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":25,
+            "child":[
+                {
+                    "type":"Label",
+                    "searchKey":"Label,mattxt",
+                    "props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},
+                    "nodeParent":25,
+                    "label":"mattxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":6,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Text",
+                    "searchKey":"Text,changemat",
+                    "props":{"y":25,"x":60,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28"},
+                    "nodeParent":25,
+                    "label":"changemat",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":7,
                     "child":[
                         ]
                 }]

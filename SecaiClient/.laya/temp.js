@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1208,7 +1208,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/SelectMaterialPanel.scene";
+	GameConfig.startScene="order/OrderItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1427,6 +1427,25 @@ var ViewManager=(function(){
 })()
 
 
+//class utils.UtilTool
+var UtilTool=(function(){
+	function UtilTool(){}
+	__class(UtilTool,'utils.UtilTool');
+	UtilTool.oneCutNineAdd=function(fnum){
+		var numstr=fnum.toFixed(1);
+		var dotnum=parseInt(numstr.split(".")[1]);
+		if(dotnum==1)
+			return parseInt(numstr.split(".")[0]);
+		else if(dotnum==9)
+		return parseInt(numstr.split(".")[0])+1;
+		else
+		return parseFloat(numstr);
+	}
+
+	return UtilTool;
+})()
+
+
 //class model.orderModel.PartItemVo
 var PartItemVo=(function(){
 	function PartItemVo(){
@@ -1458,6 +1477,8 @@ var PicInfoVo=(function(){
 		this.fid="";
 		this.picWidth=0;
 		this.picHeight=0;
+		this.picPhysicWidth=NaN;
+		this.picPhysicHeight=NaN;
 		this.colorspace="";
 		this.picClass="";
 		this.dpi=NaN;
@@ -1473,7 +1494,9 @@ var PicInfoVo=(function(){
 			this.picWidth=fattr.width;
 			this.picHeight=fattr.height;
 			this.colorspace=fattr.colorspace;
-			this.dpi=fattr.dpi;
+			this.dpi=UtilTool.oneCutNineAdd(fattr.dpi);
+			this.picPhysicWidth=UtilTool.oneCutNineAdd(this.picWidth/this.dpi*2.54);
+			this.picPhysicHeight=UtilTool.oneCutNineAdd(this.picHeight/this.dpi*2.54);
 			this.picClass=fileinfo.ftype;
 			this.directName=fileinfo.fname;
 			this.parentDirect=fileinfo.fpath;
@@ -1560,7 +1583,7 @@ var PicOrderItemVo=(function(){
 		this.totalPrice=NaN;
 		this.picinfo=picvo;
 		var num=Math.random()*8;
-		for(var i=0;i < 2;i++){
+		for(var i=0;i < num;i++){
 			this.techStr+="工艺"+i+"\n";
 		}
 	}
@@ -25913,6 +25936,9 @@ var EventCenter=(function(_super){
 	EventCenter.UPDATE_FILE_LIST="UPDATE_FILE_LIST";
 	EventCenter.SELECT_PIC_ORDER="SELECT_PIC_ORDER";
 	EventCenter.SELECT_ORDER_ADDRESS="SELECT_ORDER_ADDRESS";
+	EventCenter.ADD_PIC_FOR_ORDER="ADD_PIC_FOR_ORDER";
+	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
+	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -33661,9 +33687,15 @@ var SelectPicControl=(function(_super){
 		this.uiSkin.htmltext.style.fontSize=20;
 		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
+		this.uiSkin.btnok.on("click",this,this.onConfirmSelect);
 		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+	}
+
+	__proto.onConfirmSelect=function(){
+		EventCenter.instance.event("ADD_PIC_FOR_ORDER");
+		this.onCloseView();
 	}
 
 	__proto.onCloseView=function(){
@@ -34165,13 +34197,20 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.btn_addattach.on("click",this,this.onAddPart);
 		this.uiSkin.btnaddpic.on("click",this,this.onShowSelectPic);
 		var i=1;
+		var num=0;
+		var totalheight=0;
 		var fvo;
 		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
 			fvo=DirectoryFileModel.instance.haselectPic[$each_fvo];
 			var ovo=new PicOrderItemVo(fvo);
 			ovo.indexNum=i++;
-			this.uiSkin.ordervbox.addChild(new PicOrderItem(ovo));
+			var item=new PicOrderItem(ovo);
+			this.uiSkin.ordervbox.addChild(item);
+			totalheight+=item.height+this.uiSkin.ordervbox.space;
+			num++;
 		}
+		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,totalheight-this.uiSkin.ordervbox.space);
+		DirectoryFileModel.instance.haselectPic={};
 		this.uiSkin.changemyadd.underline=true;
 		this.uiSkin.changemyadd.underlineColor="#222222";
 		this.uiSkin.changefactory.underline=true;
@@ -34179,6 +34218,9 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.changemyadd.on("click",this,this.onShowSelectAddress);
 		this.uiSkin.changefactory.on("click",this,this.onShowSelectFactory);
 		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
+		EventCenter.instance.on("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
+		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 	}
 
 	__proto.onShowSelectPic=function(){
@@ -34197,12 +34239,63 @@ var PaintOrderControl=(function(_super){
 		ViewManager.instance.openView("VIEW_SELECT_ADDRESS");
 	}
 
+	__proto.onUpdateOrderPic=function(){
+		var curindex=this.uiSkin.ordervbox.numChildren;
+		curindex++;
+		var childarr=[];
+		var fvo;
+		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
+			fvo=DirectoryFileModel.instance.haselectPic[$each_fvo];
+			if(this.uiSkin.ordervbox.numChildren > 0)
+				this.uiSkin.ordervbox.height+=this.uiSkin.ordervbox.space;
+			var ovo=new PicOrderItemVo(fvo);
+			ovo.indexNum=curindex++;
+			var item=new PicOrderItem(ovo);
+			this.uiSkin.ordervbox.height+=item.height;
+			this.uiSkin.ordervbox.addChild(item);
+		}
+		for(var i=0;i < this.uiSkin.ordervbox.numChildren;i++){
+			if(i==0)
+				(this.uiSkin.ordervbox.getChildAt(0)).y=0;
+			else
+			(this.uiSkin.ordervbox.getChildAt(i)).y=(this.uiSkin.ordervbox.getChildAt(i-1)).y+(this.uiSkin.ordervbox.getChildAt(i-1)).height+this.uiSkin.ordervbox.space;
+		}
+		this.uiSkin.ordervbox.refresh();
+		DirectoryFileModel.instance.haselectPic={};
+	}
+
+	__proto.onDeletePicOrder=function(orderitem){
+		var ordervo=orderitem.ordervo;
+		for(var i=0;i < this.uiSkin.ordervbox.numChildren;i++){
+			var pvo=(this.uiSkin.ordervbox.getChildAt(i)).ordervo;
+			if(pvo.indexNum > ordervo.indexNum)
+				pvo.indexNum--;
+			(this.uiSkin.ordervbox.getChildAt(i)).updateIndex();
+		}
+		this.uiSkin.ordervbox.removeChild(orderitem);
+		if(this.uiSkin.ordervbox.height-orderitem.height-this.uiSkin.ordervbox.space < 0)
+			this.uiSkin.ordervbox.height=0;
+		else
+		this.uiSkin.ordervbox.height-=orderitem.height+this.uiSkin.ordervbox.space;
+		if(this.uiSkin.ordervbox.numChildren==0)
+			this.uiSkin.ordervbox.height=0;
+		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,0);
+		this.uiSkin.ordervbox.refresh();
+	}
+
+	__proto.onAdjustHeight=function(changeht){
+		this.uiSkin.ordervbox.height+=changeht;
+	}
+
 	__proto.onAddPart=function(){
 		this.uiSkin.partvbox.addChild(new PartItem(new PartItemVo()));
 	}
 
 	__proto.onDestroy=function(){
 		EventCenter.instance.off("SELECT_ORDER_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.off("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
+		EventCenter.instance.off("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
+		EventCenter.instance.off("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 	}
 
 	__proto.onClosePanel=function(){
@@ -40637,13 +40730,10 @@ var View=(function(_super){
 //class ui.order.OrderItemUI extends laya.display.Scene
 var OrderItemUI=(function(_super){
 	function OrderItemUI(){
+		this.bgimg=null;
 		this.numindex=null;
 		this.fileimg=null;
 		this.filename=null;
-		this.mattxt=null;
-		this.changemat=null;
-		this.architype=null;
-		this.changearchitxt=null;
 		this.viprice=null;
 		this.price=null;
 		this.inputnum=null;
@@ -40654,6 +40744,11 @@ var OrderItemUI=(function(_super){
 		this.editbox=null;
 		this.editwidth=null;
 		this.editheight=null;
+		this.architype=null;
+		this.changearchitxt=null;
+		this.matbox=null;
+		this.mattxt=null;
+		this.changemat=null;
 		OrderItemUI.__super.call(this);
 	}
 
@@ -40664,7 +40759,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":2,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":22,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":21,"x":360,"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":46,"x":420,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":7},{"type":"Label","props":{"x":726,"width":176,"var":"architype","valign":"middle","top":1,"text":"户外材料--白胶车贴","height":40,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":45,"x":778,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":13},{"type":"Label","props":{"y":30,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":30,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":30,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":30,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":20,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":20,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]}],"loadList":["comp/image.png","comp/textinput.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":13}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":7}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -46594,6 +46689,7 @@ var SelectPicPanelUI=(function(_super){
 		this.flder2=null;
 		this.htmltext=null;
 		this.radiosel=null;
+		this.btnok=null;
 		this.picList=null;
 		this.btncancel=null;
 		SelectPicPanelUI.__super.call(this);
@@ -46606,7 +46702,7 @@ var SelectPicPanelUI=(function(_super){
 		this.createView(SelectPicPanelUI.uiView);
 	}
 
-	SelectPicPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":33},{"type":"Panel","props":{"top":100,"right":0,"left":0,"bottom":100},"compId":3,"child":[{"type":"Image","props":{"y":0,"top":0,"skin":"commers/whitebg.png","right":360,"left":360,"bottom":0,"alpha":1},"compId":34},{"type":"Sprite","props":{"y":131,"x":362,"width":154,"height":387},"compId":12,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":152,"lineWidth":1,"lineColor":"#141313","height":384,"fillColor":"#fdfbfb"},"compId":13},{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":14}]},{"type":"Label","props":{"y":90,"x":610,"width":100,"var":"flder0","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":725,"width":100,"var":"flder1","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":839,"width":100,"var":"flder2","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":88,"x":1252,"width":181,"var":"htmltext","innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":20,"x":1194.5,"width":115,"skin":"comp/button.png","labelSize":20,"label":"确定","height":40},"compId":21},{"type":"List","props":{"x":611,"width":940,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":6,"height":688,"bottom":62},"compId":22},{"type":"Button","props":{"y":20,"x":1332.5,"width":115,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":40},"compId":30},{"type":"Label","props":{"y":96,"x":362,"width":152,"text":"一级目录","mouseEnabled":true,"height":35,"fontSize":30,"color":"#FFFFFF","bgColor":"#f41a16","align":"center"},"compId":31}]},{"type":"Script","props":{"runtime":"script.order.SelectPicControl"},"compId":32}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/checkbox.png","comp/button.png"],"loadList3D":[]};
+	SelectPicPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":33},{"type":"Panel","props":{"top":100,"right":0,"left":0,"bottom":100},"compId":3,"child":[{"type":"Image","props":{"y":0,"top":0,"skin":"commers/whitebg.png","right":360,"left":360,"bottom":0,"alpha":1},"compId":34},{"type":"Sprite","props":{"y":131,"x":362,"width":154,"height":387},"compId":12,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":152,"lineWidth":1,"lineColor":"#141313","height":384,"fillColor":"#fdfbfb"},"compId":13},{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":14}]},{"type":"Label","props":{"y":90,"x":610,"width":100,"var":"flder0","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":725,"width":100,"var":"flder1","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":839,"width":100,"var":"flder2","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":88,"x":1252,"width":181,"var":"htmltext","innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":20,"x":1194.5,"width":115,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":40},"compId":21},{"type":"List","props":{"x":576,"width":967,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":6,"height":688,"bottom":62},"compId":22},{"type":"Button","props":{"y":20,"x":1332.5,"width":115,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":40},"compId":30},{"type":"Label","props":{"y":96,"x":362,"width":152,"text":"一级目录","mouseEnabled":true,"height":35,"fontSize":30,"color":"#FFFFFF","bgColor":"#f41a16","align":"center"},"compId":31}]},{"type":"Script","props":{"runtime":"script.order.SelectPicControl"},"compId":32}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/checkbox.png","comp/button.png"],"loadList3D":[]};
 	return SelectPicPanelUI;
 })(View)
 
@@ -46820,6 +46916,91 @@ var ResetPwdPanelUI=(function(_super){
 })(View)
 
 
+//class script.order.PicOrderItem extends ui.order.OrderItemUI
+var PicOrderItem=(function(_super){
+	function PicOrderItem(vo){
+		this.ordervo=null;
+		PicOrderItem.__super.call(this);
+		this.ordervo=vo;
+		this.initItem();
+	}
+
+	__class(PicOrderItem,'script.order.PicOrderItem',_super);
+	var __proto=PicOrderItem.prototype;
+	__proto.initItem=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		this.filename.text=this.ordervo.picinfo.directName;
+		this.architype.text=this.ordervo.techStr;
+		this.deleteorder.underline=true;
+		this.deleteorder.underlineColor="#222222";
+		this.deleteorder.on("click",this,this.onDeleteOrder);
+		this.changemat.underline=true;
+		this.changemat.underlineColor="#222222";
+		this.changemat.on("click",this,this.onShowMaterialView);
+		this.changearchitxt.on("click",this,this.onchangeTech);
+		if(this.architype.textField.textHeight > 30)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=30;
+		if(this.architype.height > 30)
+			this.height=this.architype.height+35;
+		else
+		this.height=60;
+		this.bgimg.height=this.height;
+		this.alighComponet();
+	}
+
+	__proto.onchangeTech=function(){
+		var num=Math.random()*8;
+		var techStr="";
+		for(var i=0;i < num;i++){
+			techStr+="工艺"+i+"\n";
+		};
+		var lastheight=this.height;
+		this.architype.text=techStr;
+		if(this.architype.textField.textHeight > 30)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=30;
+		if(this.architype.height > 30)
+			this.height=this.architype.height+35;
+		else
+		this.height=60;
+		this.bgimg.height=this.height;
+		this.alighComponet();
+		EventCenter.instance.event("ADJUST_PIC_ORDER_TECH",this.height-lastheight);
+	}
+
+	__proto.alighComponet=function(){
+		this.numindex.y=(this.height-this.numindex.height)/2;
+		this.fileimg.y=(this.height-this.fileimg.height)/2;
+		this.filename.y=(this.height-this.filename.height)/2;
+		this.matbox.y=(this.height-42)/2;
+		this.editbox.y=(this.height-this.editbox.height)/2;
+		this.viprice.y=(this.height-this.viprice.height)/2;
+		this.inputnum.y=(this.height-this.inputnum.height)/2;
+		this.price.y=(this.height-this.price.height)/2;
+		this.total.y=(this.height-this.total.height)/2;
+		this.operatebox.y=(this.height-this.operatebox.height)/2;
+	}
+
+	__proto.updateIndex=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+	}
+
+	__proto.onDeleteOrder=function(){
+		EventCenter.instance.event("DELETE_PIC_ORDER",this);
+	}
+
+	__proto.onShowMaterialView=function(){
+		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
+	}
+
+	return PicOrderItem;
+})(OrderItemUI)
+
+
 //class ui.uploadpic.UpLoadPanelUI extends laya.ui.View
 var UpLoadPanelUI=(function(_super){
 	function UpLoadPanelUI(){
@@ -46840,44 +47021,6 @@ var UpLoadPanelUI=(function(_super){
 	UpLoadPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":4},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":14,"child":[{"type":"Image","props":{"x":320,"width":1280,"top":0,"skin":"commers/blackbg.png","bottom":0},"compId":20},{"type":"Label","props":{"y":11,"x":359,"text":"您选择的文件：","fontSize":24,"color":"#f3e6e6"},"compId":5},{"type":"Button","props":{"y":5,"x":1860,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},"compId":6},{"type":"Button","props":{"y":48,"x":395,"width":98,"skin":"comp/button.png","labelSize":20,"label":"选择文件","height":33},"compId":7},{"type":"Button","props":{"y":48,"x":509,"width":98,"var":"btnBegin","skin":"comp/button.png","labelSize":20,"label":"开始上传","height":33},"compId":8},{"type":"List","props":{"y":97,"x":358,"width":938,"var":"fileList","repeatX":1,"height":584},"compId":9}]},{"type":"Script","props":{"runtime":"script.picUpload.UpLoadAndOrderContrl"},"compId":19}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return UpLoadPanelUI;
 })(View)
-
-
-//class script.order.PicOrderItem extends ui.order.OrderItemUI
-var PicOrderItem=(function(_super){
-	function PicOrderItem(vo){
-		this.ordervo=null;
-		PicOrderItem.__super.call(this);
-		this.ordervo=vo;
-		this.initItem();
-	}
-
-	__class(PicOrderItem,'script.order.PicOrderItem',_super);
-	var __proto=PicOrderItem.prototype;
-	__proto.initItem=function(){
-		this.numindex.text=this.ordervo.indexNum.toString();
-		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
-		this.filename.text=this.ordervo.picinfo.directName;
-		this.architype.text=this.ordervo.techStr;
-		this.changemat.underline=true;
-		this.changemat.underlineColor="#222222";
-		this.changemat.on("click",this,this.onShowMaterialView);
-		if(this.architype.textField.textHeight > 40)
-			this.architype.height=this.architype.textField.textHeight;
-		else
-		this.architype.height=40;
-		this.changearchitxt.y=this.architype.y+this.architype.height-15;
-		if(this.architype.height > 60)
-			this.height=this.architype.height+20;
-		else
-		this.height=60;
-	}
-
-	__proto.onShowMaterialView=function(){
-		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
-	}
-
-	return PicOrderItem;
-})(OrderItemUI)
 
 
 //class ui.uploadpic.UpLoadItemUI extends laya.ui.View
@@ -51501,7 +51644,7 @@ var PicInfoItem=(function(_super){
 				this.img.width=150/this.picInfo.picHeight *this.picInfo.picWidth;
 			}
 			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
-			var str="长:"+(this.picInfo.picWidth/this.picInfo.dpi).toFixed(1).toString()+";宽:"+(this.picInfo.picHeight/this.picInfo.dpi).toFixed(1).toString()+"\n";
+			var str="长:"+this.picInfo.picPhysicWidth+";宽:"+this.picInfo.picPhysicHeight+"\n";
 			str+="dpi:"+this.picInfo.dpi;
 			this.fileinfo.text=str;
 			this.picClassTxt.text=this.picInfo.picClass;

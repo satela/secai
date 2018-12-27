@@ -67,7 +67,7 @@ package script.picUpload
 				}
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
 				
-				var str:String = "长:" + (picInfo.picWidth/picInfo.dpi).toFixed(1).toString() + ";宽:" +  (picInfo.picHeight/picInfo.dpi).toFixed(1).toString() + "\n";
+				var str:String = "长:" + picInfo.picPhysicWidth + ";宽:" +  picInfo.picPhysicHeight + "\n";
 				
 				str += "dpi:" + picInfo.dpi;
 				this.fileinfo.text = str;

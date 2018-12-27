@@ -31,7 +31,7 @@ package model.orderModel
 		{
 			picinfo = picvo;
 			var num:int = Math.random()*8;
-			for(var i:int=0;i < 2;i++)
+			for(var i:int=0;i < num;i++)
 			{
 				techStr += "工艺" + i + "\n";
 			}

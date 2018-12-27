@@ -66,10 +66,19 @@ package script.order
 			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
 			
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
+			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelect);
+
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+		}
+		
+		private function onConfirmSelect():void
+		{
+			// TODO Auto Generated method stub
+			EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+			onCloseView();
 		}
 		
 		private function onCloseView():void
