@@ -2,11 +2,11 @@
     "x":0,
     "type":"Scene",
     "selectedBox":24,
-    "selecteID":13,
+    "selecteID":29,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff","height":0},
     "nodeParent":-1,
-    "maxID":27,
+    "maxID":31,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -265,16 +265,43 @@
                 {
                     "x":30,
                     "type":"Text",
+                    "selectedBox":3,
                     "searchKey":"Text,changearchitxt",
-                    "props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28"},
+                    "props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":18,"color":"#094f28"},
                     "nodeParent":24,
+                    "maxID":5,
                     "label":"changearchitxt",
-                    "isDirectory":false,
+                    "isOpen":null,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":13,
+                    "hasChild":true,
+                    "compId":29,
                     "child":[
-                        ]
+                        {
+                            "type":"Script",
+                            "switchAble":true,
+                            "source":"src/script/prefabScript/LinkTextControl.as",
+                            "searchKey":"Script,LinkTextControl",
+                            "removeAble":true,
+                            "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                            "nodeParent":29,
+                            "label":"LinkTextControl",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":30,
+                            "child":[
+                                ]
+                        }],
+                    "animations":[
+                        {
+                            "nodes":[
+                                ],
+                            "name":"ani1",
+                            "id":1,
+                            "frameRate":24,
+                            "action":0
+                        }]
                 }]
         },
         {
@@ -284,13 +311,14 @@
             "props":{"y":12,"x":360,"var":"matbox"},
             "nodeParent":2,
             "label":"matbox",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":25,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,mattxt",
                     "props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},
@@ -304,17 +332,45 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
+                    "selectedBox":3,
                     "searchKey":"Text,changemat",
-                    "props":{"y":25,"x":60,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28"},
+                    "props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":18,"color":"#094f28"},
                     "nodeParent":25,
+                    "maxID":5,
                     "label":"changemat",
-                    "isDirectory":false,
+                    "isOpen":null,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":7,
+                    "hasChild":true,
+                    "compId":27,
                     "child":[
-                        ]
+                        {
+                            "type":"Script",
+                            "switchAble":true,
+                            "source":"src/script/prefabScript/LinkTextControl.as",
+                            "searchKey":"Script,LinkTextControl",
+                            "removeAble":true,
+                            "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                            "nodeParent":27,
+                            "label":"LinkTextControl",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":28,
+                            "child":[
+                                ]
+                        }],
+                    "animations":[
+                        {
+                            "nodes":[
+                                ],
+                            "name":"ani1",
+                            "id":1,
+                            "frameRate":24,
+                            "action":0
+                        }]
                 }]
         }],
     "animations":[

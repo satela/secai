@@ -25,4 +25,8 @@
    <item name="order/SelectMaterialPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/TabChooseBtn.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/MaterialNameItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="prefabs/LinkCText.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/TechorItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/TechBoxItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectTechPanel.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

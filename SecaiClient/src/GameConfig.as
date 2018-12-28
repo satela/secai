@@ -8,11 +8,13 @@ package {
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
+	import script.prefabScript.LinkTextControl;
 	import script.order.SelectAddressControl;
 	import script.order.SelectFactoryControl;
 	import script.order.SelectMaterialControl;
 	import laya.html.dom.HTMLDivElement;
 	import script.order.SelectPicControl;
+	import script.order.SelectTechControl;
 	import script.order.PaintOrderControl;
 	import script.picUpload.PicManagerControl;
 	import script.picUpload.PictureCheckControl;
@@ -28,7 +30,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/OrderItem.scene";
+		public static var startScene:* = "order/TechBoxItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -43,11 +45,13 @@ package {
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);
+			reg("script.prefabScript.LinkTextControl",LinkTextControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);
 			reg("script.order.SelectFactoryControl",SelectFactoryControl);
 			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.order.SelectPicControl",SelectPicControl);
+			reg("script.order.SelectTechControl",SelectTechControl);
 			reg("script.order.PaintOrderControl",PaintOrderControl);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);

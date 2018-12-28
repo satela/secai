@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":47,
+    "selectedBox":31,
+    "selecteID":104,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
-    "maxID":98,
+    "maxID":106,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -281,20 +281,6 @@
                         },
                         {
                             "x":45,
-                            "type":"Text",
-                            "searchKey":"Text,changemyadd",
-                            "props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","fontSize":24,"color":"#3028ea"},
-                            "nodeParent":24,
-                            "label":"changemyadd",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":22,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,myaddresstxt",
                             "props":{"y":42,"width":1046,"var":"myaddresstxt","text":"收货信息","height":30,"fontSize":24},
@@ -306,6 +292,47 @@
                             "compId":23,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text,changemyadd",
+                            "props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":24,"color":"#3028ea"},
+                            "nodeParent":24,
+                            "maxID":5,
+                            "label":"changemyadd",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":98,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "nodeParent":98,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":99,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
                         }]
                 },
                 {
@@ -337,20 +364,6 @@
                         },
                         {
                             "x":45,
-                            "type":"Text",
-                            "searchKey":"Text,changefactory",
-                            "props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","fontSize":24,"color":"#3028ea"},
-                            "nodeParent":26,
-                            "label":"changefactory",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":28,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,factorytxt",
                             "props":{"y":42,"x":0,"width":425,"var":"factorytxt","text":"收货信息","height":30,"fontSize":24},
@@ -376,6 +389,47 @@
                             "compId":30,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text,changefactory",
+                            "props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":24,"color":"#3028ea"},
+                            "nodeParent":26,
+                            "maxID":5,
+                            "label":"changefactory",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":100,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "nodeParent":100,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":101,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
                         }]
                 },
                 {
@@ -385,13 +439,14 @@
                     "props":{"y":160,"x":320,"width":1280,"height":112},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":31,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"text":"批量修改","fontSize":30},
@@ -405,6 +460,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},
@@ -418,6 +474,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44,"x":162,"text":"商品名称","fontSize":24},
@@ -431,6 +488,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},
@@ -444,6 +502,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":44,"x":1180,"text":"数量","fontSize":24},
@@ -457,6 +516,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},
@@ -470,19 +530,7 @@
                                 ]
                         },
                         {
-                            "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":83,"x":456,"text":"更好材料","fontSize":20,"color":"#3028ea"},
-                            "nodeParent":31,
-                            "label":"Text",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":41,
-                            "child":[
-                                ]
-                        },
-                        {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":74,"x":540,"text":"|","fontSize":30},
@@ -496,6 +544,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},
@@ -509,19 +558,7 @@
                                 ]
                         },
                         {
-                            "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":83,"x":1006,"text":"更换工艺","fontSize":20,"color":"#3028ea"},
-                            "nodeParent":31,
-                            "label":"Text",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":44,
-                            "child":[
-                                ]
-                        },
-                        {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput",
                             "props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20},
@@ -533,6 +570,88 @@
                             "compId":45,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"y":83,"x":456,"text":"更好材料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"color":"#3028ea"},
+                            "nodeParent":31,
+                            "maxID":5,
+                            "label":"Text(LinksText)",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":102,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "nodeParent":102,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":103,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"y":83,"x":1006,"text":"更换工艺","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"color":"#3028ea"},
+                            "nodeParent":31,
+                            "maxID":5,
+                            "label":"Text(LinksText)",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":104,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "nodeParent":104,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":105,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
                         }]
                 },
                 {

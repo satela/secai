@@ -56,6 +56,8 @@ package script.order
 		
 		private function onchangeTech():void
 		{
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY);
+			return;
 			var num:int = Math.random()*8;
 			var techStr:String = "";
 			for(var i:int=0;i < num;i++)

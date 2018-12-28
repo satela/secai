@@ -1201,11 +1201,13 @@ var GameConfig=(function(){
 		reg("script.login.RegisterCntrol",RegisterCntrol);
 		reg("script.login.ResetPwdControl",ResetPwdControl);
 		reg("script.MainPageControl",MainPageControl);
+		reg("script.prefabScript.LinkTextControl",LinkTextControl);
 		reg("script.order.SelectAddressControl",SelectAddressControl);
 		reg("script.order.SelectFactoryControl",SelectFactoryControl);
 		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.order.SelectPicControl",SelectPicControl);
+		reg("script.order.SelectTechControl",SelectTechControl);
 		reg("script.order.PaintOrderControl",PaintOrderControl);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
@@ -1219,7 +1221,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="order/TechBoxItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1268,6 +1270,21 @@ var MaterialItemVo=(function(){
 
 	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
 	return MaterialItemVo;
+})()
+
+
+//class model.orderModel.SingleTechVo
+var SingleTechVo=(function(){
+	function SingleTechVo(){
+		this.techId=0;
+		this.techName="蓝色包边";
+		this.needAttach=false;
+		var index=Math.floor(5*Math.random());
+		this.techName=["蓝色包边","3毫米PVC板","不裁剪","中金边","画面正上方打孔"][index];
+	}
+
+	__class(SingleTechVo,'model.orderModel.SingleTechVo');
+	return SingleTechVo;
 })()
 
 
@@ -1374,6 +1391,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_FACTORY"]=SelectFactoryPanelUI;
 		this.viewDict["VIEW_SELECT_PIC_TO_ORDER"]=SelectPicPanelUI;
 		this.viewDict["VIEW_SELECT_MATERIAL"]=SelectMaterialPanelUI;
+		this.viewDict["VIEW_SELECT_TECHNORLOGY"]=SelectTechPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1433,6 +1451,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_FACTORY="VIEW_SELECT_FACTORY";
 	ViewManager.VIEW_SELECT_PIC_TO_ORDER="VIEW_SELECT_PIC_TO_ORDER";
 	ViewManager.VIEW_SELECT_MATERIAL="VIEW_SELECT_MATERIAL";
+	ViewManager.VIEW_SELECT_TECHNORLOGY="VIEW_SELECT_TECHNORLOGY";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -1601,6 +1620,24 @@ var PicOrderItemVo=(function(){
 
 	__class(PicOrderItemVo,'model.orderModel.PicOrderItemVo');
 	return PicOrderItemVo;
+})()
+
+
+//class model.orderModel.TechMainVo
+var TechMainVo=(function(){
+	function TechMainVo(){
+		this.totalName="包边";
+		this.techlist=null;
+		this.techlist=[];
+		var num=Math.random()*28;
+		for(var i=0;i < num;i++){
+			var tech=new SingleTechVo();
+			this.techlist.push(tech);
+		}
+	}
+
+	__class(TechMainVo,'model.orderModel.TechMainVo');
+	return TechMainVo;
 })()
 
 
@@ -4529,6 +4566,54 @@ var DrawCurvesCmd=(function(){
 
 	DrawCurvesCmd.ID="DrawCurves";
 	return DrawCurvesCmd;
+})()
+
+
+/**
+*<code>Mouse</code> 类用于控制鼠标光标样式。
+*/
+//class laya.utils.Mouse
+var Mouse=(function(){
+	function Mouse(){}
+	__class(Mouse,'laya.utils.Mouse');
+	/**
+	*设置鼠标样式
+	*@param cursorStr
+	*例如auto move no-drop col-resize
+	*all-scroll pointer not-allowed row-resize
+	*crosshair progress e-resize ne-resize
+	*default text n-resize nw-resize
+	*help vertical-text s-resize se-resize
+	*inherit wait w-resize sw-resize
+	*/
+	__getset(1,Mouse,'cursor',function(){
+		return Mouse._style.cursor;
+		},function(cursorStr){
+		Mouse._style.cursor=cursorStr;
+	});
+
+	Mouse.hide=function(){
+		if (Mouse.cursor !="none"){
+			Mouse._preCursor=Mouse.cursor;
+			Mouse.cursor="none";
+		}
+	}
+
+	Mouse.show=function(){
+		if (Mouse.cursor=="none"){
+			if (Mouse._preCursor){
+				Mouse.cursor=Mouse._preCursor;
+				}else {
+				Mouse.cursor="auto";
+			}
+		}
+	}
+
+	Mouse._preCursor=null;
+	__static(Mouse,
+	['_style',function(){return this._style=Browser.document.body.style;}
+	]);
+	return Mouse;
 })()
 
 
@@ -29570,6 +29655,50 @@ var WebAudioSound=(function(_super){
 
 
 /**
+*<code>Sound</code> 类是用来播放控制声音的类。
+*引擎默认有两套声音方案，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
+*/
+//class laya.media.Sound extends laya.events.EventDispatcher
+var Sound=(function(_super){
+	function Sound(){
+		Sound.__super.call(this);;
+	}
+
+	__class(Sound,'laya.media.Sound',_super);
+	var __proto=Sound.prototype;
+	/**
+	*加载声音。
+	*@param url 地址。
+	*/
+	__proto.load=function(url){}
+	/**
+	*播放声音。
+	*@param startTime 开始时间,单位秒
+	*@param loops 循环次数,0表示一直循环
+	*@return 声道 SoundChannel 对象。
+	*/
+	__proto.play=function(startTime,loops){
+		(startTime===void 0)&& (startTime=0);
+		(loops===void 0)&& (loops=0);
+		return null;
+	}
+
+	/**
+	*释放声音资源。
+	*/
+	__proto.dispose=function(){}
+	/**
+	*获取总时间。
+	*/
+	__getset(0,__proto,'duration',function(){
+		return 0;
+	});
+
+	return Sound;
+})(EventDispatcher)
+
+
+/**
 *<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
 *<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
 */
@@ -29792,50 +29921,6 @@ var ColorFilter=(function(_super){
 	]);
 	return ColorFilter;
 })(Filter)
-
-
-/**
-*<code>Sound</code> 类是用来播放控制声音的类。
-*引擎默认有两套声音方案，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
-*/
-//class laya.media.Sound extends laya.events.EventDispatcher
-var Sound=(function(_super){
-	function Sound(){
-		Sound.__super.call(this);;
-	}
-
-	__class(Sound,'laya.media.Sound',_super);
-	var __proto=Sound.prototype;
-	/**
-	*加载声音。
-	*@param url 地址。
-	*/
-	__proto.load=function(url){}
-	/**
-	*播放声音。
-	*@param startTime 开始时间,单位秒
-	*@param loops 循环次数,0表示一直循环
-	*@return 声道 SoundChannel 对象。
-	*/
-	__proto.play=function(startTime,loops){
-		(startTime===void 0)&& (startTime=0);
-		(loops===void 0)&& (loops=0);
-		return null;
-	}
-
-	/**
-	*释放声音资源。
-	*/
-	__proto.dispose=function(){}
-	/**
-	*获取总时间。
-	*/
-	__getset(0,__proto,'duration',function(){
-		return 0;
-	});
-
-	return Sound;
-})(EventDispatcher)
 
 
 /**
@@ -31029,90 +31114,6 @@ var ShaderDefines2D=(function(_super){
 
 
 /**
-*与MeshQuadTexture基本相同。不过index不是固定的
-*/
-//class laya.webgl.utils.MeshTexture extends laya.webgl.utils.Mesh2D
-var MeshTexture=(function(_super){
-	function MeshTexture(){
-		MeshTexture.__super.call(this,laya.webgl.utils.MeshTexture.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshTexture._fixattriInfo);
-	}
-
-	__class(MeshTexture,'laya.webgl.utils.MeshTexture',_super);
-	var __proto=MeshTexture.prototype;
-	__proto.addData=function(vertices,uvs,idx,matrix,rgba,ctx){
-		var vertsz=vertices.length / 2;
-		var startpos=this._vb.needSize(vertsz *MeshTexture.const_stride);
-		var f32pos=startpos >> 2;
-		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
-		var vbu32Arr=this._vb._uint32Array;
-		var ci=0;
-		for (var i=0;i < vertsz;i++){
-			var x=vertices[ci],y=vertices[ci+1];
-			var x1=x *matrix.a+y *matrix.c+matrix.tx;
-			var y1=x *matrix.b+y *matrix.d+matrix.ty;
-			vbdata[f32pos++]=x1;vbdata[f32pos++]=y1;
-			vbdata[f32pos++]=uvs[ci];vbdata[f32pos++]=uvs[ci+1];
-			ci+=2;
-			vbu32Arr[f32pos++]=rgba;
-			vbu32Arr[f32pos++]=0xff;
-		}
-		this._vb.setNeedUpload();
-		var vertN=this.vertNum;
-		if (vertN > 0){
-			var sz=idx.length;
-			if (sz > MeshTexture.tmpIdx.length)MeshTexture.tmpIdx=new Uint16Array(sz);
-			for (var ii=0;ii < sz;ii++){
-				MeshTexture.tmpIdx[ii]=idx[ii]+vertN;
-			}
-			this._ib.appendU16Array(MeshTexture.tmpIdx,idx.length);
-			}else {
-			this._ib.append(idx);
-		}
-		this._ib.setNeedUpload();
-		this.vertNum+=vertsz;
-		this.indexNum+=idx.length;
-	}
-
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this._ib.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshTexture._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._ib.disposeResource();
-		this._vb.deleteBuffer();
-	}
-
-	MeshTexture.getAMesh=function(){
-		if (laya.webgl.utils.MeshTexture._POOL.length){
-			return laya.webgl.utils.MeshTexture._POOL.pop();
-		}
-		return new MeshTexture();
-	}
-
-	MeshTexture.const_stride=24;
-	MeshTexture._POOL=[];
-	__static(MeshTexture,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1401,4,16,
-		0x1401,4,20];},'tmpIdx',function(){return this.tmpIdx=new Uint16Array(4);}
-	]);
-	return MeshTexture;
-})(Mesh2D)
-
-
-/**
 *相对布局插件
 */
 //class laya.ui.Widget extends laya.components.Component
@@ -31289,6 +31290,90 @@ var Widget=(function(_super){
 	]);
 	return Widget;
 })(Component)
+
+
+/**
+*与MeshQuadTexture基本相同。不过index不是固定的
+*/
+//class laya.webgl.utils.MeshTexture extends laya.webgl.utils.Mesh2D
+var MeshTexture=(function(_super){
+	function MeshTexture(){
+		MeshTexture.__super.call(this,laya.webgl.utils.MeshTexture.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshTexture._fixattriInfo);
+	}
+
+	__class(MeshTexture,'laya.webgl.utils.MeshTexture',_super);
+	var __proto=MeshTexture.prototype;
+	__proto.addData=function(vertices,uvs,idx,matrix,rgba,ctx){
+		var vertsz=vertices.length / 2;
+		var startpos=this._vb.needSize(vertsz *MeshTexture.const_stride);
+		var f32pos=startpos >> 2;
+		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
+		var vbu32Arr=this._vb._uint32Array;
+		var ci=0;
+		for (var i=0;i < vertsz;i++){
+			var x=vertices[ci],y=vertices[ci+1];
+			var x1=x *matrix.a+y *matrix.c+matrix.tx;
+			var y1=x *matrix.b+y *matrix.d+matrix.ty;
+			vbdata[f32pos++]=x1;vbdata[f32pos++]=y1;
+			vbdata[f32pos++]=uvs[ci];vbdata[f32pos++]=uvs[ci+1];
+			ci+=2;
+			vbu32Arr[f32pos++]=rgba;
+			vbu32Arr[f32pos++]=0xff;
+		}
+		this._vb.setNeedUpload();
+		var vertN=this.vertNum;
+		if (vertN > 0){
+			var sz=idx.length;
+			if (sz > MeshTexture.tmpIdx.length)MeshTexture.tmpIdx=new Uint16Array(sz);
+			for (var ii=0;ii < sz;ii++){
+				MeshTexture.tmpIdx[ii]=idx[ii]+vertN;
+			}
+			this._ib.appendU16Array(MeshTexture.tmpIdx,idx.length);
+			}else {
+			this._ib.append(idx);
+		}
+		this._ib.setNeedUpload();
+		this.vertNum+=vertsz;
+		this.indexNum+=idx.length;
+	}
+
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this._ib.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshTexture._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._ib.disposeResource();
+		this._vb.deleteBuffer();
+	}
+
+	MeshTexture.getAMesh=function(){
+		if (laya.webgl.utils.MeshTexture._POOL.length){
+			return laya.webgl.utils.MeshTexture._POOL.pop();
+		}
+		return new MeshTexture();
+	}
+
+	MeshTexture.const_stride=24;
+	MeshTexture._POOL=[];
+	__static(MeshTexture,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1401,4,16,
+		0x1401,4,20];},'tmpIdx',function(){return this.tmpIdx=new Uint16Array(4);}
+	]);
+	return MeshTexture;
+})(Mesh2D)
 
 
 /**
@@ -33885,6 +33970,37 @@ var LogPanelControl=(function(_super){
 })(Script)
 
 
+//class script.prefabScript.LinkTextControl extends laya.components.Script
+var LinkTextControl=(function(_super){
+	function LinkTextControl(){
+		this.txt=null;
+		/**@prop {name:undercolor,tips:"下划线颜色",type:String}*/
+		this.undercolor="#222222";
+		LinkTextControl.__super.call(this);
+	}
+
+	__class(LinkTextControl,'script.prefabScript.LinkTextControl',_super);
+	var __proto=LinkTextControl.prototype;
+	__proto.onStart=function(){
+		this.txt=this.owner;
+		this.txt.underline=true;
+		this.txt.underlineColor=this.undercolor;
+		this.txt.on("mouseover",this,this.onMouseOverHandler);
+		this.txt.on("mouseout",this,this.onMouseOutHandler);
+	}
+
+	__proto.onMouseOutHandler=function(){
+		Mouse.cursor="auto";
+	}
+
+	__proto.onMouseOverHandler=function(){
+		Mouse.cursor="hand";
+	}
+
+	return LinkTextControl;
+})(Script)
+
+
 //class script.picUpload.PicManagerControl extends laya.components.Script
 var PicManagerControl=(function(_super){
 	function PicManagerControl(){
@@ -34314,6 +34430,39 @@ var PaintOrderControl=(function(_super){
 	}
 
 	return PaintOrderControl;
+})(Script)
+
+
+//class script.order.SelectTechControl extends laya.components.Script
+var SelectTechControl=(function(_super){
+	function SelectTechControl(){
+		this.uiSKin=null;
+		SelectTechControl.__super.call(this);
+	}
+
+	__class(SelectTechControl,'script.order.SelectTechControl',_super);
+	var __proto=SelectTechControl.prototype;
+	__proto.onStart=function(){
+		this.uiSKin=this.owner;
+		var list=[];
+		var num=Math.random()*18;
+		var startpos=0;
+		this.uiSKin.techcontent.vScrollBarSkin="";
+		for(var i=0;i < num;i++){
+			var tcvo=new TechMainVo();
+			var itembox=new TechBoxItem(tcvo);
+			itembox.y=startpos;
+			startpos+=itembox.height+20;
+			this.uiSKin.techcontent.addChild(itembox);
+		}
+		this.uiSKin.btnok.on("click",this,this.onCloseView);
+	}
+
+	__proto.onCloseView=function(){
+		ViewManager.instance.closeView("VIEW_SELECT_TECHNORLOGY");
+	}
+
+	return SelectTechControl;
 })(Script)
 
 
@@ -40770,7 +40919,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":13}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":7}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -46642,10 +46791,10 @@ var PaintOrderPanelUI=(function(_super){
 	function PaintOrderPanelUI(){
 		this.firstpage=null;
 		this.panel_main=null;
-		this.changemyadd=null;
 		this.myaddresstxt=null;
-		this.changefactory=null;
+		this.changemyadd=null;
 		this.factorytxt=null;
+		this.changefactory=null;
 		this.btnaddpic=null;
 		this.mainvbox=null;
 		this.ordervbox=null;
@@ -46661,8 +46810,27 @@ var PaintOrderPanelUI=(function(_super){
 		this.createView(PaintOrderPanelUI.uiView);
 	}
 
-	PaintOrderPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080,"fontSize":24},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Sprite","props":{"y":65,"x":320},"compId":20,"child":[{"type":"Image","props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},"compId":11},{"type":"Label","props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":12},{"type":"Label","props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":13},{"type":"Label","props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":14},{"type":"Label","props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":15},{"type":"Label","props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":16},{"type":"Label","props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":17},{"type":"Label","props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":18},{"type":"Label","props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":19}]},{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":10}]},{"type":"Panel","props":{"var":"panel_main","top":160,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Box","props":{"y":0,"x":320},"compId":24,"child":[{"type":"Label","props":{"text":"收货信息","fontSize":30},"compId":21},{"type":"Text","props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":22},{"type":"Label","props":{"y":42,"width":1046,"var":"myaddresstxt","text":"收货信息","height":30,"fontSize":24},"compId":23}]},{"type":"Box","props":{"y":80,"x":320},"compId":26,"child":[{"type":"Label","props":{"text":"输出中心","fontSize":30},"compId":27},{"type":"Text","props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":28},{"type":"Label","props":{"y":42,"x":0,"width":425,"var":"factorytxt","text":"收货信息","height":30,"fontSize":24},"compId":29},{"type":"Button","props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},"compId":30}]},{"type":"Box","props":{"y":160,"x":320,"width":1280,"height":112},"compId":31,"child":[{"type":"Label","props":{"text":"批量修改","fontSize":30},"compId":32},{"type":"Image","props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},"compId":36},{"type":"Label","props":{"y":44,"x":162,"text":"商品名称","fontSize":24},"compId":37},{"type":"Label","props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},"compId":38},{"type":"Label","props":{"y":44,"x":1180,"text":"数量","fontSize":24},"compId":39},{"type":"Label","props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},"compId":40},{"type":"Text","props":{"y":83,"x":456,"text":"更好材料","fontSize":20,"color":"#3028ea","runtime":"laya.display.Text"},"compId":41},{"type":"Label","props":{"y":74,"x":540,"text":"|","fontSize":30},"compId":42},{"type":"Label","props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},"compId":43},{"type":"Text","props":{"y":83,"x":1006,"text":"更换工艺","fontSize":20,"color":"#3028ea","runtime":"laya.display.Text"},"compId":44},{"type":"TextInput","props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":45}]},{"type":"Label","props":{"y":282,"x":320,"text":"产品清单","fontSize":30},"compId":46},{"type":"Button","props":{"y":280,"x":462,"width":100,"var":"btnaddpic","skin":"comp/button.png","labelSize":20,"label":"添加产品","height":30},"compId":47},{"type":"Label","props":{"y":286,"x":582,"width":714,"text":"绿色字体为自动识别选择，请仔细核对。注：文件名的信息越详细，识别越精准。","height":30,"fontSize":20,"color":"#325a2d"},"compId":48},{"type":"Box","props":{"y":334,"x":320},"compId":62,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":49},{"type":"Label","props":{"y":10,"text":"序号","fontSize":24},"compId":50},{"type":"Label","props":{"y":10,"x":74,"text":"稿件","fontSize":24},"compId":51},{"type":"Label","props":{"y":10,"x":209,"text":"稿件名","fontSize":24},"compId":52},{"type":"Label","props":{"y":10,"x":436,"text":"材料","fontSize":24},"compId":53},{"type":"Label","props":{"y":10,"x":595,"text":"图片编辑","fontSize":24},"compId":54},{"type":"Label","props":{"y":10,"x":783,"text":"工艺","fontSize":24},"compId":55},{"type":"Label","props":{"y":10,"x":897,"text":"会员价","fontSize":24},"compId":56},{"type":"Label","props":{"y":10,"x":986,"text":"数量","fontSize":24},"compId":57},{"type":"Label","props":{"y":10,"x":1051,"text":"单价","fontSize":24},"compId":58},{"type":"Label","props":{"y":10,"x":1119,"text":"总价","fontSize":24},"compId":59},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":60}]},{"type":"VBox","props":{"y":383,"x":320,"width":1280,"var":"mainvbox","space":10},"compId":63,"child":[{"type":"VBox","props":{"var":"ordervbox","space":20,"right":0,"left":0},"compId":64},{"type":"VBox","props":{"y":100,"x":0,"space":10,"right":0,"left":0},"compId":65,"child":[{"type":"Box","props":{"y":50,"x":0},"compId":68,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":69},{"type":"Label","props":{"y":10,"x":89,"text":"商品名称","fontSize":24},"compId":70},{"type":"Label","props":{"y":10,"x":344,"text":"物料规格","fontSize":24},"compId":72},{"type":"Label","props":{"y":10,"x":578,"text":"数量","fontSize":24},"compId":77},{"type":"Label","props":{"y":10,"x":773,"text":"单价","fontSize":24},"compId":78},{"type":"Label","props":{"y":10,"x":1017,"text":"总价","fontSize":24},"compId":79},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":80}]},{"type":"Box","props":{"y":0,"x":0},"compId":83,"child":[{"type":"Label","props":{"y":0,"x":0,"text":"配件清单","fontSize":30},"compId":66},{"type":"Button","props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},"compId":67}]}]},{"type":"VBox","props":{"y":200,"x":0,"var":"partvbox","right":0,"left":0},"compId":82},{"type":"Box","props":{"y":319,"x":0},"compId":84,"child":[{"type":"Label","props":{"text":"配送方式","fontSize":30},"compId":85},{"type":"Text","props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":86},{"type":"Label","props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},"compId":87}]},{"type":"Box","props":{"y":400,"x":0},"compId":91,"child":[{"type":"Label","props":{"text":"添加批量备注","fontSize":30},"compId":89},{"type":"Label","props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},"compId":90}]},{"type":"TextInput","props":{"y":441,"x":0,"width":1280,"valign":"top","text":"请添加备注","skin":"comp/textinput.png","height":93,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":92},{"type":"Label","props":{"y":543,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},"compId":93},{"type":"Box","props":{"y":591,"x":959},"compId":96,"child":[{"type":"Button","props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},"compId":94},{"type":"Button","props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},"compId":95}]}]}]},{"type":"Script","props":{"runtime":"script.order.PaintOrderControl"},"compId":97}],"loadList":["commers/whitebg.png","commers/blackbg.png","comp/label.png","comp/button.png","comp/textinput.png"],"loadList3D":[]};
+	PaintOrderPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080,"fontSize":24},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Sprite","props":{"y":65,"x":320},"compId":20,"child":[{"type":"Image","props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},"compId":11},{"type":"Label","props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":12},{"type":"Label","props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":13},{"type":"Label","props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":14},{"type":"Label","props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":15},{"type":"Label","props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":16},{"type":"Label","props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":17},{"type":"Label","props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":18},{"type":"Label","props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":19}]},{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":10}]},{"type":"Panel","props":{"var":"panel_main","top":160,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Box","props":{"y":0,"x":320},"compId":24,"child":[{"type":"Label","props":{"text":"收货信息","fontSize":30},"compId":21},{"type":"Label","props":{"y":42,"width":1046,"var":"myaddresstxt","text":"收货信息","height":30,"fontSize":24},"compId":23},{"type":"Text","props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","presetID":1,"fontSize":24,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":98,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":99}]}]},{"type":"Box","props":{"y":80,"x":320},"compId":26,"child":[{"type":"Label","props":{"text":"输出中心","fontSize":30},"compId":27},{"type":"Label","props":{"y":42,"x":0,"width":425,"var":"factorytxt","text":"收货信息","height":30,"fontSize":24},"compId":29},{"type":"Button","props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},"compId":30},{"type":"Text","props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","presetID":1,"fontSize":24,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":100,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":101}]}]},{"type":"Box","props":{"y":160,"x":320,"width":1280,"height":112},"compId":31,"child":[{"type":"Label","props":{"text":"批量修改","fontSize":30},"compId":32},{"type":"Image","props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},"compId":36},{"type":"Label","props":{"y":44,"x":162,"text":"商品名称","fontSize":24},"compId":37},{"type":"Label","props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},"compId":38},{"type":"Label","props":{"y":44,"x":1180,"text":"数量","fontSize":24},"compId":39},{"type":"Label","props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},"compId":40},{"type":"Label","props":{"y":74,"x":540,"text":"|","fontSize":30},"compId":42},{"type":"Label","props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},"compId":43},{"type":"TextInput","props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":45},{"type":"Text","props":{"y":83,"x":456,"text":"更好材料","presetID":1,"fontSize":20,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":102,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":103}]},{"type":"Text","props":{"y":83,"x":1006,"text":"更换工艺","presetID":1,"fontSize":20,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":104,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":105}]}]},{"type":"Label","props":{"y":282,"x":320,"text":"产品清单","fontSize":30},"compId":46},{"type":"Button","props":{"y":280,"x":462,"width":100,"var":"btnaddpic","skin":"comp/button.png","labelSize":20,"label":"添加产品","height":30},"compId":47},{"type":"Label","props":{"y":286,"x":582,"width":714,"text":"绿色字体为自动识别选择，请仔细核对。注：文件名的信息越详细，识别越精准。","height":30,"fontSize":20,"color":"#325a2d"},"compId":48},{"type":"Box","props":{"y":334,"x":320},"compId":62,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":49},{"type":"Label","props":{"y":10,"text":"序号","fontSize":24},"compId":50},{"type":"Label","props":{"y":10,"x":74,"text":"稿件","fontSize":24},"compId":51},{"type":"Label","props":{"y":10,"x":209,"text":"稿件名","fontSize":24},"compId":52},{"type":"Label","props":{"y":10,"x":436,"text":"材料","fontSize":24},"compId":53},{"type":"Label","props":{"y":10,"x":595,"text":"图片编辑","fontSize":24},"compId":54},{"type":"Label","props":{"y":10,"x":783,"text":"工艺","fontSize":24},"compId":55},{"type":"Label","props":{"y":10,"x":897,"text":"会员价","fontSize":24},"compId":56},{"type":"Label","props":{"y":10,"x":986,"text":"数量","fontSize":24},"compId":57},{"type":"Label","props":{"y":10,"x":1051,"text":"单价","fontSize":24},"compId":58},{"type":"Label","props":{"y":10,"x":1119,"text":"总价","fontSize":24},"compId":59},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":60}]},{"type":"VBox","props":{"y":383,"x":320,"width":1280,"var":"mainvbox","space":10},"compId":63,"child":[{"type":"VBox","props":{"var":"ordervbox","space":20,"right":0,"left":0},"compId":64},{"type":"VBox","props":{"y":100,"x":0,"space":10,"right":0,"left":0},"compId":65,"child":[{"type":"Box","props":{"y":50,"x":0},"compId":68,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":69},{"type":"Label","props":{"y":10,"x":89,"text":"商品名称","fontSize":24},"compId":70},{"type":"Label","props":{"y":10,"x":344,"text":"物料规格","fontSize":24},"compId":72},{"type":"Label","props":{"y":10,"x":578,"text":"数量","fontSize":24},"compId":77},{"type":"Label","props":{"y":10,"x":773,"text":"单价","fontSize":24},"compId":78},{"type":"Label","props":{"y":10,"x":1017,"text":"总价","fontSize":24},"compId":79},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":80}]},{"type":"Box","props":{"y":0,"x":0},"compId":83,"child":[{"type":"Label","props":{"y":0,"x":0,"text":"配件清单","fontSize":30},"compId":66},{"type":"Button","props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},"compId":67}]}]},{"type":"VBox","props":{"y":200,"x":0,"var":"partvbox","right":0,"left":0},"compId":82},{"type":"Box","props":{"y":319,"x":0},"compId":84,"child":[{"type":"Label","props":{"text":"配送方式","fontSize":30},"compId":85},{"type":"Text","props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":86},{"type":"Label","props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},"compId":87}]},{"type":"Box","props":{"y":400,"x":0},"compId":91,"child":[{"type":"Label","props":{"text":"添加批量备注","fontSize":30},"compId":89},{"type":"Label","props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},"compId":90}]},{"type":"TextInput","props":{"y":441,"x":0,"width":1280,"valign":"top","text":"请添加备注","skin":"comp/textinput.png","height":93,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":92},{"type":"Label","props":{"y":543,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},"compId":93},{"type":"Box","props":{"y":591,"x":959},"compId":96,"child":[{"type":"Button","props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},"compId":94},{"type":"Button","props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},"compId":95}]}]}]},{"type":"Script","props":{"runtime":"script.order.PaintOrderControl"},"compId":97}],"loadList":["commers/whitebg.png","commers/blackbg.png","comp/label.png","prefabs/LinksText.prefab","comp/button.png","comp/textinput.png"],"loadList3D":[]};
 	return PaintOrderPanelUI;
+})(View)
+
+
+//class ui.order.TechBoxItemUI extends laya.ui.View
+var TechBoxItemUI=(function(_super){
+	function TechBoxItemUI(){
+		this.techname=null;
+		TechBoxItemUI.__super.call(this);
+	}
+
+	__class(TechBoxItemUI,'ui.order.TechBoxItemUI',_super);
+	var __proto=TechBoxItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TechBoxItemUI.uiView);
+	}
+
+	TechBoxItemUI.uiView={"type":"View","props":{"width":1240,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
+	return TechBoxItemUI;
 })(View)
 
 
@@ -46903,30 +47071,6 @@ var SelectMaterialPanelUI=(function(_super){
 })(View)
 
 
-//class ui.login.ResetPwdPanelUI extends laya.ui.View
-var ResetPwdPanelUI=(function(_super){
-	function ResetPwdPanelUI(){
-		this.input_phone=null;
-		this.input_conpwd=null;
-		this.input_phonecode=null;
-		this.btn_getcode=null;
-		this.btnClose=null;
-		this.btn_ok=null;
-		ResetPwdPanelUI.__super.call(this);
-	}
-
-	__class(ResetPwdPanelUI,'ui.login.ResetPwdPanelUI',_super);
-	var __proto=ResetPwdPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(ResetPwdPanelUI.uiView);
-	}
-
-	ResetPwdPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"x":0,"width":1920,"top":0,"bottom":100},"compId":4,"child":[{"type":"Label","props":{"y":12,"x":930,"text":"修改密码","fontSize":30,"font":"SimSun"},"compId":6},{"type":"Box","props":{"y":70,"x":660},"compId":7,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},"compId":8},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":9},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":10},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":11}]},{"type":"Box","props":{"y":153,"x":660},"compId":12,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"新密码","fontSize":20,"font":"Arial","align":"right"},"compId":13},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":14},{"type":"Label","props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":15},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":16}]},{"type":"Box","props":{"y":236,"x":660},"compId":17,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},"compId":18},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":19},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":20},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":21}]},{"type":"Box","props":{"y":313,"x":660},"compId":46,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},"compId":47},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":48},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":49},{"type":"Button","props":{"y":-1.5,"x":402,"width":150,"var":"btn_getcode","skin":"comp/button.png","label":"获取验证码","height":40},"compId":50}]},{"type":"Button","props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},"compId":68},{"type":"Button","props":{"y":414,"x":826,"width":150,"var":"btn_ok","skin":"comp/button.png","labelSize":24,"label":"确认修改","height":40},"compId":71}]},{"type":"Script","props":{"runtime":"script.login.ResetPwdControl"},"compId":72}],"loadList":["commers/whitebg.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
-	return ResetPwdPanelUI;
-})(View)
-
-
 //class script.order.PicOrderItem extends ui.order.OrderItemUI
 var PicOrderItem=(function(_super){
 	function PicOrderItem(vo){
@@ -46963,6 +47107,8 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.onchangeTech=function(){
+		ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY");
+		return;
 		var num=Math.random()*8;
 		var techStr="";
 		for(var i=0;i < num;i++){
@@ -47010,6 +47156,30 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
+
+
+//class ui.login.ResetPwdPanelUI extends laya.ui.View
+var ResetPwdPanelUI=(function(_super){
+	function ResetPwdPanelUI(){
+		this.input_phone=null;
+		this.input_conpwd=null;
+		this.input_phonecode=null;
+		this.btn_getcode=null;
+		this.btnClose=null;
+		this.btn_ok=null;
+		ResetPwdPanelUI.__super.call(this);
+	}
+
+	__class(ResetPwdPanelUI,'ui.login.ResetPwdPanelUI',_super);
+	var __proto=ResetPwdPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(ResetPwdPanelUI.uiView);
+	}
+
+	ResetPwdPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"x":0,"width":1920,"top":0,"bottom":100},"compId":4,"child":[{"type":"Label","props":{"y":12,"x":930,"text":"修改密码","fontSize":30,"font":"SimSun"},"compId":6},{"type":"Box","props":{"y":70,"x":660},"compId":7,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},"compId":8},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":9},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":10},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":11}]},{"type":"Box","props":{"y":153,"x":660},"compId":12,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"新密码","fontSize":20,"font":"Arial","align":"right"},"compId":13},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":14},{"type":"Label","props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":15},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":16}]},{"type":"Box","props":{"y":236,"x":660},"compId":17,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},"compId":18},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":19},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":20},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":21}]},{"type":"Box","props":{"y":313,"x":660},"compId":46,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},"compId":47},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":48},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":49},{"type":"Button","props":{"y":-1.5,"x":402,"width":150,"var":"btn_getcode","skin":"comp/button.png","label":"获取验证码","height":40},"compId":50}]},{"type":"Button","props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},"compId":68},{"type":"Button","props":{"y":414,"x":826,"width":150,"var":"btn_ok","skin":"comp/button.png","labelSize":24,"label":"确认修改","height":40},"compId":71}]},{"type":"Script","props":{"runtime":"script.login.ResetPwdControl"},"compId":72}],"loadList":["commers/whitebg.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
+	return ResetPwdPanelUI;
+})(View)
 
 
 //class ui.uploadpic.UpLoadPanelUI extends laya.ui.View
@@ -47075,6 +47245,25 @@ var PartItem=(function(_super){
 })(PartsItemUI)
 
 
+//class ui.order.TechorItemUI extends laya.ui.View
+var TechorItemUI=(function(_super){
+	function TechorItemUI(){
+		this.txt=null;
+		TechorItemUI.__super.call(this);
+	}
+
+	__class(TechorItemUI,'ui.order.TechorItemUI',_super);
+	var __proto=TechorItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TechorItemUI.uiView);
+	}
+
+	TechorItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
+	return TechorItemUI;
+})(View)
+
+
 //class ui.PopUpDialogUI extends laya.ui.View
 var PopUpDialogUI=(function(_super){
 	function PopUpDialogUI(){
@@ -47094,6 +47283,27 @@ var PopUpDialogUI=(function(_super){
 
 	PopUpDialogUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Image","props":{"width":920,"top":200,"skin":"commers/whitebg.png","right":500,"left":500,"height":374,"bottom":506,"alpha":0.8},"compId":4,"child":[{"type":"Label","props":{"y":34,"x":50,"width":820,"var":"msgtxt","valign":"middle","text":"这是一个确定弹窗","right":50,"overflow":"scroll","left":50,"height":208,"fontSize":22,"align":"center"},"compId":5},{"type":"Sprite","props":{"y":294,"x":236},"compId":8,"child":[{"type":"Button","props":{"width":100,"var":"okbtn","skin":"comp/button.png","labelSize":24,"label":"确定","height":30},"compId":6},{"type":"Button","props":{"x":348,"width":100,"var":"cancelbtn","skin":"comp/button.png","labelSize":24,"label":"取消","height":30},"compId":7}]},{"type":"Button","props":{"y":0,"x":870,"width":50,"var":"closebtn","skin":"comp/button.png","labelSize":24,"label":"X","height":40},"compId":9}]},{"type":"Script","props":{"runtime":"utils.PopUpWindowControl"},"compId":10}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
 	return PopUpDialogUI;
+})(View)
+
+
+//class ui.order.SelectTechPanelUI extends laya.ui.View
+var SelectTechPanelUI=(function(_super){
+	function SelectTechPanelUI(){
+		this.techcontent=null;
+		this.btnok=null;
+		this.btncancel=null;
+		SelectTechPanelUI.__super.call(this);
+	}
+
+	__class(SelectTechPanelUI,'ui.order.SelectTechPanelUI',_super);
+	var __proto=SelectTechPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(SelectTechPanelUI.uiView);
+	}
+
+	SelectTechPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":10,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Panel","props":{"y":10,"x":10,"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":6},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":7},{"type":"Label","props":{"y":119,"x":849,"text":"修改工艺","fontSize":36,"color":"#eedfdf","bold":true},"compId":8},{"type":"Panel","props":{"y":182,"x":332,"width":1256,"var":"techcontent","height":636},"compId":16},{"type":"Sprite","props":{"y":889,"x":824},"compId":13,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":14},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":15}]},{"type":"Label","props":{"y":838,"x":343.443359375,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","fontSize":20,"color":"#f81410"},"compId":18}]},{"type":"Script","props":{"runtime":"script.order.SelectTechControl"},"compId":19}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
+	return SelectTechPanelUI;
 })(View)
 
 
@@ -49010,314 +49220,6 @@ var ScaleBox=(function(_super){
 
 
 /**
-*<code>TextInput</code> 类用于创建显示对象以显示和输入文本。
-*
-*@example <caption>以下示例代码，创建了一个 <code>TextInput</code> 实例。</caption>
-*package
-*{
-	*import laya.display.Stage;
-	*import laya.ui.TextInput;
-	*import laya.utils.Handler;
-	*public class TextInput_Example
-	*{
-		*public function TextInput_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/input.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*var textInput:TextInput=new TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
-			*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
-			*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
-			*textInput.color="#008fff";//设置 textInput 的文本颜色。
-			*textInput.font="Arial";//设置 textInput 的文本字体。
-			*textInput.bold=true;//设置 textInput 的文本显示为粗体。
-			*textInput.fontSize=30;//设置 textInput 的字体大小。
-			*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
-			*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
-			*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
-			*textInput.width=300;//设置 textInput 的宽度。
-			*textInput.height=200;//设置 textInput 的高度。
-			*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800);//设置游戏画布宽高
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*Laya.loader.load(["resource/ui/input.png"],laya.utils.Handler.create(this,onLoadComplete));//加载资源。
-*function onLoadComplete(){
-	*var textInput=new laya.ui.TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
-	*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
-	*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
-	*textInput.color="#008fff";//设置 textInput 的文本颜色。
-	*textInput.font="Arial";//设置 textInput 的文本字体。
-	*textInput.bold=true;//设置 textInput 的文本显示为粗体。
-	*textInput.fontSize=30;//设置 textInput 的字体大小。
-	*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
-	*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
-	*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
-	*textInput.width=300;//设置 textInput 的宽度。
-	*textInput.height=200;//设置 textInput 的高度。
-	*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
-	*}
-*@example
-*import Stage=laya.display.Stage;
-*import TextInput=laya.ui.TextInput;
-*import Handler=laya.utils.Handler;
-*class TextInput_Example {
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/input.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*var textInput:TextInput=new TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
-		*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
-		*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
-		*textInput.color="#008fff";//设置 textInput 的文本颜色。
-		*textInput.font="Arial";//设置 textInput 的文本字体。
-		*textInput.bold=true;//设置 textInput 的文本显示为粗体。
-		*textInput.fontSize=30;//设置 textInput 的字体大小。
-		*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
-		*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
-		*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
-		*textInput.width=300;//设置 textInput 的宽度。
-		*textInput.height=200;//设置 textInput 的高度。
-		*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
-		*}
-	*}
-*/
-//class laya.ui.TextInput extends laya.ui.Label
-var TextInput=(function(_super){
-	function TextInput(text){
-		/**@private */
-		this._bg=null;
-		/**@private */
-		this._skin=null;
-		TextInput.__super.call(this);
-		(text===void 0)&& (text="");
-		this.text=text;
-		this.skin=this.skin;
-	}
-
-	__class(TextInput,'laya.ui.TextInput',_super);
-	var __proto=TextInput.prototype;
-	/**@inheritDoc */
-	__proto.preinitialize=function(){
-		this.mouseEnabled=true;
-	}
-
-	/**@inheritDoc */
-	__proto.destroy=function(destroyChild){
-		(destroyChild===void 0)&& (destroyChild=true);
-		_super.prototype.destroy.call(this,destroyChild);
-		this._bg && this._bg.destroy();
-		this._bg=null;
-	}
-
-	/**@inheritDoc */
-	__proto.createChildren=function(){
-		this.addChild(this._tf=new Input());
-		this._tf.padding=Styles.inputLabelPadding;
-		this._tf.on("input",this,this._onInput);
-		this._tf.on("enter",this,this._onEnter);
-		this._tf.on("blur",this,this._onBlur);
-		this._tf.on("focus",this,this._onFocus);
-	}
-
-	/**
-	*@private
-	*/
-	__proto._onFocus=function(){
-		this.event("focus",this);
-	}
-
-	/**
-	*@private
-	*/
-	__proto._onBlur=function(){
-		this.event("blur",this);
-	}
-
-	/**
-	*@private
-	*/
-	__proto._onInput=function(){
-		this.event("input",this);
-	}
-
-	/**
-	*@private
-	*/
-	__proto._onEnter=function(){
-		this.event("enter",this);
-	}
-
-	/**@inheritDoc */
-	__proto.initialize=function(){
-		this.width=128;
-		this.height=22;
-	}
-
-	__proto._skinLoaded=function(){
-		this._bg || (this.graphics=this._bg=new AutoBitmap());
-		this._bg.source=Loader.getRes(this._skin);
-		this._width && (this._bg.width=this._width);
-		this._height && (this._bg.height=this._height);
-		this._sizeChanged();
-		this.event("loaded");
-	}
-
-	/**选中输入框内的文本。*/
-	__proto.select=function(){
-		(this._tf).select();
-	}
-
-	__proto.setSelection=function(startIndex,endIndex){
-		(this._tf).setSelection(startIndex,endIndex);
-	}
-
-	/**
-	*当前文本内容字符串。
-	*@see laya.display.Text.text
-	*/
-	__getset(0,__proto,'text',_super.prototype._$get_text,function(value){
-		if (this._tf.text !=value){
-			value=value+"";
-			this._tf.text=value;
-			this.event("change");
-		}
-	});
-
-	/**
-	*表示此对象包含的文本背景 <code>AutoBitmap</code> 组件实例。
-	*/
-	__getset(0,__proto,'bg',function(){
-		return this._bg;
-		},function(value){
-		this.graphics=this._bg=value;
-	});
-
-	/**
-	*<p>指示当前是否是文本域。</p>
-	*值为true表示当前是文本域，否则不是文本域。
-	*/
-	__getset(0,__proto,'multiline',function(){
-		return (this._tf).multiline;
-		},function(value){
-		(this._tf).multiline=value;
-	});
-
-	/**
-	*@copy laya.ui.Image#skin
-	*/
-	__getset(0,__proto,'skin',function(){
-		return this._skin;
-		},function(value){
-		if (this._skin !=value){
-			this._skin=value;
-			if (this._skin&&!Loader.getRes(this._skin)){
-				Laya.loader.load(this._skin,Handler.create(this,this._skinLoaded),null,"image",1);
-				}else{
-				this._skinLoaded();
-			}
-		}
-	});
-
-	/**
-	*<p>当前实例的背景图（ <code>AutoBitmap</code> ）实例的有效缩放网格数据。</p>
-	*<p>数据格式："上边距,右边距,下边距,左边距,是否重复填充(值为0：不重复填充，1：重复填充)"，以逗号分隔。
-	*<ul><li>例如："4,4,4,4,1"</li></ul></p>
-	*@see laya.ui.AutoBitmap.sizeGrid
-	*/
-	__getset(0,__proto,'sizeGrid',function(){
-		return this._bg && this._bg.sizeGrid ? this._bg.sizeGrid.join(","):null;
-		},function(value){
-		this._bg || (this.graphics=this._bg=new AutoBitmap());
-		this._bg.sizeGrid=UIUtils.fillArray(Styles.defaultSizeGrid,value,Number);
-	});
-
-	/**@inheritDoc */
-	__getset(0,__proto,'width',_super.prototype._$get_width,function(value){
-		Laya.superSet(Label,this,'width',value);
-		this._bg && (this._bg.width=value);
-	});
-
-	/**@inheritDoc */
-	__getset(0,__proto,'height',_super.prototype._$get_height,function(value){
-		Laya.superSet(Label,this,'height',value);
-		this._bg && (this._bg.height=value);
-	});
-
-	/**
-	*设置可编辑状态。
-	*/
-	__getset(0,__proto,'editable',function(){
-		return (this._tf).editable;
-		},function(value){
-		(this._tf).editable=value;
-	});
-
-	/**限制输入的字符。*/
-	__getset(0,__proto,'restrict',function(){
-		return (this._tf).restrict;
-		},function(pattern){
-		(this._tf).restrict=pattern;
-	});
-
-	/**
-	*@copy laya.display.Input#prompt
-	*/
-	__getset(0,__proto,'prompt',function(){
-		return (this._tf).prompt;
-		},function(value){
-		(this._tf).prompt=value;
-	});
-
-	/**
-	*@copy laya.display.Input#promptColor
-	*/
-	__getset(0,__proto,'promptColor',function(){
-		return (this._tf).promptColor;
-		},function(value){
-		(this._tf).promptColor=value;
-	});
-
-	/**
-	*@copy laya.display.Input#maxChars
-	*/
-	__getset(0,__proto,'maxChars',function(){
-		return (this._tf).maxChars;
-		},function(value){
-		(this._tf).maxChars=value;
-	});
-
-	/**
-	*@copy laya.display.Input#focus
-	*/
-	__getset(0,__proto,'focus',function(){
-		return (this._tf).focus;
-		},function(value){
-		(this._tf).focus=value;
-	});
-
-	/**
-	*@copy laya.display.Input#type
-	*/
-	__getset(0,__proto,'type',function(){
-		return (this._tf).type;
-		},function(value){
-		(this._tf).type=value;
-	});
-
-	return TextInput;
-})(Label)
-
-
-/**
 *<code>Dialog</code> 组件是一个弹出对话框，实现对话框弹出，拖动，模式窗口功能。
 *可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭等
 *通过设置zOrder属性，可以更改弹出的层次
@@ -49649,6 +49551,314 @@ var Dialog=(function(_super){
 	Dialog._manager=null;
 	return Dialog;
 })(View)
+
+
+/**
+*<code>TextInput</code> 类用于创建显示对象以显示和输入文本。
+*
+*@example <caption>以下示例代码，创建了一个 <code>TextInput</code> 实例。</caption>
+*package
+*{
+	*import laya.display.Stage;
+	*import laya.ui.TextInput;
+	*import laya.utils.Handler;
+	*public class TextInput_Example
+	*{
+		*public function TextInput_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/input.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*var textInput:TextInput=new TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
+			*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
+			*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
+			*textInput.color="#008fff";//设置 textInput 的文本颜色。
+			*textInput.font="Arial";//设置 textInput 的文本字体。
+			*textInput.bold=true;//设置 textInput 的文本显示为粗体。
+			*textInput.fontSize=30;//设置 textInput 的字体大小。
+			*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
+			*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
+			*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
+			*textInput.width=300;//设置 textInput 的宽度。
+			*textInput.height=200;//设置 textInput 的高度。
+			*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800);//设置游戏画布宽高
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*Laya.loader.load(["resource/ui/input.png"],laya.utils.Handler.create(this,onLoadComplete));//加载资源。
+*function onLoadComplete(){
+	*var textInput=new laya.ui.TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
+	*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
+	*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
+	*textInput.color="#008fff";//设置 textInput 的文本颜色。
+	*textInput.font="Arial";//设置 textInput 的文本字体。
+	*textInput.bold=true;//设置 textInput 的文本显示为粗体。
+	*textInput.fontSize=30;//设置 textInput 的字体大小。
+	*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
+	*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
+	*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
+	*textInput.width=300;//设置 textInput 的宽度。
+	*textInput.height=200;//设置 textInput 的高度。
+	*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
+	*}
+*@example
+*import Stage=laya.display.Stage;
+*import TextInput=laya.ui.TextInput;
+*import Handler=laya.utils.Handler;
+*class TextInput_Example {
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/input.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*var textInput:TextInput=new TextInput("这是一个TextInput实例。");//创建一个 TextInput 类的实例对象 textInput 。
+		*textInput.skin="resource/ui/input.png";//设置 textInput 的皮肤。
+		*textInput.sizeGrid="4,4,4,4";//设置 textInput 的网格信息。
+		*textInput.color="#008fff";//设置 textInput 的文本颜色。
+		*textInput.font="Arial";//设置 textInput 的文本字体。
+		*textInput.bold=true;//设置 textInput 的文本显示为粗体。
+		*textInput.fontSize=30;//设置 textInput 的字体大小。
+		*textInput.wordWrap=true;//设置 textInput 的文本自动换行。
+		*textInput.x=100;//设置 textInput 对象的属性 x 的值，用于控制 textInput 对象的显示位置。
+		*textInput.y=100;//设置 textInput 对象的属性 y 的值，用于控制 textInput 对象的显示位置。
+		*textInput.width=300;//设置 textInput 的宽度。
+		*textInput.height=200;//设置 textInput 的高度。
+		*Laya.stage.addChild(textInput);//将 textInput 添加到显示列表。
+		*}
+	*}
+*/
+//class laya.ui.TextInput extends laya.ui.Label
+var TextInput=(function(_super){
+	function TextInput(text){
+		/**@private */
+		this._bg=null;
+		/**@private */
+		this._skin=null;
+		TextInput.__super.call(this);
+		(text===void 0)&& (text="");
+		this.text=text;
+		this.skin=this.skin;
+	}
+
+	__class(TextInput,'laya.ui.TextInput',_super);
+	var __proto=TextInput.prototype;
+	/**@inheritDoc */
+	__proto.preinitialize=function(){
+		this.mouseEnabled=true;
+	}
+
+	/**@inheritDoc */
+	__proto.destroy=function(destroyChild){
+		(destroyChild===void 0)&& (destroyChild=true);
+		_super.prototype.destroy.call(this,destroyChild);
+		this._bg && this._bg.destroy();
+		this._bg=null;
+	}
+
+	/**@inheritDoc */
+	__proto.createChildren=function(){
+		this.addChild(this._tf=new Input());
+		this._tf.padding=Styles.inputLabelPadding;
+		this._tf.on("input",this,this._onInput);
+		this._tf.on("enter",this,this._onEnter);
+		this._tf.on("blur",this,this._onBlur);
+		this._tf.on("focus",this,this._onFocus);
+	}
+
+	/**
+	*@private
+	*/
+	__proto._onFocus=function(){
+		this.event("focus",this);
+	}
+
+	/**
+	*@private
+	*/
+	__proto._onBlur=function(){
+		this.event("blur",this);
+	}
+
+	/**
+	*@private
+	*/
+	__proto._onInput=function(){
+		this.event("input",this);
+	}
+
+	/**
+	*@private
+	*/
+	__proto._onEnter=function(){
+		this.event("enter",this);
+	}
+
+	/**@inheritDoc */
+	__proto.initialize=function(){
+		this.width=128;
+		this.height=22;
+	}
+
+	__proto._skinLoaded=function(){
+		this._bg || (this.graphics=this._bg=new AutoBitmap());
+		this._bg.source=Loader.getRes(this._skin);
+		this._width && (this._bg.width=this._width);
+		this._height && (this._bg.height=this._height);
+		this._sizeChanged();
+		this.event("loaded");
+	}
+
+	/**选中输入框内的文本。*/
+	__proto.select=function(){
+		(this._tf).select();
+	}
+
+	__proto.setSelection=function(startIndex,endIndex){
+		(this._tf).setSelection(startIndex,endIndex);
+	}
+
+	/**
+	*当前文本内容字符串。
+	*@see laya.display.Text.text
+	*/
+	__getset(0,__proto,'text',_super.prototype._$get_text,function(value){
+		if (this._tf.text !=value){
+			value=value+"";
+			this._tf.text=value;
+			this.event("change");
+		}
+	});
+
+	/**
+	*表示此对象包含的文本背景 <code>AutoBitmap</code> 组件实例。
+	*/
+	__getset(0,__proto,'bg',function(){
+		return this._bg;
+		},function(value){
+		this.graphics=this._bg=value;
+	});
+
+	/**
+	*<p>指示当前是否是文本域。</p>
+	*值为true表示当前是文本域，否则不是文本域。
+	*/
+	__getset(0,__proto,'multiline',function(){
+		return (this._tf).multiline;
+		},function(value){
+		(this._tf).multiline=value;
+	});
+
+	/**
+	*@copy laya.ui.Image#skin
+	*/
+	__getset(0,__proto,'skin',function(){
+		return this._skin;
+		},function(value){
+		if (this._skin !=value){
+			this._skin=value;
+			if (this._skin&&!Loader.getRes(this._skin)){
+				Laya.loader.load(this._skin,Handler.create(this,this._skinLoaded),null,"image",1);
+				}else{
+				this._skinLoaded();
+			}
+		}
+	});
+
+	/**
+	*<p>当前实例的背景图（ <code>AutoBitmap</code> ）实例的有效缩放网格数据。</p>
+	*<p>数据格式："上边距,右边距,下边距,左边距,是否重复填充(值为0：不重复填充，1：重复填充)"，以逗号分隔。
+	*<ul><li>例如："4,4,4,4,1"</li></ul></p>
+	*@see laya.ui.AutoBitmap.sizeGrid
+	*/
+	__getset(0,__proto,'sizeGrid',function(){
+		return this._bg && this._bg.sizeGrid ? this._bg.sizeGrid.join(","):null;
+		},function(value){
+		this._bg || (this.graphics=this._bg=new AutoBitmap());
+		this._bg.sizeGrid=UIUtils.fillArray(Styles.defaultSizeGrid,value,Number);
+	});
+
+	/**@inheritDoc */
+	__getset(0,__proto,'width',_super.prototype._$get_width,function(value){
+		Laya.superSet(Label,this,'width',value);
+		this._bg && (this._bg.width=value);
+	});
+
+	/**@inheritDoc */
+	__getset(0,__proto,'height',_super.prototype._$get_height,function(value){
+		Laya.superSet(Label,this,'height',value);
+		this._bg && (this._bg.height=value);
+	});
+
+	/**
+	*设置可编辑状态。
+	*/
+	__getset(0,__proto,'editable',function(){
+		return (this._tf).editable;
+		},function(value){
+		(this._tf).editable=value;
+	});
+
+	/**限制输入的字符。*/
+	__getset(0,__proto,'restrict',function(){
+		return (this._tf).restrict;
+		},function(pattern){
+		(this._tf).restrict=pattern;
+	});
+
+	/**
+	*@copy laya.display.Input#prompt
+	*/
+	__getset(0,__proto,'prompt',function(){
+		return (this._tf).prompt;
+		},function(value){
+		(this._tf).prompt=value;
+	});
+
+	/**
+	*@copy laya.display.Input#promptColor
+	*/
+	__getset(0,__proto,'promptColor',function(){
+		return (this._tf).promptColor;
+		},function(value){
+		(this._tf).promptColor=value;
+	});
+
+	/**
+	*@copy laya.display.Input#maxChars
+	*/
+	__getset(0,__proto,'maxChars',function(){
+		return (this._tf).maxChars;
+		},function(value){
+		(this._tf).maxChars=value;
+	});
+
+	/**
+	*@copy laya.display.Input#focus
+	*/
+	__getset(0,__proto,'focus',function(){
+		return (this._tf).focus;
+		},function(value){
+		(this._tf).focus=value;
+	});
+
+	/**
+	*@copy laya.display.Input#type
+	*/
+	__getset(0,__proto,'type',function(){
+		return (this._tf).type;
+		},function(value){
+		(this._tf).type=value;
+	});
+
+	return TextInput;
+})(Label)
 
 
 /**
@@ -51614,6 +51824,50 @@ var CityAreaItem=(function(_super){
 
 	return CityAreaItem;
 })(CityAreaItemUI)
+
+
+//class script.order.TechBoxItem extends ui.order.TechBoxItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(tvo){
+		this.techmainvo=null;
+		this.originPos=110;
+		this.allItems=[];
+		TechBoxItem.__super.call(this);
+		this.techmainvo=tvo;
+		this.initView();
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.initView=function(){
+		this.techname.text=this.techmainvo.totalName;
+		var startposx=this.originPos;
+		var startposy=0;
+		var xspace=10;
+		var yspace=10;
+		for(var i=0;i < this.techmainvo.techlist.length;i++){
+			var item=new TechorItemUI();
+			item.txt.text=this.techmainvo.techlist[i].techName;
+			item.txt.borderColor="#445544";
+			item.txt.width=item.txt.textField.textWidth+20;
+			this.addChild(item);
+			if(startposx+xspace+item.txt.width > this.width){
+				startposx=this.originPos;
+				startposy+=item.txt.height+yspace;
+			}
+			item.x=startposx+xspace;
+			item.y=startposy;
+			startposx+=item.txt.width+xspace;
+			this.allItems.push(item);
+		}
+		if(startposy > 0)
+			this.height=startposy+30;
+		else
+		this.height=30;
+	}
+
+	return TechBoxItem;
+})(TechBoxItemUI)
 
 
 //class script.picUpload.PicInfoItem extends ui.picManager.PicShortItemUI
