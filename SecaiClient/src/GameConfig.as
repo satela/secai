@@ -8,6 +8,7 @@ package {
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
+	import utils.AddMsgControl;
 	import script.prefabScript.LinkTextControl;
 	import script.order.SelectAddressControl;
 	import script.order.SelectFactoryControl;
@@ -20,6 +21,8 @@ package {
 	import script.picUpload.PictureCheckControl;
 	import utils.PopUpWindowControl;
 	import script.picUpload.UpLoadAndOrderContrl;
+	import script.usercenter.EnterPrizeInfoControl;
+	import script.usercenter.UserMainControl;
 	/**
 	 * 游戏初始化配置
 	 */
@@ -30,7 +33,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/TechBoxItem.scene";
+		public static var startScene:* = "usercenter/UserMainPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -45,6 +48,7 @@ package {
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);
+			reg("utils.AddMsgControl",AddMsgControl);
 			reg("script.prefabScript.LinkTextControl",LinkTextControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);
 			reg("script.order.SelectFactoryControl",SelectFactoryControl);
@@ -57,6 +61,8 @@ package {
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 			reg("utils.PopUpWindowControl",PopUpWindowControl);
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
+			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
+			reg("script.usercenter.UserMainControl",UserMainControl);
 		}
 		GameConfig.init();
 	}

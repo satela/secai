@@ -241,6 +241,8 @@ package script.login
 			if(result.status == 0)
 			{
 				Browser.window.alert("注册成功！");
+				Browser.document.body.removeChild(verifycode);//添加到舞台
+
 				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL,true);
 
 			}

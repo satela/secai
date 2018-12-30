@@ -27,6 +27,8 @@ package model.orderModel
 		
 		public var totalPrice:Number;
 		
+		public var comment:String = "";
+		
 		public function PicOrderItemVo(picvo:PicInfoVo)
 		{
 			picinfo = picvo;

@@ -52,6 +52,9 @@ package script {
 			var uploadbtn:Button = this.owner["btnUpload"];
 			uploadbtn.on(Event.CLICK,this,onShowUpload);
 
+			var btnUserCenter:Button = this.owner["btnUserCenter"];
+			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
+			
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 
 		}
@@ -59,9 +62,13 @@ package script {
 		private function onShowUpload():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
-			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
+			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
+		}
+		
+		private function onShowUserCenter():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 
-			
 		}
 		private function onShowLogin(e:Event):void
 		{

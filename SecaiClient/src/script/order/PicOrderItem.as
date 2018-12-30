@@ -34,6 +34,12 @@ package script.order
 			this.deleteorder.underlineColor = "#222222";
 			
 			this.deleteorder.on(Event.CLICK,this,onDeleteOrder);
+			
+			this.addmsg.underline = true;
+			this.addmsg.underlineColor = "#222222";
+			
+			this.addmsg.on(Event.CLICK,this,onAddComment);
+			
 			this.changemat.underline = true;
 			this.changemat.underlineColor = "#222222";
 			this.changemat.on(Event.CLICK,this,onShowMaterialView);
@@ -54,6 +60,15 @@ package script.order
 			alighComponet();
 		}
 		
+		private function onAddComment():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_ADD_MESSAGE,false,{msg:this.ordervo.comment,caller:this,callback:onAddMsgBack});
+		}
+		
+		private function onAddMsgBack(msg:String):void
+		{
+			this.ordervo.comment = msg;
+		}
 		private function onchangeTech():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY);

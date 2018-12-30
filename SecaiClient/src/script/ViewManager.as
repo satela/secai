@@ -11,6 +11,7 @@ package script
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
+	import ui.order.AddCommentPanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectFactoryPanelUI;
 	import ui.order.SelectMaterialPanelUI;
@@ -49,6 +50,7 @@ package script
 
 		public static const VIEW_SELECT_MATERIAL:String = "VIEW_SELECT_MATERIAL";//选择材料界面
 		public static const VIEW_SELECT_TECHNORLOGY:String = "VIEW_SELECT_TECHNORLOGY";//选选择工艺界面
+		public static const VIEW_ADD_MESSAGE:String = "VIEW_ADD_MESSAGE";//添加备注
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
@@ -84,6 +86,7 @@ package script
 			viewDict[VIEW_SELECT_PIC_TO_ORDER] = SelectPicPanelUI;
 			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
 			viewDict[VIEW_SELECT_TECHNORLOGY] = SelectTechPanelUI;
+			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;
 
 		}
 		

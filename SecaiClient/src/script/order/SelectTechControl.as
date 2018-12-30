@@ -36,6 +36,8 @@ package script.order
 				this.uiSKin.techcontent.addChild(itembox);
 			}
 			this.uiSKin.btnok.on(Event.CLICK,this,onCloseView);
+			this.uiSKin.btncancel.on(Event.CLICK,this,onCloseView);
+
 		}
 		
 		private function onCloseView():void

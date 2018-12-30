@@ -6,7 +6,7 @@
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":50,
+    "maxID":53,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -32,10 +32,10 @@
         {
             "x":15,
             "type":"Panel",
-            "searchKey":"Panel",
-            "props":{"top":0,"right":0,"left":0,"bottom":100},
+            "searchKey":"Panel,panel_main",
+            "props":{"var":"panel_main","top":0,"right":0,"left":0,"bottom":100},
             "nodeParent":2,
-            "label":"Panel",
+            "label":"panel_main",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
@@ -44,25 +44,9 @@
             "child":[
                 {
                     "x":30,
-                    "type":"Rect",
-                    "searchKey":"Rect",
-                    "props":{"y":100,"x":320,"width":235,"lineWidth":1,"lineColor":"#252323","height":666,"fillColor":"#f8f3f3"},
-                    "nodeParent":4,
-                    "label":"Rect",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":12,
-                    "child":[
-                        ],
-                    "$LOCKED":true,
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":113,"x":389,"text":"用户中心","fontSize":24,"color":"#f8f0ef"},
+                    "props":{"y":101,"x":320,"width":236,"valign":"middle","text":"用户中心","height":48,"fontSize":24,"color":"#f8f0ef","bgColor":"#f60f0b","align":"center"},
                     "nodeParent":4,
                     "label":"Label",
                     "isOpen":true,
@@ -76,19 +60,17 @@
                 },
                 {
                     "x":30,
-                    "type":"Rect",
-                    "searchKey":"Rect",
-                    "props":{"y":100,"x":320,"width":235,"lineWidth":1,"height":48,"fillColor":"#c50505"},
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":147,"x":320,"width":236,"skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":639},
                     "nodeParent":4,
-                    "label":"Rect",
-                    "isOpen":true,
+                    "label":"Image",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
-                    "compId":13,
+                    "compId":52,
                     "child":[
-                        ],
-                    "$HIDDEN":false
+                        ]
                 },
                 {
                     "x":30,
@@ -97,13 +79,14 @@
                     "props":{"y":148,"x":321,"space":2},
                     "nodeParent":4,
                     "label":"VBox",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":5,
                     "child":[
                         {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":50,"x":2,"width":232,"height":127},
@@ -116,6 +99,7 @@
                             "compId":20,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},
@@ -128,6 +112,7 @@
                                     "compId":17,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -144,6 +129,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -156,11 +142,12 @@
                                     "compId":26,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt0",
+                                            "props":{"var":"btntxt0","text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":26,
-                                            "label":"Label",
+                                            "label":"btntxt0",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -170,11 +157,12 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":43,"text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt1",
+                                            "props":{"y":43,"var":"btntxt1","text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":26,
-                                            "label":"Label",
+                                            "label":"btntxt1",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -188,6 +176,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":182,"x":2,"width":232,"height":171},
@@ -200,6 +189,7 @@
                             "compId":21,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},
@@ -212,6 +202,7 @@
                                     "compId":22,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -228,6 +219,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -240,11 +232,12 @@
                                     "compId":27,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":0,"text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt2",
+                                            "props":{"y":0,"var":"btntxt2","text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":27,
-                                            "label":"Label",
+                                            "label":"btntxt2",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -254,11 +247,12 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":44,"text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt3",
+                                            "props":{"y":44,"var":"btntxt3","text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":27,
-                                            "label":"Label",
+                                            "label":"btntxt3",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -268,11 +262,12 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":88,"text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt4",
+                                            "props":{"y":88,"var":"btntxt4","text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":27,
-                                            "label":"Label",
+                                            "label":"btntxt4",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -286,6 +281,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":353,"x":2,"width":232,"height":127},
@@ -298,6 +294,7 @@
                             "compId":29,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},
@@ -310,6 +307,7 @@
                                     "compId":30,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -326,6 +324,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -338,11 +337,12 @@
                                     "compId":32,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":0,"text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt5",
+                                            "props":{"y":0,"var":"btntxt5","text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":32,
-                                            "label":"Label",
+                                            "label":"btntxt5",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -352,11 +352,12 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":44,"text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt6",
+                                            "props":{"y":44,"var":"btntxt6","text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":32,
-                                            "label":"Label",
+                                            "label":"btntxt6",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -370,6 +371,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":508,"x":2,"width":232,"height":117},
@@ -382,6 +384,7 @@
                             "compId":36,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},
@@ -394,6 +397,7 @@
                                     "compId":37,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -410,6 +414,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -422,11 +427,12 @@
                                     "compId":39,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":0,"text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt7",
+                                            "props":{"y":0,"var":"btntxt7","text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":39,
-                                            "label":"Label",
+                                            "label":"btntxt7",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -436,11 +442,12 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
-                                            "searchKey":"Label",
-                                            "props":{"y":33,"text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
+                                            "searchKey":"Label,btntxt8",
+                                            "props":{"y":33,"var":"btntxt8","text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
                                             "nodeParent":39,
-                                            "label":"Label",
+                                            "label":"btntxt8",
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -453,7 +460,7 @@
                                 }],
                             "$HIDDEN":false
                         }],
-                    "$LOCKED":true,
+                    "$LOCKED":false,
                     "$HIDDEN":false
                 },
                 {
@@ -527,10 +534,10 @@
                         },
                         {
                             "type":"Text",
-                            "searchKey":"Text",
-                            "props":{"y":19,"x":210,"text":"首页","mouseEnabled":true,"fontSize":20},
+                            "searchKey":"Text,firstpage",
+                            "props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20},
                             "nodeParent":6,
-                            "label":"Text",
+                            "label":"firstpage",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -540,20 +547,6 @@
                             "$HIDDEN":false
                         }],
                     "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Rect",
-                    "searchKey":"Rect",
-                    "props":{"y":140,"x":600,"width":800,"lineWidth":1,"lineColor":"#322f2f","height":1,"fillColor":"#453a3a"},
-                    "nodeParent":4,
-                    "label":"Rect",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":48,
-                    "child":[
-                        ]
                 },
                 {
                     "x":30,
@@ -568,8 +561,39 @@
                     "compId":49,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,sp_container",
+                    "props":{"y":150,"x":600,"width":900,"var":"sp_container","height":800},
+                    "nodeParent":4,
+                    "label":"sp_container",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":50,
+                    "child":[
+                        ]
                 }],
             "$HIDDEN":false
+        },
+        {
+            "x":15,
+            "type":"Script",
+            "switchAble":true,
+            "source":"src/script/usercenter/UserMainControl.as",
+            "searchKey":"Script,UserMainControl",
+            "removeAble":true,
+            "props":{},
+            "nodeParent":2,
+            "label":"UserMainControl",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":51,
+            "child":[
+                ]
         }],
     "animations":[
         {

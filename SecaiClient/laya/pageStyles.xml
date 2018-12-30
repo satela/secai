@@ -29,4 +29,7 @@
    <item name="order/TechorItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/TechBoxItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/SelectTechPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/AddCommentPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/AddressMgrPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/AddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>
