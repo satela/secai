@@ -1,0 +1,1 @@
+{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"var":"selbtn","stateNum":2,"skin":"button/clubDayoption.png","labelSize":26,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜"},"compId":3}],"loadList":["button/clubDayoption.png"],"loadList3D":[]}

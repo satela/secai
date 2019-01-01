@@ -10,10 +10,9 @@ package ui.uploadpic {
 		public var btnBegin:Button;
 		public var fileList:List;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":4},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":14,"child":[{"type":"Image","props":{"x":320,"width":1280,"top":0,"skin":"commers/blackbg.png","bottom":0},"compId":20},{"type":"Label","props":{"y":11,"x":359,"text":"您选择的文件：","fontSize":24,"color":"#f3e6e6"},"compId":5},{"type":"Button","props":{"y":5,"x":1860,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},"compId":6},{"type":"Button","props":{"y":48,"x":395,"width":98,"skin":"comp/button.png","labelSize":20,"label":"选择文件","height":33},"compId":7},{"type":"Button","props":{"y":48,"x":509,"width":98,"var":"btnBegin","skin":"comp/button.png","labelSize":20,"label":"开始上传","height":33},"compId":8},{"type":"List","props":{"y":97,"x":358,"width":938,"var":"fileList","repeatX":1,"height":584},"compId":9}]},{"type":"Script","props":{"runtime":"script.picUpload.UpLoadAndOrderContrl"},"compId":19}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
-			createView(uiView);
+			loadScene("uploadpic/UpLoadPanel");
 
 		}
 

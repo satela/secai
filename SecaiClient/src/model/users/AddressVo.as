@@ -23,5 +23,9 @@ package model.users
 		{
 			return receiverName + "-" + phone + " " + province + " " + city + " " + town + " " + address;
 		}
+		public function get proCityArea():String
+		{
+			return  province + " " + city + " " + town + " " + address;
+		}
 	}
 }

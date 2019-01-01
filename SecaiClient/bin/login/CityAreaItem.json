@@ -1,1 +1,1 @@
-{"type":"View","props":{"width":286,"height":57},"compId":2,"child":[{"type":"Label","props":{"valign":"middle","top":0,"text":"江西省","right":0,"left":0,"fontSize":30,"color":"#f8f1f1","bottom":0,"align":"center"},"compId":3}],"loadList":[],"loadList3D":[]}
+{"type":"View","props":{"width":170,"height":26},"compId":2,"child":[{"type":"Label","props":{"width":170,"var":"productname","valign":"middle","top":0,"text":"江西省","left":0,"height":24,"fontSize":24,"color":"#f8f1f1","align":"center"},"compId":3}],"loadList":[],"loadList3D":[]}

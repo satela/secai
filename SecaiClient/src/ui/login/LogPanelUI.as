@@ -14,10 +14,9 @@ package ui.login {
 		public var txt_reg:Text;
 		public var txt_forget:Text;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":17},{"type":"Sprite","props":{"y":350,"x":608,"width":802,"texture":"commers/whitebg.png","height":519},"compId":3},{"type":"Label","props":{"y":373,"x":976,"text":"登陆","styleSkin":"comp/label.png","fontSize":28},"compId":4},{"type":"Label","props":{"y":470,"x":816,"text":"账号","styleSkin":"comp/label.png","fontSize":28},"compId":5},{"type":"TextInput","props":{"y":459,"x":884,"width":250,"var":"input_account","skin":"comp/textinput.png","prompt":"请输入账号","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":6},{"type":"Label","props":{"y":546,"x":816,"text":"密码","styleSkin":"comp/label.png","fontSize":28},"compId":7},{"type":"TextInput","props":{"y":535,"x":884,"width":250,"var":"input_pwd","skin":"comp/textinput.png","prompt":"请输入密码","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":8},{"type":"Button","props":{"y":764,"x":913,"width":120,"var":"btn_login","skin":"comp/button.png","labelSize":24,"label":"登陆","height":40},"compId":10},{"type":"Button","props":{"y":353,"x":1281,"width":120,"var":"closebtn","skin":"comp/button.png","labelSize":24,"label":"X","height":40},"compId":11},{"type":"Script","props":{"runtime":"script.login.LogPanelControl"},"compId":14},{"type":"Text","props":{"y":674,"x":1134,"var":"txt_reg","text":"注册","fontSize":28,"runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":674,"x":1236,"var":"txt_forget","text":"忘记密码","fontSize":28,"runtime":"laya.display.Text"},"compId":19}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/label.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
-			createView(uiView);
+			loadScene("login/LogPanel");
 
 		}
 

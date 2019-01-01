@@ -19,12 +19,43 @@
 
 <body>
 
+<br/><br/>
+<br/><br/>
+<br/><br/>
+<br/><br/>
+
+<div id="div1" align="center"> 
+<progress value="0"  max="100" style="width: 30%">您的浏览器不支持progress元素</progress>
+</div>
     <script type="text/javascript">
+	
+	function goprogress(){
+        var pro=document.getElementsByTagName("progress")[0];
+        gotoend(pro,0);
+    }
+    function gotoend(pro,value){
+        var value=value+1;
+        pro.value=value;
+        if(value<95) {
+            setTimeout(function(){gotoend(pro, value);},60)
+        }else{
+            //setTimeout(function(){alert("任务完成")},20);
+        }
+    }
         function loadLib(url) {
             var script = document.createElement("script");
             script.async = false;
             script.src = url;
             document.body.appendChild(script);
+			goprogress();
+			script.onload  = function()
+			{
+			var pro=document.getElementsByTagName("progress")[0];
+			 	pro.value=100;
+			var parent=document.getElementById("div1");
+				parent.removeChild(pro);
+				//console.log("pass time:" + ((new Date()).valueOf() - nowtime));
+			}
         }
 		
 		var verifyCode;
@@ -84,6 +115,7 @@
 	<script type="text/javascript" src="GVerify.js"></script>
 
     <script type="text/javascript" src="index.js"></script>
+	
 </body>
 
 </html>

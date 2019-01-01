@@ -7,7 +7,7 @@ package ui.order {
 		public var selimg:Image;
 		public var addresstxt:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":888,"var":"selimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":41},"compId":4},{"type":"Label","props":{"y":8,"x":7,"width":870,"var":"addresstxt","text":"label","height":24,"fontSize":24},"compId":3}],"loadList":["commers/sel.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":888,"var":"selimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":41},"compId":4},{"type":"Label","props":{"y":8,"x":7,"width":870,"var":"addresstxt","text":"label","height":24,"fontSize":24},"compId":3}],"loadList":["commers/sel.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

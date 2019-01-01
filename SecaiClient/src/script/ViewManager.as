@@ -5,9 +5,11 @@ package script
 	import laya.ui.View;
 	import laya.utils.Browser;
 	
+	import ui.LoginViewUI;
 	import ui.PaintOrderPanelUI;
 	import ui.PicManagePanelUI;
 	import ui.PopUpDialogUI;
+	import ui.login.LoadingPanelUI;
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
@@ -19,6 +21,7 @@ package script
 	import ui.order.SelectTechPanelUI;
 	import ui.picManager.PicCheckPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
+	import ui.usercenter.NewAddressPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 
 	public class ViewManager
@@ -29,6 +32,8 @@ package script
 		
 		private var openViewList:Object;
 		
+		public static const VIEW_FIRST_PAGE:String = "VIEW_FIRST_PAGE"; //首页页面
+
 		public static const VIEW_lOGPANEL:String = "VIEW_lOGPANEL"; //登陆页面
 		public static const VIEW_REGPANEL:String = "VIEW_REGPANEL";//注册界面;
 		public static const VIEW_CHANGEPWD:String = "VIEW_CHANGEPWD";//注册界面;
@@ -51,6 +56,9 @@ package script
 		public static const VIEW_SELECT_MATERIAL:String = "VIEW_SELECT_MATERIAL";//选择材料界面
 		public static const VIEW_SELECT_TECHNORLOGY:String = "VIEW_SELECT_TECHNORLOGY";//选选择工艺界面
 		public static const VIEW_ADD_MESSAGE:String = "VIEW_ADD_MESSAGE";//添加备注
+		public static const VIEW_LOADING_PRO:String = "VIEW_LOADING_PRO";//加载界面
+
+		public static const VIEW_ADD_NEW_ADDRESS:String = "VIEW_ADD_NEW_ADDRESS";//添加收货地址
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
@@ -71,6 +79,9 @@ package script
 			openViewList = {};
 			
 			viewDict = new Object();
+			
+			viewDict[VIEW_FIRST_PAGE] = LoginViewUI;
+
 			viewDict[VIEW_lOGPANEL] = LogPanelUI;
 			viewDict[VIEW_REGPANEL] = RegisterPanelUI;
 			viewDict[VIEW_CHANGEPWD] = ResetPwdPanelUI;
@@ -87,6 +98,8 @@ package script
 			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
 			viewDict[VIEW_SELECT_TECHNORLOGY] = SelectTechPanelUI;
 			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;
+			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;
+			viewDict[VIEW_LOADING_PRO] = LoadingPanelUI;
 
 		}
 		

@@ -9,9 +9,13 @@ package laya.net {
 		private static var _fileLoadDic:Object = {};
 		
 		public static function enable(infoFile:String, callback:Handler = null):void {
-			Laya.loader.load(infoFile, Handler.create(null, _onInfoLoaded, [callback]), null, Loader.JSON);
+			Laya.loader.load(infoFile, Handler.create(null, _onInfoLoaded, [callback]), Handler.create(null,_progressData), Loader.JSON);
 		}
 		
+		private static function _progressData(prg:Number):void
+		{
+			console.log("sss:" + prg);
+		}
 		/**@private */
 		private static function _onInfoLoaded(callback:Handler, data:Object):void {
 			var tKey:String;

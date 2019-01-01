@@ -24,6 +24,9 @@ package eventUtil
 
 		public static const ADJUST_PIC_ORDER_TECH:String = "ADJUST_PIC_ORDER_TECH";//自适应下单工艺修改
 
+		
+		public static const UPDATE_LOADING_PROGRESS:String = "UPDATE_LOADING_PROGRESS";//刷新加载进度
+
 		private static var _eventCenter:EventCenter;
 		
 	

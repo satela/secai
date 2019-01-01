@@ -2,7 +2,6 @@
     "x":0,
     "type":"Scene",
     "selectedBox":2,
-    "selecteID":3,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,

@@ -1,35 +1,38 @@
 <page>
    <item name="test/TestScene.scene" props="" ifExport="分离模式" aName=""/>
-   <item name="login/LogPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="login/RegisterPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/LogPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="login/RegisterPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="login/CityAreaItemUI.scene" props="" ifExport="加载模式" aName=""/>
    <item name="login/CityAreaItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="PicManagePanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="PicManagePanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="UpLoadPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="login/ResetPwdPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/ResetPwdPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="uploadpic/UpLoadItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="uploadpic/UpLoadPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="uploadpic/UpLoadPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="picManager/PicShortItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="picManager/DirectItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="PaintOrderPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="PaintOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/UserMainPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="usercenter/EnterPrizeInfoPane.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="picManager/PicCheckPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/EnterPrizeInfoPane.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="picManager/PicCheckPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="PopUpDialog.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/OrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/PartsItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectAddressPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectFactoryPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectAddressPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SelectFactoryPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/AddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectPicPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectMaterialPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectPicPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SelectMaterialPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/TabChooseBtn.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/MaterialNameItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="prefabs/LinkCText.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/TechorItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/TechBoxItem.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectTechPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectTechPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/AddCommentPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="usercenter/AddressMgrPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/AddressMgrPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/AddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/NewAddressPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="login/LoadingPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="LoginView.scene" props="" ifExport="分离模式" aName=""/>
 </page>

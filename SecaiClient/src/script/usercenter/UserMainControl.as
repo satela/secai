@@ -8,6 +8,7 @@ package script.usercenter
 	
 	import script.ViewManager;
 	
+	import ui.usercenter.AddressMgrPanelUI;
 	import ui.usercenter.EnterPrizeInfoPaneUI;
 	import ui.usercenter.UserMainPanelUI;
 	
@@ -29,7 +30,7 @@ package script.usercenter
 			uiSkin.panel_main.vScrollBarSkin = "";
 			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
-			viewArr = [EnterPrizeInfoPaneUI,null,null];
+			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null];
 			
 			
 			

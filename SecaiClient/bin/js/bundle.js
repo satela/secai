@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1179,6 +1179,10 @@ var AddressVo=(function(){
 
 	__class(AddressVo,'model.users.AddressVo');
 	var __proto=AddressVo.prototype;
+	__getset(0,__proto,'proCityArea',function(){
+		return this.province+" "+this.city+" "+this.town+" "+this.address;
+	});
+
 	__getset(0,__proto,'addressDetail',function(){
 		return this.receiverName+"-"+this.phone+" "+this.province+" "+this.city+" "+this.town+" "+this.address;
 	});
@@ -1196,6 +1200,7 @@ var GameConfig=(function(){
 	__class(GameConfig,'GameConfig');
 	GameConfig.init=function(){
 		var reg=ClassUtils.regClass;
+		reg("utils.LoadingPrgControl",LoadingPrgControl);
 		reg("script.login.LogPanelControl",LogPanelControl);
 		reg("laya.display.Text",Text);
 		reg("script.login.RegisterCntrol",RegisterCntrol);
@@ -1214,7 +1219,9 @@ var GameConfig=(function(){
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 		reg("utils.PopUpWindowControl",PopUpWindowControl);
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
+		reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 		reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
+		reg("script.usercenter.AddressEditControl",AddressEditControl);
 		reg("script.usercenter.UserMainControl",UserMainControl);
 	}
 
@@ -1224,7 +1231,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/UserMainPanel.scene";
+	GameConfig.startScene="usercenter/AddressItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1381,6 +1388,7 @@ var ViewManager=(function(){
 		Laya.stage.addChild(this.viewContainer);
 		this.openViewList={};
 		this.viewDict=new Object();
+		this.viewDict["VIEW_FIRST_PAGE"]=LoginViewUI;
 		this.viewDict["VIEW_lOGPANEL"]=LogPanelUI;
 		this.viewDict["VIEW_REGPANEL"]=RegisterPanelUI;
 		this.viewDict["VIEW_CHANGEPWD"]=ResetPwdPanelUI;
@@ -1396,6 +1404,8 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_MATERIAL"]=SelectMaterialPanelUI;
 		this.viewDict["VIEW_SELECT_TECHNORLOGY"]=SelectTechPanelUI;
 		this.viewDict["VIEW_ADD_MESSAGE"]=AddCommentPanelUI;
+		this.viewDict["VIEW_ADD_NEW_ADDRESS"]=NewAddressPanelUI;
+		this.viewDict["VIEW_LOADING_PRO"]=LoadingPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1443,6 +1453,7 @@ var ViewManager=(function(){
 	}
 
 	ViewManager._instance=null;
+	ViewManager.VIEW_FIRST_PAGE="VIEW_FIRST_PAGE";
 	ViewManager.VIEW_lOGPANEL="VIEW_lOGPANEL";
 	ViewManager.VIEW_REGPANEL="VIEW_REGPANEL";
 	ViewManager.VIEW_CHANGEPWD="VIEW_CHANGEPWD";
@@ -1457,6 +1468,8 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_MATERIAL="VIEW_SELECT_MATERIAL";
 	ViewManager.VIEW_SELECT_TECHNORLOGY="VIEW_SELECT_TECHNORLOGY";
 	ViewManager.VIEW_ADD_MESSAGE="VIEW_ADD_MESSAGE";
+	ViewManager.VIEW_LOADING_PRO="VIEW_LOADING_PRO";
+	ViewManager.VIEW_ADD_NEW_ADDRESS="VIEW_ADD_NEW_ADDRESS";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -1729,15 +1742,16 @@ var HttpRequestUtil=(function(){
 //class Main
 var Main=(function(){
 	function Main(){
+		this.tt=NaN;
 		if (window["Laya3D"])window["Laya3D"].init(1920,1080);
 		else Laya.init(1920,1080,Laya["WebGL"]);
-		Laya["Physics"] && Laya["Physics"].enable();
-		Laya["DebugPanel"] && Laya["DebugPanel"].enable();
 		Laya.stage.scaleMode="noscale";
 		Laya.stage.screenMode=GameConfig.screenMode;
 		Laya.stage.alignV=GameConfig.alignV;
 		Laya.stage.alignH=GameConfig.alignH;
 		URL.exportSceneToJson=GameConfig.exportSceneToJson;
+		this.tt=(new Date()).getTime();
+		console.log("now time:"+this.tt);
 		if (GameConfig.debug || Utils.getQueryString("debug")=="true")Laya.enableDebugPanel();
 		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"])Laya["PhysicsDebugDraw"].enable();
 		if (GameConfig.stat)Stat.show();
@@ -1748,11 +1762,24 @@ var Main=(function(){
 	__class(Main,'Main');
 	var __proto=Main.prototype;
 	__proto.onVersionLoaded=function(){
-		AtlasInfoManager.enable("fileconfig.json",Handler.create(this,this.onConfigLoaded));
+		AtlasInfoManager.enable("fileconfig.json",Handler.create(null,this.onConfigLoaded));
 	}
 
+	//Laya.loader.load("res/atlas/comp.atlas",Handler.create(this,onLoadedComp),null,Loader.ATLAS);
+	__proto.onLoadedComp=function(){}
+	//AtlasInfoManager.enable("fileconfig.json",Handler.create(null,onConfigLoaded),null,Loader.JSON);
 	__proto.onConfigLoaded=function(){
-		GameConfig.startScene && Scene.open("LoginView.scene");
+		Laya.stage.addChild(new LoginViewUI());
+	}
+
+	//console.log("times:"+((new Date()).getTime()));
+	__proto.onCompleteShowView=function(){
+		ViewManager.instance.closeView("VIEW_LOADING_PRO");
+	}
+
+	__proto.onLoadingPrg=function(prg){
+		console.log("prg:"+prg);
+		EventCenter.instance.event("UPDATE_LOADING_PROGRESS",prg);
 	}
 
 	return Main;
@@ -15520,133 +15547,6 @@ var Tween=(function(){
 })()
 
 
-//class laya.webgl.shader.d2.value.Value2D
-var Value2D=(function(){
-	function Value2D(mainID,subID){
-		this.size=[0,0];
-		this.alpha=1.0;
-		//这个目前只给setIBVB用。其他的都放到attribute的color中了
-		//this.mmat=null;
-		//worldmatrix，是4x4的，因为为了shader使用方便。 TODO 换成float32Array
-		//this.texture=null;
-		this.ALPHA=1.0;
-		//这个？
-		//this.shader=null;
-		//this.mainID=0;
-		this.subID=0;
-		//this.filters=null;
-		//this.textureHost=null;
-		//public var fillStyle:DrawStyle;//TODO 这个有什么用？
-		//this.color=null;
-		//public var strokeStyle:DrawStyle;
-		//this.colorAdd=null;
-		//this.u_mmat2=null;
-		this.ref=1;
-		//this._attribLocation=null;
-		//[name,location,name,location...] 由继承类赋值。这个最终会传给对应的shader
-		//this._inClassCache=null;
-		this._cacheID=0;
-		this.clipMatDir=[99999999,0,0,99999999];
-		this.clipMatPos=[0,0];
-		this.defines=new ShaderDefines2D();
-		this.mainID=mainID;
-		this.subID=subID;
-		this.textureHost=null;
-		this.texture=null;
-		this.color=null;
-		this.colorAdd=null;
-		this.u_mmat2=null;
-		this._cacheID=mainID|subID;
-		this._inClassCache=Value2D._cache[this._cacheID];
-		if (mainID>0 && !this._inClassCache){
-			this._inClassCache=Value2D._cache[this._cacheID]=[];
-			this._inClassCache._length=0;
-		}
-		this.clear();
-	}
-
-	__class(Value2D,'laya.webgl.shader.d2.value.Value2D');
-	var __proto=Value2D.prototype;
-	__proto.setValue=function(value){}
-	//public function refresh():ShaderValue
-	__proto._ShaderWithCompile=function(){
-		var ret=Shader.withCompile2D(0,this.mainID,this.defines.toNameDic(),this.mainID | this.defines._value,Shader2X.create,this._attribLocation);
-		return ret;
-	}
-
-	__proto.upload=function(){
-		var renderstate2d=RenderState2D;
-		RenderState2D.worldMatrix4===RenderState2D.TEMPMAT4_ARRAY || this.defines.addInt(0x80);
-		this.mmat=renderstate2d.worldMatrix4;
-		var sd=Shader.sharders[this.mainID | this.defines._value] || this._ShaderWithCompile();
-		if (sd._shaderValueWidth!==renderstate2d.width || sd._shaderValueHeight!==renderstate2d.height){
-			this.size[0]=renderstate2d.width;
-			this.size[1]=renderstate2d.height;
-			sd._shaderValueWidth=renderstate2d.width;
-			sd._shaderValueHeight=renderstate2d.height;
-			sd.upload(this,null);
-		}
-		else{
-			sd.upload(this,sd._params2dQuick2 || sd._make2dQuick2());
-		}
-	}
-
-	//TODO:coverage
-	__proto.setFilters=function(value){
-		this.filters=value;
-		if (!value)
-			return;
-		var n=value.length,f;
-		for (var i=0;i < n;i++){
-			f=value[i];
-			if (f){
-				this.defines.add(f.type);
-				f.action.setValue(this);
-			}
-		}
-	}
-
-	__proto.clear=function(){
-		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
-	}
-
-	__proto.release=function(){
-		if ((--this.ref)< 1){
-			this._inClassCache && (this._inClassCache[this._inClassCache._length++]=this);
-			this.clear();
-			this.filters=null;
-			this.ref=1;
-		}
-	}
-
-	Value2D._initone=function(type,classT){
-		Value2D._typeClass[type]=classT;
-		Value2D._cache[type]=[];
-		Value2D._cache[type]._length=0;
-	}
-
-	Value2D.__init__=function(){
-		Value2D._initone(0x04,PrimitiveSV);
-		Value2D._initone(0x200,SkinSV);
-		Value2D._initone(0x01,TextureSV);
-		Value2D._initone(0x01 | 0x08,TextureSV);
-	}
-
-	Value2D.create=function(mainType,subType){
-		var types=Value2D._cache[mainType|subType];
-		if (types._length)
-			return types[--types._length];
-		else
-		return new Value2D._typeClass[mainType|subType](subType);
-	}
-
-	Value2D._cache=[];
-	Value2D._typeClass=[];
-	Value2D.TEMPMAT4_ARRAY=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
-	return Value2D;
-})()
-
-
 /**
 *...
 *@author ww
@@ -18031,6 +17931,133 @@ var DrawPieCmdNative=(function(){
 })()
 
 
+//class laya.webgl.shader.d2.value.Value2D
+var Value2D=(function(){
+	function Value2D(mainID,subID){
+		this.size=[0,0];
+		this.alpha=1.0;
+		//这个目前只给setIBVB用。其他的都放到attribute的color中了
+		//this.mmat=null;
+		//worldmatrix，是4x4的，因为为了shader使用方便。 TODO 换成float32Array
+		//this.texture=null;
+		this.ALPHA=1.0;
+		//这个？
+		//this.shader=null;
+		//this.mainID=0;
+		this.subID=0;
+		//this.filters=null;
+		//this.textureHost=null;
+		//public var fillStyle:DrawStyle;//TODO 这个有什么用？
+		//this.color=null;
+		//public var strokeStyle:DrawStyle;
+		//this.colorAdd=null;
+		//this.u_mmat2=null;
+		this.ref=1;
+		//this._attribLocation=null;
+		//[name,location,name,location...] 由继承类赋值。这个最终会传给对应的shader
+		//this._inClassCache=null;
+		this._cacheID=0;
+		this.clipMatDir=[99999999,0,0,99999999];
+		this.clipMatPos=[0,0];
+		this.defines=new ShaderDefines2D();
+		this.mainID=mainID;
+		this.subID=subID;
+		this.textureHost=null;
+		this.texture=null;
+		this.color=null;
+		this.colorAdd=null;
+		this.u_mmat2=null;
+		this._cacheID=mainID|subID;
+		this._inClassCache=Value2D._cache[this._cacheID];
+		if (mainID>0 && !this._inClassCache){
+			this._inClassCache=Value2D._cache[this._cacheID]=[];
+			this._inClassCache._length=0;
+		}
+		this.clear();
+	}
+
+	__class(Value2D,'laya.webgl.shader.d2.value.Value2D');
+	var __proto=Value2D.prototype;
+	__proto.setValue=function(value){}
+	//public function refresh():ShaderValue
+	__proto._ShaderWithCompile=function(){
+		var ret=Shader.withCompile2D(0,this.mainID,this.defines.toNameDic(),this.mainID | this.defines._value,Shader2X.create,this._attribLocation);
+		return ret;
+	}
+
+	__proto.upload=function(){
+		var renderstate2d=RenderState2D;
+		RenderState2D.worldMatrix4===RenderState2D.TEMPMAT4_ARRAY || this.defines.addInt(0x80);
+		this.mmat=renderstate2d.worldMatrix4;
+		var sd=Shader.sharders[this.mainID | this.defines._value] || this._ShaderWithCompile();
+		if (sd._shaderValueWidth!==renderstate2d.width || sd._shaderValueHeight!==renderstate2d.height){
+			this.size[0]=renderstate2d.width;
+			this.size[1]=renderstate2d.height;
+			sd._shaderValueWidth=renderstate2d.width;
+			sd._shaderValueHeight=renderstate2d.height;
+			sd.upload(this,null);
+		}
+		else{
+			sd.upload(this,sd._params2dQuick2 || sd._make2dQuick2());
+		}
+	}
+
+	//TODO:coverage
+	__proto.setFilters=function(value){
+		this.filters=value;
+		if (!value)
+			return;
+		var n=value.length,f;
+		for (var i=0;i < n;i++){
+			f=value[i];
+			if (f){
+				this.defines.add(f.type);
+				f.action.setValue(this);
+			}
+		}
+	}
+
+	__proto.clear=function(){
+		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
+	}
+
+	__proto.release=function(){
+		if ((--this.ref)< 1){
+			this._inClassCache && (this._inClassCache[this._inClassCache._length++]=this);
+			this.clear();
+			this.filters=null;
+			this.ref=1;
+		}
+	}
+
+	Value2D._initone=function(type,classT){
+		Value2D._typeClass[type]=classT;
+		Value2D._cache[type]=[];
+		Value2D._cache[type]._length=0;
+	}
+
+	Value2D.__init__=function(){
+		Value2D._initone(0x04,PrimitiveSV);
+		Value2D._initone(0x200,SkinSV);
+		Value2D._initone(0x01,TextureSV);
+		Value2D._initone(0x01 | 0x08,TextureSV);
+	}
+
+	Value2D.create=function(mainType,subType){
+		var types=Value2D._cache[mainType|subType];
+		if (types._length)
+			return types[--types._length];
+		else
+		return new Value2D._typeClass[mainType|subType](subType);
+	}
+
+	Value2D._cache=[];
+	Value2D._typeClass=[];
+	Value2D.TEMPMAT4_ARRAY=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+	return Value2D;
+})()
+
+
 //class laya.webgl.shapes.Earcut
 var Earcut=(function(){
 	function Earcut(){}
@@ -20352,7 +20379,11 @@ var AtlasInfoManager=(function(){
 	function AtlasInfoManager(){}
 	__class(AtlasInfoManager,'laya.net.AtlasInfoManager');
 	AtlasInfoManager.enable=function(infoFile,callback){
-		Laya.loader.load(infoFile,Handler.create(null,AtlasInfoManager._onInfoLoaded,[callback]),null,"json");
+		Laya.loader.load(infoFile,Handler.create(null,AtlasInfoManager._onInfoLoaded,[callback]),Handler.create(null,AtlasInfoManager._progressData),"json");
+	}
+
+	AtlasInfoManager._progressData=function(prg){
+		console.log("sss:"+prg);
 	}
 
 	AtlasInfoManager._onInfoLoaded=function(callback,data){
@@ -26041,6 +26072,7 @@ var EventCenter=(function(_super){
 	EventCenter.ADD_PIC_FOR_ORDER="ADD_PIC_FOR_ORDER";
 	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
+	EventCenter.UPDATE_LOADING_PROGRESS="UPDATE_LOADING_PROGRESS";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -28861,35 +28893,6 @@ var WebGLContext2D=(function(_super){
 
 
 /**
-*@private
-*/
-//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
-var HTMLStyleElement=(function(_super){
-	function HTMLStyleElement(){
-		HTMLStyleElement.__super.call(this);;
-	}
-
-	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
-	var __proto=HTMLStyleElement.prototype;
-	__proto._creates=function(){}
-	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
-	//TODO:coverage
-	__proto.reset=function(){
-		return this;
-	}
-
-	/**
-	*解析样式
-	*/
-	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
-		HTMLStyle.parseCSS(value,null);
-	});
-
-	return HTMLStyleElement;
-})(HTMLElement)
-
-
-/**
 *<p> <code>LoaderManager</code> 类用于用于批量加载资源。此类是单例，不要手动实例化此类，请通过Laya.loader访问。</p>
 *<p>全部队列加载完成，会派发 Event.COMPLETE 事件；如果队列中任意一个加载失败，会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
 *<p> <code>LoaderManager</code> 类提供了以下几种功能：<br/>
@@ -29661,6 +29664,35 @@ var WebAudioSound=(function(_super){
 
 
 /**
+*@private
+*/
+//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
+var HTMLStyleElement=(function(_super){
+	function HTMLStyleElement(){
+		HTMLStyleElement.__super.call(this);;
+	}
+
+	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
+	var __proto=HTMLStyleElement.prototype;
+	__proto._creates=function(){}
+	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
+	//TODO:coverage
+	__proto.reset=function(){
+		return this;
+	}
+
+	/**
+	*解析样式
+	*/
+	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
+		HTMLStyle.parseCSS(value,null);
+	});
+
+	return HTMLStyleElement;
+})(HTMLElement)
+
+
+/**
 *<code>Sound</code> 类是用来播放控制声音的类。
 *引擎默认有两套声音方案，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
 */
@@ -29701,6 +29733,172 @@ var Sound=(function(_super){
 	});
 
 	return Sound;
+})(EventDispatcher)
+
+
+/**
+*<p> <code>HttpRequest</code> 通过封装 HTML <code>XMLHttpRequest</code> 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。 <code>HttpRequest</code> 只提供以异步的形式返回 Web 服务器的响应，并且能够以文本或者二进制的形式返回内容。</p>
+*<p><b>注意：</b>建议每次请求都使用新的 <code>HttpRequest</code> 对象，因为每次调用该对象的send方法时，都会清空之前设置的数据，并重置 HTTP 请求的状态，这会导致之前还未返回响应的请求被重置，从而得不到之前请求的响应结果。</p>
+*/
+//class laya.net.HttpRequest extends laya.events.EventDispatcher
+var HttpRequest=(function(_super){
+	function HttpRequest(){
+		/**@private */
+		this._responseType=null;
+		/**@private */
+		this._data=null;
+		/**@private */
+		this._url=null;
+		HttpRequest.__super.call(this);
+		this._http=new Browser.window.XMLHttpRequest();
+	}
+
+	__class(HttpRequest,'laya.net.HttpRequest',_super);
+	var __proto=HttpRequest.prototype;
+	/**
+	*发送 HTTP 请求。
+	*@param url 请求的地址。大多数浏览器实施了一个同源安全策略，并且要求这个 URL 与包含脚本的文本具有相同的主机名和端口。
+	*@param data (default=null)发送的数据。
+	*@param method (default="get")用于请求的 HTTP 方法。值包括 "get"、"post"、"head"。
+	*@param responseType (default="text")Web 服务器的响应类型，可设置为 "text"、"json"、"xml"、"arraybuffer"。
+	*@param headers (default=null)HTTP 请求的头部信息。参数形如key-value数组：key是头部的名称，不应该包括空白、冒号或换行；value是头部的值，不应该包括换行。比如["Content-Type","application/json"]。
+	*/
+	__proto.send=function(url,data,method,responseType,headers){
+		(method===void 0)&& (method="get");
+		(responseType===void 0)&& (responseType="text");
+		this._responseType=responseType;
+		this._data=null;
+		this._url=url;
+		var _this=this;
+		var http=this._http;
+		url=URL.getAdptedFilePath(url);
+		http.open(method,url,true);
+		if (headers){
+			for (var i=0;i < headers.length;i++){
+				http.setRequestHeader(headers[i++],headers[i]);
+			}
+			}else if (!Render.isConchApp){
+			if (!data || (typeof data=='string'))http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+			else http.setRequestHeader("Content-Type","application/json");
+		}
+		http.responseType=responseType!=="arraybuffer" ? "text" :"arraybuffer";
+		http.onerror=function (e){
+			_this._onError(e);
+		}
+		http.onabort=function (e){
+			_this._onAbort(e);
+		}
+		http.onprogress=function (e){
+			_this._onProgress(e);
+		}
+		http.onload=function (e){
+			_this._onLoad(e);
+		}
+		http.send(data);
+	}
+
+	/**
+	*@private
+	*请求进度的侦听处理函数。
+	*@param e 事件对象。
+	*/
+	__proto._onProgress=function(e){
+		if (e && e.lengthComputable)this.event("progress",e.loaded / e.total);
+	}
+
+	/**
+	*@private
+	*请求中断的侦听处理函数。
+	*@param e 事件对象。
+	*/
+	__proto._onAbort=function(e){
+		this.error("Request was aborted by user");
+	}
+
+	/**
+	*@private
+	*请求出错侦的听处理函数。
+	*@param e 事件对象。
+	*/
+	__proto._onError=function(e){
+		this.error("Request failed Status:"+this._http.status+" text:"+this._http.statusText);
+	}
+
+	/**
+	*@private
+	*请求消息返回的侦听处理函数。
+	*@param e 事件对象。
+	*/
+	__proto._onLoad=function(e){
+		var http=this._http;
+		var status=http.status!==undefined ? http.status :200;
+		if (status===200 || status===204 || status===0){
+			this.complete();
+			}else {
+			this.error("["+http.status+"]"+http.statusText+":"+http.responseURL);
+		}
+	}
+
+	/**
+	*@private
+	*请求错误的处理函数。
+	*@param message 错误信息。
+	*/
+	__proto.error=function(message){
+		this.clear();
+		console.warn(this.url,message);
+		this.event("error",message);
+	}
+
+	/**
+	*@private
+	*请求成功完成的处理函数。
+	*/
+	__proto.complete=function(){
+		this.clear();
+		var flag=true;
+		try {
+			if (this._responseType==="json"){
+				this._data=JSON.parse(this._http.responseText);
+				}else if (this._responseType==="xml"){
+				this._data=Utils.parseXMLFromString(this._http.responseText);
+				}else {
+				this._data=this._http.response || this._http.responseText;
+			}
+			}catch (e){
+			flag=false;
+			this.error(e.message);
+		}
+		flag && this.event("complete",(this._data instanceof Array)? [this._data] :this._data);
+	}
+
+	/**
+	*@private
+	*清除当前请求。
+	*/
+	__proto.clear=function(){
+		var http=this._http;
+		http.onerror=http.onabort=http.onprogress=http.onload=null;
+	}
+
+	/**请求的地址。*/
+	__getset(0,__proto,'url',function(){
+		return this._url;
+	});
+
+	/**
+	*本对象所封装的原生 XMLHttpRequest 引用。
+	*/
+	__getset(0,__proto,'http',function(){
+		return this._http;
+	});
+
+	/**返回的数据。*/
+	__getset(0,__proto,'data',function(){
+		return this._data;
+	});
+
+	return HttpRequest;
 })(EventDispatcher)
 
 
@@ -29930,172 +30128,6 @@ var ColorFilter=(function(_super){
 
 
 /**
-*<p> <code>HttpRequest</code> 通过封装 HTML <code>XMLHttpRequest</code> 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。 <code>HttpRequest</code> 只提供以异步的形式返回 Web 服务器的响应，并且能够以文本或者二进制的形式返回内容。</p>
-*<p><b>注意：</b>建议每次请求都使用新的 <code>HttpRequest</code> 对象，因为每次调用该对象的send方法时，都会清空之前设置的数据，并重置 HTTP 请求的状态，这会导致之前还未返回响应的请求被重置，从而得不到之前请求的响应结果。</p>
-*/
-//class laya.net.HttpRequest extends laya.events.EventDispatcher
-var HttpRequest=(function(_super){
-	function HttpRequest(){
-		/**@private */
-		this._responseType=null;
-		/**@private */
-		this._data=null;
-		/**@private */
-		this._url=null;
-		HttpRequest.__super.call(this);
-		this._http=new Browser.window.XMLHttpRequest();
-	}
-
-	__class(HttpRequest,'laya.net.HttpRequest',_super);
-	var __proto=HttpRequest.prototype;
-	/**
-	*发送 HTTP 请求。
-	*@param url 请求的地址。大多数浏览器实施了一个同源安全策略，并且要求这个 URL 与包含脚本的文本具有相同的主机名和端口。
-	*@param data (default=null)发送的数据。
-	*@param method (default="get")用于请求的 HTTP 方法。值包括 "get"、"post"、"head"。
-	*@param responseType (default="text")Web 服务器的响应类型，可设置为 "text"、"json"、"xml"、"arraybuffer"。
-	*@param headers (default=null)HTTP 请求的头部信息。参数形如key-value数组：key是头部的名称，不应该包括空白、冒号或换行；value是头部的值，不应该包括换行。比如["Content-Type","application/json"]。
-	*/
-	__proto.send=function(url,data,method,responseType,headers){
-		(method===void 0)&& (method="get");
-		(responseType===void 0)&& (responseType="text");
-		this._responseType=responseType;
-		this._data=null;
-		this._url=url;
-		var _this=this;
-		var http=this._http;
-		url=URL.getAdptedFilePath(url);
-		http.open(method,url,true);
-		if (headers){
-			for (var i=0;i < headers.length;i++){
-				http.setRequestHeader(headers[i++],headers[i]);
-			}
-			}else if (!Render.isConchApp){
-			if (!data || (typeof data=='string'))http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-			else http.setRequestHeader("Content-Type","application/json");
-		}
-		http.responseType=responseType!=="arraybuffer" ? "text" :"arraybuffer";
-		http.onerror=function (e){
-			_this._onError(e);
-		}
-		http.onabort=function (e){
-			_this._onAbort(e);
-		}
-		http.onprogress=function (e){
-			_this._onProgress(e);
-		}
-		http.onload=function (e){
-			_this._onLoad(e);
-		}
-		http.send(data);
-	}
-
-	/**
-	*@private
-	*请求进度的侦听处理函数。
-	*@param e 事件对象。
-	*/
-	__proto._onProgress=function(e){
-		if (e && e.lengthComputable)this.event("progress",e.loaded / e.total);
-	}
-
-	/**
-	*@private
-	*请求中断的侦听处理函数。
-	*@param e 事件对象。
-	*/
-	__proto._onAbort=function(e){
-		this.error("Request was aborted by user");
-	}
-
-	/**
-	*@private
-	*请求出错侦的听处理函数。
-	*@param e 事件对象。
-	*/
-	__proto._onError=function(e){
-		this.error("Request failed Status:"+this._http.status+" text:"+this._http.statusText);
-	}
-
-	/**
-	*@private
-	*请求消息返回的侦听处理函数。
-	*@param e 事件对象。
-	*/
-	__proto._onLoad=function(e){
-		var http=this._http;
-		var status=http.status!==undefined ? http.status :200;
-		if (status===200 || status===204 || status===0){
-			this.complete();
-			}else {
-			this.error("["+http.status+"]"+http.statusText+":"+http.responseURL);
-		}
-	}
-
-	/**
-	*@private
-	*请求错误的处理函数。
-	*@param message 错误信息。
-	*/
-	__proto.error=function(message){
-		this.clear();
-		console.warn(this.url,message);
-		this.event("error",message);
-	}
-
-	/**
-	*@private
-	*请求成功完成的处理函数。
-	*/
-	__proto.complete=function(){
-		this.clear();
-		var flag=true;
-		try {
-			if (this._responseType==="json"){
-				this._data=JSON.parse(this._http.responseText);
-				}else if (this._responseType==="xml"){
-				this._data=Utils.parseXMLFromString(this._http.responseText);
-				}else {
-				this._data=this._http.response || this._http.responseText;
-			}
-			}catch (e){
-			flag=false;
-			this.error(e.message);
-		}
-		flag && this.event("complete",(this._data instanceof Array)? [this._data] :this._data);
-	}
-
-	/**
-	*@private
-	*清除当前请求。
-	*/
-	__proto.clear=function(){
-		var http=this._http;
-		http.onerror=http.onabort=http.onprogress=http.onload=null;
-	}
-
-	/**请求的地址。*/
-	__getset(0,__proto,'url',function(){
-		return this._url;
-	});
-
-	/**
-	*本对象所封装的原生 XMLHttpRequest 引用。
-	*/
-	__getset(0,__proto,'http',function(){
-		return this._http;
-	});
-
-	/**返回的数据。*/
-	__getset(0,__proto,'data',function(){
-		return this._data;
-	});
-
-	return HttpRequest;
-})(EventDispatcher)
-
-
-/**
 *用来画矢量的mesh。顶点格式固定为 x,y,rgba
 */
 //class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
@@ -30182,174 +30214,6 @@ var UIEvent=(function(_super){
 	UIEvent.HIDE_TIP="hidetip";
 	return UIEvent;
 })(Event)
-
-
-//class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
-var SubmitTexture=(function(_super){
-	function SubmitTexture(renderType){
-		(renderType===void 0)&& (renderType=10000);
-		SubmitTexture.__super.call(this,renderType);
-	}
-
-	__class(SubmitTexture,'laya.webgl.submit.SubmitTexture',_super);
-	var __proto=SubmitTexture.prototype;
-	__proto.clone=function(context,mesh,pos){
-		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture();
-		this._cloneInit(o,context,mesh,pos);
-		return o;
-	}
-
-	__proto.releaseRender=function(){
-		if ((--this._ref)< 1){
-			SubmitTexture.POOL[SubmitTexture._poolSize++]=this;
-			this.shaderValue.release();
-			this._mesh=null;
-			this._parent && (this._parent.releaseRender(),this._parent=null);
-		}
-	}
-
-	__proto.renderSubmit=function(){
-		if (this._numEle===0)
-			return 1;
-		var tex=this.shaderValue.textureHost;
-		if(tex){
-			var source=tex?tex._getSource():null;
-			if (!source)return 1;
-		};
-		var gl=WebGL.mainContext;
-		this._mesh.useMesh(gl);
-		var lastSubmit=Submit.preRender;
-		var prekey=(Submit.preRender)._key;
-		if (this._key.blendShader===0 && (this._key.submitType===prekey.submitType && this._key.blendShader===prekey.blendShader)&& BaseShader.activeShader &&
-			(Submit.preRender).clipInfoID==this.clipInfoID &&
-		lastSubmit.shaderValue.defines._value===this.shaderValue.defines._value &&
-		(this.shaderValue.defines._value & ShaderDefines2D.NOOPTMASK)==0){
-			(BaseShader.activeShader).uploadTexture2D(source);
-		}
-		else{
-			if (BlendMode.activeBlendFunction!==this._blendFn){
-				WebGLContext.setBlend(gl,true);
-				this._blendFn(gl);
-				BlendMode.activeBlendFunction=this._blendFn;
-			}
-			this.shaderValue.texture=source;
-			this.shaderValue.upload();
-		}
-		gl.drawElements(0x0004,this._numEle,0x1403,this._startIdx);
-		Stat.drawCall++;
-		Stat.trianglesFaces+=this._numEle / 3;
-		return 1;
-	}
-
-	SubmitTexture.create=function(context,mesh,sv){
-		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture(10016);
-		o._mesh=mesh;
-		o._key.clear();
-		o._key.submitType=2;
-		o._ref=1;
-		o._startIdx=mesh.indexNum *CONST3D2D.BYTES_PIDX;
-		o._numEle=0;
-		var blendType=context._nBlendType;
-		o._key.blendShader=blendType;
-		o._blendFn=context._targets ? BlendMode.targetFns[blendType] :BlendMode.fns[blendType];
-		o.shaderValue=sv;
-		if (context._colorFiler){
-			var ft=context._colorFiler;
-			sv.defines.add(ft.type);
-			(sv).colorMat=ft._mat;
-			(sv).colorAlpha=ft._alpha;
-		}
-		return o;
-	}
-
-	SubmitTexture._poolSize=0;
-	SubmitTexture.POOL=[];
-	return SubmitTexture;
-})(Submit)
-
-
-/**
-*cache as normal 模式下的生成的canvas的渲染。
-*/
-//class laya.webgl.submit.SubmitCanvas extends laya.webgl.submit.Submit
-var SubmitCanvas=(function(_super){
-	function SubmitCanvas(){
-		//this.canv=null;
-		this._matrix=new Matrix();
-		this._matrix4=CONST3D2D.defaultMatrix4.concat();
-		SubmitCanvas.__super.call(this,10000);
-		this.shaderValue=new Value2D(0,0);
-	}
-
-	__class(SubmitCanvas,'laya.webgl.submit.SubmitCanvas',_super);
-	var __proto=SubmitCanvas.prototype;
-	__proto.renderSubmit=function(){
-		var preAlpha=RenderState2D.worldAlpha;
-		var preMatrix4=RenderState2D.worldMatrix4;
-		var preMatrix=RenderState2D.worldMatrix;
-		var preFilters=RenderState2D.worldFilters;
-		var preWorldShaderDefines=RenderState2D.worldShaderDefines;
-		var v=this.shaderValue;
-		var m=this._matrix;
-		var m4=this._matrix4;
-		var mout=Matrix.TEMP;
-		Matrix.mul(m,preMatrix,mout);
-		m4[0]=mout.a;
-		m4[1]=mout.b;
-		m4[4]=mout.c;
-		m4[5]=mout.d;
-		m4[12]=mout.tx;
-		m4[13]=mout.ty;
-		RenderState2D.worldMatrix=mout.clone();
-		RenderState2D.worldMatrix4=m4;
-		RenderState2D.worldAlpha=RenderState2D.worldAlpha *v.alpha;
-		if (v.filters && v.filters.length){
-			RenderState2D.worldFilters=v.filters;
-			RenderState2D.worldShaderDefines=v.defines;
-		}
-		this.canv['flushsubmit']();
-		RenderState2D.worldAlpha=preAlpha;
-		RenderState2D.worldMatrix4=preMatrix4;
-		RenderState2D.worldMatrix.destroy();
-		RenderState2D.worldMatrix=preMatrix;
-		RenderState2D.worldFilters=preFilters;
-		RenderState2D.worldShaderDefines=preWorldShaderDefines;
-		return 1;
-	}
-
-	__proto.releaseRender=function(){
-		if((--this._ref)<1){
-			var cache=SubmitCanvas.POOL;
-			this._mesh=null;
-			cache[cache._length++]=this;
-		}
-	}
-
-	//TODO:coverage
-	__proto.clone=function(context,mesh,pos){
-		return null;
-	}
-
-	//TODO:coverage
-	__proto.getRenderType=function(){
-		return 10003;
-	}
-
-	SubmitCanvas.create=function(canvas,alpha,filters){
-		var o=(!SubmitCanvas.POOL._length)? (new SubmitCanvas()):SubmitCanvas.POOL[--SubmitCanvas.POOL._length];
-		o.canv=canvas;
-		o._ref=1;
-		o._numEle=0;
-		var v=o.shaderValue;
-		v.alpha=alpha;
-		v.defines.setValue(0);
-		filters && filters.length && v.setFilters(filters);
-		return o;
-	}
-
-	SubmitCanvas.POOL=(SubmitCanvas.POOL=[],SubmitCanvas.POOL._length=0,SubmitCanvas.POOL);
-	return SubmitCanvas;
-})(Submit)
 
 
 /**
@@ -30526,71 +30390,6 @@ var AudioSound=(function(_super){
 
 
 /**
-*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
-*/
-//class laya.webgl.utils.MeshParticle2D extends laya.webgl.utils.Mesh2D
-var MeshParticle2D=(function(_super){
-	//TODO:coverage
-	function MeshParticle2D(maxNum){
-		MeshParticle2D.__super.call(this,laya.webgl.utils.MeshParticle2D.const_stride,maxNum*4*MeshParticle2D.const_stride,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshParticle2D._fixattriInfo);
-		this.createQuadIB(maxNum);
-		this._quadNum=maxNum;
-	}
-
-	__class(MeshParticle2D,'laya.webgl.utils.MeshParticle2D',_super);
-	var __proto=MeshParticle2D.prototype;
-	__proto.setMaxParticleNum=function(maxNum){
-		this._vb._resizeBuffer(maxNum *4 *MeshParticle2D.const_stride,false);
-		this.createQuadIB(maxNum);
-	}
-
-	//TODO:coverage
-	__proto.releaseMesh=function(){
-		debugger;
-		this._vb.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshParticle2D._POOL.push(this);
-	}
-
-	//TODO:coverage
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._vb.deleteBuffer();
-	}
-
-	MeshParticle2D.getAMesh=function(maxNum){
-		if (laya.webgl.utils.MeshParticle2D._POOL.length){
-			var ret=laya.webgl.utils.MeshParticle2D._POOL.pop();
-			ret.setMaxParticleNum(maxNum);
-			return ret;
-		}
-		return new MeshParticle2D(maxNum);
-	}
-
-	MeshParticle2D.const_stride=29*4;
-	MeshParticle2D._POOL=[];
-	__static(MeshParticle2D,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1406,3,16,
-		0x1406,3,28,
-		0x1406,4,40,
-		0x1406,4,56,
-		0x1406,3,72,
-		0x1406,2,84,
-		0x1406,4,92,
-		0x1406,1,108,
-		0x1406,1,112];}
-	]);
-	return MeshParticle2D;
-})(Mesh2D)
-
-
-/**
 *@private
 *Worker Image加载器
 */
@@ -30727,6 +30526,547 @@ var WorkerLoader=(function(_super){
 	WorkerLoader._enable=false;
 	WorkerLoader._tryEnabled=false;
 	return WorkerLoader;
+})(EventDispatcher)
+
+
+//class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
+var SubmitTexture=(function(_super){
+	function SubmitTexture(renderType){
+		(renderType===void 0)&& (renderType=10000);
+		SubmitTexture.__super.call(this,renderType);
+	}
+
+	__class(SubmitTexture,'laya.webgl.submit.SubmitTexture',_super);
+	var __proto=SubmitTexture.prototype;
+	__proto.clone=function(context,mesh,pos){
+		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture();
+		this._cloneInit(o,context,mesh,pos);
+		return o;
+	}
+
+	__proto.releaseRender=function(){
+		if ((--this._ref)< 1){
+			SubmitTexture.POOL[SubmitTexture._poolSize++]=this;
+			this.shaderValue.release();
+			this._mesh=null;
+			this._parent && (this._parent.releaseRender(),this._parent=null);
+		}
+	}
+
+	__proto.renderSubmit=function(){
+		if (this._numEle===0)
+			return 1;
+		var tex=this.shaderValue.textureHost;
+		if(tex){
+			var source=tex?tex._getSource():null;
+			if (!source)return 1;
+		};
+		var gl=WebGL.mainContext;
+		this._mesh.useMesh(gl);
+		var lastSubmit=Submit.preRender;
+		var prekey=(Submit.preRender)._key;
+		if (this._key.blendShader===0 && (this._key.submitType===prekey.submitType && this._key.blendShader===prekey.blendShader)&& BaseShader.activeShader &&
+			(Submit.preRender).clipInfoID==this.clipInfoID &&
+		lastSubmit.shaderValue.defines._value===this.shaderValue.defines._value &&
+		(this.shaderValue.defines._value & ShaderDefines2D.NOOPTMASK)==0){
+			(BaseShader.activeShader).uploadTexture2D(source);
+		}
+		else{
+			if (BlendMode.activeBlendFunction!==this._blendFn){
+				WebGLContext.setBlend(gl,true);
+				this._blendFn(gl);
+				BlendMode.activeBlendFunction=this._blendFn;
+			}
+			this.shaderValue.texture=source;
+			this.shaderValue.upload();
+		}
+		gl.drawElements(0x0004,this._numEle,0x1403,this._startIdx);
+		Stat.drawCall++;
+		Stat.trianglesFaces+=this._numEle / 3;
+		return 1;
+	}
+
+	SubmitTexture.create=function(context,mesh,sv){
+		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture(10016);
+		o._mesh=mesh;
+		o._key.clear();
+		o._key.submitType=2;
+		o._ref=1;
+		o._startIdx=mesh.indexNum *CONST3D2D.BYTES_PIDX;
+		o._numEle=0;
+		var blendType=context._nBlendType;
+		o._key.blendShader=blendType;
+		o._blendFn=context._targets ? BlendMode.targetFns[blendType] :BlendMode.fns[blendType];
+		o.shaderValue=sv;
+		if (context._colorFiler){
+			var ft=context._colorFiler;
+			sv.defines.add(ft.type);
+			(sv).colorMat=ft._mat;
+			(sv).colorAlpha=ft._alpha;
+		}
+		return o;
+	}
+
+	SubmitTexture._poolSize=0;
+	SubmitTexture.POOL=[];
+	return SubmitTexture;
+})(Submit)
+
+
+/**
+*cache as normal 模式下的生成的canvas的渲染。
+*/
+//class laya.webgl.submit.SubmitCanvas extends laya.webgl.submit.Submit
+var SubmitCanvas=(function(_super){
+	function SubmitCanvas(){
+		//this.canv=null;
+		this._matrix=new Matrix();
+		this._matrix4=CONST3D2D.defaultMatrix4.concat();
+		SubmitCanvas.__super.call(this,10000);
+		this.shaderValue=new Value2D(0,0);
+	}
+
+	__class(SubmitCanvas,'laya.webgl.submit.SubmitCanvas',_super);
+	var __proto=SubmitCanvas.prototype;
+	__proto.renderSubmit=function(){
+		var preAlpha=RenderState2D.worldAlpha;
+		var preMatrix4=RenderState2D.worldMatrix4;
+		var preMatrix=RenderState2D.worldMatrix;
+		var preFilters=RenderState2D.worldFilters;
+		var preWorldShaderDefines=RenderState2D.worldShaderDefines;
+		var v=this.shaderValue;
+		var m=this._matrix;
+		var m4=this._matrix4;
+		var mout=Matrix.TEMP;
+		Matrix.mul(m,preMatrix,mout);
+		m4[0]=mout.a;
+		m4[1]=mout.b;
+		m4[4]=mout.c;
+		m4[5]=mout.d;
+		m4[12]=mout.tx;
+		m4[13]=mout.ty;
+		RenderState2D.worldMatrix=mout.clone();
+		RenderState2D.worldMatrix4=m4;
+		RenderState2D.worldAlpha=RenderState2D.worldAlpha *v.alpha;
+		if (v.filters && v.filters.length){
+			RenderState2D.worldFilters=v.filters;
+			RenderState2D.worldShaderDefines=v.defines;
+		}
+		this.canv['flushsubmit']();
+		RenderState2D.worldAlpha=preAlpha;
+		RenderState2D.worldMatrix4=preMatrix4;
+		RenderState2D.worldMatrix.destroy();
+		RenderState2D.worldMatrix=preMatrix;
+		RenderState2D.worldFilters=preFilters;
+		RenderState2D.worldShaderDefines=preWorldShaderDefines;
+		return 1;
+	}
+
+	__proto.releaseRender=function(){
+		if((--this._ref)<1){
+			var cache=SubmitCanvas.POOL;
+			this._mesh=null;
+			cache[cache._length++]=this;
+		}
+	}
+
+	//TODO:coverage
+	__proto.clone=function(context,mesh,pos){
+		return null;
+	}
+
+	//TODO:coverage
+	__proto.getRenderType=function(){
+		return 10003;
+	}
+
+	SubmitCanvas.create=function(canvas,alpha,filters){
+		var o=(!SubmitCanvas.POOL._length)? (new SubmitCanvas()):SubmitCanvas.POOL[--SubmitCanvas.POOL._length];
+		o.canv=canvas;
+		o._ref=1;
+		o._numEle=0;
+		var v=o.shaderValue;
+		v.alpha=alpha;
+		v.defines.setValue(0);
+		filters && filters.length && v.setFilters(filters);
+		return o;
+	}
+
+	SubmitCanvas.POOL=(SubmitCanvas.POOL=[],SubmitCanvas.POOL._length=0,SubmitCanvas.POOL);
+	return SubmitCanvas;
+})(Submit)
+
+
+/**
+*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*/
+//class laya.webgl.utils.MeshParticle2D extends laya.webgl.utils.Mesh2D
+var MeshParticle2D=(function(_super){
+	//TODO:coverage
+	function MeshParticle2D(maxNum){
+		MeshParticle2D.__super.call(this,laya.webgl.utils.MeshParticle2D.const_stride,maxNum*4*MeshParticle2D.const_stride,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshParticle2D._fixattriInfo);
+		this.createQuadIB(maxNum);
+		this._quadNum=maxNum;
+	}
+
+	__class(MeshParticle2D,'laya.webgl.utils.MeshParticle2D',_super);
+	var __proto=MeshParticle2D.prototype;
+	__proto.setMaxParticleNum=function(maxNum){
+		this._vb._resizeBuffer(maxNum *4 *MeshParticle2D.const_stride,false);
+		this.createQuadIB(maxNum);
+	}
+
+	//TODO:coverage
+	__proto.releaseMesh=function(){
+		debugger;
+		this._vb.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshParticle2D._POOL.push(this);
+	}
+
+	//TODO:coverage
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._vb.deleteBuffer();
+	}
+
+	MeshParticle2D.getAMesh=function(maxNum){
+		if (laya.webgl.utils.MeshParticle2D._POOL.length){
+			var ret=laya.webgl.utils.MeshParticle2D._POOL.pop();
+			ret.setMaxParticleNum(maxNum);
+			return ret;
+		}
+		return new MeshParticle2D(maxNum);
+	}
+
+	MeshParticle2D.const_stride=29*4;
+	MeshParticle2D._POOL=[];
+	__static(MeshParticle2D,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1406,3,16,
+		0x1406,3,28,
+		0x1406,4,40,
+		0x1406,4,56,
+		0x1406,3,72,
+		0x1406,2,84,
+		0x1406,4,92,
+		0x1406,1,108,
+		0x1406,1,112];}
+	]);
+	return MeshParticle2D;
+})(Mesh2D)
+
+
+/**
+*相对布局插件
+*/
+//class laya.ui.Widget extends laya.components.Component
+var Widget=(function(_super){
+	function Widget(){
+		Widget.__super.call(this);
+		this._top=NaN;
+		this._bottom=NaN;
+		this._left=NaN;
+		this._right=NaN;
+		this._centerX=NaN;
+		this._centerY=NaN;
+	}
+
+	__class(Widget,'laya.ui.Widget',_super);
+	var __proto=Widget.prototype;
+	__proto.onReset=function(){
+		this._top=this._bottom=this._left=this._right=this._centerX=this._centerY=NaN;
+	}
+
+	__proto._onEnable=function(){
+		if (this.owner.parent)this._onAdded();
+		else this.owner.once("added",this,this._onAdded);
+	}
+
+	__proto._onDisable=function(){
+		this.owner.off("added",this,this._onAdded);
+		if (this.owner.parent)this.owner.parent.off("resize",this,this._onParentResize);
+	}
+
+	/**
+	*对象被添加到显示列表的事件侦听处理函数。
+	*/
+	__proto._onAdded=function(){
+		if (this.owner.parent)
+			this.owner.parent.on("resize",this,this._onParentResize);
+		this.resetLayoutX();
+		this.resetLayoutY();
+	}
+
+	/**
+	*父容器的 <code>Event.RESIZE</code> 事件侦听处理函数。
+	*/
+	__proto._onParentResize=function(){
+		if (this.resetLayoutX()|| this.resetLayoutY())this.owner.event("resize");
+	}
+
+	/**
+	*<p>重置对象的 <code>X</code> 轴（水平方向）布局。</p>
+	*@private
+	*/
+	__proto.resetLayoutX=function(){
+		var owner=this.owner;
+		if (!owner)return false;
+		var parent=owner.parent;
+		if (parent){
+			if (!isNaN(this.centerX)){
+				owner.x=Math.round((parent.width-owner.displayWidth)*0.5+this.centerX+owner.pivotX *owner.scaleX);
+				}else if (!isNaN(this.left)){
+				owner.x=Math.round(this.left+owner.pivotX *owner.scaleX);
+				if (!isNaN(this.right)){
+					var temp=(parent._width-this.left-this.right)/ (owner.scaleX || 0.01);
+					if (temp !=owner.width){
+						owner.width=temp;
+						return true;
+					}
+				}
+				}else if (!isNaN(this.right)){
+				owner.x=Math.round(parent.width-owner.displayWidth-this.right+owner.pivotX *owner.scaleX);
+			}
+		}
+		return false;
+	}
+
+	/**
+	*<p>重置对象的 <code>Y</code> 轴（垂直方向）布局。</p>
+	*@private
+	*/
+	__proto.resetLayoutY=function(){
+		var owner=this.owner;
+		if (!owner)return false;
+		var parent=owner.parent;
+		if (parent){
+			if (!isNaN(this.centerY)){
+				owner.y=Math.round((parent.height-owner.displayHeight)*0.5+this.centerY+owner.pivotY *owner.scaleY);
+				}else if (!isNaN(this.top)){
+				owner.y=Math.round(this.top+owner.pivotY *owner.scaleY);
+				if (!isNaN(this.bottom)){
+					var temp=(parent._height-this.top-this.bottom)/ (owner.scaleY || 0.01);
+					if (temp !=owner.height){
+						owner.height=temp;
+						return true;
+					}
+				}
+				}else if (!isNaN(this.bottom)){
+				owner.y=Math.round(parent.height-owner.displayHeight-this.bottom+owner.pivotY *owner.scaleY);
+			}
+		}
+		return false;
+	}
+
+	/**
+	*重新计算布局
+	*/
+	__proto.resetLayout=function(){
+		if (this.owner){
+			this.resetLayoutX();
+			this.resetLayoutY();
+		}
+	}
+
+	/**表示距水平方向中心轴的距离（以像素为单位）。*/
+	__getset(0,__proto,'centerX',function(){
+		return this._centerX;
+		},function(value){
+		if (this._centerX !=value){
+			this._centerX=value;
+			this.resetLayoutX();
+		}
+	});
+
+	/**表示距顶边的距离（以像素为单位）。*/
+	__getset(0,__proto,'top',function(){
+		return this._top;
+		},function(value){
+		if (this._top !=value){
+			this._top=value;
+			this.resetLayoutY();
+		}
+	});
+
+	/**表示距底边的距离（以像素为单位）。*/
+	__getset(0,__proto,'bottom',function(){
+		return this._bottom;
+		},function(value){
+		if (this._bottom !=value){
+			this._bottom=value;
+			this.resetLayoutY();
+		}
+	});
+
+	/**表示距左边的距离（以像素为单位）。*/
+	__getset(0,__proto,'left',function(){
+		return this._left;
+		},function(value){
+		if (this._left !=value){
+			this._left=value;
+			this.resetLayoutX();
+		}
+	});
+
+	/**表示距右边的距离（以像素为单位）。*/
+	__getset(0,__proto,'right',function(){
+		return this._right;
+		},function(value){
+		if (this._right !=value){
+			this._right=value;
+			this.resetLayoutX();
+		}
+	});
+
+	/**表示距垂直方向中心轴的距离（以像素为单位）。*/
+	__getset(0,__proto,'centerY',function(){
+		return this._centerY;
+		},function(value){
+		if (this._centerY !=value){
+			this._centerY=value;
+			this.resetLayoutY();
+		}
+	});
+
+	__static(Widget,
+	['EMPTY',function(){return this.EMPTY=new Widget();}
+	]);
+	return Widget;
+})(Component)
+
+
+/**
+*@private
+*场景资源加载器
+*/
+//class laya.net.SceneLoader extends laya.events.EventDispatcher
+var SceneLoader=(function(_super){
+	function SceneLoader(){
+		this.totalCount=0;
+		this._completeHandler=null;
+		this._toLoadList=null;
+		this._isLoading=false;
+		this._curUrl=null;
+		SceneLoader.__super.call(this);
+		this._completeHandler=new Handler(this,this.onOneLoadComplete);
+		this.reset();
+	}
+
+	__class(SceneLoader,'laya.net.SceneLoader',_super);
+	var __proto=SceneLoader.prototype;
+	__proto.reset=function(){
+		this._toLoadList=[];
+		this._isLoading=false;
+		this.totalCount=0;
+	}
+
+	__proto.load=function(url,is3D,ifCheck){
+		(is3D===void 0)&& (is3D=false);
+		(ifCheck===void 0)&& (ifCheck=true);
+		if ((url instanceof Array)){
+			var i=0,len=0;
+			len=url.length;
+			for (i=0;i < len;i++){
+				this._addToLoadList(url[i],is3D);
+			}
+			}else {
+			this._addToLoadList(url,is3D);
+		}
+		if(ifCheck)
+			this._checkNext();
+	}
+
+	__proto._addToLoadList=function(url,is3D){
+		(is3D===void 0)&& (is3D=false);
+		if (this._toLoadList.indexOf(url)>=0)return;
+		if (Loader.getRes(url))return;
+		if (is3D){
+			this._toLoadList.push({url:url});
+		}else
+		this._toLoadList.push(url);
+		this.totalCount++;
+	}
+
+	__proto._checkNext=function(){
+		if (!this._isLoading){
+			if (this._toLoadList.length==0){
+				this.event("complete");
+				return;
+			};
+			var tItem;
+			tItem=this._toLoadList.pop();
+			if ((typeof tItem=='string')){
+				this.loadOne(tItem);
+				}else{
+				this.loadOne(tItem.url,true);
+			}
+		}
+	}
+
+	__proto.loadOne=function(url,is3D){
+		(is3D===void 0)&& (is3D=false);
+		this._curUrl=url;
+		var type=Utils.getFileExtension(this._curUrl);
+		if (is3D){
+			Laya.loader.create(url,this._completeHandler);
+		}else
+		if (SceneLoader.LoadableExtensions[type]){
+			Laya.loader.load(url,this._completeHandler,null,SceneLoader.LoadableExtensions[type]);
+			}else if (url !=AtlasInfoManager.getFileLoadPath(url)|| SceneLoader.No3dLoadTypes[type] || !LoaderManager.createMap[type]){
+			Laya.loader.load(url,this._completeHandler);
+			}else {
+			Laya.loader.create(url,this._completeHandler);
+		}
+	}
+
+	__proto.onOneLoadComplete=function(){
+		this._isLoading=false;
+		if (!Loader.getRes(this._curUrl)){
+			console.log("Fail to load:",this._curUrl);
+		};
+		var type=Utils.getFileExtension(this._curUrl);
+		if (SceneLoader.LoadableExtensions[type]){
+			var dataO;
+			dataO=Loader.getRes(this._curUrl);
+			if (dataO&&((dataO instanceof laya.components.Prefab ))){
+				dataO=dataO.json;
+			}
+			if (dataO){
+				if (dataO.loadList){
+					this.load(dataO.loadList,false,false);
+				}
+				if (dataO.loadList3D){
+					this.load(dataO.loadList3D,true,false);
+				}
+			}
+		}
+		this.event("progress",this.getProgress());
+		this._checkNext();
+	}
+
+	__proto.getProgress=function(){
+		return this.loadedCount / this.totalCount;
+	}
+
+	__getset(0,__proto,'loadedCount',function(){
+		return this.totalCount-this.leftCount;
+	});
+
+	__getset(0,__proto,'leftCount',function(){
+		if (this._isLoading)return this._toLoadList.length+1;
+		return this._toLoadList.length;
+	});
+
+	__static(SceneLoader,
+	['LoadableExtensions',function(){return this.LoadableExtensions={"scene":"json","scene3d":"json","ani":"json","ui":"json","prefab":"prefab"};},'No3dLoadTypes',function(){return this.No3dLoadTypes={"png":true,"jpg":true,"txt":true};}
+	]);
+	return SceneLoader;
 })(EventDispatcher)
 
 
@@ -31120,185 +31460,6 @@ var ShaderDefines2D=(function(_super){
 
 
 /**
-*相对布局插件
-*/
-//class laya.ui.Widget extends laya.components.Component
-var Widget=(function(_super){
-	function Widget(){
-		Widget.__super.call(this);
-		this._top=NaN;
-		this._bottom=NaN;
-		this._left=NaN;
-		this._right=NaN;
-		this._centerX=NaN;
-		this._centerY=NaN;
-	}
-
-	__class(Widget,'laya.ui.Widget',_super);
-	var __proto=Widget.prototype;
-	__proto.onReset=function(){
-		this._top=this._bottom=this._left=this._right=this._centerX=this._centerY=NaN;
-	}
-
-	__proto._onEnable=function(){
-		if (this.owner.parent)this._onAdded();
-		else this.owner.once("added",this,this._onAdded);
-	}
-
-	__proto._onDisable=function(){
-		this.owner.off("added",this,this._onAdded);
-		if (this.owner.parent)this.owner.parent.off("resize",this,this._onParentResize);
-	}
-
-	/**
-	*对象被添加到显示列表的事件侦听处理函数。
-	*/
-	__proto._onAdded=function(){
-		if (this.owner.parent)
-			this.owner.parent.on("resize",this,this._onParentResize);
-		this.resetLayoutX();
-		this.resetLayoutY();
-	}
-
-	/**
-	*父容器的 <code>Event.RESIZE</code> 事件侦听处理函数。
-	*/
-	__proto._onParentResize=function(){
-		if (this.resetLayoutX()|| this.resetLayoutY())this.owner.event("resize");
-	}
-
-	/**
-	*<p>重置对象的 <code>X</code> 轴（水平方向）布局。</p>
-	*@private
-	*/
-	__proto.resetLayoutX=function(){
-		var owner=this.owner;
-		if (!owner)return false;
-		var parent=owner.parent;
-		if (parent){
-			if (!isNaN(this.centerX)){
-				owner.x=Math.round((parent.width-owner.displayWidth)*0.5+this.centerX+owner.pivotX *owner.scaleX);
-				}else if (!isNaN(this.left)){
-				owner.x=Math.round(this.left+owner.pivotX *owner.scaleX);
-				if (!isNaN(this.right)){
-					var temp=(parent._width-this.left-this.right)/ (owner.scaleX || 0.01);
-					if (temp !=owner.width){
-						owner.width=temp;
-						return true;
-					}
-				}
-				}else if (!isNaN(this.right)){
-				owner.x=Math.round(parent.width-owner.displayWidth-this.right+owner.pivotX *owner.scaleX);
-			}
-		}
-		return false;
-	}
-
-	/**
-	*<p>重置对象的 <code>Y</code> 轴（垂直方向）布局。</p>
-	*@private
-	*/
-	__proto.resetLayoutY=function(){
-		var owner=this.owner;
-		if (!owner)return false;
-		var parent=owner.parent;
-		if (parent){
-			if (!isNaN(this.centerY)){
-				owner.y=Math.round((parent.height-owner.displayHeight)*0.5+this.centerY+owner.pivotY *owner.scaleY);
-				}else if (!isNaN(this.top)){
-				owner.y=Math.round(this.top+owner.pivotY *owner.scaleY);
-				if (!isNaN(this.bottom)){
-					var temp=(parent._height-this.top-this.bottom)/ (owner.scaleY || 0.01);
-					if (temp !=owner.height){
-						owner.height=temp;
-						return true;
-					}
-				}
-				}else if (!isNaN(this.bottom)){
-				owner.y=Math.round(parent.height-owner.displayHeight-this.bottom+owner.pivotY *owner.scaleY);
-			}
-		}
-		return false;
-	}
-
-	/**
-	*重新计算布局
-	*/
-	__proto.resetLayout=function(){
-		if (this.owner){
-			this.resetLayoutX();
-			this.resetLayoutY();
-		}
-	}
-
-	/**表示距水平方向中心轴的距离（以像素为单位）。*/
-	__getset(0,__proto,'centerX',function(){
-		return this._centerX;
-		},function(value){
-		if (this._centerX !=value){
-			this._centerX=value;
-			this.resetLayoutX();
-		}
-	});
-
-	/**表示距顶边的距离（以像素为单位）。*/
-	__getset(0,__proto,'top',function(){
-		return this._top;
-		},function(value){
-		if (this._top !=value){
-			this._top=value;
-			this.resetLayoutY();
-		}
-	});
-
-	/**表示距底边的距离（以像素为单位）。*/
-	__getset(0,__proto,'bottom',function(){
-		return this._bottom;
-		},function(value){
-		if (this._bottom !=value){
-			this._bottom=value;
-			this.resetLayoutY();
-		}
-	});
-
-	/**表示距左边的距离（以像素为单位）。*/
-	__getset(0,__proto,'left',function(){
-		return this._left;
-		},function(value){
-		if (this._left !=value){
-			this._left=value;
-			this.resetLayoutX();
-		}
-	});
-
-	/**表示距右边的距离（以像素为单位）。*/
-	__getset(0,__proto,'right',function(){
-		return this._right;
-		},function(value){
-		if (this._right !=value){
-			this._right=value;
-			this.resetLayoutX();
-		}
-	});
-
-	/**表示距垂直方向中心轴的距离（以像素为单位）。*/
-	__getset(0,__proto,'centerY',function(){
-		return this._centerY;
-		},function(value){
-		if (this._centerY !=value){
-			this._centerY=value;
-			this.resetLayoutY();
-		}
-	});
-
-	__static(Widget,
-	['EMPTY',function(){return this.EMPTY=new Widget();}
-	]);
-	return Widget;
-})(Component)
-
-
-/**
 *与MeshQuadTexture基本相同。不过index不是固定的
 */
 //class laya.webgl.utils.MeshTexture extends laya.webgl.utils.Mesh2D
@@ -31380,135 +31541,6 @@ var MeshTexture=(function(_super){
 	]);
 	return MeshTexture;
 })(Mesh2D)
-
-
-/**
-*@private
-*场景资源加载器
-*/
-//class laya.net.SceneLoader extends laya.events.EventDispatcher
-var SceneLoader=(function(_super){
-	function SceneLoader(){
-		this.totalCount=0;
-		this._completeHandler=null;
-		this._toLoadList=null;
-		this._isLoading=false;
-		this._curUrl=null;
-		SceneLoader.__super.call(this);
-		this._completeHandler=new Handler(this,this.onOneLoadComplete);
-		this.reset();
-	}
-
-	__class(SceneLoader,'laya.net.SceneLoader',_super);
-	var __proto=SceneLoader.prototype;
-	__proto.reset=function(){
-		this._toLoadList=[];
-		this._isLoading=false;
-		this.totalCount=0;
-	}
-
-	__proto.load=function(url,is3D,ifCheck){
-		(is3D===void 0)&& (is3D=false);
-		(ifCheck===void 0)&& (ifCheck=true);
-		if ((url instanceof Array)){
-			var i=0,len=0;
-			len=url.length;
-			for (i=0;i < len;i++){
-				this._addToLoadList(url[i],is3D);
-			}
-			}else {
-			this._addToLoadList(url,is3D);
-		}
-		if(ifCheck)
-			this._checkNext();
-	}
-
-	__proto._addToLoadList=function(url,is3D){
-		(is3D===void 0)&& (is3D=false);
-		if (this._toLoadList.indexOf(url)>=0)return;
-		if (Loader.getRes(url))return;
-		if (is3D){
-			this._toLoadList.push({url:url});
-		}else
-		this._toLoadList.push(url);
-		this.totalCount++;
-	}
-
-	__proto._checkNext=function(){
-		if (!this._isLoading){
-			if (this._toLoadList.length==0){
-				this.event("complete");
-				return;
-			};
-			var tItem;
-			tItem=this._toLoadList.pop();
-			if ((typeof tItem=='string')){
-				this.loadOne(tItem);
-				}else{
-				this.loadOne(tItem.url,true);
-			}
-		}
-	}
-
-	__proto.loadOne=function(url,is3D){
-		(is3D===void 0)&& (is3D=false);
-		this._curUrl=url;
-		var type=Utils.getFileExtension(this._curUrl);
-		if (is3D){
-			Laya.loader.create(url,this._completeHandler);
-		}else
-		if (SceneLoader.LoadableExtensions[type]){
-			Laya.loader.load(url,this._completeHandler,null,SceneLoader.LoadableExtensions[type]);
-			}else if (url !=AtlasInfoManager.getFileLoadPath(url)|| SceneLoader.No3dLoadTypes[type] || !LoaderManager.createMap[type]){
-			Laya.loader.load(url,this._completeHandler);
-			}else {
-			Laya.loader.create(url,this._completeHandler);
-		}
-	}
-
-	__proto.onOneLoadComplete=function(){
-		this._isLoading=false;
-		if (!Loader.getRes(this._curUrl)){
-			console.log("Fail to load:",this._curUrl);
-		};
-		var type=Utils.getFileExtension(this._curUrl);
-		if (SceneLoader.LoadableExtensions[type]){
-			var dataO;
-			dataO=Loader.getRes(this._curUrl);
-			if (dataO&&((dataO instanceof laya.components.Prefab ))){
-				dataO=dataO.json;
-			}
-			if (dataO){
-				if (dataO.loadList){
-					this.load(dataO.loadList,false,false);
-				}
-				if (dataO.loadList3D){
-					this.load(dataO.loadList3D,true,false);
-				}
-			}
-		}
-		this.event("progress",this.getProgress());
-		this._checkNext();
-	}
-
-	__proto.getProgress=function(){
-		return this.loadedCount / this.totalCount;
-	}
-
-	__getset(0,__proto,'loadedCount',function(){
-		return this.totalCount-this.leftCount;
-	});
-
-	__getset(0,__proto,'leftCount',function(){
-		if (this._isLoading)return this._toLoadList.length+1;
-		return this._toLoadList.length;
-	});
-
-	__static(SceneLoader,
-	['LoadableExtensions',function(){return this.LoadableExtensions={"scene":"json","scene3d":"json","ani":"json","ui":"json","prefab":"prefab"};},'No3dLoadTypes',function(){return this.No3dLoadTypes={"png":true,"jpg":true,"txt":true};}
-	]);
-	return SceneLoader;
-})(EventDispatcher)
 
 
 //class laya.webgl.resource.CharRender_Native extends laya.webgl.resource.ICharRender
@@ -33772,7 +33804,7 @@ var UserMainControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
-		this.viewArr=[EnterPrizeInfoPaneUI,null,null];
+		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null];
 		this.btntxtArr=[];
 		for(var i=0;i < 9;i++){
 			this.uiSkin["btntxt"+i].on("click",this,this.onShowEditView,[i]);
@@ -34408,6 +34440,36 @@ var PopUpWindowControl=(function(_super){
 	}
 
 	return PopUpWindowControl;
+})(Script)
+
+
+//class utils.LoadingPrgControl extends laya.components.Script
+var LoadingPrgControl=(function(_super){
+	function LoadingPrgControl(){
+		this.uiSkin=null;
+		LoadingPrgControl.__super.call(this);
+	}
+
+	__class(LoadingPrgControl,'utils.LoadingPrgControl',_super);
+	var __proto=LoadingPrgControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.prg.value=0;
+		this.uiSkin.prgtxt.text="0%";
+		EventCenter.instance.on("UPDATE_LOADING_PROGRESS",this,this.onUpdatePrg);
+	}
+
+	__proto.onUpdatePrg=function(prgs){
+		console.log("prg rec:"+prgs);
+		this.uiSkin.prg.value=prgs;
+		this.uiSkin.prgtxt.text=prgs+"%";
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("UPDATE_LOADING_PROGRESS",this,this.onUpdatePrg);
+	}
+
+	return LoadingPrgControl;
 })(Script)
 
 
@@ -35164,6 +35226,67 @@ var SelectMaterialControl=(function(_super){
 	}
 
 	return SelectMaterialControl;
+})(Script)
+
+
+//class script.usercenter.AddressMgrControl extends laya.components.Script
+var AddressMgrControl=(function(_super){
+	function AddressMgrControl(){
+		this.uiSkin=null;
+		AddressMgrControl.__super.call(this);
+	}
+
+	__class(AddressMgrControl,'script.usercenter.AddressMgrControl',_super);
+	var __proto=AddressMgrControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.addlist.itemRender=CompanyAddressItem;
+		this.uiSkin.addlist.vScrollBarSkin="";
+		this.uiSkin.addlist.repeatX=1;
+		this.uiSkin.addlist.spaceY=0;
+		this.uiSkin.addlist.renderHandler=new Handler(this,this.updateAddressList);
+		this.uiSkin.addlist.selectEnable=false;
+		var temparr=[];
+		for(var i=0;i < 6;i++){
+			var addvo=new AddressVo();
+			temparr.push(addvo);
+		}
+		this.uiSkin.addlist.array=temparr;
+		this.uiSkin.btnaddAddress.on("click",this,this.onClickAdd);
+	}
+
+	__proto.onClickAdd=function(){
+		ViewManager.instance.openView("VIEW_ADD_NEW_ADDRESS");
+	}
+
+	__proto.updateAddressList=function(cell,index){
+		cell.setData(cell.dataSource);
+	}
+
+	return AddressMgrControl;
+})(Script)
+
+
+//class script.usercenter.AddressEditControl extends laya.components.Script
+var AddressEditControl=(function(_super){
+	function AddressEditControl(){
+		this.uiSkin=null;
+		AddressEditControl.__super.call(this);
+	}
+
+	__class(AddressEditControl,'script.usercenter.AddressEditControl',_super);
+	var __proto=AddressEditControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.btnok.on("click",this,this.onCloseView);
+		this.uiSkin.btncancel.on("click",this,this.onCloseView);
+	}
+
+	__proto.onCloseView=function(){
+		ViewManager.instance.closeView("VIEW_ADD_NEW_ADDRESS");
+	}
+
+	return AddressEditControl;
 })(Script)
 
 
@@ -35977,47 +36100,6 @@ var BaseShader=(function(_super){
 })(Resource)
 
 
-/**
-*@private
-*<code>Bitmap</code> 图片资源类。
-*/
-//class laya.resource.Bitmap extends laya.resource.Resource
-var Bitmap=(function(_super){
-	function Bitmap(){
-		/**@private */
-		//this._width=NaN;
-		/**@private */
-		//this._height=NaN;
-		Bitmap.__super.call(this);
-		this._width=-1;
-		this._height=-1;
-	}
-
-	__class(Bitmap,'laya.resource.Bitmap',_super);
-	var __proto=Bitmap.prototype;
-	//TODO:coverage
-	__proto._getSource=function(){
-		throw "Bitmap: must override it.";
-	}
-
-	/**
-	*获取宽度。
-	*/
-	__getset(0,__proto,'width',function(){
-		return this._width;
-	});
-
-	/***
-	*获取高度。
-	*/
-	__getset(0,__proto,'height',function(){
-		return this._height;
-	});
-
-	return Bitmap;
-})(Resource)
-
-
 //class laya.webgl.utils.Buffer extends laya.resource.Resource
 var Buffer=(function(_super){
 	function Buffer(){
@@ -36259,6 +36341,47 @@ var WebAudioSoundChannel=(function(_super){
 	WebAudioSoundChannel.SetTargetDelay=0.001;
 	return WebAudioSoundChannel;
 })(SoundChannel)
+
+
+/**
+*@private
+*<code>Bitmap</code> 图片资源类。
+*/
+//class laya.resource.Bitmap extends laya.resource.Resource
+var Bitmap=(function(_super){
+	function Bitmap(){
+		/**@private */
+		//this._width=NaN;
+		/**@private */
+		//this._height=NaN;
+		Bitmap.__super.call(this);
+		this._width=-1;
+		this._height=-1;
+	}
+
+	__class(Bitmap,'laya.resource.Bitmap',_super);
+	var __proto=Bitmap.prototype;
+	//TODO:coverage
+	__proto._getSource=function(){
+		throw "Bitmap: must override it.";
+	}
+
+	/**
+	*获取宽度。
+	*/
+	__getset(0,__proto,'width',function(){
+		return this._width;
+	});
+
+	/***
+	*获取高度。
+	*/
+	__getset(0,__proto,'height',function(){
+		return this._height;
+	});
+
+	return Bitmap;
+})(Resource)
 
 
 /**
@@ -39482,6 +39605,475 @@ var Stage=(function(_super){
 })(Sprite)
 
 
+/**
+*<code>DialogManager</code> 对话框管理容器，所有的对话框都在该容器内，并且受管理器管理。
+*任意对话框打开和关闭，都会出发管理类的open和close事件
+*可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭，点击窗口是否切换层次等
+*通过设置对话框的zOrder属性，可以更改弹出的层次
+*/
+//class laya.ui.DialogManager extends laya.display.Sprite
+var DialogManager=(function(_super){
+	function DialogManager(){
+		/**锁屏层*/
+		this.lockLayer=null;
+		/**@private 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，如果不想有任何效果，可以赋值为null*/
+		this.popupEffect=function(dialog){
+			dialog.scale(1,1);
+			Tween.from(dialog,{x:Laya.stage.width / 2,y:Laya.stage.height / 2,scaleX:0,scaleY:0},300,Ease.backOut,Handler.create(this,this.doOpen,[dialog]));
+		}
+		/**@private 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，如果不想有任何效果，可以赋值为null*/
+		this.closeEffect=function(dialog){
+			Tween.to(dialog,{x:Laya.stage.width / 2,y:Laya.stage.height / 2,scaleX:0,scaleY:0},300,Ease.strongOut,Handler.create(this,this.doClose,[dialog]));
+		}
+		DialogManager.__super.call(this);
+		this.maskLayer=new Sprite();
+		this.popupEffectHandler=new Handler(this,this.popupEffect);
+		this.closeEffectHandler=new Handler(this,this.closeEffect);
+		this.mouseEnabled=this.maskLayer.mouseEnabled=true;
+		this.zOrder=1000;
+		Laya.stage.addChild(this);
+		Laya.stage.on("resize",this,this._onResize);
+		if (UIConfig.closeDialogOnSide)this.maskLayer.on("click",this,this._closeOnSide);
+		this._onResize(null);
+	}
+
+	__class(DialogManager,'laya.ui.DialogManager',_super);
+	var __proto=DialogManager.prototype;
+	__proto._closeOnSide=function(){
+		var dialog=this.getChildAt(this.numChildren-1);
+		if ((dialog instanceof laya.ui.Dialog ))dialog.close();
+	}
+
+	/**设置锁定界面，如果为空则什么都不显示*/
+	__proto.setLockView=function(value){
+		if (!this.lockLayer){
+			this.lockLayer=new Box();
+			this.lockLayer.mouseEnabled=true;
+			this.lockLayer.size(Laya.stage.width,Laya.stage.height);
+		}
+		this.lockLayer.removeChildren();
+		if (value){
+			value.centerX=value.centerY=0;
+			this.lockLayer.addChild(value);
+		}
+	}
+
+	/**@private */
+	__proto._onResize=function(e){
+		var width=this.maskLayer.width=Laya.stage.width;
+		var height=this.maskLayer.height=Laya.stage.height;
+		if (this.lockLayer)this.lockLayer.size(width,height);
+		this.maskLayer.graphics.clear(true);
+		this.maskLayer.graphics.drawRect(0,0,width,height,UIConfig.popupBgColor);
+		this.maskLayer.alpha=UIConfig.popupBgAlpha;
+		for (var i=this.numChildren-1;i >-1;i--){
+			var item=this.getChildAt(i);
+			if (item.isPopupCenter)this._centerDialog(item);
+		}
+	}
+
+	__proto._centerDialog=function(dialog){
+		dialog.x=Math.round(((Laya.stage.width-dialog.width)>> 1)+dialog.pivotX);
+		dialog.y=Math.round(((Laya.stage.height-dialog.height)>> 1)+dialog.pivotY);
+	}
+
+	/**
+	*显示对话框
+	*@param dialog 需要显示的对象框 <code>Dialog</code> 实例。
+	*@param closeOther 是否关闭其它对话框，若值为ture，则关闭其它的对话框。
+	*@param showEffect 是否显示弹出效果
+	*/
+	__proto.open=function(dialog,closeOther,showEffect){
+		(closeOther===void 0)&& (closeOther=false);
+		(showEffect===void 0)&& (showEffect=false);
+		if (closeOther)this._closeAll();
+		if (dialog.isPopupCenter)this._centerDialog(dialog);
+		this.addChild(dialog);
+		if (dialog.isModal || this._getBit(0x20))Laya.timer.callLater(this,this._checkMask);
+		if (showEffect && dialog.popupEffect !=null)dialog.popupEffect.runWith(dialog);
+		else this.doOpen(dialog);
+		this.event("open");
+	}
+
+	/**
+	*执行打开对话框。
+	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
+	*/
+	__proto.doOpen=function(dialog){
+		dialog.onOpened(dialog._param);
+	}
+
+	/**
+	*锁定所有层，显示加载条信息，防止双击
+	*/
+	__proto.lock=function(value){
+		if (this.lockLayer){
+			if (value)this.addChild(this.lockLayer);
+			else this.lockLayer.removeSelf();
+		}
+	}
+
+	/**
+	*关闭对话框。
+	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
+	*/
+	__proto.close=function(dialog){
+		if (dialog.isShowEffect && dialog.closeEffect !=null)dialog.closeEffect.runWith([dialog]);
+		else this.doClose(dialog);
+		this.event("close");
+	}
+
+	/**
+	*执行关闭对话框。
+	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
+	*/
+	__proto.doClose=function(dialog){
+		dialog.removeSelf();
+		dialog.isModal && this._checkMask();
+		dialog.closeHandler && dialog.closeHandler.runWith(dialog.closeType);
+		dialog.onClosed(dialog.closeType);
+		if (dialog.autoDestroyAtClosed)dialog.destroy();
+	}
+
+	/**
+	*关闭所有的对话框。
+	*/
+	__proto.closeAll=function(){
+		this._closeAll();
+		this.event("close");
+	}
+
+	/**@private */
+	__proto._closeAll=function(){
+		for (var i=this.numChildren-1;i >-1;i--){
+			var item=this.getChildAt(i);
+			if (item && item.close !=null){
+				this.doClose(item);
+			}
+		}
+	}
+
+	/**
+	*根据组获取所有对话框
+	*@param group 组名称
+	*@return 对话框数组
+	*/
+	__proto.getDialogsByGroup=function(group){
+		var arr=[];
+		for (var i=this.numChildren-1;i >-1;i--){
+			var item=this.getChildAt(i);
+			if (item && item.group===group){
+				arr.push(item);
+			}
+		}
+		return arr;
+	}
+
+	/**
+	*根据组关闭所有弹出框
+	*@param group 需要关闭的组名称
+	*@return 需要关闭的对话框数组
+	*/
+	__proto.closeByGroup=function(group){
+		var arr=[];
+		for (var i=this.numChildren-1;i >-1;i--){
+			var item=this.getChildAt(i);
+			if (item && item.group===group){
+				item.close();
+				arr.push(item);
+			}
+		}
+		return arr;
+	}
+
+	/**@private 发生层次改变后，重新检查遮罩层是否正确*/
+	__proto._checkMask=function(){
+		this.maskLayer.removeSelf();
+		for (var i=this.numChildren-1;i >-1;i--){
+			var dialog=this.getChildAt(i);
+			if (dialog && dialog.isModal){
+				this.addChildAt(this.maskLayer,i);
+				return;
+			}
+		}
+	}
+
+	return DialogManager;
+})(Sprite)
+
+
+//class laya.webgl.utils.Buffer2D extends laya.webgl.utils.Buffer
+var Buffer2D=(function(_super){
+	function Buffer2D(){
+		this._maxsize=0;
+		this._upload=true;
+		this._uploadSize=0;
+		this._bufferSize=0;
+		this._u8Array=null;
+		Buffer2D.__super.call(this);
+		this.lock=true;
+	}
+
+	__class(Buffer2D,'laya.webgl.utils.Buffer2D',_super);
+	var __proto=Buffer2D.prototype;
+	__proto.setByteLength=function(value){
+		if (this._byteLength!==value){
+			value <=this._bufferSize || (this._resizeBuffer(value *2+256,true));
+			this._byteLength=value;
+		}
+	}
+
+	/**
+	*在当前的基础上需要多大空间，单位是byte
+	*@param sz
+	*@return 增加大小之前的写位置。单位是byte
+	*/
+	__proto.needSize=function(sz){
+		var old=this._byteLength;
+		if (sz){
+			var needsz=this._byteLength+sz;
+			needsz <=this._bufferSize || (this._resizeBuffer(needsz << 1,true));
+			this._byteLength=needsz;
+		}
+		return old;
+	}
+
+	__proto._bufferData=function(){
+		this._maxsize=Math.max(this._maxsize,this._byteLength);
+		if (Stat.loopCount % 30==0){
+			if (this._buffer.byteLength > (this._maxsize+64)){
+				this._setGPUMemory(this._buffer.byteLength);
+				this._buffer=this._buffer.slice(0,this._maxsize+64);
+				this._bufferSize=this._buffer.byteLength;
+				this._checkArrayUse();
+			}
+			this._maxsize=this._byteLength;
+		}
+		if (this._uploadSize < this._buffer.byteLength){
+			this._uploadSize=this._buffer.byteLength;
+			LayaGL.instance.bufferData(this._bufferType,this._uploadSize,this._bufferUsage);
+			this._setGPUMemory(this._uploadSize);
+		}
+		LayaGL.instance.bufferSubData(this._bufferType,0,this._buffer);
+	}
+
+	//TODO:coverage
+	__proto._bufferSubData=function(offset,dataStart,dataLength){
+		(offset===void 0)&& (offset=0);
+		(dataStart===void 0)&& (dataStart=0);
+		(dataLength===void 0)&& (dataLength=0);
+		this._maxsize=Math.max(this._maxsize,this._byteLength);
+		if (Stat.loopCount % 30==0){
+			if (this._buffer.byteLength > (this._maxsize+64)){
+				this._setGPUMemory(this._buffer.byteLength);
+				this._buffer=this._buffer.slice(0,this._maxsize+64);
+				this._bufferSize=this._buffer.byteLength;
+				this._checkArrayUse();
+			}
+			this._maxsize=this._byteLength;
+		}
+		if (this._uploadSize < this._buffer.byteLength){
+			this._uploadSize=this._buffer.byteLength;
+			LayaGL.instance.bufferData(this._bufferType,this._uploadSize,this._bufferUsage);
+			this._setGPUMemory(this._uploadSize);
+		}
+		if (dataStart || dataLength){
+			var subBuffer=this._buffer.slice(dataStart,dataLength);
+			LayaGL.instance.bufferSubData(this._bufferType,offset,subBuffer);
+			}else {
+			LayaGL.instance.bufferSubData(this._bufferType,offset,this._buffer);
+		}
+	}
+
+	/**
+	*buffer重新分配了，继承类根据需要做相应的处理。
+	*/
+	__proto._checkArrayUse=function(){}
+	/**
+	*给vao使用的 _bind_upload函数。不要与已经绑定的判断是否相同
+	*@return
+	*/
+	__proto._bind_uploadForVAO=function(){
+		if (!this._upload)
+			return false;
+		this._upload=false;
+		this._bindForVAO();
+		this._bufferData();
+		return true;
+	}
+
+	__proto._bind_upload=function(){
+		if (!this._upload)
+			return false;
+		this._upload=false;
+		this.bind();
+		this._bufferData();
+		return true;
+	}
+
+	//TODO:coverage
+	__proto._bind_subUpload=function(offset,dataStart,dataLength){
+		(offset===void 0)&& (offset=0);
+		(dataStart===void 0)&& (dataStart=0);
+		(dataLength===void 0)&& (dataLength=0);
+		if (!this._upload)
+			return false;
+		this._upload=false;
+		this.bind();
+		this._bufferSubData(offset,dataStart,dataLength);
+		return true;
+	}
+
+	/**
+	*重新分配buffer大小，如果nsz比原来的小则什么都不做。
+	*@param nsz buffer大小，单位是byte。
+	*@param copy 是否拷贝原来的buffer的数据。
+	*@return
+	*/
+	__proto._resizeBuffer=function(nsz,copy){
+		if (nsz < this._buffer.byteLength)
+			return this;
+		this._setGPUMemory(nsz);
+		if (copy && this._buffer && this._buffer.byteLength > 0){
+			var newbuffer=new ArrayBuffer(nsz);
+			var oldU8Arr=(this._u8Array && this._u8Array.buffer==this._buffer)?this._u8Array :new Uint8Array(this._buffer);
+			this._u8Array=new Uint8Array(newbuffer);
+			this._u8Array.set(oldU8Arr,0);
+			this._buffer=newbuffer;
+			}else{
+			this._buffer=new ArrayBuffer(nsz);
+		}
+		this._checkArrayUse();
+		this._upload=true;
+		this._bufferSize=this._buffer.byteLength;
+		return this;
+	}
+
+	__proto.append=function(data){
+		this._upload=true;
+		var byteLen=0,n;
+		byteLen=data.byteLength;
+		if ((data instanceof Uint8Array)){
+			this._resizeBuffer(this._byteLength+byteLen,true);
+			n=new Uint8Array(this._buffer,this._byteLength);
+			}else if ((data instanceof Uint16Array)){
+			this._resizeBuffer(this._byteLength+byteLen,true);
+			n=new Uint16Array(this._buffer,this._byteLength);
+			}else if ((data instanceof Float32Array)){
+			this._resizeBuffer(this._byteLength+byteLen,true);
+			n=new Float32Array(this._buffer,this._byteLength);
+		}
+		n.set(data,0);
+		this._byteLength+=byteLen;
+		this._checkArrayUse();
+	}
+
+	//TODO:coverage
+	__proto.appendU16Array=function(data,len){
+		this._resizeBuffer(this._byteLength+len*2,true);
+		var u=new Uint16Array(this._buffer,this._byteLength,len);
+		for (var i=0;i < len;i++){
+			u[i]=data[i];
+		}
+		this._byteLength+=len *2;
+		this._checkArrayUse();
+	}
+
+	//TODO:coverage
+	__proto.appendEx=function(data,type){
+		this._upload=true;
+		var byteLen=0,n;
+		byteLen=data.byteLength;
+		this._resizeBuffer(this._byteLength+byteLen,true);
+		n=new type(this._buffer,this._byteLength);
+		n.set(data,0);
+		this._byteLength+=byteLen;
+		this._checkArrayUse();
+	}
+
+	//TODO:coverage
+	__proto.appendEx2=function(data,type,dataLen,perDataLen){
+		(perDataLen===void 0)&& (perDataLen=1);
+		this._upload=true;
+		var byteLen=0,n;
+		byteLen=dataLen*perDataLen;
+		this._resizeBuffer(this._byteLength+byteLen,true);
+		n=new type(this._buffer,this._byteLength);
+		var i=0;
+		for (i=0;i < dataLen;i++){
+			n[i]=data[i];
+		}
+		this._byteLength+=byteLen;
+		this._checkArrayUse();
+	}
+
+	//TODO:coverage
+	__proto.getBuffer=function(){
+		return this._buffer;
+	}
+
+	__proto.setNeedUpload=function(){
+		this._upload=true;
+	}
+
+	//TODO:coverage
+	__proto.getNeedUpload=function(){
+		return this._upload;
+	}
+
+	//TODO:coverage
+	__proto.upload=function(){
+		var scuess=this._bind_upload();
+		LayaGL.instance.bindBuffer(this._bufferType,null);
+		if(this._bufferType==0x8892)Buffer._bindedVertexBuffer=null;
+		if(this._bufferType==0x8893)Buffer._bindedIndexBuffer=null;
+		BaseShader.activeShader=null
+		return scuess;
+	}
+
+	//TODO:coverage
+	__proto.subUpload=function(offset,dataStart,dataLength){
+		(offset===void 0)&& (offset=0);
+		(dataStart===void 0)&& (dataStart=0);
+		(dataLength===void 0)&& (dataLength=0);
+		var scuess=this._bind_subUpload();
+		LayaGL.instance.bindBuffer(this._bufferType,null);
+		if(this._bufferType==0x8892)Buffer._bindedVertexBuffer=null;
+		if(this._bufferType==0x8893)Buffer._bindedIndexBuffer=null;
+		BaseShader.activeShader=null
+		return scuess;
+	}
+
+	__proto._disposeResource=function(){
+		_super.prototype._disposeResource.call(this);
+		this._upload=true;
+		this._uploadSize=0;
+	}
+
+	/**
+	*清理数据。保留ArrayBuffer
+	*/
+	__proto.clear=function(){
+		this._byteLength=0;
+		this._upload=true;
+	}
+
+	//反正常常要拷贝老的数据，所以保留这个可以提高效率
+	__getset(0,__proto,'bufferLength',function(){
+		return this._buffer.byteLength;
+	});
+
+	__getset(0,__proto,'byteLength',null,function(value){
+		this.setByteLength(value);
+	});
+
+	Buffer2D.__int__=function(gl){}
+	Buffer2D.FLOAT32=4;
+	Buffer2D.SHORT=2;
+	return Buffer2D;
+})(Buffer)
+
+
 //class laya.webgl.shader.Shader extends laya.webgl.shader.BaseShader
 var Shader=(function(_super){
 	function Shader(vs,ps,saveName,nameMap,bindAttrib){
@@ -39960,475 +40552,6 @@ var Shader=(function(_super){
 	]);
 	return Shader;
 })(BaseShader)
-
-
-/**
-*<code>DialogManager</code> 对话框管理容器，所有的对话框都在该容器内，并且受管理器管理。
-*任意对话框打开和关闭，都会出发管理类的open和close事件
-*可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭，点击窗口是否切换层次等
-*通过设置对话框的zOrder属性，可以更改弹出的层次
-*/
-//class laya.ui.DialogManager extends laya.display.Sprite
-var DialogManager=(function(_super){
-	function DialogManager(){
-		/**锁屏层*/
-		this.lockLayer=null;
-		/**@private 全局默认弹出对话框效果，可以设置一个效果代替默认的弹出效果，如果不想有任何效果，可以赋值为null*/
-		this.popupEffect=function(dialog){
-			dialog.scale(1,1);
-			Tween.from(dialog,{x:Laya.stage.width / 2,y:Laya.stage.height / 2,scaleX:0,scaleY:0},300,Ease.backOut,Handler.create(this,this.doOpen,[dialog]));
-		}
-		/**@private 全局默认关闭对话框效果，可以设置一个效果代替默认的关闭效果，如果不想有任何效果，可以赋值为null*/
-		this.closeEffect=function(dialog){
-			Tween.to(dialog,{x:Laya.stage.width / 2,y:Laya.stage.height / 2,scaleX:0,scaleY:0},300,Ease.strongOut,Handler.create(this,this.doClose,[dialog]));
-		}
-		DialogManager.__super.call(this);
-		this.maskLayer=new Sprite();
-		this.popupEffectHandler=new Handler(this,this.popupEffect);
-		this.closeEffectHandler=new Handler(this,this.closeEffect);
-		this.mouseEnabled=this.maskLayer.mouseEnabled=true;
-		this.zOrder=1000;
-		Laya.stage.addChild(this);
-		Laya.stage.on("resize",this,this._onResize);
-		if (UIConfig.closeDialogOnSide)this.maskLayer.on("click",this,this._closeOnSide);
-		this._onResize(null);
-	}
-
-	__class(DialogManager,'laya.ui.DialogManager',_super);
-	var __proto=DialogManager.prototype;
-	__proto._closeOnSide=function(){
-		var dialog=this.getChildAt(this.numChildren-1);
-		if ((dialog instanceof laya.ui.Dialog ))dialog.close();
-	}
-
-	/**设置锁定界面，如果为空则什么都不显示*/
-	__proto.setLockView=function(value){
-		if (!this.lockLayer){
-			this.lockLayer=new Box();
-			this.lockLayer.mouseEnabled=true;
-			this.lockLayer.size(Laya.stage.width,Laya.stage.height);
-		}
-		this.lockLayer.removeChildren();
-		if (value){
-			value.centerX=value.centerY=0;
-			this.lockLayer.addChild(value);
-		}
-	}
-
-	/**@private */
-	__proto._onResize=function(e){
-		var width=this.maskLayer.width=Laya.stage.width;
-		var height=this.maskLayer.height=Laya.stage.height;
-		if (this.lockLayer)this.lockLayer.size(width,height);
-		this.maskLayer.graphics.clear(true);
-		this.maskLayer.graphics.drawRect(0,0,width,height,UIConfig.popupBgColor);
-		this.maskLayer.alpha=UIConfig.popupBgAlpha;
-		for (var i=this.numChildren-1;i >-1;i--){
-			var item=this.getChildAt(i);
-			if (item.isPopupCenter)this._centerDialog(item);
-		}
-	}
-
-	__proto._centerDialog=function(dialog){
-		dialog.x=Math.round(((Laya.stage.width-dialog.width)>> 1)+dialog.pivotX);
-		dialog.y=Math.round(((Laya.stage.height-dialog.height)>> 1)+dialog.pivotY);
-	}
-
-	/**
-	*显示对话框
-	*@param dialog 需要显示的对象框 <code>Dialog</code> 实例。
-	*@param closeOther 是否关闭其它对话框，若值为ture，则关闭其它的对话框。
-	*@param showEffect 是否显示弹出效果
-	*/
-	__proto.open=function(dialog,closeOther,showEffect){
-		(closeOther===void 0)&& (closeOther=false);
-		(showEffect===void 0)&& (showEffect=false);
-		if (closeOther)this._closeAll();
-		if (dialog.isPopupCenter)this._centerDialog(dialog);
-		this.addChild(dialog);
-		if (dialog.isModal || this._getBit(0x20))Laya.timer.callLater(this,this._checkMask);
-		if (showEffect && dialog.popupEffect !=null)dialog.popupEffect.runWith(dialog);
-		else this.doOpen(dialog);
-		this.event("open");
-	}
-
-	/**
-	*执行打开对话框。
-	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-	*/
-	__proto.doOpen=function(dialog){
-		dialog.onOpened(dialog._param);
-	}
-
-	/**
-	*锁定所有层，显示加载条信息，防止双击
-	*/
-	__proto.lock=function(value){
-		if (this.lockLayer){
-			if (value)this.addChild(this.lockLayer);
-			else this.lockLayer.removeSelf();
-		}
-	}
-
-	/**
-	*关闭对话框。
-	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-	*/
-	__proto.close=function(dialog){
-		if (dialog.isShowEffect && dialog.closeEffect !=null)dialog.closeEffect.runWith([dialog]);
-		else this.doClose(dialog);
-		this.event("close");
-	}
-
-	/**
-	*执行关闭对话框。
-	*@param dialog 需要关闭的对象框 <code>Dialog</code> 实例。
-	*/
-	__proto.doClose=function(dialog){
-		dialog.removeSelf();
-		dialog.isModal && this._checkMask();
-		dialog.closeHandler && dialog.closeHandler.runWith(dialog.closeType);
-		dialog.onClosed(dialog.closeType);
-		if (dialog.autoDestroyAtClosed)dialog.destroy();
-	}
-
-	/**
-	*关闭所有的对话框。
-	*/
-	__proto.closeAll=function(){
-		this._closeAll();
-		this.event("close");
-	}
-
-	/**@private */
-	__proto._closeAll=function(){
-		for (var i=this.numChildren-1;i >-1;i--){
-			var item=this.getChildAt(i);
-			if (item && item.close !=null){
-				this.doClose(item);
-			}
-		}
-	}
-
-	/**
-	*根据组获取所有对话框
-	*@param group 组名称
-	*@return 对话框数组
-	*/
-	__proto.getDialogsByGroup=function(group){
-		var arr=[];
-		for (var i=this.numChildren-1;i >-1;i--){
-			var item=this.getChildAt(i);
-			if (item && item.group===group){
-				arr.push(item);
-			}
-		}
-		return arr;
-	}
-
-	/**
-	*根据组关闭所有弹出框
-	*@param group 需要关闭的组名称
-	*@return 需要关闭的对话框数组
-	*/
-	__proto.closeByGroup=function(group){
-		var arr=[];
-		for (var i=this.numChildren-1;i >-1;i--){
-			var item=this.getChildAt(i);
-			if (item && item.group===group){
-				item.close();
-				arr.push(item);
-			}
-		}
-		return arr;
-	}
-
-	/**@private 发生层次改变后，重新检查遮罩层是否正确*/
-	__proto._checkMask=function(){
-		this.maskLayer.removeSelf();
-		for (var i=this.numChildren-1;i >-1;i--){
-			var dialog=this.getChildAt(i);
-			if (dialog && dialog.isModal){
-				this.addChildAt(this.maskLayer,i);
-				return;
-			}
-		}
-	}
-
-	return DialogManager;
-})(Sprite)
-
-
-//class laya.webgl.utils.Buffer2D extends laya.webgl.utils.Buffer
-var Buffer2D=(function(_super){
-	function Buffer2D(){
-		this._maxsize=0;
-		this._upload=true;
-		this._uploadSize=0;
-		this._bufferSize=0;
-		this._u8Array=null;
-		Buffer2D.__super.call(this);
-		this.lock=true;
-	}
-
-	__class(Buffer2D,'laya.webgl.utils.Buffer2D',_super);
-	var __proto=Buffer2D.prototype;
-	__proto.setByteLength=function(value){
-		if (this._byteLength!==value){
-			value <=this._bufferSize || (this._resizeBuffer(value *2+256,true));
-			this._byteLength=value;
-		}
-	}
-
-	/**
-	*在当前的基础上需要多大空间，单位是byte
-	*@param sz
-	*@return 增加大小之前的写位置。单位是byte
-	*/
-	__proto.needSize=function(sz){
-		var old=this._byteLength;
-		if (sz){
-			var needsz=this._byteLength+sz;
-			needsz <=this._bufferSize || (this._resizeBuffer(needsz << 1,true));
-			this._byteLength=needsz;
-		}
-		return old;
-	}
-
-	__proto._bufferData=function(){
-		this._maxsize=Math.max(this._maxsize,this._byteLength);
-		if (Stat.loopCount % 30==0){
-			if (this._buffer.byteLength > (this._maxsize+64)){
-				this._setGPUMemory(this._buffer.byteLength);
-				this._buffer=this._buffer.slice(0,this._maxsize+64);
-				this._bufferSize=this._buffer.byteLength;
-				this._checkArrayUse();
-			}
-			this._maxsize=this._byteLength;
-		}
-		if (this._uploadSize < this._buffer.byteLength){
-			this._uploadSize=this._buffer.byteLength;
-			LayaGL.instance.bufferData(this._bufferType,this._uploadSize,this._bufferUsage);
-			this._setGPUMemory(this._uploadSize);
-		}
-		LayaGL.instance.bufferSubData(this._bufferType,0,this._buffer);
-	}
-
-	//TODO:coverage
-	__proto._bufferSubData=function(offset,dataStart,dataLength){
-		(offset===void 0)&& (offset=0);
-		(dataStart===void 0)&& (dataStart=0);
-		(dataLength===void 0)&& (dataLength=0);
-		this._maxsize=Math.max(this._maxsize,this._byteLength);
-		if (Stat.loopCount % 30==0){
-			if (this._buffer.byteLength > (this._maxsize+64)){
-				this._setGPUMemory(this._buffer.byteLength);
-				this._buffer=this._buffer.slice(0,this._maxsize+64);
-				this._bufferSize=this._buffer.byteLength;
-				this._checkArrayUse();
-			}
-			this._maxsize=this._byteLength;
-		}
-		if (this._uploadSize < this._buffer.byteLength){
-			this._uploadSize=this._buffer.byteLength;
-			LayaGL.instance.bufferData(this._bufferType,this._uploadSize,this._bufferUsage);
-			this._setGPUMemory(this._uploadSize);
-		}
-		if (dataStart || dataLength){
-			var subBuffer=this._buffer.slice(dataStart,dataLength);
-			LayaGL.instance.bufferSubData(this._bufferType,offset,subBuffer);
-			}else {
-			LayaGL.instance.bufferSubData(this._bufferType,offset,this._buffer);
-		}
-	}
-
-	/**
-	*buffer重新分配了，继承类根据需要做相应的处理。
-	*/
-	__proto._checkArrayUse=function(){}
-	/**
-	*给vao使用的 _bind_upload函数。不要与已经绑定的判断是否相同
-	*@return
-	*/
-	__proto._bind_uploadForVAO=function(){
-		if (!this._upload)
-			return false;
-		this._upload=false;
-		this._bindForVAO();
-		this._bufferData();
-		return true;
-	}
-
-	__proto._bind_upload=function(){
-		if (!this._upload)
-			return false;
-		this._upload=false;
-		this.bind();
-		this._bufferData();
-		return true;
-	}
-
-	//TODO:coverage
-	__proto._bind_subUpload=function(offset,dataStart,dataLength){
-		(offset===void 0)&& (offset=0);
-		(dataStart===void 0)&& (dataStart=0);
-		(dataLength===void 0)&& (dataLength=0);
-		if (!this._upload)
-			return false;
-		this._upload=false;
-		this.bind();
-		this._bufferSubData(offset,dataStart,dataLength);
-		return true;
-	}
-
-	/**
-	*重新分配buffer大小，如果nsz比原来的小则什么都不做。
-	*@param nsz buffer大小，单位是byte。
-	*@param copy 是否拷贝原来的buffer的数据。
-	*@return
-	*/
-	__proto._resizeBuffer=function(nsz,copy){
-		if (nsz < this._buffer.byteLength)
-			return this;
-		this._setGPUMemory(nsz);
-		if (copy && this._buffer && this._buffer.byteLength > 0){
-			var newbuffer=new ArrayBuffer(nsz);
-			var oldU8Arr=(this._u8Array && this._u8Array.buffer==this._buffer)?this._u8Array :new Uint8Array(this._buffer);
-			this._u8Array=new Uint8Array(newbuffer);
-			this._u8Array.set(oldU8Arr,0);
-			this._buffer=newbuffer;
-			}else{
-			this._buffer=new ArrayBuffer(nsz);
-		}
-		this._checkArrayUse();
-		this._upload=true;
-		this._bufferSize=this._buffer.byteLength;
-		return this;
-	}
-
-	__proto.append=function(data){
-		this._upload=true;
-		var byteLen=0,n;
-		byteLen=data.byteLength;
-		if ((data instanceof Uint8Array)){
-			this._resizeBuffer(this._byteLength+byteLen,true);
-			n=new Uint8Array(this._buffer,this._byteLength);
-			}else if ((data instanceof Uint16Array)){
-			this._resizeBuffer(this._byteLength+byteLen,true);
-			n=new Uint16Array(this._buffer,this._byteLength);
-			}else if ((data instanceof Float32Array)){
-			this._resizeBuffer(this._byteLength+byteLen,true);
-			n=new Float32Array(this._buffer,this._byteLength);
-		}
-		n.set(data,0);
-		this._byteLength+=byteLen;
-		this._checkArrayUse();
-	}
-
-	//TODO:coverage
-	__proto.appendU16Array=function(data,len){
-		this._resizeBuffer(this._byteLength+len*2,true);
-		var u=new Uint16Array(this._buffer,this._byteLength,len);
-		for (var i=0;i < len;i++){
-			u[i]=data[i];
-		}
-		this._byteLength+=len *2;
-		this._checkArrayUse();
-	}
-
-	//TODO:coverage
-	__proto.appendEx=function(data,type){
-		this._upload=true;
-		var byteLen=0,n;
-		byteLen=data.byteLength;
-		this._resizeBuffer(this._byteLength+byteLen,true);
-		n=new type(this._buffer,this._byteLength);
-		n.set(data,0);
-		this._byteLength+=byteLen;
-		this._checkArrayUse();
-	}
-
-	//TODO:coverage
-	__proto.appendEx2=function(data,type,dataLen,perDataLen){
-		(perDataLen===void 0)&& (perDataLen=1);
-		this._upload=true;
-		var byteLen=0,n;
-		byteLen=dataLen*perDataLen;
-		this._resizeBuffer(this._byteLength+byteLen,true);
-		n=new type(this._buffer,this._byteLength);
-		var i=0;
-		for (i=0;i < dataLen;i++){
-			n[i]=data[i];
-		}
-		this._byteLength+=byteLen;
-		this._checkArrayUse();
-	}
-
-	//TODO:coverage
-	__proto.getBuffer=function(){
-		return this._buffer;
-	}
-
-	__proto.setNeedUpload=function(){
-		this._upload=true;
-	}
-
-	//TODO:coverage
-	__proto.getNeedUpload=function(){
-		return this._upload;
-	}
-
-	//TODO:coverage
-	__proto.upload=function(){
-		var scuess=this._bind_upload();
-		LayaGL.instance.bindBuffer(this._bufferType,null);
-		if(this._bufferType==0x8892)Buffer._bindedVertexBuffer=null;
-		if(this._bufferType==0x8893)Buffer._bindedIndexBuffer=null;
-		BaseShader.activeShader=null
-		return scuess;
-	}
-
-	//TODO:coverage
-	__proto.subUpload=function(offset,dataStart,dataLength){
-		(offset===void 0)&& (offset=0);
-		(dataStart===void 0)&& (dataStart=0);
-		(dataLength===void 0)&& (dataLength=0);
-		var scuess=this._bind_subUpload();
-		LayaGL.instance.bindBuffer(this._bufferType,null);
-		if(this._bufferType==0x8892)Buffer._bindedVertexBuffer=null;
-		if(this._bufferType==0x8893)Buffer._bindedIndexBuffer=null;
-		BaseShader.activeShader=null
-		return scuess;
-	}
-
-	__proto._disposeResource=function(){
-		_super.prototype._disposeResource.call(this);
-		this._upload=true;
-		this._uploadSize=0;
-	}
-
-	/**
-	*清理数据。保留ArrayBuffer
-	*/
-	__proto.clear=function(){
-		this._byteLength=0;
-		this._upload=true;
-	}
-
-	//反正常常要拷贝老的数据，所以保留这个可以提高效率
-	__getset(0,__proto,'bufferLength',function(){
-		return this._buffer.byteLength;
-	});
-
-	__getset(0,__proto,'byteLength',null,function(value){
-		this.setByteLength(value);
-	});
-
-	Buffer2D.__int__=function(gl){}
-	Buffer2D.FLOAT32=4;
-	Buffer2D.SHORT=2;
-	return Buffer2D;
-})(Buffer)
 
 
 /**
@@ -41132,8 +41255,31 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"76.8","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"户外材料--白胶车贴","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderItemUI;
+})(Scene)
+
+
+//class ui.LoginViewUI extends laya.display.Scene
+var LoginViewUI=(function(_super){
+	function LoginViewUI(){
+		this.panel_main=null;
+		this.txt_login=null;
+		this.txt_reg=null;
+		this.btnUserCenter=null;
+		this.btnBuyCar=null;
+		this.btnUpload=null;
+		LoginViewUI.__super.call(this);
+	}
+
+	__class(LoginViewUI,'ui.LoginViewUI',_super);
+	var __proto=LoginViewUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.loadScene("LoginView");
+	}
+
+	return LoginViewUI;
 })(Scene)
 
 
@@ -41156,7 +41302,7 @@ var PartsItemUI=(function(_super){
 		this.createView(PartsItemUI.uiView);
 	}
 
-	PartsItemUI.uiView={"type":"Scene","props":{"width":1280,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"var":"pname","text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"var":"psize","text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"var":"inputnum","text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"var":"pricetxt","text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"var":"totaltxt","text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"var":"btndelete","text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
+	PartsItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"var":"pname","text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"var":"psize","text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"var":"inputnum","text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"var":"pricetxt","text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"var":"totaltxt","text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"var":"btndelete","text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
 	return PartsItemUI;
 })(Scene)
 
@@ -46912,11 +47058,33 @@ var SelectAddressPanelUI=(function(_super){
 	var __proto=SelectAddressPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(SelectAddressPanelUI.uiView);
+		this.loadScene("order/SelectAddressPanel");
 	}
 
-	SelectAddressPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":7},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":5},{"type":"Label","props":{"y":119,"x":849,"text":"选择收货地址","fontSize":36,"color":"#eedfdf","bold":true},"compId":6},{"type":"Button","props":{"y":189,"x":358,"width":112,"var":"btnadd","skin":"comp/button.png","labelSize":20,"label":"新增收货地址","height":30},"compId":8},{"type":"TextInput","props":{"y":189,"x":486,"width":305,"var":"inputsearch","skin":"comp/textinput.png","prompt":"搜索收货地址","height":30,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":9},{"type":"Button","props":{"y":189,"x":802,"width":92,"var":"btnsearch","skin":"comp/button.png","labelSize":20,"label":"搜索","height":30},"compId":10},{"type":"List","props":{"y":231,"x":364,"width":1192,"var":"list_address","height":619},"compId":11},{"type":"Sprite","props":{"y":889,"x":824},"compId":14,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":12},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":13}]}]},{"type":"Script","props":{"runtime":"script.order.SelectAddressControl"},"compId":16}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png","comp/textinput.png"],"loadList3D":[]};
 	return SelectAddressPanelUI;
+})(View)
+
+
+//class ui.usercenter.AddressItemUI extends laya.ui.View
+var AddressItemUI=(function(_super){
+	function AddressItemUI(){
+		this.conName=null;
+		this.phone=null;
+		this.detailaddr=null;
+		this.btnDel=null;
+		this.btnEdit=null;
+		AddressItemUI.__super.call(this);
+	}
+
+	__class(AddressItemUI,'ui.usercenter.AddressItemUI',_super);
+	var __proto=AddressItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(AddressItemUI.uiView);
+	}
+
+	AddressItemUI.uiView={"type":"View","props":{"width":788,"height":24},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":1,"width":101,"var":"conName","valign":"middle","text":"徐建华","height":24,"fontSize":18,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":101,"width":170,"var":"phone","valign":"middle","text":"13564113173","height":24,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":270,"width":443,"var":"detailaddr","valign":"middle","text":"上海市浦东新区周浦镇瑞浦路612弄23号1001室","height":24,"fontSize":18,"align":"center"},"compId":6},{"type":"Rect","props":{"y":0,"x":0,"width":788,"lineWidth":1,"lineColor":"#1c1a1a","height":24},"compId":10},{"type":"Text","props":{"y":5,"x":753,"var":"btnDel","text":"删除","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":5,"x":718,"var":"btnEdit","text":"编辑","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":7,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}],"loadList":["prefabs/LinksText.prefab"],"loadList3D":[]};
+	return AddressItemUI;
 })(View)
 
 
@@ -46952,10 +47120,9 @@ var SelectFactoryPanelUI=(function(_super){
 	var __proto=SelectFactoryPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(SelectFactoryPanelUI.uiView);
+		this.loadScene("order/SelectFactoryPanel");
 	}
 
-	SelectFactoryPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":2,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Panel","props":{"y":0,"x":10,"top":-2,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":5},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":6},{"type":"Label","props":{"y":119,"x":849,"text":"选择输出中心","fontSize":36,"color":"#eedfdf","bold":true},"compId":7},{"type":"List","props":{"y":191,"x":364,"width":1192,"var":"list_address","height":671},"compId":11},{"type":"Sprite","props":{"y":889,"x":824},"compId":12,"child":[{"type":"Button","props":{"width":112,"var":"okbtn","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":13},{"type":"Button","props":{"x":159,"width":112,"var":"cancelbtn","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":14}]}]},{"type":"Script","props":{"runtime":"script.order.SelectFactoryControl"},"compId":15}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
 	return SelectFactoryPanelUI;
 })(View)
 
@@ -46974,27 +47141,27 @@ var TabChooseBtnUI=(function(_super){
 		this.createView(TabChooseBtnUI.uiView);
 	}
 
-	TabChooseBtnUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"var":"selbtn","stateNum":2,"skin":"button/clubDayoption.png","labelSize":26,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜"},"compId":3}],"loadList":["button/clubDayoption.png"],"loadList3D":[]};
+	TabChooseBtnUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"var":"selbtn","stateNum":2,"skin":"button/clubDayoption.png","labelSize":26,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜"},"compId":3}],"loadList":["button/clubDayoption.png"],"loadList3D":[]};
 	return TabChooseBtnUI;
 })(View)
 
 
 //class ui.order.AddressItemUI extends laya.ui.View
-var AddressItemUI=(function(_super){
+var AddressItemUI$1=(function(_super){
 	function AddressItemUI(){
 		this.selimg=null;
 		this.addresstxt=null;
 		AddressItemUI.__super.call(this);
 	}
 
-	__class(AddressItemUI,'ui.order.AddressItemUI',_super);
+	__class(AddressItemUI,'ui.order.AddressItemUI',_super,'AddressItemUI$1');
 	var __proto=AddressItemUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
 		this.createView(AddressItemUI.uiView);
 	}
 
-	AddressItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":888,"var":"selimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":41},"compId":4},{"type":"Label","props":{"y":8,"x":7,"width":870,"var":"addresstxt","text":"label","height":24,"fontSize":24},"compId":3}],"loadList":["commers/sel.png"],"loadList3D":[]};
+	AddressItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":888,"var":"selimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":41},"compId":4},{"type":"Label","props":{"y":8,"x":7,"width":870,"var":"addresstxt","text":"label","height":24,"fontSize":24},"compId":3}],"loadList":["commers/sel.png"],"loadList3D":[]};
 	return AddressItemUI;
 })(View)
 
@@ -47021,10 +47188,9 @@ var EnterPrizeInfoPaneUI=(function(_super){
 	var __proto=EnterPrizeInfoPaneUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(EnterPrizeInfoPaneUI.uiView);
+		this.loadScene("usercenter/EnterPrizeInfoPane");
 	}
 
-	EnterPrizeInfoPaneUI.uiView={"type":"View","props":{"width":800,"height":1200},"compId":2,"child":[{"type":"Label","props":{"y":20,"x":35,"text":"账户资料","fontSize":20,"bold":true},"compId":3},{"type":"Label","props":{"y":53,"x":20,"width":150,"text":"企业账户：","fontSize":20,"bold":false,"align":"right"},"compId":4},{"type":"Label","props":{"y":53,"x":169,"text":"1325969696","fontSize":20,"bold":false},"compId":5},{"type":"Label","props":{"y":83,"x":20,"width":150,"text":"账户余额：","fontSize":20,"bold":false,"align":"right"},"compId":6},{"type":"Label","props":{"y":83,"x":169,"width":117,"text":"3258.6元","height":20,"fontSize":20,"color":"#e81d1a","bold":false},"compId":7},{"type":"Text","props":{"y":81,"x":297,"text":"充值","fontSize":20,"color":"#0d2897","runtime":"laya.display.Text"},"compId":8},{"type":"Label","props":{"y":114,"x":20,"width":150,"text":"我的服务店：","fontSize":20,"bold":false,"align":"right"},"compId":9},{"type":"Label","props":{"y":114,"x":169,"text":"1325969696","fontSize":20,"bold":false},"compId":10},{"type":"Rect","props":{"y":148,"x":25,"width":750,"lineWidth":1,"height":1,"fillColor":"#453e3e"},"compId":11},{"type":"Label","props":{"y":163,"x":35,"text":"企业信息","fontSize":20,"bold":true},"compId":12},{"type":"Box","props":{"y":195,"x":47},"compId":13,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"企业名称：","fontSize":20,"font":"Arial"},"compId":14},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":15},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":17}]},{"type":"Label","props":{"y":258,"x":56.619140625,"text":"所在地：","fontSize":20,"font":"Arial"},"compId":18},{"type":"Label","props":{"y":252,"x":45,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":19},{"type":"Button","props":{"y":248,"x":174,"width":170,"var":"btnSelProv","stateNum":1,"height":35},"compId":20,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"var":"province","valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":23},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":24}]},{"type":"Button","props":{"y":248,"x":368,"width":170,"var":"btnSelCity","stateNum":1,"height":35},"compId":29,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"var":"citytxt","valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":30},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":31}]},{"type":"Button","props":{"y":248,"x":561,"width":170,"var":"btnSelArea","stateNum":1,"height":35},"compId":32,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"var":"areatxt","valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":33},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":34}]},{"type":"Box","props":{"y":300,"x":47},"compId":41,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"详细地址：","fontSize":20,"font":"Arial"},"compId":42},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":43},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":44}]},{"type":"Box","props":{"y":354,"x":47},"compId":45,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"公司电话：","fontSize":20,"font":"Arial"},"compId":46},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":47}]},{"type":"Box","props":{"y":407,"x":47},"compId":49,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"公司传真：","fontSize":20,"font":"Arial"},"compId":50},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":51}]},{"type":"Rect","props":{"y":463,"x":25,"width":750,"lineWidth":1,"height":1,"fillColor":"#453e3e"},"compId":53},{"type":"Label","props":{"y":474,"x":35,"text":"企业信息","fontSize":20,"bold":true},"compId":54},{"type":"Box","props":{"y":506,"x":47,"width":385},"compId":55,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":56},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":57}]},{"type":"Box","props":{"y":557,"x":47,"width":385},"compId":59,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":60},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":61}]},{"type":"Box","props":{"y":607,"x":47,"width":385},"compId":63,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":64},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":65}]},{"type":"Box","props":{"y":658,"x":47,"width":385},"compId":67,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":68},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":69}]},{"type":"Box","props":{"y":708,"x":47,"width":385},"compId":71,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":72},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":73}]},{"type":"Box","props":{"y":759,"x":47,"width":385},"compId":75,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"开票名称：","fontSize":20,"font":"Arial"},"compId":76},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":77}]},{"type":"Rect","props":{"y":810,"x":25,"width":750,"lineWidth":1,"height":1,"fillColor":"#453e3e"},"compId":79},{"type":"Label","props":{"y":826,"x":35,"text":"企业信息","fontSize":20,"bold":true},"compId":80},{"type":"Box","props":{"y":858,"x":47},"compId":81,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"联系人姓名：","fontSize":20,"font":"Arial"},"compId":82},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":83},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":84}]},{"type":"Box","props":{"y":914,"x":47},"compId":85,"child":[{"type":"Label","props":{"y":10,"x":31,"text":"手机号码：","fontSize":20,"font":"Arial"},"compId":86},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":87},{"type":"Label","props":{"y":8,"x":18,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":88}]},{"type":"Box","props":{"y":970,"x":47},"compId":89,"child":[{"type":"Label","props":{"y":10,"x":77,"text":"QQ：","fontSize":20,"font":"Arial"},"compId":90},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":91}]},{"type":"Box","props":{"y":1026,"x":47},"compId":93,"child":[{"type":"Label","props":{"y":10,"x":64,"text":"微信：","fontSize":20,"font":"Arial"},"compId":94},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":95}]},{"type":"Image","props":{"y":285,"x":173,"width":172,"var":"provbox","skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":35,"child":[{"type":"List","props":{"var":"provList","top":0,"right":0,"left":0,"bottom":0},"compId":38}]},{"type":"Image","props":{"y":285,"x":366,"width":172,"var":"citybox","skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":36,"child":[{"type":"List","props":{"var":"cityList","top":0,"right":0,"left":0,"bottom":0},"compId":39}]},{"type":"Image","props":{"y":285,"x":560,"width":172,"var":"areabox","skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":37,"child":[{"type":"List","props":{"var":"areaList","top":0,"right":0,"left":0,"bottom":0},"compId":40}]},{"type":"Button","props":{"y":1094,"x":350,"width":100,"skin":"comp/button.png","labelAlign":"center","label":"保存修改","height":30},"compId":97},{"type":"Script","props":{"runtime":"script.usercenter.EnterPrizeInfoControl"},"compId":98}],"loadList":["comp/textinput.png","commers/combxbtn.png","commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return EnterPrizeInfoPaneUI;
 })(View)
 
@@ -47050,11 +47216,29 @@ var PaintOrderPanelUI=(function(_super){
 	var __proto=PaintOrderPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(PaintOrderPanelUI.uiView);
+		this.loadScene("PaintOrderPanel");
 	}
 
-	PaintOrderPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080,"fontSize":24},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Sprite","props":{"y":65,"x":320},"compId":20,"child":[{"type":"Image","props":{"width":1280,"skin":"commers/blackbg.png","height":93,"alpha":0.2},"compId":11},{"type":"Label","props":{"y":17,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":12},{"type":"Label","props":{"y":17,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":13},{"type":"Label","props":{"y":17,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":14},{"type":"Label","props":{"y":17,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":15},{"type":"Label","props":{"y":61,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":16},{"type":"Label","props":{"y":61,"x":326,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":17},{"type":"Label","props":{"y":61,"x":652,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":18},{"type":"Label","props":{"y":61,"x":978,"width":300,"text":"会员等级：黄金","mouseEnabled":true,"fontSize":24,"color":"#312b2b","align":"center"},"compId":19}]},{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":10}]},{"type":"Panel","props":{"var":"panel_main","top":160,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Box","props":{"y":0,"x":320},"compId":24,"child":[{"type":"Label","props":{"text":"收货信息","fontSize":30},"compId":21},{"type":"Label","props":{"y":42,"width":1046,"var":"myaddresstxt","text":"收货信息","height":30,"fontSize":24},"compId":23},{"type":"Text","props":{"y":5,"x":132,"var":"changemyadd","text":"更改收货信息","presetID":1,"fontSize":24,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":98,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":99}]}]},{"type":"Box","props":{"y":80,"x":320},"compId":26,"child":[{"type":"Label","props":{"text":"输出中心","fontSize":30},"compId":27},{"type":"Label","props":{"y":42,"x":0,"width":425,"var":"factorytxt","text":"收货信息","height":30,"fontSize":24},"compId":29},{"type":"Button","props":{"y":47,"x":444,"width":62,"skin":"comp/button.png","label":"qq交谈","height":23},"compId":30},{"type":"Text","props":{"y":5,"x":132,"var":"changefactory","text":"更改输出中心","presetID":1,"fontSize":24,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":100,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":101}]}]},{"type":"Box","props":{"y":160,"x":320,"width":1280,"height":112},"compId":31,"child":[{"type":"Label","props":{"text":"批量修改","fontSize":30},"compId":32},{"type":"Image","props":{"y":36,"x":0,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.2},"compId":36},{"type":"Label","props":{"y":44,"x":162,"text":"商品名称","fontSize":24},"compId":37},{"type":"Label","props":{"y":44.5,"x":749,"text":"工艺","fontSize":24},"compId":38},{"type":"Label","props":{"y":44,"x":1180,"text":"数量","fontSize":24},"compId":39},{"type":"Label","props":{"y":83,"x":0,"width":415,"text":"请选择产品","height":20,"fontSize":20,"align":"center"},"compId":40},{"type":"Label","props":{"y":74,"x":540,"text":"|","fontSize":30},"compId":42},{"type":"Label","props":{"y":83,"x":572,"width":424,"text":"请选择工艺","height":20,"fontSize":20,"align":"center"},"compId":43},{"type":"TextInput","props":{"y":79,"x":1180,"width":85,"text":"1","skin":"comp/textinput.png","height":30,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":45},{"type":"Text","props":{"y":83,"x":456,"text":"更好材料","presetID":1,"fontSize":20,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":102,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":103}]},{"type":"Text","props":{"y":83,"x":1006,"text":"更换工艺","presetID":1,"fontSize":20,"color":"#3028ea","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":104,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":105}]}]},{"type":"Label","props":{"y":282,"x":320,"text":"产品清单","fontSize":30},"compId":46},{"type":"Button","props":{"y":280,"x":462,"width":100,"var":"btnaddpic","skin":"comp/button.png","labelSize":20,"label":"添加产品","height":30},"compId":47},{"type":"Label","props":{"y":286,"x":582,"width":714,"text":"绿色字体为自动识别选择，请仔细核对。注：文件名的信息越详细，识别越精准。","height":30,"fontSize":20,"color":"#325a2d"},"compId":48},{"type":"Box","props":{"y":334,"x":320},"compId":62,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":49},{"type":"Label","props":{"y":10,"text":"序号","fontSize":24},"compId":50},{"type":"Label","props":{"y":10,"x":74,"text":"稿件","fontSize":24},"compId":51},{"type":"Label","props":{"y":10,"x":209,"text":"稿件名","fontSize":24},"compId":52},{"type":"Label","props":{"y":10,"x":436,"text":"材料","fontSize":24},"compId":53},{"type":"Label","props":{"y":10,"x":595,"text":"图片编辑","fontSize":24},"compId":54},{"type":"Label","props":{"y":10,"x":783,"text":"工艺","fontSize":24},"compId":55},{"type":"Label","props":{"y":10,"x":897,"text":"会员价","fontSize":24},"compId":56},{"type":"Label","props":{"y":10,"x":986,"text":"数量","fontSize":24},"compId":57},{"type":"Label","props":{"y":10,"x":1051,"text":"单价","fontSize":24},"compId":58},{"type":"Label","props":{"y":10,"x":1119,"text":"总价","fontSize":24},"compId":59},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":60}]},{"type":"VBox","props":{"y":383,"x":320,"width":1280,"var":"mainvbox","space":10},"compId":63,"child":[{"type":"VBox","props":{"var":"ordervbox","space":20,"right":0,"left":0},"compId":64},{"type":"VBox","props":{"y":100,"x":0,"space":10,"right":0,"left":0},"compId":65,"child":[{"type":"Box","props":{"y":50,"x":0},"compId":68,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},"compId":69},{"type":"Label","props":{"y":10,"x":89,"text":"商品名称","fontSize":24},"compId":70},{"type":"Label","props":{"y":10,"x":344,"text":"物料规格","fontSize":24},"compId":72},{"type":"Label","props":{"y":10,"x":578,"text":"数量","fontSize":24},"compId":77},{"type":"Label","props":{"y":10,"x":773,"text":"单价","fontSize":24},"compId":78},{"type":"Label","props":{"y":10,"x":1017,"text":"总价","fontSize":24},"compId":79},{"type":"Label","props":{"y":10,"x":1207,"text":"操作","fontSize":24},"compId":80}]},{"type":"Box","props":{"y":0,"x":0},"compId":83,"child":[{"type":"Label","props":{"y":0,"x":0,"text":"配件清单","fontSize":30},"compId":66},{"type":"Button","props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},"compId":67}]}]},{"type":"VBox","props":{"y":200,"x":0,"var":"partvbox","right":0,"left":0},"compId":82},{"type":"Box","props":{"y":319,"x":0},"compId":84,"child":[{"type":"Label","props":{"text":"配送方式","fontSize":30},"compId":85},{"type":"Text","props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea","runtime":"laya.display.Text"},"compId":86},{"type":"Label","props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},"compId":87}]},{"type":"Box","props":{"y":400,"x":0},"compId":91,"child":[{"type":"Label","props":{"text":"添加批量备注","fontSize":30},"compId":89},{"type":"Label","props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},"compId":90}]},{"type":"TextInput","props":{"y":441,"x":0,"width":1280,"valign":"top","text":"请添加备注","skin":"comp/textinput.png","height":93,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":92},{"type":"Label","props":{"y":543,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},"compId":93},{"type":"Box","props":{"y":591,"x":959},"compId":96,"child":[{"type":"Button","props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},"compId":94},{"type":"Button","props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},"compId":95}]}]}]},{"type":"Script","props":{"runtime":"script.order.PaintOrderControl"},"compId":97}],"loadList":["commers/whitebg.png","commers/blackbg.png","comp/label.png","prefabs/LinksText.prefab","comp/button.png","comp/textinput.png"],"loadList3D":[]};
 	return PaintOrderPanelUI;
+})(View)
+
+
+//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
+var AddressMgrPanelUI=(function(_super){
+	function AddressMgrPanelUI(){
+		this.btnaddAddress=null;
+		this.addlist=null;
+		AddressMgrPanelUI.__super.call(this);
+	}
+
+	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
+	var __proto=AddressMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/AddressMgrPanel");
+	}
+
+	return AddressMgrPanelUI;
 })(View)
 
 
@@ -47072,7 +47256,7 @@ var TechBoxItemUI=(function(_super){
 		this.createView(TechBoxItemUI.uiView);
 	}
 
-	TechBoxItemUI.uiView={"type":"View","props":{"width":1240,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
+	TechBoxItemUI.uiView={"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
 	return TechBoxItemUI;
 })(View)
 
@@ -47094,10 +47278,9 @@ var LogPanelUI=(function(_super){
 	var __proto=LogPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(LogPanelUI.uiView);
+		this.loadScene("login/LogPanel");
 	}
 
-	LogPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":17},{"type":"Sprite","props":{"y":350,"x":608,"width":802,"texture":"commers/whitebg.png","height":519},"compId":3},{"type":"Label","props":{"y":373,"x":976,"text":"登陆","styleSkin":"comp/label.png","fontSize":28},"compId":4},{"type":"Label","props":{"y":470,"x":816,"text":"账号","styleSkin":"comp/label.png","fontSize":28},"compId":5},{"type":"TextInput","props":{"y":459,"x":884,"width":250,"var":"input_account","skin":"comp/textinput.png","prompt":"请输入账号","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":6},{"type":"Label","props":{"y":546,"x":816,"text":"密码","styleSkin":"comp/label.png","fontSize":28},"compId":7},{"type":"TextInput","props":{"y":535,"x":884,"width":250,"var":"input_pwd","skin":"comp/textinput.png","prompt":"请输入密码","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":8},{"type":"Button","props":{"y":764,"x":913,"width":120,"var":"btn_login","skin":"comp/button.png","labelSize":24,"label":"登陆","height":40},"compId":10},{"type":"Button","props":{"y":353,"x":1281,"width":120,"var":"closebtn","skin":"comp/button.png","labelSize":24,"label":"X","height":40},"compId":11},{"type":"Script","props":{"runtime":"script.login.LogPanelControl"},"compId":14},{"type":"Text","props":{"y":674,"x":1134,"var":"txt_reg","text":"注册","fontSize":28,"runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":674,"x":1236,"var":"txt_forget","text":"忘记密码","fontSize":28,"runtime":"laya.display.Text"},"compId":19}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/label.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
 	return LogPanelUI;
 })(View)
 
@@ -47121,10 +47304,9 @@ var SelectPicPanelUI=(function(_super){
 	var __proto=SelectPicPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(SelectPicPanelUI.uiView);
+		this.loadScene("order/SelectPicPanel");
 	}
 
-	SelectPicPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":33},{"type":"Panel","props":{"top":100,"right":0,"left":0,"bottom":100},"compId":3,"child":[{"type":"Image","props":{"y":0,"top":0,"skin":"commers/whitebg.png","right":360,"left":360,"bottom":0,"alpha":1},"compId":34},{"type":"Sprite","props":{"y":131,"x":362,"width":154,"height":387},"compId":12,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":152,"lineWidth":1,"lineColor":"#141313","height":384,"fillColor":"#fdfbfb"},"compId":13},{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":14}]},{"type":"Label","props":{"y":90,"x":610,"width":100,"var":"flder0","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":725,"width":100,"var":"flder1","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":839,"width":100,"var":"flder2","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":88,"x":1252,"width":181,"var":"htmltext","innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":20,"x":1194.5,"width":115,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":40},"compId":21},{"type":"List","props":{"x":576,"width":967,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":6,"height":688,"bottom":62},"compId":22},{"type":"Button","props":{"y":20,"x":1332.5,"width":115,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":40},"compId":30},{"type":"Label","props":{"y":96,"x":362,"width":152,"text":"一级目录","mouseEnabled":true,"height":35,"fontSize":30,"color":"#FFFFFF","bgColor":"#f41a16","align":"center"},"compId":31}]},{"type":"Script","props":{"runtime":"script.order.SelectPicControl"},"compId":32}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/checkbox.png","comp/button.png"],"loadList3D":[]};
 	return SelectPicPanelUI;
 })(View)
 
@@ -47187,10 +47369,9 @@ var RegisterPanelUI=(function(_super){
 	var __proto=RegisterPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(RegisterPanelUI.uiView);
+		this.loadScene("login/RegisterPanel");
 	}
 
-	RegisterPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"var":"bgimg","top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":70},{"type":"Panel","props":{"width":1920,"top":0,"bottom":100},"compId":3,"child":[{"type":"Label","props":{"y":12,"x":930,"text":"注册","fontSize":30,"font":"SimSun"},"compId":4},{"type":"Box","props":{"y":70,"x":660},"compId":9,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},"compId":5},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":6},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":7},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":8}]},{"type":"Box","props":{"y":153,"x":660},"compId":10,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"密码","fontSize":20,"font":"Arial","align":"right"},"compId":11},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_pwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":12},{"type":"Label","props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":13},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":14}]},{"type":"Box","props":{"y":236,"x":660},"compId":15,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},"compId":16},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":17},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":18},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":19}]},{"type":"Box","props":{"y":319,"x":660},"compId":20,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"公司名称","fontSize":20,"font":"Arial"},"compId":21},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_company","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":22},{"type":"Label","props":{"y":10,"x":398,"text":"公司名称不超过20个字","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":23},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":24}]},{"type":"Box","props":{"y":402,"x":660},"compId":25,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"收货人","fontSize":20,"font":"Arial"},"compId":26},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_receiver","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":27},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":29}]},{"type":"Box","props":{"y":484,"x":660},"compId":30,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"收货人电话","fontSize":20,"font":"Arial"},"compId":31},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_receiverphone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":32},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":33},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":34}]},{"type":"Box","props":{"y":636,"x":660},"compId":35,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"详细地址","fontSize":20,"font":"Arial"},"compId":36},{"type":"TextInput","props":{"y":0,"x":126,"width":533,"var":"input_adress","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":37},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":39}]},{"type":"Box","props":{"y":775,"x":660},"compId":40,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"图片验证码","fontSize":20,"font":"Arial"},"compId":41},{"type":"TextInput","props":{"y":0,"x":126,"width":154,"var":"inputCode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":42},{"type":"Label","props":{"y":10,"x":500,"text":"看不清？","fontSize":20,"font":"Arial","color":"#121212"},"compId":43},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":44},{"type":"Text","props":{"y":10,"x":588,"var":"txtRefresh","text":"换一张","mouseEnabled":true,"fontSize":20,"color":"#1a1c1c","runtime":"laya.display.Text"},"compId":78}]},{"type":"Box","props":{"y":846,"x":660},"compId":45,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},"compId":46},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":47},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":49},{"type":"Button","props":{"y":-1.5,"x":402,"width":150,"var":"btnGetCode","skin":"comp/button.png","label":"获取验证码","height":40},"compId":76}]},{"type":"Label","props":{"y":568,"x":673,"text":"收货地址","fontSize":20,"font":"Arial"},"compId":50},{"type":"Label","props":{"y":566,"x":660,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":51},{"type":"Button","props":{"y":556,"x":796,"width":182,"var":"btnSelProv","stateNum":1,"skin":"commers/inputbg.png","height":45,"sizeGrid":"22,39,19,46"},"compId":52,"child":[{"type":"Label","props":{"y":10,"x":18,"width":128,"var":"province","text":"北京市","height":24,"fontSize":24,"color":"#efe6e6","align":"center"},"compId":53},{"type":"Image","props":{"y":16,"x":136,"skin":"commers/combxbtn.png"},"compId":54}]},{"type":"Button","props":{"y":556,"x":1001,"width":182,"var":"btnSelCity","stateNum":1,"skin":"commers/inputbg.png","height":45,"sizeGrid":"22,39,19,46"},"compId":55,"child":[{"type":"Label","props":{"y":10,"x":18,"width":128,"var":"citytxt","text":"北京市","height":24,"fontSize":24,"color":"#efe6e6","align":"center"},"compId":56},{"type":"Image","props":{"y":16,"x":136,"skin":"commers/combxbtn.png"},"compId":57}]},{"type":"Button","props":{"y":556,"x":1205,"width":182,"var":"btnSelArea","stateNum":1,"skin":"commers/inputbg.png","height":45,"sizeGrid":"22,39,19,46"},"compId":58,"child":[{"type":"Label","props":{"y":10,"x":18,"width":128,"var":"areatxt","text":"北京市","height":24,"fontSize":24,"color":"#efe6e6","align":"center"},"compId":59},{"type":"Image","props":{"y":16,"x":136,"skin":"commers/combxbtn.png"},"compId":60}]},{"type":"Button","props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},"compId":68},{"type":"Label","props":{"y":716,"x":673,"text":"是否设为默认收货地址","fontSize":20,"font":"Arial"},"compId":72},{"type":"RadioGroup","props":{"y":711,"x":890,"width":150,"var":"radio_default","space":20,"skin":"comp/radiogroup.png","scaleY":1.5,"scaleX":1.5,"labels":"是,否","labelSize":20,"height":26},"compId":73},{"type":"Button","props":{"y":906.5,"x":861,"width":150,"var":"btnReg","skin":"comp/button.png","labelSize":24,"label":"注册","height":40},"compId":77},{"type":"Image","props":{"y":195,"x":801,"width":172,"var":"provbox","skin":"commers/blackbg.png","height":359,"alpha":0.8},"compId":62,"child":[{"type":"List","props":{"var":"provList","top":0,"right":0,"left":0,"bottom":0},"compId":63}]},{"type":"Image","props":{"y":195,"x":1004,"width":172,"var":"citybox","skin":"commers/blackbg.png","height":359,"alpha":0.8},"compId":64,"child":[{"type":"List","props":{"var":"cityList","top":0,"right":0,"left":0,"bottom":0},"compId":65}]},{"type":"Image","props":{"y":195,"x":1205,"width":172,"var":"areabox","skin":"commers/blackbg.png","height":359,"alpha":0.8},"compId":66,"child":[{"type":"List","props":{"var":"areaList","top":0,"right":0,"left":0,"bottom":0},"compId":67}]}]},{"type":"Script","props":{"runtime":"script.login.RegisterCntrol"},"compId":69}],"loadList":["commers/whitebg.png","comp/textinput.png","comp/button.png","commers/inputbg.png","commers/combxbtn.png","comp/radiogroup.png","commers/blackbg.png"],"loadList3D":[]};
 	return RegisterPanelUI;
 })(View)
 
@@ -47212,6 +47393,26 @@ var DirectItemUI=(function(_super){
 
 	DirectItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","height":30},"compId":3,"child":[{"type":"Label","props":{"y":4,"var":"foldname","text":"我的图片","right":2,"left":2,"height":24,"fontSize":20,"color":"#eaf3ec","alpha":0.8,"align":"center"},"compId":5}]}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
 	return DirectItemUI;
+})(View)
+
+
+//class ui.usercenter.NewAddressPanelUI extends laya.ui.View
+var NewAddressPanelUI=(function(_super){
+	function NewAddressPanelUI(){
+		this.btnok=null;
+		this.btncancel=null;
+		NewAddressPanelUI.__super.call(this);
+	}
+
+	__class(NewAddressPanelUI,'ui.usercenter.NewAddressPanelUI',_super);
+	var __proto=NewAddressPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(NewAddressPanelUI.uiView);
+	}
+
+	NewAddressPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":10,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Panel","props":{"y":10,"x":10,"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":170,"x":490,"width":946,"skin":"commers/whitebg.png","height":515},"compId":6},{"type":"Image","props":{"y":100,"x":490,"width":946,"skin":"commers/blackbg.png","height":74,"alpha":0.8},"compId":7},{"type":"Label","props":{"y":119,"x":861,"text":"新增收货地址","fontSize":36,"color":"#eedfdf","bold":true},"compId":8},{"type":"Sprite","props":{"y":635,"x":780.5},"compId":13,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":14},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":15}]},{"type":"Box","props":{"y":189,"x":511},"compId":56,"child":[{"type":"Label","props":{"y":10,"x":13,"width":109,"text":"收货人：","height":20,"fontSize":20,"font":"Arial","align":"right"},"compId":64},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":65},{"type":"Label","props":{"y":8,"x":29,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":66}]},{"type":"Label","props":{"y":310,"x":517,"width":112,"text":"地区：","height":20,"fontSize":20,"font":"Arial","align":"right"},"compId":57},{"type":"Button","props":{"y":300,"x":638,"width":170,"stateNum":1,"height":35},"compId":58,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":67},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":68}]},{"type":"Button","props":{"y":300,"x":832,"width":170,"stateNum":1,"height":35},"compId":59,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":69},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":70}]},{"type":"Button","props":{"y":300,"x":1025,"width":170,"stateNum":1,"height":35},"compId":60,"child":[{"type":"Label","props":{"y":0,"x":0,"width":170,"valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},"compId":71},{"type":"Image","props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},"compId":72}]},{"type":"Box","props":{"y":364,"x":511},"compId":84,"child":[{"type":"Label","props":{"y":10,"x":13,"width":109,"text":"详细地址：","height":20,"fontSize":20,"font":"Arial","align":"right"},"compId":85},{"type":"TextInput","props":{"y":0,"x":126,"width":772,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":86},{"type":"Label","props":{"y":8,"x":9,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":87}]},{"type":"Image","props":{"y":337,"x":637,"width":172,"skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":61,"child":[{"type":"List","props":{"top":0,"right":0,"left":0,"bottom":0},"compId":73}]},{"type":"Image","props":{"y":337,"x":830,"width":172,"skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":62,"child":[{"type":"List","props":{"top":0,"right":0,"left":0,"bottom":0},"compId":74}]},{"type":"Image","props":{"y":337,"x":1024,"width":172,"skin":"commers/blackbg.png","height":278,"alpha":0.8},"compId":63,"child":[{"type":"List","props":{"top":0,"right":0,"left":0,"bottom":0},"compId":75}]},{"type":"Box","props":{"y":244,"x":511},"compId":80,"child":[{"type":"Label","props":{"y":10,"x":13,"width":109,"text":"手机号码：","height":20,"fontSize":20,"font":"Arial","align":"right"},"compId":81},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":82},{"type":"Label","props":{"y":8,"x":9,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":83}]}]},{"type":"Script","props":{"runtime":"script.usercenter.AddressEditControl"},"compId":88}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png","comp/textinput.png","commers/combxbtn.png"],"loadList3D":[]};
+	return NewAddressPanelUI;
 })(View)
 
 
@@ -47286,7 +47487,7 @@ var MaterialNameItemUI=(function(_super){
 		this.createView(MaterialNameItemUI.uiView);
 	}
 
-	MaterialNameItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"var":"blackrect"},"compId":6,"child":[{"type":"Rect","props":{"y":-0.5,"x":-0.5,"width":200,"lineWidth":1,"lineColor":"0","height":39},"compId":7}]},{"type":"Sprite","props":{"y":0,"x":0,"var":"redrect"},"compId":5,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":200,"lineWidth":1,"lineColor":"#ff0000","height":39},"compId":3}]},{"type":"Label","props":{"y":2,"x":1,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"var":"blackrect"},"compId":6,"child":[{"type":"Rect","props":{"y":-0.5,"x":-0.5,"width":200,"lineWidth":1,"lineColor":"0","height":39},"compId":7}]},{"type":"Sprite","props":{"y":0,"x":0,"var":"redrect"},"compId":5,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":200,"lineWidth":1,"lineColor":"#ff0000","height":39},"compId":3}]},{"type":"Label","props":{"y":2,"x":1,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
 	return MaterialNameItemUI;
 })(View)
 
@@ -47317,33 +47518,10 @@ var PicManagePanelUI=(function(_super){
 	var __proto=PicManagePanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(PicManagePanelUI.uiView);
+		this.loadScene("PicManagePanel");
 	}
 
-	PicManagePanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"x":0,"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":5,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":6},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":7},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":8},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":9},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":53}]},{"type":"Button","props":{"y":82,"x":325,"width":150,"var":"btnNewDir","skin":"comp/button.png","labelSize":20,"label":"新建一级目录","height":40},"compId":13},{"type":"Button","props":{"y":82,"x":603,"width":115,"var":"btnUploadPic","skin":"comp/button.png","labelSize":20,"label":"上传图片","height":40},"compId":14},{"type":"Sprite","props":{"y":131,"x":320,"width":154,"height":387},"compId":11,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":152,"lineWidth":1,"lineColor":"#141313","height":384,"fillColor":"#fdfbfb"},"compId":54},{"type":"List","props":{"var":"folderList","top":2,"right":2,"repeatX":1,"left":2,"bottom":2},"compId":12}]},{"type":"Button","props":{"y":82,"x":729,"width":115,"var":"btnNewFolder","skin":"comp/button.png","labelSize":20,"label":"新建目录","height":40},"compId":15},{"type":"Label","props":{"y":90,"x":872,"width":100,"var":"flder0","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":16},{"type":"Label","props":{"y":90,"x":987,"width":100,"var":"flder1","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":17},{"type":"Label","props":{"y":90,"x":1101,"width":100,"var":"flder2","text":"南京>","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},"compId":18},{"type":"HTMLDivElement","props":{"y":88,"x":1252,"width":181,"var":"htmltext","innerHTML":"htmlText","height":12,"runtime":"laya.html.dom.HTMLDivElement"},"compId":19},{"type":"CheckBox","props":{"y":90,"x":1421,"width":53,"var":"radiosel","skin":"comp/checkbox.png","scaleY":1.5,"scaleX":1.5,"labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选","height":18},"compId":20},{"type":"Button","props":{"y":82,"x":1501,"width":115,"var":"btnorder","skin":"comp/button.png","labelSize":20,"label":"喷印下单","height":40},"compId":21},{"type":"List","props":{"x":611,"width":995,"var":"picList","top":130,"spaceY":10,"spaceX":10,"repeatX":6,"bottom":0},"compId":22},{"type":"Box","props":{"var":"boxNewFolder","top":0,"right":0,"left":0,"bottom":0},"compId":48,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.7},"compId":44},{"type":"Image","props":{"y":345,"x":710,"width":500,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","height":200},"compId":45,"child":[{"type":"Image","props":{"top":5,"skin":"commers/whitebg.png","right":5,"left":5,"bottom":5,"alpha":0.8},"compId":46},{"type":"TextInput","props":{"y":65,"x":37,"width":312,"var":"input_folename","skin":"comp/textinput.png","prompt":"请输入目录名称","height":46,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":49},{"type":"Button","props":{"y":67,"x":362,"width":100,"var":"btnSureCreate","skin":"comp/button.png","labelSize":24,"label":"确定","height":40},"compId":50},{"type":"Button","props":{"y":5,"x":454,"width":40,"var":"btnCloseInput","skin":"comp/btn_close.png","labelSize":24,"height":40},"compId":51}]}]}]},{"type":"Script","props":{"runtime":"script.picUpload.PicManagerControl"},"compId":23}],"loadList":["commers/whitebg.png","comp/label.png","comp/button.png","comp/checkbox.png","commers/blackbg.png","commers/sel.png","comp/textinput.png","comp/btn_close.png"],"loadList3D":[]};
 	return PicManagePanelUI;
-})(View)
-
-
-//class ui.order.SelectMaterialPanelUI extends laya.ui.View
-var SelectMaterialPanelUI=(function(_super){
-	function SelectMaterialPanelUI(){
-		this.matlist=null;
-		this.btnok=null;
-		this.btncancel=null;
-		this.tablist=null;
-		SelectMaterialPanelUI.__super.call(this);
-	}
-
-	__class(SelectMaterialPanelUI,'ui.order.SelectMaterialPanelUI',_super);
-	var __proto=SelectMaterialPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(SelectMaterialPanelUI.uiView);
-	}
-
-	SelectMaterialPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":2,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":5},{"type":"Panel","props":{"y":0,"x":10,"top":-2,"right":0,"left":0,"bottom":100},"compId":6,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":8},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":9},{"type":"Label","props":{"y":119,"x":886,"text":"选择材料","fontSize":36,"color":"#eedfdf","bold":true},"compId":10},{"type":"List","props":{"y":370,"x":364,"width":1192,"var":"matlist","spaceY":10,"spaceX":10,"repeatX":5,"height":508},"compId":11},{"type":"Sprite","props":{"y":889,"x":824},"compId":12,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":13},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":14}]},{"type":"List","props":{"y":190,"x":364,"width":1192,"var":"tablist","repeatX":6,"height":164},"compId":15}]},{"type":"Script","props":{"runtime":"script.order.SelectMaterialControl"},"compId":16}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
-	return SelectMaterialPanelUI;
 })(View)
 
 
@@ -47445,6 +47623,27 @@ var PicOrderItem=(function(_super){
 })(OrderItemUI)
 
 
+//class ui.order.SelectMaterialPanelUI extends laya.ui.View
+var SelectMaterialPanelUI=(function(_super){
+	function SelectMaterialPanelUI(){
+		this.matlist=null;
+		this.btnok=null;
+		this.btncancel=null;
+		this.tablist=null;
+		SelectMaterialPanelUI.__super.call(this);
+	}
+
+	__class(SelectMaterialPanelUI,'ui.order.SelectMaterialPanelUI',_super);
+	var __proto=SelectMaterialPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/SelectMaterialPanel");
+	}
+
+	return SelectMaterialPanelUI;
+})(View)
+
+
 //class ui.login.ResetPwdPanelUI extends laya.ui.View
 var ResetPwdPanelUI=(function(_super){
 	function ResetPwdPanelUI(){
@@ -47461,10 +47660,9 @@ var ResetPwdPanelUI=(function(_super){
 	var __proto=ResetPwdPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(ResetPwdPanelUI.uiView);
+		this.loadScene("login/ResetPwdPanel");
 	}
 
-	ResetPwdPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"x":0,"width":1920,"top":0,"bottom":100},"compId":4,"child":[{"type":"Label","props":{"y":12,"x":930,"text":"修改密码","fontSize":30,"font":"SimSun"},"compId":6},{"type":"Box","props":{"y":70,"x":660},"compId":7,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},"compId":8},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":9},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":10},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":11}]},{"type":"Box","props":{"y":153,"x":660},"compId":12,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"新密码","fontSize":20,"font":"Arial","align":"right"},"compId":13},{"type":"TextInput","props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":14},{"type":"Label","props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":15},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":16}]},{"type":"Box","props":{"y":236,"x":660},"compId":17,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},"compId":18},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":19},{"type":"Label","props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},"compId":20},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":21}]},{"type":"Box","props":{"y":313,"x":660},"compId":46,"child":[{"type":"Label","props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},"compId":47},{"type":"TextInput","props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20,"sizeGrid":"6,15,7,14"},"compId":48},{"type":"Label","props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},"compId":49},{"type":"Button","props":{"y":-1.5,"x":402,"width":150,"var":"btn_getcode","skin":"comp/button.png","label":"获取验证码","height":40},"compId":50}]},{"type":"Button","props":{"y":17,"x":1799,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},"compId":68},{"type":"Button","props":{"y":414,"x":826,"width":150,"var":"btn_ok","skin":"comp/button.png","labelSize":24,"label":"确认修改","height":40},"compId":71}]},{"type":"Script","props":{"runtime":"script.login.ResetPwdControl"},"compId":72}],"loadList":["commers/whitebg.png","comp/textinput.png","comp/button.png"],"loadList3D":[]};
 	return ResetPwdPanelUI;
 })(View)
 
@@ -47483,10 +47681,9 @@ var UpLoadPanelUI=(function(_super){
 	var __proto=UpLoadPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(UpLoadPanelUI.uiView);
+		this.loadScene("uploadpic/UpLoadPanel");
 	}
 
-	UpLoadPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":4},{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":100},"compId":14,"child":[{"type":"Image","props":{"x":320,"width":1280,"top":0,"skin":"commers/blackbg.png","bottom":0},"compId":20},{"type":"Label","props":{"y":11,"x":359,"text":"您选择的文件：","fontSize":24,"color":"#f3e6e6"},"compId":5},{"type":"Button","props":{"y":5,"x":1860,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},"compId":6},{"type":"Button","props":{"y":48,"x":395,"width":98,"skin":"comp/button.png","labelSize":20,"label":"选择文件","height":33},"compId":7},{"type":"Button","props":{"y":48,"x":509,"width":98,"var":"btnBegin","skin":"comp/button.png","labelSize":20,"label":"开始上传","height":33},"compId":8},{"type":"List","props":{"y":97,"x":358,"width":938,"var":"fileList","repeatX":1,"height":584},"compId":9}]},{"type":"Script","props":{"runtime":"script.picUpload.UpLoadAndOrderContrl"},"compId":19}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return UpLoadPanelUI;
 })(View)
 
@@ -47508,8 +47705,27 @@ var UpLoadItemUI=(function(_super){
 		this.createView(UpLoadItemUI.uiView);
 	}
 
-	UpLoadItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
+	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
 	return UpLoadItemUI;
+})(View)
+
+
+//class ui.order.TechorItemUI extends laya.ui.View
+var TechorItemUI=(function(_super){
+	function TechorItemUI(){
+		this.txt=null;
+		TechorItemUI.__super.call(this);
+	}
+
+	__class(TechorItemUI,'ui.order.TechorItemUI',_super);
+	var __proto=TechorItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TechorItemUI.uiView);
+	}
+
+	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
+	return TechorItemUI;
 })(View)
 
 
@@ -47530,25 +47746,6 @@ var PartItem=(function(_super){
 
 	return PartItem;
 })(PartsItemUI)
-
-
-//class ui.order.TechorItemUI extends laya.ui.View
-var TechorItemUI=(function(_super){
-	function TechorItemUI(){
-		this.txt=null;
-		TechorItemUI.__super.call(this);
-	}
-
-	__class(TechorItemUI,'ui.order.TechorItemUI',_super);
-	var __proto=TechorItemUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(TechorItemUI.uiView);
-	}
-
-	TechorItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
-	return TechorItemUI;
-})(View)
 
 
 //class ui.PopUpDialogUI extends laya.ui.View
@@ -47586,11 +47783,29 @@ var SelectTechPanelUI=(function(_super){
 	var __proto=SelectTechPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(SelectTechPanelUI.uiView);
+		this.loadScene("order/SelectTechPanel");
 	}
 
-	SelectTechPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":10,"x":10,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Panel","props":{"y":10,"x":10,"top":0,"right":0,"left":0,"bottom":100},"compId":4,"child":[{"type":"Image","props":{"y":170,"x":320,"width":1280,"skin":"commers/whitebg.png","height":779},"compId":6},{"type":"Image","props":{"y":100,"x":320,"width":1280,"skin":"commers/blackbg.png","height":74,"alpha":0.3},"compId":7},{"type":"Label","props":{"y":119,"x":849,"text":"修改工艺","fontSize":36,"color":"#eedfdf","bold":true},"compId":8},{"type":"Panel","props":{"y":182,"x":332,"width":1256,"var":"techcontent","height":636},"compId":16},{"type":"Sprite","props":{"y":889,"x":824},"compId":13,"child":[{"type":"Button","props":{"width":112,"var":"btnok","skin":"comp/button.png","labelSize":20,"label":"确定","height":30},"compId":14},{"type":"Button","props":{"x":159,"width":112,"var":"btncancel","skin":"comp/button.png","labelSize":20,"label":"取消","height":30},"compId":15}]},{"type":"Label","props":{"y":838,"x":343.443359375,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","fontSize":20,"color":"#f81410"},"compId":18}]},{"type":"Script","props":{"runtime":"script.order.SelectTechControl"},"compId":19}],"loadList":["commers/blackbg.png","commers/whitebg.png","comp/button.png"],"loadList3D":[]};
 	return SelectTechPanelUI;
+})(View)
+
+
+//class ui.login.LoadingPanelUI extends laya.ui.View
+var LoadingPanelUI=(function(_super){
+	function LoadingPanelUI(){
+		this.prg=null;
+		this.prgtxt=null;
+		LoadingPanelUI.__super.call(this);
+	}
+
+	__class(LoadingPanelUI,'ui.login.LoadingPanelUI',_super);
+	var __proto=LoadingPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("login/LoadingPanel");
+	}
+
+	return LoadingPanelUI;
 })(View)
 
 
@@ -47607,10 +47822,9 @@ var PicCheckPanelUI=(function(_super){
 	var __proto=PicCheckPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(PicCheckPanelUI.uiView);
+		this.loadScene("picManager/PicCheckPanel");
 	}
 
-	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8},"compId":3},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6},{"type":"Panel","props":{"var":"mainpanel","top":0,"right":0,"left":0,"bottom":100},"compId":7,"child":[{"type":"Image","props":{"y":571,"x":980,"width":1000,"var":"img","height":999,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return PicCheckPanelUI;
 })(View)
 
@@ -48659,6 +48873,340 @@ var LayoutBox=(function(_super){
 
 
 /**
+*<code>Dialog</code> 组件是一个弹出对话框，实现对话框弹出，拖动，模式窗口功能。
+*可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭等
+*通过设置zOrder属性，可以更改弹出的层次
+*通过设置popupEffect和closeEffect可以设置弹出效果和关闭效果，如果不想有任何弹出关闭效果，可以设置前述属性为空
+*
+*@example <caption>以下示例代码，创建了一个 <code>Dialog</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.Dialog;
+	*import laya.utils.Handler;
+	*public class Dialog_Example
+	*{
+		*private var dialog:Dialog_Instance;
+		*public function Dialog_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load("resource/ui/btn_close.png",Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*dialog=new Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
+			*dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
+			*dialog.show();//显示 dialog。
+			*dialog.closeHandler=new Handler(this,onClose);//设置 dialog 的关闭函数处理器。
+			*}
+		*private function onClose(name:String):void
+		*{
+			*if (name==Dialog.CLOSE)
+			*{
+				*trace("通过点击 name 为"+name+"的组件，关闭了dialog。");
+				*}
+			*}
+		*}
+	*}
+*import laya.ui.Button;
+*import laya.ui.Dialog;
+*import laya.ui.Image;
+*class Dialog_Instance extends Dialog
+*{
+	*function Dialog_Instance():void
+	*{
+		*var bg:Image=new Image("resource/ui/bg.png");
+		*bg.sizeGrid="40,10,5,10";
+		*bg.width=150;
+		*bg.height=250;
+		*addChild(bg);
+		*var image:Image=new Image("resource/ui/image.png");
+		*addChild(image);
+		*var button:Button=new Button("resource/ui/btn_close.png");
+		*button.name=Dialog.CLOSE;//设置button的name属性值。
+		*button.x=0;
+		*button.y=0;
+		*addChild(button);
+		*}
+	*}
+*@example
+*Laya.init(640,800);//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var dialog;
+*Laya.loader.load("resource/ui/btn_close.png",laya.utils.Handler.create(this,loadComplete));//加载资源
+*(function (_super){//新建一个类Dialog_Instance继承自laya.ui.Dialog。
+	*function Dialog_Instance(){
+		*Dialog_Instance.__super.call(this);//初始化父类
+		*var bg=new laya.ui.Image("resource/ui/bg.png");//新建一个 Image 类的实例 bg 。
+		*bg.sizeGrid="10,40,10,5";//设置 bg 的网格信息。
+		*bg.width=150;//设置 bg 的宽度。
+		*bg.height=250;//设置 bg 的高度。
+		*this.addChild(bg);//将 bg 添加到显示列表。
+		*var image=new laya.ui.Image("resource/ui/image.png");//新建一个 Image 类的实例 image 。
+		*this.addChild(image);//将 image 添加到显示列表。
+		*var button=new laya.ui.Button("resource/ui/btn_close.png");//新建一个 Button 类的实例 bg 。
+		*button.name=laya.ui.Dialog.CLOSE;//设置 button 的 name 属性值。
+		*button.x=0;//设置 button 对象的属性 x 的值，用于控制 button 对象的显示位置。
+		*button.y=0;//设置 button 对象的属性 y 的值，用于控制 button 对象的显示位置。
+		*this.addChild(button);//将 button 添加到显示列表。
+		*};
+	*Laya.class(Dialog_Instance,"mypackage.dialogExample.Dialog_Instance",_super);//注册类Dialog_Instance。
+	*})(laya.ui.Dialog);
+*function loadComplete(){
+	*console.log("资源加载完成！");
+	*dialog=new mypackage.dialogExample.Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
+	*dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
+	*dialog.show();//显示 dialog。
+	*dialog.closeHandler=new laya.utils.Handler(this,onClose);//设置 dialog 的关闭函数处理器。
+	*}
+*function onClose(name){
+	*if (name==laya.ui.Dialog.CLOSE){
+		*console.log("通过点击 name 为"+name+"的组件，关闭了dialog。");
+		*}
+	*}
+*@example
+*import Dialog=laya.ui.Dialog;
+*import Handler=laya.utils.Handler;
+*class Dialog_Example {
+	*private dialog:Dialog_Instance;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load("resource/ui/btn_close.png",Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.dialog=new Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
+		*this.dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
+		*this.dialog.show();//显示 dialog。
+		*this.dialog.closeHandler=new Handler(this,this.onClose);//设置 dialog 的关闭函数处理器。
+		*}
+	*private onClose(name:string):void {
+		*if (name==Dialog.CLOSE){
+			*console.log("通过点击 name 为"+name+"的组件，关闭了dialog。");
+			*}
+		*}
+	*}
+*import Button=laya.ui.Button;
+*class Dialog_Instance extends Dialog {
+	*Dialog_Instance():void {
+		*var bg:laya.ui.Image=new laya.ui.Image("resource/ui/bg.png");
+		*bg.sizeGrid="40,10,5,10";
+		*bg.width=150;
+		*bg.height=250;
+		*this.addChild(bg);
+		*var image:laya.ui.Image=new laya.ui.Image("resource/ui/image.png");
+		*this.addChild(image);
+		*var button:Button=new Button("resource/ui/btn_close.png");
+		*button.name=Dialog.CLOSE;//设置button的name属性值。
+		*button.x=0;
+		*button.y=0;
+		*this.addChild(button);
+		*}
+	*}
+*/
+//class laya.ui.Dialog extends laya.ui.View
+var Dialog=(function(_super){
+	function Dialog(){
+		/**
+		*对话框被关闭时会触发的回调函数处理器。
+		*<p>回调函数参数为用户点击的按钮名字name:String。</p>
+		*/
+		this.closeHandler=null;
+		/**
+		*弹出对话框效果，可以设置一个效果代替默认的弹出效果，如果不想有任何效果，可以赋值为null
+		*全局默认弹出效果可以通过manager.popupEffect修改
+		*/
+		this.popupEffect=null;
+		/**
+		*关闭对话框效果，可以设置一个效果代替默认的关闭效果，如果不想有任何效果，可以赋值为null
+		*全局默认关闭效果可以通过manager.closeEffect修改
+		*/
+		this.closeEffect=null;
+		/**组名称*/
+		this.group=null;
+		/**是否是模式窗口*/
+		this.isModal=false;
+		/**是否显示弹出效果*/
+		this.isShowEffect=true;
+		/**指定对话框是否居中弹。<p>如果值为true，则居中弹出，否则，则根据对象坐标显示，默认为true。</p>*/
+		this.isPopupCenter=true;
+		/**关闭类型，点击name为"close"，"cancel"，"sure"，"no"，"yes"，"no"的按钮时，会自动记录点击按钮的名称*/
+		this.closeType=null;
+		/**@private */
+		this._dragArea=null;
+		/**@private */
+		this._param=null;
+		Dialog.__super.call(this);
+		this.popupEffect=Dialog.manager.popupEffectHandler;
+		this.closeEffect=Dialog.manager.closeEffectHandler;
+		this._dealDragArea();
+		this.on("click",this,this._onClick);
+	}
+
+	__class(Dialog,'laya.ui.Dialog',_super);
+	var __proto=Dialog.prototype;
+	/**@private 提取拖拽区域*/
+	__proto._dealDragArea=function(){
+		var dragTarget=this.getChildByName("drag");
+		if (dragTarget){
+			this.dragArea=dragTarget._x+","+dragTarget._y+","+dragTarget.width+","+dragTarget.height;
+			dragTarget.removeSelf();
+		}
+	}
+
+	/**@private */
+	__proto._onMouseDown=function(e){
+		var point=this.getMousePoint();
+		if (this._dragArea.contains(point.x,point.y))this.startDrag();
+		else this.stopDrag();
+	}
+
+	/**@private 处理默认点击事件*/
+	__proto._onClick=function(e){
+		var btn=e.target;
+		if (btn){
+			switch (btn.name){
+				case "close":
+				case "cancel":
+				case "sure":
+				case "no":
+				case "ok":
+				case "yes":
+					this.close(btn.name);
+					return;
+				}
+		}
+	}
+
+	/**@inheritDoc */
+	__proto.open=function(closeOther,param){
+		(closeOther===void 0)&& (closeOther=true);
+		this._dealDragArea();
+		this._param=param;
+		Dialog.manager.open(this,closeOther,this.isShowEffect);
+		Dialog.manager.lock(false);
+	}
+
+	/**
+	*关闭对话框。
+	*@param type 关闭的原因，会传递给onClosed函数
+	*/
+	__proto.close=function(type){
+		this.closeType=type;
+		Dialog.manager.close(this);
+	}
+
+	/**@inheritDoc */
+	__proto.destroy=function(destroyChild){
+		(destroyChild===void 0)&& (destroyChild=true);
+		this.closeHandler=null;
+		this.popupEffect=null;
+		this.closeEffect=null;
+		this._dragArea=null;
+		_super.prototype.destroy.call(this,destroyChild);
+	}
+
+	/**
+	*显示对话框（以非模式窗口方式显示）。
+	*@param closeOther 是否关闭其它的对话框。若值为true则关闭其它对话框。
+	*@param showEffect 是否显示弹出效果
+	*/
+	__proto.show=function(closeOther,showEffect){
+		(closeOther===void 0)&& (closeOther=false);
+		(showEffect===void 0)&& (showEffect=true);
+		this._open(false,closeOther,showEffect);
+	}
+
+	/**
+	*显示对话框（以模式窗口方式显示）。
+	*@param closeOther 是否关闭其它的对话框。若值为true则关闭其它对话框。
+	*@param showEffect 是否显示弹出效果
+	*/
+	__proto.popup=function(closeOther,showEffect){
+		(closeOther===void 0)&& (closeOther=false);
+		(showEffect===void 0)&& (showEffect=true);
+		this._open(true,closeOther,showEffect);
+	}
+
+	/**@private */
+	__proto._open=function(modal,closeOther,showEffect){
+		this.isModal=modal;
+		this.isShowEffect=showEffect;
+		Dialog.manager.lock(true);
+		this.open(closeOther);
+	}
+
+	/**
+	*用来指定对话框的拖拽区域。默认值为"0,0,0,0"。
+	*<p><b>格式：</b>构成一个矩形所需的 x,y,width,heith 值，用逗号连接为字符串。
+	*例如："0,0,100,200"。</p>
+	*@see #includeExamplesSummary 请参考示例
+	*/
+	__getset(0,__proto,'dragArea',function(){
+		if (this._dragArea)return this._dragArea.toString();
+		return null;
+		},function(value){
+		if (value){
+			var a=UIUtils.fillArray([0,0,0,0],value,Number);
+			this._dragArea=new Rectangle(a[0],a[1],a[2],a[3]);
+			this.on("mousedown",this,this._onMouseDown);
+			}else {
+			this._dragArea=null;
+			this.off("mousedown",this,this._onMouseDown);
+		}
+	});
+
+	/**弹出框的显示状态；如果弹框处于显示中，则为true，否则为false;*/
+	__getset(0,__proto,'isPopup',function(){
+		return this.parent !=null;
+	});
+
+	/**@inheritDoc */
+	__getset(0,__proto,'zOrder',_super.prototype._$get_zOrder,function(value){
+		Laya.superSet(View,this,'zOrder',value);
+		Dialog.manager._checkMask();
+	});
+
+	/**对话框管理容器，所有的对话框都在该容器内，并且受管理器管理，可以自定义自己的管理器，来更改窗口管理的流程。
+	*任意对话框打开和关闭，都会触发管理类的open和close事件*/
+	__getset(1,Dialog,'manager',function(){
+		return Dialog._manager=Dialog._manager|| new DialogManager();
+		},function(value){
+		Dialog._manager=value;
+	});
+
+	Dialog.setLockView=function(view){
+		Dialog.manager.setLockView(view);
+	}
+
+	Dialog.lock=function(value){
+		Dialog.manager.lock(value);
+	}
+
+	Dialog.closeAll=function(){
+		Dialog.manager.closeAll();
+	}
+
+	Dialog.getDialogsByGroup=function(group){
+		return Dialog.manager.getDialogsByGroup(group);
+	}
+
+	Dialog.closeByGroup=function(group){
+		return Dialog.manager.closeByGroup(group);
+	}
+
+	Dialog.CLOSE="close";
+	Dialog.CANCEL="cancel";
+	Dialog.SURE="sure";
+	Dialog.NO="no";
+	Dialog.YES="yes";
+	Dialog.OK="ok";
+	Dialog._manager=null;
+	return Dialog;
+})(View)
+
+
+/**
 *<code>CheckBox</code> 组件显示一个小方框，该方框内可以有选中标记。
 *<code>CheckBox</code> 组件还可以显示可选的文本标签，默认该标签位于 CheckBox 右侧。
 *<p><code>CheckBox</code> 使用 <code>dataSource</code>赋值时的的默认属性是：<code>selected</code>。</p>
@@ -49459,340 +50007,6 @@ var UIGroup=(function(_super){
 
 	return UIGroup;
 })(Box)
-
-
-/**
-*<code>Dialog</code> 组件是一个弹出对话框，实现对话框弹出，拖动，模式窗口功能。
-*可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭等
-*通过设置zOrder属性，可以更改弹出的层次
-*通过设置popupEffect和closeEffect可以设置弹出效果和关闭效果，如果不想有任何弹出关闭效果，可以设置前述属性为空
-*
-*@example <caption>以下示例代码，创建了一个 <code>Dialog</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.Dialog;
-	*import laya.utils.Handler;
-	*public class Dialog_Example
-	*{
-		*private var dialog:Dialog_Instance;
-		*public function Dialog_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load("resource/ui/btn_close.png",Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*dialog=new Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
-			*dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
-			*dialog.show();//显示 dialog。
-			*dialog.closeHandler=new Handler(this,onClose);//设置 dialog 的关闭函数处理器。
-			*}
-		*private function onClose(name:String):void
-		*{
-			*if (name==Dialog.CLOSE)
-			*{
-				*trace("通过点击 name 为"+name+"的组件，关闭了dialog。");
-				*}
-			*}
-		*}
-	*}
-*import laya.ui.Button;
-*import laya.ui.Dialog;
-*import laya.ui.Image;
-*class Dialog_Instance extends Dialog
-*{
-	*function Dialog_Instance():void
-	*{
-		*var bg:Image=new Image("resource/ui/bg.png");
-		*bg.sizeGrid="40,10,5,10";
-		*bg.width=150;
-		*bg.height=250;
-		*addChild(bg);
-		*var image:Image=new Image("resource/ui/image.png");
-		*addChild(image);
-		*var button:Button=new Button("resource/ui/btn_close.png");
-		*button.name=Dialog.CLOSE;//设置button的name属性值。
-		*button.x=0;
-		*button.y=0;
-		*addChild(button);
-		*}
-	*}
-*@example
-*Laya.init(640,800);//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var dialog;
-*Laya.loader.load("resource/ui/btn_close.png",laya.utils.Handler.create(this,loadComplete));//加载资源
-*(function (_super){//新建一个类Dialog_Instance继承自laya.ui.Dialog。
-	*function Dialog_Instance(){
-		*Dialog_Instance.__super.call(this);//初始化父类
-		*var bg=new laya.ui.Image("resource/ui/bg.png");//新建一个 Image 类的实例 bg 。
-		*bg.sizeGrid="10,40,10,5";//设置 bg 的网格信息。
-		*bg.width=150;//设置 bg 的宽度。
-		*bg.height=250;//设置 bg 的高度。
-		*this.addChild(bg);//将 bg 添加到显示列表。
-		*var image=new laya.ui.Image("resource/ui/image.png");//新建一个 Image 类的实例 image 。
-		*this.addChild(image);//将 image 添加到显示列表。
-		*var button=new laya.ui.Button("resource/ui/btn_close.png");//新建一个 Button 类的实例 bg 。
-		*button.name=laya.ui.Dialog.CLOSE;//设置 button 的 name 属性值。
-		*button.x=0;//设置 button 对象的属性 x 的值，用于控制 button 对象的显示位置。
-		*button.y=0;//设置 button 对象的属性 y 的值，用于控制 button 对象的显示位置。
-		*this.addChild(button);//将 button 添加到显示列表。
-		*};
-	*Laya.class(Dialog_Instance,"mypackage.dialogExample.Dialog_Instance",_super);//注册类Dialog_Instance。
-	*})(laya.ui.Dialog);
-*function loadComplete(){
-	*console.log("资源加载完成！");
-	*dialog=new mypackage.dialogExample.Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
-	*dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
-	*dialog.show();//显示 dialog。
-	*dialog.closeHandler=new laya.utils.Handler(this,onClose);//设置 dialog 的关闭函数处理器。
-	*}
-*function onClose(name){
-	*if (name==laya.ui.Dialog.CLOSE){
-		*console.log("通过点击 name 为"+name+"的组件，关闭了dialog。");
-		*}
-	*}
-*@example
-*import Dialog=laya.ui.Dialog;
-*import Handler=laya.utils.Handler;
-*class Dialog_Example {
-	*private dialog:Dialog_Instance;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load("resource/ui/btn_close.png",Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.dialog=new Dialog_Instance();//创建一个 Dialog_Instance 类的实例对象 dialog。
-		*this.dialog.dragArea="0,0,150,50";//设置 dialog 的拖拽区域。
-		*this.dialog.show();//显示 dialog。
-		*this.dialog.closeHandler=new Handler(this,this.onClose);//设置 dialog 的关闭函数处理器。
-		*}
-	*private onClose(name:string):void {
-		*if (name==Dialog.CLOSE){
-			*console.log("通过点击 name 为"+name+"的组件，关闭了dialog。");
-			*}
-		*}
-	*}
-*import Button=laya.ui.Button;
-*class Dialog_Instance extends Dialog {
-	*Dialog_Instance():void {
-		*var bg:laya.ui.Image=new laya.ui.Image("resource/ui/bg.png");
-		*bg.sizeGrid="40,10,5,10";
-		*bg.width=150;
-		*bg.height=250;
-		*this.addChild(bg);
-		*var image:laya.ui.Image=new laya.ui.Image("resource/ui/image.png");
-		*this.addChild(image);
-		*var button:Button=new Button("resource/ui/btn_close.png");
-		*button.name=Dialog.CLOSE;//设置button的name属性值。
-		*button.x=0;
-		*button.y=0;
-		*this.addChild(button);
-		*}
-	*}
-*/
-//class laya.ui.Dialog extends laya.ui.View
-var Dialog=(function(_super){
-	function Dialog(){
-		/**
-		*对话框被关闭时会触发的回调函数处理器。
-		*<p>回调函数参数为用户点击的按钮名字name:String。</p>
-		*/
-		this.closeHandler=null;
-		/**
-		*弹出对话框效果，可以设置一个效果代替默认的弹出效果，如果不想有任何效果，可以赋值为null
-		*全局默认弹出效果可以通过manager.popupEffect修改
-		*/
-		this.popupEffect=null;
-		/**
-		*关闭对话框效果，可以设置一个效果代替默认的关闭效果，如果不想有任何效果，可以赋值为null
-		*全局默认关闭效果可以通过manager.closeEffect修改
-		*/
-		this.closeEffect=null;
-		/**组名称*/
-		this.group=null;
-		/**是否是模式窗口*/
-		this.isModal=false;
-		/**是否显示弹出效果*/
-		this.isShowEffect=true;
-		/**指定对话框是否居中弹。<p>如果值为true，则居中弹出，否则，则根据对象坐标显示，默认为true。</p>*/
-		this.isPopupCenter=true;
-		/**关闭类型，点击name为"close"，"cancel"，"sure"，"no"，"yes"，"no"的按钮时，会自动记录点击按钮的名称*/
-		this.closeType=null;
-		/**@private */
-		this._dragArea=null;
-		/**@private */
-		this._param=null;
-		Dialog.__super.call(this);
-		this.popupEffect=Dialog.manager.popupEffectHandler;
-		this.closeEffect=Dialog.manager.closeEffectHandler;
-		this._dealDragArea();
-		this.on("click",this,this._onClick);
-	}
-
-	__class(Dialog,'laya.ui.Dialog',_super);
-	var __proto=Dialog.prototype;
-	/**@private 提取拖拽区域*/
-	__proto._dealDragArea=function(){
-		var dragTarget=this.getChildByName("drag");
-		if (dragTarget){
-			this.dragArea=dragTarget._x+","+dragTarget._y+","+dragTarget.width+","+dragTarget.height;
-			dragTarget.removeSelf();
-		}
-	}
-
-	/**@private */
-	__proto._onMouseDown=function(e){
-		var point=this.getMousePoint();
-		if (this._dragArea.contains(point.x,point.y))this.startDrag();
-		else this.stopDrag();
-	}
-
-	/**@private 处理默认点击事件*/
-	__proto._onClick=function(e){
-		var btn=e.target;
-		if (btn){
-			switch (btn.name){
-				case "close":
-				case "cancel":
-				case "sure":
-				case "no":
-				case "ok":
-				case "yes":
-					this.close(btn.name);
-					return;
-				}
-		}
-	}
-
-	/**@inheritDoc */
-	__proto.open=function(closeOther,param){
-		(closeOther===void 0)&& (closeOther=true);
-		this._dealDragArea();
-		this._param=param;
-		Dialog.manager.open(this,closeOther,this.isShowEffect);
-		Dialog.manager.lock(false);
-	}
-
-	/**
-	*关闭对话框。
-	*@param type 关闭的原因，会传递给onClosed函数
-	*/
-	__proto.close=function(type){
-		this.closeType=type;
-		Dialog.manager.close(this);
-	}
-
-	/**@inheritDoc */
-	__proto.destroy=function(destroyChild){
-		(destroyChild===void 0)&& (destroyChild=true);
-		this.closeHandler=null;
-		this.popupEffect=null;
-		this.closeEffect=null;
-		this._dragArea=null;
-		_super.prototype.destroy.call(this,destroyChild);
-	}
-
-	/**
-	*显示对话框（以非模式窗口方式显示）。
-	*@param closeOther 是否关闭其它的对话框。若值为true则关闭其它对话框。
-	*@param showEffect 是否显示弹出效果
-	*/
-	__proto.show=function(closeOther,showEffect){
-		(closeOther===void 0)&& (closeOther=false);
-		(showEffect===void 0)&& (showEffect=true);
-		this._open(false,closeOther,showEffect);
-	}
-
-	/**
-	*显示对话框（以模式窗口方式显示）。
-	*@param closeOther 是否关闭其它的对话框。若值为true则关闭其它对话框。
-	*@param showEffect 是否显示弹出效果
-	*/
-	__proto.popup=function(closeOther,showEffect){
-		(closeOther===void 0)&& (closeOther=false);
-		(showEffect===void 0)&& (showEffect=true);
-		this._open(true,closeOther,showEffect);
-	}
-
-	/**@private */
-	__proto._open=function(modal,closeOther,showEffect){
-		this.isModal=modal;
-		this.isShowEffect=showEffect;
-		Dialog.manager.lock(true);
-		this.open(closeOther);
-	}
-
-	/**
-	*用来指定对话框的拖拽区域。默认值为"0,0,0,0"。
-	*<p><b>格式：</b>构成一个矩形所需的 x,y,width,heith 值，用逗号连接为字符串。
-	*例如："0,0,100,200"。</p>
-	*@see #includeExamplesSummary 请参考示例
-	*/
-	__getset(0,__proto,'dragArea',function(){
-		if (this._dragArea)return this._dragArea.toString();
-		return null;
-		},function(value){
-		if (value){
-			var a=UIUtils.fillArray([0,0,0,0],value,Number);
-			this._dragArea=new Rectangle(a[0],a[1],a[2],a[3]);
-			this.on("mousedown",this,this._onMouseDown);
-			}else {
-			this._dragArea=null;
-			this.off("mousedown",this,this._onMouseDown);
-		}
-	});
-
-	/**弹出框的显示状态；如果弹框处于显示中，则为true，否则为false;*/
-	__getset(0,__proto,'isPopup',function(){
-		return this.parent !=null;
-	});
-
-	/**@inheritDoc */
-	__getset(0,__proto,'zOrder',_super.prototype._$get_zOrder,function(value){
-		Laya.superSet(View,this,'zOrder',value);
-		Dialog.manager._checkMask();
-	});
-
-	/**对话框管理容器，所有的对话框都在该容器内，并且受管理器管理，可以自定义自己的管理器，来更改窗口管理的流程。
-	*任意对话框打开和关闭，都会触发管理类的open和close事件*/
-	__getset(1,Dialog,'manager',function(){
-		return Dialog._manager=Dialog._manager|| new DialogManager();
-		},function(value){
-		Dialog._manager=value;
-	});
-
-	Dialog.setLockView=function(view){
-		Dialog.manager.setLockView(view);
-	}
-
-	Dialog.lock=function(value){
-		Dialog.manager.lock(value);
-	}
-
-	Dialog.closeAll=function(){
-		Dialog.manager.closeAll();
-	}
-
-	Dialog.getDialogsByGroup=function(group){
-		return Dialog.manager.getDialogsByGroup(group);
-	}
-
-	Dialog.closeByGroup=function(group){
-		return Dialog.manager.closeByGroup(group);
-	}
-
-	Dialog.CLOSE="close";
-	Dialog.CANCEL="cancel";
-	Dialog.SURE="sure";
-	Dialog.NO="no";
-	Dialog.YES="yes";
-	Dialog.OK="ok";
-	Dialog._manager=null;
-	return Dialog;
-})(View)
 
 
 /**
@@ -51341,6 +51555,91 @@ var Tree=(function(_super){
 
 
 /**
+*
+*使用 <code>VScrollBar</code> （垂直 <code>ScrollBar</code> ）控件，可以在因数据太多而不能在显示区域完全显示时控制显示的数据部分。
+*
+*@example <caption>以下示例代码，创建了一个 <code>VScrollBar</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.vScrollBar;
+	*import laya.ui.VScrollBar;
+	*import laya.utils.Handler;
+	*public class VScrollBar_Example
+	*{
+		*private var vScrollBar:VScrollBar;
+		*public function VScrollBar_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"],Handler.create(this,onLoadComplete));
+			*}
+		*private function onLoadComplete():void
+		*{
+			*vScrollBar=new VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
+			*vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
+			*vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
+			*vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
+			*vScrollBar.changeHandler=new Handler(this,onChange);//设置 vScrollBar 的滚动变化处理器。
+			*Laya.stage.addChild(vScrollBar);//将此 vScrollBar 对象添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滚动条的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800);//设置游戏画布宽高
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var vScrollBar;
+*var res=["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));//加载资源。
+*function onLoadComplete(){
+	*vScrollBar=new laya.ui.VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
+	*vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
+	*vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
+	*vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
+	*vScrollBar.changeHandler=new laya.utils.Handler(this,onChange);//设置 vScrollBar 的滚动变化处理器。
+	*Laya.stage.addChild(vScrollBar);//将此 vScrollBar 对象添加到显示列表。
+	*}
+*function onChange(value){
+	*console.log("滚动条的位置： value="+value);
+	*}
+*@example
+*import VScrollBar=laya.ui.VScrollBar;
+*import Handler=laya.utils.Handler;
+*class VScrollBar_Example {
+	*private vScrollBar:VScrollBar;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"],Handler.create(this,this.onLoadComplete));
+		*}
+	*private onLoadComplete():void {
+		*this.vScrollBar=new VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
+		*this.vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
+		*this.vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
+		*this.vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
+		*this.vScrollBar.changeHandler=new Handler(this,this.onChange);//设置 vScrollBar 的滚动变化处理器。
+		*Laya.stage.addChild(this.vScrollBar);//将此 vScrollBar 对象添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滚动条的位置： value="+value);
+		*}
+	*}
+*/
+//class laya.ui.VScrollBar extends laya.ui.ScrollBar
+var VScrollBar=(function(_super){
+	function VScrollBar(){
+		VScrollBar.__super.call(this);;
+	}
+
+	__class(VScrollBar,'laya.ui.VScrollBar',_super);
+	return VScrollBar;
+})(ScrollBar)
+
+
+/**
 *Graphics动画解析器
 *@private
 */
@@ -51763,91 +52062,6 @@ var GraphicAnimation=(function(_super){
 
 
 /**
-*
-*使用 <code>VScrollBar</code> （垂直 <code>ScrollBar</code> ）控件，可以在因数据太多而不能在显示区域完全显示时控制显示的数据部分。
-*
-*@example <caption>以下示例代码，创建了一个 <code>VScrollBar</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.vScrollBar;
-	*import laya.ui.VScrollBar;
-	*import laya.utils.Handler;
-	*public class VScrollBar_Example
-	*{
-		*private var vScrollBar:VScrollBar;
-		*public function VScrollBar_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"],Handler.create(this,onLoadComplete));
-			*}
-		*private function onLoadComplete():void
-		*{
-			*vScrollBar=new VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
-			*vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
-			*vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
-			*vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
-			*vScrollBar.changeHandler=new Handler(this,onChange);//设置 vScrollBar 的滚动变化处理器。
-			*Laya.stage.addChild(vScrollBar);//将此 vScrollBar 对象添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滚动条的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800);//设置游戏画布宽高
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var vScrollBar;
-*var res=["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));//加载资源。
-*function onLoadComplete(){
-	*vScrollBar=new laya.ui.VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
-	*vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
-	*vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
-	*vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
-	*vScrollBar.changeHandler=new laya.utils.Handler(this,onChange);//设置 vScrollBar 的滚动变化处理器。
-	*Laya.stage.addChild(vScrollBar);//将此 vScrollBar 对象添加到显示列表。
-	*}
-*function onChange(value){
-	*console.log("滚动条的位置： value="+value);
-	*}
-*@example
-*import VScrollBar=laya.ui.VScrollBar;
-*import Handler=laya.utils.Handler;
-*class VScrollBar_Example {
-	*private vScrollBar:VScrollBar;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/vscroll.png","resource/ui/vscroll$bar.png","resource/ui/vscroll$down.png","resource/ui/vscroll$up.png"],Handler.create(this,this.onLoadComplete));
-		*}
-	*private onLoadComplete():void {
-		*this.vScrollBar=new VScrollBar();//创建一个 vScrollBar 类的实例对象 hScrollBar 。
-		*this.vScrollBar.skin="resource/ui/vscroll.png";//设置 vScrollBar 的皮肤。
-		*this.vScrollBar.x=100;//设置 vScrollBar 对象的属性 x 的值，用于控制 vScrollBar 对象的显示位置。
-		*this.vScrollBar.y=100;//设置 vScrollBar 对象的属性 y 的值，用于控制 vScrollBar 对象的显示位置。
-		*this.vScrollBar.changeHandler=new Handler(this,this.onChange);//设置 vScrollBar 的滚动变化处理器。
-		*Laya.stage.addChild(this.vScrollBar);//将此 vScrollBar 对象添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滚动条的位置： value="+value);
-		*}
-	*}
-*/
-//class laya.ui.VScrollBar extends laya.ui.ScrollBar
-var VScrollBar=(function(_super){
-	function VScrollBar(){
-		VScrollBar.__super.call(this);;
-	}
-
-	__class(VScrollBar,'laya.ui.VScrollBar',_super);
-	return VScrollBar;
-})(ScrollBar)
-
-
-/**
 *使用 <code>VSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
 *<p> <code>VSlider</code> 控件采用垂直方向。滑块轨道从下往上扩展，而标签位于轨道的左右两侧。</p>
 *
@@ -52092,6 +52306,24 @@ var SelAddressItem=(function(_super){
 	});
 
 	return SelAddressItem;
+})(AddressItemUI$1)
+
+
+//class script.usercenter.CompanyAddressItem extends ui.usercenter.AddressItemUI
+var CompanyAddressItem=(function(_super){
+	function CompanyAddressItem(){
+		CompanyAddressItem.__super.call(this);
+	}
+
+	__class(CompanyAddressItem,'script.usercenter.CompanyAddressItem',_super);
+	var __proto=CompanyAddressItem.prototype;
+	__proto.setData=function(add){
+		this.conName.text=add.receiverName;
+		this.phone.text=add.phone;
+		this.detailaddr.text=add.proCityArea;
+	}
+
+	return CompanyAddressItem;
 })(AddressItemUI)
 
 
@@ -52907,7 +53139,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,View,GameConfig,LoaderManager,SceneUtils,CallLater,Timer,GraphicAnimation,LocalStorage,Path,WebGLContext2D,EventCenter]);
+	Laya.__init([EventDispatcher,CharBook,EventCenter,View,GameConfig,LoaderManager,SceneUtils,GraphicAnimation,Path,Timer,CallLater,WebGLContext2D,LocalStorage]);
 	/**LayaGameStart**/
 	new Main();
 

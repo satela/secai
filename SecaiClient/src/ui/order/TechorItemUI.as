@@ -6,7 +6,7 @@ package ui.order {
 	public class TechorItemUI extends View {
 		public var txt:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);
