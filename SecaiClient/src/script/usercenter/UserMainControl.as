@@ -1,9 +1,12 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.Label;
 	import laya.ui.View;
+	import laya.utils.Browser;
 	import laya.utils.Mouse;
 	
 	import script.ViewManager;
@@ -18,6 +21,8 @@ package script.usercenter
 		
 		private var viewArr:Array;
 		private var btntxtArr:Array;
+		
+		private var curView:View;
 		public function UserMainControl()
 		{
 			super();
@@ -28,6 +33,7 @@ package script.usercenter
 			uiSkin = this.owner as UserMainPanelUI;
 			
 			uiSkin.panel_main.vScrollBarSkin = "";
+			//uiSkin.sp_container.autoSize = true;
 			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
 			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null];
@@ -44,8 +50,16 @@ package script.usercenter
 
 			}
 			onShowEditView(0);
+			(uiSkin.panel_main).height = Browser.clientHeight - 20;
+
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
-		
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			(uiSkin.panel_main).height = Browser.clientHeight - 50;
+		}
 		private function onMouseOutHandler():void
 		{
 			// TODO Auto Generated method stub
@@ -71,16 +85,28 @@ package script.usercenter
 			
 			if(viewArr[index])
 			{
-				var viewpanel:View = new viewArr[index]();
-				uiSkin.sp_container.addChild(viewpanel);
-				uiSkin.sp_container.height = viewpanel.height;
+				curView = new viewArr[index]();
+				curView.on(Event.RESIZE,this,onLoadComplete);
+				uiSkin.sp_container.addChild(curView);
+				uiSkin.sp_container.height = curView.height;
 			}
 			else
 				uiSkin.sp_container.height = 0;
+			uiSkin.panel_main.refresh();
 			uiSkin.panel_main.scrollTo(0,0);
 		}
+		
+		private function onLoadComplete():void
+		{
+			// TODO Auto Generated method stub
+			if(curView)
+			{
+				uiSkin.sp_container.height = curView.height;
+				uiSkin.panel_main.refresh();
+			}
+		}		
+		
 		private function onBackToMain():void
-
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_USERCENTER);

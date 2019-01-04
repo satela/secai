@@ -2,10 +2,11 @@
     "x":0,
     "type":"Scene",
     "selectedBox":2,
+    "selecteID":3,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
-    "maxID":35,
+    "maxID":38,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -31,7 +32,7 @@
             "x":15,
             "type":"Panel",
             "searchKey":"Panel,panel_main",
-            "props":{"x":0,"width":1920,"var":"panel_main","top":0,"bottom":80},
+            "props":{"y":0,"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
             "nodeParent":2,
             "label":"panel_main",
             "isOpen":true,
@@ -47,14 +48,13 @@
                     "props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},
                     "nodeParent":3,
                     "label":"Image",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":4,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"x":30,"width":548,"top":20,"text":"欢迎来到 色彩飞扬-广告全产业链生态平台 联系方式：4006055998","styleSkin":"comp/label.png","height":18,"fontSize":18,"align":"left"},
@@ -68,7 +68,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,txt_login",
                             "props":{"y":18,"x":1016,"width":139,"var":"txt_login","text":"登陆","mouseEnabled":true,"height":20,"fontSize":20,"align":"right"},
@@ -82,7 +81,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":17,"text":"|","right":117,"fontSize":20},
@@ -96,7 +94,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,txt_reg",
                             "props":{"y":18,"x":1166.1953125,"var":"txt_reg","text":"注册","mouseEnabled":true,"fontSize":20},

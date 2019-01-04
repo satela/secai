@@ -1,4 +1,6 @@
 package laya.display {
+	import eventUtil.EventCenter;
+	
 	import laya.Const;
 	import laya.display.Sprite;
 	import laya.events.Event;
@@ -63,12 +65,20 @@ package laya.display {
 				Laya.loader.resetProgress();
 				var loader:SceneLoader = new SceneLoader();
 				loader.on(Event.COMPLETE, this, this._onSceneLoaded, [url]);
+				loader.on(Event.PROGRESS, this, this._onPrgogress);
+
 				loader.load(url);
 					//Laya.loader.load(url, Handler.create(this, createView), null, Loader.JSON);
 			}
 		}
 		
+		private function _onPrgogress(prg:Number):void {
+			
+			EventCenter.instance.event(EventCenter.UPDATE_LOADING_PROGRESS,prg);
+
+		}
 		private function _onSceneLoaded(url:String):void {
+			console.log("加载scene:" + url);
 			createView(Loader.getRes(url));
 		}
 		

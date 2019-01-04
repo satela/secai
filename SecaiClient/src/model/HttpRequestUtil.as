@@ -9,9 +9,9 @@ package model
 		
 		public static const httpUrl:String = "http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	
 		
-		public static const registerUrl:String = "account/create";
+		public static const registerUrl:String = "account/create?";
 		
-		public static const loginInUrl:String = "account/login?";//phone= code= 或pwd=
+		public static const loginInUrl:String = "account/login?";//phone= code= 或pwd= mode(0 密码登陆 1 验证码登陆);
 		
 		public static const loginOutUrl:String = "account/logout?";//登出
 

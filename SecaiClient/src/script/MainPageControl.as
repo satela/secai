@@ -56,7 +56,19 @@ package script {
 			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
 			
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
+			//EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 
+			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
+		}
+		
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			console.log("height:" + Browser.clientHeight);
+			EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
+
+			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
 		}
 		
 		private function onShowUpload():void

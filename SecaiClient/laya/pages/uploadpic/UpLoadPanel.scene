@@ -1,7 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
+    "selectedBox":14,
+    "selecteID":6,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
@@ -73,7 +74,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnClose",
-                    "props":{"y":5,"x":1860,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},
+                    "props":{"y":11,"x":1538,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},
                     "nodeParent":14,
                     "label":"btnClose",
                     "isDirectory":false,

@@ -4,6 +4,8 @@ package utils
 	
 	import laya.components.Script;
 	
+	import script.ViewManager;
+	
 	import ui.login.LoadingPanelUI;
 	
 	public class LoadingPrgControl extends Script
@@ -27,7 +29,12 @@ package utils
 			// TODO Auto Generated method stub
 			console.log("prg rec:" + prgs);
 			uiSkin.prg.value = prgs;
-			uiSkin.prgtxt.text = prgs + "%";
+			uiSkin.prgtxt.text = Math.floor(prgs*100) + "%";
+			
+			if(prgs>= 1)
+			{
+				ViewManager.instance.closeView(ViewManager.VIEW_LOADING_PRO);
+			}
 		}
 		
 		public override function onDestroy():void

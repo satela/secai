@@ -66,7 +66,7 @@ package script.login
 				return;
 			}
 			
-			var param:String = "phone=" + uiSKin.input_account.text + "&pwd=" + uiSKin.input_pwd.text;
+			var param:String = "phone=" + uiSKin.input_account.text + "&pwd=" + uiSKin.input_pwd.text + "&mode=0";
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.loginInUrl,this,onLoginBack,param,"post");
 		}
 		
