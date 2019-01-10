@@ -1,6 +1,11 @@
 package script.order
 {
+	import laya.events.Event;
+	
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.PaintOrderModel;
+	
+	import script.ViewManager;
 	
 	import ui.order.MaterialNameItemUI;
 	
@@ -17,15 +22,23 @@ package script.order
 			matvo = matName as MaterialItemVo;
 			this.matname.text = matvo.matName;
 			
-			this.blackrect.visible = false;
-			this.redrect.visible = false;
+			this.on(Event.CLICK,this,onClickMat);
+			//this.blackrect.visible = false;
+			//this.redrect.visible = false;
+		}
+		
+		private function onClickMat():void
+		{
+			// TODO Auto Generated method stub
+			PaintOrderModel.instance.curSelectMat = matvo;
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
 		}
 		
 		public function set ShowSelected(value:Boolean):void
 		{
-			this.blackrect.visible = !value;
-			this.redrect.visible = value;
-
+			//this.blackrect.visible = !value;
+			//this.redrect.visible = value;
+			
 		}
 		
 	}

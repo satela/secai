@@ -111,5 +111,10 @@ package script.usercenter
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_USERCENTER);
 		}
+		
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+		}
 	}
 }

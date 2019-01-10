@@ -4,6 +4,7 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
@@ -68,10 +69,17 @@ package script.order
 			
 			EventCenter.instance.on(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
 			EventCenter.instance.on(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
 
 
 		}
-		
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			if(Browser.clientHeight - 160 > 0)
+				(uiSkin.panel_main).height = (Browser.clientHeight - 160);
+		}
 		private function onShowSelectPic():void
 		{
 			// TODO Auto Generated method stub
@@ -168,6 +176,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.ADD_PIC_FOR_ORDER,this,onUpdateOrderPic);
 			EventCenter.instance.off(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
 			EventCenter.instance.off(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 		}
 		private function onClosePanel():void

@@ -1,5 +1,6 @@
 package model.orderModel
 {
+	import model.picmanagerModel.PicInfoVo;
 	import model.users.AddressVo;
 
 	public class PaintOrderModel
@@ -13,6 +14,10 @@ package model.orderModel
 		}
 		
 		public var selectAddress:AddressVo;
+		
+		public var curSelectPic:PicInfoVo;
+		
+		public var curSelectMat:MaterialItemVo;
 		
 		public function PaintOrderModel()
 		{

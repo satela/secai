@@ -8,6 +8,7 @@ package ui.order {
 		public var techcontent:Panel;
 		public var btnok:Button;
 		public var btncancel:Button;
+		public var selecttech:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

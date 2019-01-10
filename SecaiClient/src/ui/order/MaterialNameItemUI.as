@@ -4,11 +4,9 @@ package ui.order {
 	import laya.display.*;
 
 	public class MaterialNameItemUI extends View {
-		public var blackrect:Sprite;
-		public var redrect:Sprite;
 		public var matname:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"var":"blackrect"},"compId":6,"child":[{"type":"Rect","props":{"y":-0.5,"x":-0.5,"width":200,"lineWidth":1,"lineColor":"0","height":39},"compId":7}]},{"type":"Sprite","props":{"y":0,"x":0,"var":"redrect"},"compId":5,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":200,"lineWidth":1,"lineColor":"#ff0000","height":39},"compId":3}]},{"type":"Label","props":{"y":2,"x":1,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

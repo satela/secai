@@ -55,7 +55,7 @@ package script.picUpload
 		{
 			 file = Browser.document.createElement("input");
 			
-			file.style="filter:alpha(opacity=0);opacity:100;width: 100;height:34px;left:395px;top:48";
+			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
 			
 			file.multiple="multiple";
 			file.accept = ".jpg,.jpeg,.png,.tif";

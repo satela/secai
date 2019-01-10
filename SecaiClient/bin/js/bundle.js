@@ -1231,7 +1231,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="uploadpic/UpLoadPanel.scene";
+	GameConfig.startScene="order/TechorItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1276,6 +1276,8 @@ var MaterialItemVo=(function(){
 		this.matName="PVP塑料管";
 		this.matId=1;
 		this.matClassType=1;
+		//材料大分类
+		this.nextMatList=null;
 	}
 
 	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
@@ -1367,9 +1369,86 @@ var MatetialClassVo=(function(){
 		var arr=["喷绘材料","布类材料","印刷材料"];
 		var ccc=Math.floor(Math.random()*arr.length);
 		this.matclassname=arr[ccc];
-		for(var i=0;i < 20;i++){
-			this.childMatList.push(new MaterialItemVo());
-		}
+		var maimat=new MaterialItemVo();
+		maimat.matName="油画布";
+		maimat.nextMatList=[];
+		var mat=new MaterialItemVo();
+		mat.matName="喷印方式";
+		mat.nextMatList=[];
+		var childmat=new MaterialItemVo();
+		childmat.matName="户内写真";
+		childmat.nextMatList=[];
+		var childchildmat=new MaterialItemVo();
+		childchildmat.matName="4pass";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="6pass";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		mat.nextMatList.push(childmat);
+		childmat=new MaterialItemVo();
+		childmat.matName="户外写真";
+		childmat.nextMatList=[];
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="4pass";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="6pass";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		mat.nextMatList.push(childmat);
+		childmat=new MaterialItemVo();
+		childmat.matName="卷材UV";
+		childmat.nextMatList=[];
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="正喷";
+		childchildmat.nextMatList=[];
+		var childchildmat1=new MaterialItemVo();
+		childchildmat1.matName="1层白";
+		childchildmat1.nextMatList=[];
+		childchildmat.nextMatList.push(childchildmat1);
+		childchildmat1=new MaterialItemVo();
+		childchildmat1.matName="2层白";
+		childchildmat1.nextMatList=[];
+		childchildmat.nextMatList.push(childchildmat1);
+		childchildmat1=new MaterialItemVo();
+		childchildmat1.matName="3层白";
+		childchildmat1.nextMatList=[];
+		childchildmat.nextMatList.push(childchildmat1);
+		childmat.nextMatList.push(childchildmat);
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="背喷";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		childchildmat=new MaterialItemVo();
+		childchildmat.matName="双面喷";
+		childchildmat.nextMatList=[];
+		childmat.nextMatList.push(childchildmat);
+		mat.nextMatList.push(childmat);
+		maimat.nextMatList.push(mat);
+		mat=new MaterialItemVo();
+		mat.matName="上光油";
+		mat.nextMatList=[];
+		var childmat=new MaterialItemVo();
+		childmat.matName="哑面";
+		childmat.nextMatList=[];
+		mat.nextMatList.push(childmat);
+		childmat=new MaterialItemVo();
+		childmat.matName="亮面";
+		childmat.nextMatList=[];
+		mat.nextMatList.push(childmat);
+		maimat.nextMatList.push(mat);
+		mat=new MaterialItemVo();
+		mat.matName="异性切割";
+		mat.nextMatList=[];
+		maimat.nextMatList.push(mat);
+		mat=new MaterialItemVo();
+		mat.matName="装裱";
+		mat.nextMatList=[];
+		maimat.nextMatList.push(mat);
+		this.childMatList.push(maimat);
 	}
 
 	__class(MatetialClassVo,'model.orderModel.MatetialClassVo');
@@ -1786,6 +1865,8 @@ var Main=(function(){
 var PaintOrderModel=(function(){
 	function PaintOrderModel(){
 		this.selectAddress=null;
+		this.curSelectPic=null;
+		this.curSelectMat=null;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -33865,6 +33946,10 @@ var UserMainControl=(function(_super){
 		ViewManager.instance.closeView("VIEW_USERCENTER");
 	}
 
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+	}
+
 	return UserMainControl;
 })(Script)
 
@@ -34539,6 +34624,13 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
 		EventCenter.instance.on("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
 		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
+	}
+
+	__proto.onResizeBrower=function(){
+		if(Browser.clientHeight-160 > 0)
+			(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
 	}
 
 	__proto.onShowSelectPic=function(){
@@ -34614,6 +34706,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
 		EventCenter.instance.off("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
 		EventCenter.instance.off("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 	}
 
 	__proto.onClosePanel=function(){
@@ -34734,6 +34827,15 @@ var EnterPrizeInfoControl=(function(_super){
 var SelectTechControl=(function(_super){
 	function SelectTechControl(){
 		this.uiSKin=null;
+		this.firsttech=null;
+		this.startposx=10;
+		this.param=null;
+		this.itemheight=30;
+		this.itemspaceH=50;
+		this.itemspaceV=20;
+		this.allitemlist=null;
+		this.hasShowItemList=null;
+		this.linelist=null;
 		SelectTechControl.__super.call(this);
 	}
 
@@ -34742,18 +34844,73 @@ var SelectTechControl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSKin=this.owner;
 		var list=[];
-		var num=Math.random()*18;
-		var startpos=0;
+		this.hasShowItemList=[];
+		this.linelist=[];
 		this.uiSKin.techcontent.vScrollBarSkin="";
-		for(var i=0;i < num;i++){
-			var tcvo=new TechMainVo();
-			var itembox=new TechBoxItem(tcvo);
+		var arr=PaintOrderModel.instance.curSelectMat.nextMatList;
+		var startpos=(this.uiSKin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
+		for(var i=0;i < arr.length;i++){
+			var itembox=new TechBoxItem();
+			itembox.setData(arr[i]);
+			itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
+			itembox.x=this.startposx;
 			itembox.y=startpos;
-			startpos+=itembox.height+20;
+			startpos+=itembox.height+this.itemspaceV;
 			this.uiSKin.techcontent.addChild(itembox);
 		}
 		this.uiSKin.btnok.on("click",this,this.onCloseView);
 		this.uiSKin.btncancel.on("click",this,this.onCloseView);
+		this.allitemlist=[];
+	}
+
+	__proto.drawCurves=function(a,b){
+		var sp=new Sprite();
+		this.uiSKin.techcontent.addChild(sp);
+		var endy=b.y-a.y;
+		sp.graphics.drawCurves(0,a.y+0.5 *this.itemheight,[0,0,0.4*this.itemspaceH,0.8 *endy,this.itemspaceH,endy],"#ff0000",1);
+		sp.x=a.x+a.width;
+		this.linelist.push(sp);
+	}
+
+	__proto.onClickMat=function(parentitem,matvo){
+		this.hideItems(parentitem.x);
+		if(matvo.nextMatList && matvo.nextMatList.length > 0){
+			var arr=matvo.nextMatList;
+			var startpos=parentitem.y+0.5 *this.itemheight-(arr.length*this.itemheight+this.itemspaceV *(arr.length-1))/2;
+			var starpox=parentitem.x+parentitem.width+this.itemspaceH;
+			for(var i=0;i < arr.length;i++){
+				var itembox=this.getItembox();
+				itembox.setData(arr[i]);
+				this.hasShowItemList.push(itembox);
+				itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
+				itembox.x=starpox;
+				itembox.y=startpos;
+				this.drawCurves(parentitem,itembox);
+				startpos+=itembox.height+this.itemspaceV;
+				this.uiSKin.techcontent.addChild(itembox);
+			}
+		}
+	}
+
+	__proto.hideItems=function(curposx){
+		for(var i=0;i < this.hasShowItemList.length;i++){
+			if(this.hasShowItemList[i].x > curposx){
+				this.hasShowItemList[i].removeSelf();
+				this.allitemlist.push(this.hasShowItemList[i]);
+				this.hasShowItemList.splice(i,1);
+				i--;
+			}
+		}
+	}
+
+	__proto.getItembox=function(){
+		if(this.allitemlist.length > 0){
+			return this.allitemlist.splice(0,1)[0];
+		}
+		else{
+			var itembox=new TechBoxItem();
+			return itembox;
+		}
 	}
 
 	__proto.onCloseView=function(){
@@ -34960,10 +35117,11 @@ var RegisterCntrol=(function(_super){
 		this.uiSkin.btnReg.on("click",this,this.onRegister);
 		this.verifycode=Browser.document.createElement("div");
 		this.verifycode.id="v_container";
-		this.verifycode.style="width: 200px;height: 50px;left:950px;top:775"
+		this.verifycode.style="width: 200px;height: 50px;left:950px;top:705"
 		this.verifycode.style.position="absolute";
 		this.verifycode.style.zIndex=999;
 		Browser.document.body.appendChild(this.verifycode);
+		this.uiSkin.on("click",this,this.hideAddressPanel);
 		Browser.window.loadVerifyCode();
 	}
 
@@ -35024,6 +35182,14 @@ var RegisterCntrol=(function(_super){
 			Browser.document.body.removeChild(this.verifycode);
 			ViewManager.instance.openView("VIEW_lOGPANEL",true);
 		}
+	}
+
+	__proto.hideAddressPanel=function(e){
+		if((e.target instanceof laya.ui.List ))
+			return;
+		this.uiSkin.provbox.visible=false;
+		this.uiSkin.citybox.visible=false;
+		this.uiSkin.areabox.visible=false;
 	}
 
 	__proto.onShowProvince=function(e){
@@ -35119,7 +35285,7 @@ var UpLoadAndOrderContrl=(function(_super){
 	__proto.initFileOpen=function(){
 		var _$this=this;
 		this.file=Browser.document.createElement("input");
-		this.file.style="filter:alpha(opacity=0);opacity:100;width: 100;height:34px;left:395px;top:48";
+		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
 		this.file.multiple="multiple";
 		this.file.accept=".jpg,.jpeg,.png,.tif";
 		this.file.type="file";
@@ -35209,7 +35375,7 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.matlist.renderHandler=new Handler(this,this.updateMatNameItem);
 		this.uiSkin.matlist.selectHandler=new Handler(this,this.onSlecteMat);
 		var arr=[];
-		for(var i=0;i < 10;i++){
+		for(var i=0;i < 2;i++){
 			arr.push(new MatetialClassVo());
 		}
 		this.uiSkin.tablist.array=arr;
@@ -47273,22 +47439,22 @@ var AddressMgrPanelUI=(function(_super){
 })(View)
 
 
-//class ui.order.TechBoxItemUI extends laya.ui.View
-var TechBoxItemUI=(function(_super){
-	function TechBoxItemUI(){
-		this.techname=null;
-		TechBoxItemUI.__super.call(this);
+//class ui.order.TechorItemUI extends laya.ui.View
+var TechorItemUI=(function(_super){
+	function TechorItemUI(){
+		this.txt=null;
+		TechorItemUI.__super.call(this);
 	}
 
-	__class(TechBoxItemUI,'ui.order.TechBoxItemUI',_super);
-	var __proto=TechBoxItemUI.prototype;
+	__class(TechorItemUI,'ui.order.TechorItemUI',_super);
+	var __proto=TechorItemUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(TechBoxItemUI.uiView);
+		this.createView(TechorItemUI.uiView);
 	}
 
-	TechBoxItemUI.uiView={"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
-	return TechBoxItemUI;
+	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
+	return TechorItemUI;
 })(View)
 
 
@@ -47505,8 +47671,6 @@ var UserMainPanelUI=(function(_super){
 //class ui.order.MaterialNameItemUI extends laya.ui.View
 var MaterialNameItemUI=(function(_super){
 	function MaterialNameItemUI(){
-		this.blackrect=null;
-		this.redrect=null;
 		this.matname=null;
 		MaterialNameItemUI.__super.call(this);
 	}
@@ -47518,41 +47682,27 @@ var MaterialNameItemUI=(function(_super){
 		this.createView(MaterialNameItemUI.uiView);
 	}
 
-	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"var":"blackrect"},"compId":6,"child":[{"type":"Rect","props":{"y":-0.5,"x":-0.5,"width":200,"lineWidth":1,"lineColor":"0","height":39},"compId":7}]},{"type":"Sprite","props":{"y":0,"x":0,"var":"redrect"},"compId":5,"child":[{"type":"Rect","props":{"y":0,"x":0,"width":200,"lineWidth":1,"lineColor":"#ff0000","height":39},"compId":3}]},{"type":"Label","props":{"y":2,"x":1,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
 	return MaterialNameItemUI;
 })(View)
 
 
-//class ui.PicManagePanelUI extends laya.ui.View
-var PicManagePanelUI=(function(_super){
-	function PicManagePanelUI(){
-		this.firstpage=null;
-		this.btnNewDir=null;
-		this.btnUploadPic=null;
-		this.folderList=null;
-		this.btnNewFolder=null;
-		this.flder0=null;
-		this.flder1=null;
-		this.flder2=null;
-		this.htmltext=null;
-		this.radiosel=null;
-		this.btnorder=null;
-		this.picList=null;
-		this.boxNewFolder=null;
-		this.input_folename=null;
-		this.btnSureCreate=null;
-		this.btnCloseInput=null;
-		PicManagePanelUI.__super.call(this);
+//class ui.order.TechBoxItemUI extends laya.ui.View
+var TechBoxItemUI=(function(_super){
+	function TechBoxItemUI(){
+		this.techname=null;
+		TechBoxItemUI.__super.call(this);
 	}
 
-	__class(PicManagePanelUI,'ui.PicManagePanelUI',_super);
-	var __proto=PicManagePanelUI.prototype;
+	__class(TechBoxItemUI,'ui.order.TechBoxItemUI',_super);
+	var __proto=TechBoxItemUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("PicManagePanel");
+		this.createView(TechBoxItemUI.uiView);
 	}
 
-	return PicManagePanelUI;
+	TechBoxItemUI.uiView={"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
+	return TechBoxItemUI;
 })(View)
 
 
@@ -47654,6 +47804,39 @@ var PicOrderItem=(function(_super){
 })(OrderItemUI)
 
 
+//class ui.PicManagePanelUI extends laya.ui.View
+var PicManagePanelUI=(function(_super){
+	function PicManagePanelUI(){
+		this.firstpage=null;
+		this.btnNewDir=null;
+		this.btnUploadPic=null;
+		this.folderList=null;
+		this.btnNewFolder=null;
+		this.flder0=null;
+		this.flder1=null;
+		this.flder2=null;
+		this.htmltext=null;
+		this.radiosel=null;
+		this.btnorder=null;
+		this.picList=null;
+		this.boxNewFolder=null;
+		this.input_folename=null;
+		this.btnSureCreate=null;
+		this.btnCloseInput=null;
+		PicManagePanelUI.__super.call(this);
+	}
+
+	__class(PicManagePanelUI,'ui.PicManagePanelUI',_super);
+	var __proto=PicManagePanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("PicManagePanel");
+	}
+
+	return PicManagePanelUI;
+})(View)
+
+
 //class ui.order.SelectMaterialPanelUI extends laya.ui.View
 var SelectMaterialPanelUI=(function(_super){
 	function SelectMaterialPanelUI(){
@@ -47741,25 +47924,6 @@ var UpLoadItemUI=(function(_super){
 })(View)
 
 
-//class ui.order.TechorItemUI extends laya.ui.View
-var TechorItemUI=(function(_super){
-	function TechorItemUI(){
-		this.txt=null;
-		TechorItemUI.__super.call(this);
-	}
-
-	__class(TechorItemUI,'ui.order.TechorItemUI',_super);
-	var __proto=TechorItemUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(TechorItemUI.uiView);
-	}
-
-	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":100,"var":"txt","valign":"middle","text":"布料喷绘","height":30,"fontSize":20,"borderColor":"#e02222","align":"center"},"compId":5}],"loadList":[],"loadList3D":[]};
-	return TechorItemUI;
-})(View)
-
-
 //class script.order.PartItem extends ui.order.PartsItemUI
 var PartItem=(function(_super){
 	function PartItem(partvo){
@@ -47807,6 +47971,7 @@ var SelectTechPanelUI=(function(_super){
 		this.techcontent=null;
 		this.btnok=null;
 		this.btncancel=null;
+		this.selecttech=null;
 		SelectTechPanelUI.__super.call(this);
 	}
 
@@ -52377,66 +52542,30 @@ var CityAreaItem=(function(_super){
 })(CityAreaItemUI)
 
 
-//class script.order.TechBoxItem extends ui.order.TechBoxItemUI
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
 var TechBoxItem=(function(_super){
-	function TechBoxItem(tvo){
+	function TechBoxItem(){
 		this.techmainvo=null;
 		this.originPos=110;
 		this.allItems=[];
 		this.lastSelectIndex=-1;
 		TechBoxItem.__super.call(this);
-		this.techmainvo=tvo;
-		this.initView();
 	}
 
 	__class(TechBoxItem,'script.order.TechBoxItem',_super);
 	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.techmainvo=tvo;
+		this.initView();
+	}
+
 	__proto.initView=function(){
-		this.techname.text=this.techmainvo.totalName;
-		var startposx=this.originPos;
-		var startposy=0;
-		var xspace=10;
-		var yspace=10;
-		for(var i=0;i < this.techmainvo.techlist.length;i++){
-			var item=new TechorItemUI();
-			item.txt.text=this.techmainvo.techlist[i].techName;
-			item.txt.borderColor="#445544";
-			item.txt.width=item.txt.textField.textWidth+20;
-			item.on("click",this,this.onClickTech,[i]);
-			this.addChild(item);
-			if(startposx+xspace+item.txt.width > this.width){
-				startposx=this.originPos;
-				startposy+=item.txt.height+yspace;
-			}
-			item.x=startposx+xspace;
-			item.y=startposy;
-			startposx+=item.txt.width+xspace;
-			this.allItems.push(item);
-		}
-		if(startposy > 0)
-			this.height=startposy+30;
-		else
-		this.height=30;
+		this.txt.text=this.techmainvo.matName;
 	}
 
-	__proto.onClickTech=function(index){
-		if(this.lastSelectIndex >=0 && this.lastSelectIndex !=index){
-			this.allItems[index].txt.borderColor="#FF0000";
-			this.allItems[this.lastSelectIndex].txt.borderColor="#445544";
-			this.lastSelectIndex=index;
-		}
-		else if(this.lastSelectIndex < 0){
-			this.allItems[index].txt.borderColor="#FF0000";
-			this.lastSelectIndex=index;
-		}
-		else if(this.lastSelectIndex==index){
-			this.allItems[this.lastSelectIndex].txt.borderColor="#445544";
-			this.lastSelectIndex=-1;
-		}
-	}
-
+	__proto.onClickTech=function(index){}
 	return TechBoxItem;
-})(TechBoxItemUI)
+})(TechorItemUI)
 
 
 //class script.picUpload.PicInfoItem extends ui.picManager.PicShortItemUI
@@ -52598,13 +52727,16 @@ var MaterialItem=(function(_super){
 	__proto.setData=function(matName){
 		this.matvo=matName;
 		this.matname.text=this.matvo.matName;
-		this.blackrect.visible=false;
-		this.redrect.visible=false;
+		this.on("click",this,this.onClickMat);
+	}
+
+	//this.redrect.visible=false;
+	__proto.onClickMat=function(){
+		PaintOrderModel.instance.curSelectMat=this.matvo;
+		ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
 	}
 
 	__getset(0,__proto,'ShowSelected',null,function(value){
-		this.blackrect.visible=!value;
-		this.redrect.visible=value;
 	});
 
 	return MaterialItem;
@@ -53171,7 +53303,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,EventCenter,View,GameConfig,LoaderManager,SceneUtils,GraphicAnimation,Path,Timer,CallLater,WebGLContext2D,LocalStorage]);
+	Laya.__init([EventDispatcher,CharBook,View,GameConfig,LoaderManager,SceneUtils,GraphicAnimation,Path,Timer,CallLater,WebGLContext2D,LocalStorage,EventCenter]);
 	/**LayaGameStart**/
 	new Main();
 

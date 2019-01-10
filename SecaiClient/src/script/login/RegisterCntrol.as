@@ -3,6 +3,7 @@ package script.login
 	import laya.components.Script;
 	import laya.display.Input;
 	import laya.events.Event;
+	import laya.ui.List;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
@@ -105,13 +106,14 @@ package script.login
 
 			verifycode = Browser.document.createElement("div");
 			verifycode.id = "v_container";
-			verifycode.style="width: 200px;height: 50px;left:950px;top:775"
+			verifycode.style="width: 200px;height: 50px;left:950px;top:705"
 							
 			
 			verifycode.style.position ="absolute";
 			verifycode.style.zIndex = 999;
 			Browser.document.body.appendChild(verifycode);//添加到舞台
 			
+			uiSkin.on(Event.CLICK,this,hideAddressPanel);
 			Browser.window.loadVerifyCode();
 			
 		}
@@ -248,6 +250,14 @@ package script.login
 			}
 		}		
 		
+		private function hideAddressPanel(e:Event):void
+		{
+			if(e.target is List)
+				return;
+			uiSkin.provbox.visible = false;
+			uiSkin.citybox.visible = false;
+			uiSkin.areabox.visible = false;
+		}
 		private function onShowProvince(e:Event):void
 		{
 			uiSkin.provbox.visible = true;

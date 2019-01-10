@@ -40,7 +40,7 @@ package script.order
 			uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
 			
 			var arr:Array = [];
-			for(var i:int=0;i < 10;i++)
+			for(var i:int=0;i < 2;i++)
 			{
 				arr.push(new MatetialClassVo());
 			}
