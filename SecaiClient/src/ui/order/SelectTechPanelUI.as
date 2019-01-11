@@ -5,6 +5,7 @@ package ui.order {
 	import script.order.SelectTechControl;
 
 	public class SelectTechPanelUI extends View {
+		public var main_panel:Panel;
 		public var techcontent:Panel;
 		public var btnok:Button;
 		public var btncancel:Button;

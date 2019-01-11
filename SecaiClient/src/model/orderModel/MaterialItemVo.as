@@ -8,6 +8,8 @@ package model.orderModel
 		
 		public var nextMatList:Vector.<MaterialItemVo>;
 		
+		public var selected:Boolean = false;
+		
 		public function MaterialItemVo()
 		{
 		}

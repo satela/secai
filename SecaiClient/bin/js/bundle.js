@@ -1231,7 +1231,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/TechorItem.scene";
+	GameConfig.startScene="PaintOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1278,6 +1278,7 @@ var MaterialItemVo=(function(){
 		this.matClassType=1;
 		//材料大分类
 		this.nextMatList=null;
+		this.selected=false;
 	}
 
 	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
@@ -1832,7 +1833,7 @@ var Main=(function(){
 		console.log("now time:"+this.tt);
 		if (GameConfig.debug || Utils.getQueryString("debug")=="true")Laya.enableDebugPanel();
 		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"])Laya["PhysicsDebugDraw"].enable();
-		if (GameConfig.stat)Stat.show();
+		if (!GameConfig.stat)Stat.show();
 		Laya.alertGlobalError=true;
 		ResourceVersion.enable("version.json",Handler.create(this,this.onVersionLoaded),2);
 	}
@@ -34827,7 +34828,6 @@ var EnterPrizeInfoControl=(function(_super){
 var SelectTechControl=(function(_super){
 	function SelectTechControl(){
 		this.uiSKin=null;
-		this.firsttech=null;
 		this.startposx=10;
 		this.param=null;
 		this.itemheight=30;
@@ -34835,6 +34835,7 @@ var SelectTechControl=(function(_super){
 		this.itemspaceV=20;
 		this.allitemlist=null;
 		this.hasShowItemList=null;
+		this.firstTechlist=null;
 		this.linelist=null;
 		SelectTechControl.__super.call(this);
 	}
@@ -34846,6 +34847,7 @@ var SelectTechControl=(function(_super){
 		var list=[];
 		this.hasShowItemList=[];
 		this.linelist=[];
+		this.firstTechlist=[];
 		this.uiSKin.techcontent.vScrollBarSkin="";
 		var arr=PaintOrderModel.instance.curSelectMat.nextMatList;
 		var startpos=(this.uiSKin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
@@ -34857,10 +34859,17 @@ var SelectTechControl=(function(_super){
 			itembox.y=startpos;
 			startpos+=itembox.height+this.itemspaceV;
 			this.uiSKin.techcontent.addChild(itembox);
+			this.firstTechlist.push(itembox);
 		}
 		this.uiSKin.btnok.on("click",this,this.onCloseView);
 		this.uiSKin.btncancel.on("click",this,this.onCloseView);
 		this.allitemlist=[];
+		(this.uiSKin.main_panel).height=Browser.clientHeight;
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+	}
+
+	__proto.onResizeBrower=function(){
+		this.uiSKin.main_panel.height=Browser.clientHeight;
 	}
 
 	__proto.drawCurves=function(a,b){
@@ -34873,7 +34882,22 @@ var SelectTechControl=(function(_super){
 	}
 
 	__proto.onClickMat=function(parentitem,matvo){
-		this.hideItems(parentitem.x);
+		if(parentitem.isSelected)
+			this.hideItems(parentitem.x,true);
+		else if(this.firstTechlist.indexOf(parentitem)>=0)
+		this.hideItems(parentitem.x,false);
+		else
+		this.hideItems(parentitem.x,true);
+		if(parentitem.isSelected){
+			parentitem.setSelected(false);
+			parentitem.techmainvo.selected=false;
+			if(this.firstTechlist.indexOf(parentitem)>=0)
+				this.cancelTech(parentitem.techmainvo);
+			this.updateSelectedTech();
+			return;
+		}
+		parentitem.setSelected(true);
+		parentitem.techmainvo.selected=true;
 		if(matvo.nextMatList && matvo.nextMatList.length > 0){
 			var arr=matvo.nextMatList;
 			var startpos=parentitem.y+0.5 *this.itemheight-(arr.length*this.itemheight+this.itemspaceV *(arr.length-1))/2;
@@ -34890,17 +34914,70 @@ var SelectTechControl=(function(_super){
 				this.uiSKin.techcontent.addChild(itembox);
 			}
 		}
+		else{
+			this.hideItems(this.firstTechlist[0].x,false);
+		}
+		this.updateSelectedTech();
 	}
 
-	__proto.hideItems=function(curposx){
+	__proto.hideItems=function(curposx,changedata){
 		for(var i=0;i < this.hasShowItemList.length;i++){
 			if(this.hasShowItemList[i].x > curposx){
 				this.hasShowItemList[i].removeSelf();
+				this.hasShowItemList[i].setSelected(false);
+				if(changedata)
+					this.hasShowItemList[i].techmainvo.selected=false;
 				this.allitemlist.push(this.hasShowItemList[i]);
 				this.hasShowItemList.splice(i,1);
 				i--;
 			}
+			else if(this.hasShowItemList[i].x==curposx){
+				this.hasShowItemList[i].setSelected(false);
+				if(changedata)
+					this.hasShowItemList[i].techmainvo.selected=false;
+			}
 		}
+		for(var i=0;i < this.linelist.length;i++){
+			if(this.linelist[i].x > curposx){
+				this.linelist[i].removeSelf();
+				this.linelist.splice(i,1);
+				i--;
+			}
+		}
+	}
+
+	__proto.updateSelectedTech=function(){
+		var arr=PaintOrderModel.instance.curSelectMat.nextMatList;
+		var techstr="";
+		for(var i=0;i < arr.length;i++){
+			if(arr[i].selected){
+				techstr+=arr[i].matName;
+				var childtech=this.getTechStr(arr[i].nextMatList);
+				if(childtech !="")
+					techstr+="("+childtech.substr(0,childtech.length-1)+")";
+				techstr+=",";
+			}
+		}
+		this.uiSKin.selecttech.text=techstr;
+	}
+
+	__proto.cancelTech=function(matvo){
+		var arr=matvo.nextMatList;
+		if(arr){
+			for(var i=0;i < arr.length;i++){
+				arr[i].selected=false;
+				this.cancelTech(arr[i]);
+			}
+		}
+	}
+
+	__proto.getTechStr=function(arr){
+		for(var i=0;i < arr.length;i++){
+			if(arr[i].selected){
+				return arr[i].matName+"-"+this.getTechStr(arr[i].nextMatList);
+			}
+		}
+		return "";
 	}
 
 	__proto.getItembox=function(){
@@ -34915,6 +34992,10 @@ var SelectTechControl=(function(_super){
 
 	__proto.onCloseView=function(){
 		ViewManager.instance.closeView("VIEW_SELECT_TECHNORLOGY");
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 	}
 
 	return SelectTechControl;
@@ -35379,6 +35460,10 @@ var SelectMaterialControl=(function(_super){
 			arr.push(new MatetialClassVo());
 		}
 		this.uiSkin.tablist.array=arr;
+		if(arr.length > 0){
+			this.onSlecteMatClass(0);
+			(this.uiSkin.tablist.cells [0]).ShowSelected=true;
+		}
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
 	}
@@ -47968,6 +48053,7 @@ var PopUpDialogUI=(function(_super){
 //class ui.order.SelectTechPanelUI extends laya.ui.View
 var SelectTechPanelUI=(function(_super){
 	function SelectTechPanelUI(){
+		this.main_panel=null;
 		this.techcontent=null;
 		this.btnok=null;
 		this.btncancel=null;
@@ -52549,6 +52635,7 @@ var TechBoxItem=(function(_super){
 		this.originPos=110;
 		this.allItems=[];
 		this.lastSelectIndex=-1;
+		this.isSelected=false;
 		TechBoxItem.__super.call(this);
 	}
 
@@ -52557,10 +52644,19 @@ var TechBoxItem=(function(_super){
 	__proto.setData=function(tvo){
 		this.techmainvo=tvo;
 		this.initView();
+		this.setSelected(false);
 	}
 
 	__proto.initView=function(){
 		this.txt.text=this.techmainvo.matName;
+	}
+
+	__proto.setSelected=function(sel){
+		if(!sel)
+			this.txt.borderColor="#222222";
+		else
+		this.txt.borderColor="#FF0000";
+		this.isSelected=sel;
 	}
 
 	__proto.onClickTech=function(index){}

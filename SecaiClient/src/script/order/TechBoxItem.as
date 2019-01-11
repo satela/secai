@@ -17,6 +17,8 @@ package script.order
 		private var allItems:Array = [];
 		
 		private var lastSelectIndex:int = -1;
+		
+		public var isSelected:Boolean = false;
 		public function TechBoxItem()
 		{
 			super();			
@@ -26,13 +28,21 @@ package script.order
 		{
 			techmainvo = tvo;
 			initView();
+			setSelected(false);
 		}
 		private function initView():void
 		{
 			this.txt.text = techmainvo.matName;
 		}
 		
-		
+		public function setSelected(sel:Boolean):void
+		{
+			if(!sel)
+				this.txt.borderColor = "#222222";
+			else
+				this.txt.borderColor = "#FF0000";
+			isSelected = sel;
+		}
 		private function onClickTech(index:int):void
 		{
 //			if(lastSelectIndex >= 0 && lastSelectIndex != index)

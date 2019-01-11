@@ -1,8 +1,11 @@
 package script.order
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	
 	import model.orderModel.MaterialItemVo;
 	import model.orderModel.MatetialClassVo;
@@ -18,7 +21,6 @@ package script.order
 	{
 		private var uiSKin:SelectTechPanelUI;
 		
-		private var firsttech:Vector.<TechorItemUI>;
 		
 		private var startposx:int = 10;
 		
@@ -33,6 +35,8 @@ package script.order
 		
 		private var hasShowItemList:Array;
 		
+		private var firstTechlist:Vector.<TechBoxItem>;
+		
 		private var linelist:Vector.<Sprite>;
 		public function SelectTechControl()
 		{
@@ -46,8 +50,10 @@ package script.order
 			var list:Array = [];
 			hasShowItemList = [];
 			linelist = new Vector.<Sprite>();
+			firstTechlist = new Vector.<TechBoxItem>();
 			//var num:int = Math.random()*18;
 			this.uiSKin.techcontent.vScrollBarSkin = "";
+			//this.uiSKin.main_panel.vScrollBarSkin = "";
 			var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
 			var startpos:int = (this.uiSKin.techcontent.height - arr.length*itemheight -  itemspaceV * (arr.length - 1))/2;
 
@@ -63,11 +69,20 @@ package script.order
 				itembox.y = startpos;
 				startpos += itembox.height + itemspaceV;
 				this.uiSKin.techcontent.addChild(itembox);
+				firstTechlist.push(itembox);
 			}
 			this.uiSKin.btnok.on(Event.CLICK,this,onCloseView);
 			this.uiSKin.btncancel.on(Event.CLICK,this,onCloseView);
 			allitemlist = [];
 
+			(uiSKin.main_panel).height = Browser.clientHeight;
+			
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+		}
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			uiSKin.main_panel.height = Browser.clientHeight;
 		}
 		
 		private function drawCurves(a:TechBoxItem,b:TechBoxItem):void
@@ -84,8 +99,29 @@ package script.order
 		}
 		private function onClickMat(parentitem:TechBoxItem,matvo:MaterialItemVo):void
 		{
-			hideItems(parentitem.x);
+			if(parentitem.isSelected)
+				hideItems(parentitem.x,true);
+			else if(firstTechlist.indexOf(parentitem) >= 0)
+				hideItems(parentitem.x,false);
+			else
+				hideItems(parentitem.x,true);
 
+
+			if(parentitem.isSelected)
+			{
+				parentitem.setSelected(false);
+				parentitem.techmainvo.selected = false;
+				if(firstTechlist.indexOf(parentitem) >= 0)
+					cancelTech(parentitem.techmainvo);
+				updateSelectedTech();
+
+				return;
+				
+			}
+			
+			parentitem.setSelected(true);
+			parentitem.techmainvo.selected = true;
+			
 			if(matvo.nextMatList && matvo.nextMatList.length > 0)
 			{
 				var arr:Vector.<MaterialItemVo> = matvo.nextMatList;
@@ -108,21 +144,94 @@ package script.order
 					startpos += itembox.height + itemspaceV;
 					this.uiSKin.techcontent.addChild(itembox);
 				}
+				
 			}
+			else
+			{
+				hideItems(firstTechlist[0].x,false);
+			}
+			updateSelectedTech();
 		}
 		
-		private function hideItems(curposx:Number):void
+		private function hideItems(curposx:Number,changedata:Boolean):void
 		{
 			for(var i:int=0;i < hasShowItemList.length;i++)
 			{
 				if(hasShowItemList[i].x > curposx)
 				{
 					hasShowItemList[i].removeSelf();
+					hasShowItemList[i].setSelected(false);
+					if(changedata)
+						hasShowItemList[i].techmainvo.selected = false;
 					allitemlist.push(hasShowItemList[i]);
 					hasShowItemList.splice(i,1);
 					i--;
 				}
+				else if(hasShowItemList[i].x == curposx)
+				{
+					hasShowItemList[i].setSelected(false);
+					if(changedata)
+						hasShowItemList[i].techmainvo.selected = false;
+				}
 			}
+			
+			for(var i:int=0;i < linelist.length;i++)
+			{
+				if(linelist[i].x > curposx)
+				{
+					linelist[i].removeSelf();				
+					linelist.splice(i,1);
+					i--;
+				}
+			}
+			
+		}
+		
+		private function updateSelectedTech():void
+		{
+			var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			
+			var techstr:String = "";
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					techstr += arr[i].matName;
+					var childtech:String = getTechStr(arr[i].nextMatList);
+					if(childtech != "")
+						techstr +=  "(" + childtech.substr(0,childtech.length - 1) + ")";
+					techstr += ",";
+				}
+			
+				//techstr += ",";
+			}
+			
+			this.uiSKin.selecttech.text = techstr;
+		}
+		
+		private function cancelTech(matvo:MaterialItemVo):void
+		{
+			var arr:Vector.<MaterialItemVo> = matvo.nextMatList;
+			if(arr)
+			{
+				for(var i:int=0;i < arr.length;i++)
+				{
+					arr[i].selected = false;
+					cancelTech(arr[i]);
+				}
+			}
+		}
+		private function getTechStr(arr:Vector.<MaterialItemVo>):String
+		{
+			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					return arr[i].matName + "-" + getTechStr(arr[i].nextMatList);
+				}
+			}
+			return "";
 		}
 		private function getItembox():TechBoxItem
 		{
@@ -141,6 +250,11 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_TECHNORLOGY);
+		}
+		
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 		}
 	}
 }

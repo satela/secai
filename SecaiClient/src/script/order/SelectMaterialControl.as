@@ -45,6 +45,13 @@ package script.order
 				arr.push(new MatetialClassVo());
 			}
 			uiSkin.tablist.array = arr;
+			
+			if(arr.length > 0)
+			{
+				onSlecteMatClass(0);
+				(uiSkin.tablist.cells[0] as MaterialClassBtn).ShowSelected = true;
+			}
+			
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
 		}
