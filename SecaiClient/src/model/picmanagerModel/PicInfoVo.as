@@ -38,13 +38,20 @@ package model.picmanagerModel
 			else
 			{
 				fid = fileinfo.fid;
-				var fattr:Object = JSON.parse(fileinfo.fattr);
-				picWidth = fattr.width;
-				picHeight = fattr.height;
-				colorspace = fattr.colorspace;
-				dpi = UtilTool.oneCutNineAdd(fattr.dpi);
-				picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
-				picPhysicHeight = UtilTool.oneCutNineAdd(picHeight/dpi*2.54);
+				try
+				{
+					var fattr:Object = JSON.parse(fileinfo.fattr);
+					picWidth = fattr.width;
+					picHeight = fattr.height;
+					colorspace = fattr.colorspace;
+					dpi = UtilTool.oneCutNineAdd(fattr.dpi);
+					picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
+					picPhysicHeight = UtilTool.oneCutNineAdd(picHeight/dpi*2.54);
+				}
+				catch(err:Error)
+				{
+					
+				}
 
 				picClass = fileinfo.ftype;
 				

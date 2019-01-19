@@ -1,7 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":2,
+    "selectedBox":24,
+    "selecteID":29,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff"},
     "nodeParent":-1,
@@ -29,20 +30,6 @@
         },
         {
             "x":15,
-            "type":"Label",
-            "searchKey":"Label,numindex",
-            "props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},
-            "nodeParent":2,
-            "label":"numindex",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":3,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
             "type":"Image",
             "searchKey":"Image,fileimg",
             "props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},
@@ -53,6 +40,34 @@
             "isAniNode":true,
             "hasChild":false,
             "compId":4,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"TextInput",
+            "searchKey":"TextInput,inputnum",
+            "props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18},
+            "nodeParent":2,
+            "label":"inputnum",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":16,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Label",
+            "searchKey":"Label,numindex",
+            "props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},
+            "nodeParent":2,
+            "label":"numindex",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":3,
             "child":[
                 ]
         },
@@ -95,20 +110,6 @@
             "isAniNode":true,
             "hasChild":false,
             "compId":15,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"TextInput",
-            "searchKey":"TextInput,inputnum",
-            "props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"200","skin":"comp/textinput.png","height":22,"fontSize":18},
-            "nodeParent":2,
-            "label":"inputnum",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":16,
             "child":[
                 ]
         },
@@ -175,13 +176,14 @@
             "props":{"y":10,"x":577,"var":"editbox"},
             "nodeParent":2,
             "label":"editbox",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":22,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},
@@ -195,6 +197,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},
@@ -208,6 +211,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editwidth",
                     "props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18},
@@ -221,6 +225,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editheight",
                     "props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18},

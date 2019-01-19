@@ -9,6 +9,7 @@ package script.login
 	
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
+	import model.users.CityAreaVo;
 	
 	import script.ViewManager;
 	import script.login.CityAreaItem;
@@ -19,9 +20,7 @@ package script.login
 	{
 		private var uiSkin:RegisterPanelUI;
 		
-		private var province:String = "";
-		private var cityname:String = "";
-		private var areaname:String = "";
+		private var province:CityAreaVo;
 		
 		private var verifycode:Object;
 		public var param:Object;
@@ -86,9 +85,21 @@ package script.login
 			uiSkin.areaList.renderHandler = new Handler(this, updateCityList);
 			uiSkin.areaList.selectHandler = new Handler(this, selectArea);
 			
+			uiSkin.townList.itemRender = CityAreaItem;
+			uiSkin.townList.vScrollBarSkin = "";
+			uiSkin.townList.selectEnable = true;
+			uiSkin.townList.repeatX = 1;
+			uiSkin.townList.spaceY = 2;
+			
+			uiSkin.townList.renderHandler = new Handler(this, updateCityList);
+			uiSkin.townList.selectHandler = new Handler(this, selectTown);
+			
+			
 			uiSkin.btnSelProv.on(Event.CLICK,this,onShowProvince);
 			uiSkin.btnSelCity.on(Event.CLICK,this,onShowCity);
 			uiSkin.btnSelArea.on(Event.CLICK,this,onShowArea);
+			uiSkin.btnSelTown.on(Event.CLICK,this,onShowTown);
+
 			uiSkin.btnGetCode.on(Event.CLICK,this,onGetPhoneCode);
 
 			uiSkin.btnClose.on(Event.CLICK,this,onCloseScene);
@@ -96,7 +107,7 @@ package script.login
 			uiSkin.areabox.visible = false;
 			uiSkin.provbox.visible = false;
 			uiSkin.citybox.visible = false;
-			
+			uiSkin.townbox.visible = false;
 			
 			uiSkin.txtRefresh.underline = true;
 			uiSkin.txtRefresh.underlineColor = "#121212";
@@ -257,12 +268,16 @@ package script.login
 			uiSkin.provbox.visible = false;
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = false;
+			uiSkin.townbox.visible = false;
+
 		}
 		private function onShowProvince(e:Event):void
 		{
 			uiSkin.provbox.visible = true;
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = false;
+			uiSkin.townbox.visible = false;
+
 			e.stopPropagation();
 		}
 		private function onShowCity(e:Event):void
@@ -270,6 +285,8 @@ package script.login
 			uiSkin.provbox.visible = false;
 			uiSkin.citybox.visible = true;
 			uiSkin.areabox.visible = false;
+			uiSkin.townbox.visible = false;
+
 			e.stopPropagation();
 		}
 		private function onShowArea(e:Event):void
@@ -277,6 +294,16 @@ package script.login
 			uiSkin.provbox.visible = false;
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = true;
+			uiSkin.townbox.visible = false;
+			e.stopPropagation();
+		}
+		
+		private function onShowTown(e:Event):void
+		{
+			uiSkin.provbox.visible = false;
+			uiSkin.citybox.visible = false;
+			uiSkin.areabox.visible = false;
+			uiSkin.townbox.visible = true;
 			e.stopPropagation();
 		}
 		
@@ -290,33 +317,40 @@ package script.login
 			trace(province);
 			uiSkin.provbox.visible = false;
 			//province = uiSkin.provList.cells[index].cityname;
-			uiSkin.cityList.array = ChinaAreaModel.instance.getAllCity(province);
+			uiSkin.cityList.array = ChinaAreaModel.instance.getAllCity(province.id);
 			uiSkin.cityList.refresh();
-			uiSkin.province.text = province;
+			uiSkin.province.text = province.areaName;
 			
-			uiSkin.citytxt.text = uiSkin.cityList.array[0];
+			uiSkin.citytxt.text = uiSkin.cityList.array[0].areaName;
 			uiSkin.cityList.selectedIndex = 0;
 			
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(province, uiSkin.cityList.array[0]);
+			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[0].id);
 			uiSkin.areaList.refresh();
 			
-			//uiSkin.areatxt.text = uiSkin.areaList.array[0];
-			uiSkin.areatxt.text = "";
+			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
 			uiSkin.areaList.selectedIndex = -1;
 			
+			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
 			
+			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			uiSkin.townList.selectedIndex = -1;
 			
 		}
 		
 		private function selectCity(index:int):void
 		{
 			uiSkin.citybox.visible = false;
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(province,uiSkin.cityList.array[index]);
+			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[index].id);
 			uiSkin.areaList.refresh();
-			uiSkin.citytxt.text = uiSkin.cityList.array[index];
+			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaName;
 			uiSkin.areatxt.text = "";
-			//uiSkin.areatxt.text = uiSkin.areaList.array[0];
+			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
 			uiSkin.areaList.selectedIndex = -1;
+			
+			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
+			
+			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			uiSkin.townList.selectedIndex = -1;
 			
 		}
 		
@@ -325,10 +359,24 @@ package script.login
 			if( index == -1 )
 				return;
 			uiSkin.areabox.visible = false;
-			uiSkin.areatxt.text = uiSkin.areaList.array[index];
+			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaName;
 			
+			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
+			uiSkin.townList.refresh();
+			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			uiSkin.townList.selectedIndex = -1;
 			
+		
+		}
+		
+		private function selectTown(index:int):void
+		{
+			if( index == -1 )
+				return;
+			uiSkin.townbox.visible = false;
+			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
 			
 		}
+		
 	}
 }

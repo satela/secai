@@ -13,6 +13,8 @@
 	import laya.utils.Stat;
 	import laya.utils.Utils;
 	
+	import model.ChinaAreaModel;
+	
 	import org.osmf.layout.ScaleMode;
 	
 	import script.ViewManager;
@@ -39,12 +41,12 @@
 			URL.exportSceneToJson = GameConfig.exportSceneToJson;
 			
 			//tt = (new Date()).getTime();
-			console.log("now time:" + tt);
+			//console.log("now time:" + tt);
 
 			//打开调试面板（IDE设置调试模式，或者url地址增加debug=true参数，均可打开调试面板）
 			if (GameConfig.debug || Utils.getQueryString("debug") == "true") Laya.enableDebugPanel();
 			if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"]) Laya["PhysicsDebugDraw"].enable();
-			if (!GameConfig.stat) Stat.show();
+			if (GameConfig.stat) Stat.show();
 			Laya.alertGlobalError = true;
 			
 			//激活资源版本控制，版本文件由发布功能生成
@@ -66,8 +68,12 @@
 			//加载场景
 			
 
-			Laya.stage.addChild(new LoginViewUI());
+			//Laya.stage.addChild(new LoginViewUI());
+			
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);
+			
+			var china = ChinaAreaModel.instance;
 			//Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 
 			//ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);

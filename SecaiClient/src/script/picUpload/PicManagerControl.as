@@ -159,7 +159,8 @@ package script.picUpload
 		private function onBackToMain():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.closeView(ViewManager.VIEW_PICMANAGER);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+
 		}
 		override public function onDestroy():void
 		{

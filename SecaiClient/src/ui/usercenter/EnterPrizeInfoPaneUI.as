@@ -18,6 +18,10 @@ package ui.usercenter {
 		public var cityList:List;
 		public var areabox:Image;
 		public var areaList:List;
+		public var btnSelTown:Button;
+		public var towntxt:Label;
+		public var townbox:Image;
+		public var townList:List;
 
 		override protected function createChildren():void {
 			super.createChildren();

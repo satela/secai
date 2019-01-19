@@ -2,8 +2,9 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
+    "selecteID":3,
     "searchKey":"View",
-    "props":{"sceneColor":"#000000"},
+    "props":{"sceneColor":"#f6f3f3"},
     "nodeParent":-1,
     "maxID":6,
     "label":"View",
@@ -17,29 +18,31 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,outimg",
-            "props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","height":30},
+            "props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","height":30,"alpha":0.7},
             "nodeParent":2,
             "label":"outimg",
             "isOpen":true,
-            "isDirectory":true,
+            "isDirectory":false,
             "isAniNode":true,
-            "hasChild":true,
+            "hasChild":false,
             "compId":3,
             "child":[
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,foldname",
-                    "props":{"y":4,"var":"foldname","text":"我的图片","right":2,"left":2,"height":24,"fontSize":20,"color":"#eaf3ec","alpha":0.8,"align":"center"},
-                    "nodeParent":3,
-                    "label":"foldname",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":5,
-                    "child":[
-                        ]
-                }]
+                ],
+            "$HIDDEN":false
+        },
+        {
+            "x":15,
+            "type":"Label",
+            "searchKey":"Label,foldname",
+            "props":{"y":4,"x":0,"width":159,"var":"foldname","valign":"middle","text":"我的图片","height":24,"fontSize":20,"color":"#eff8f1","alpha":1,"align":"center"},
+            "nodeParent":2,
+            "label":"foldname",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":5,
+            "child":[
+                ]
         }],
     "animations":[
         {

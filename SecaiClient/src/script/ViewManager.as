@@ -125,9 +125,10 @@ package script
 				openViewList = {};
 			}
 			var view:View = new viewDict[viewClass]();
-			var control:Script = view.getComponent(Script);
-			if(control != null)
-			control["param"] = params;
+			view.param = params;
+//			var control:Script = view.getComponent(Script);
+//			if(control != null)
+//			control["param"] = params;
 			viewContainer.addChild(view);
 			openViewList[viewClass] = view;
 		}

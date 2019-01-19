@@ -30,9 +30,9 @@ package script.picUpload
 
 			this.on(Event.CLICK,this,onClickHandler);
 			this.on(Event.MOUSE_OVER,this,onMouseOverHandler);
-			//this.on(Event.MOUSE_OUT,this,onMouseOutHandler);
+			this.on(Event.MOUSE_OUT,this,onMouseOutHandler);
 
-			this.btndelete.visible = true;
+			this.btndelete.visible = false;
 			
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 
@@ -65,6 +65,10 @@ package script.picUpload
 					this.img.width = 150/picInfo.picHeight * picInfo.picWidth;
 
 				}
+				
+				if(this.img.skin != "commers/fold.png")
+					Laya.loader.clearTextureRes(this.img.skin);
+
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
 				
 				var str:String = "长:" + picInfo.picPhysicWidth + ";宽:" +  picInfo.picPhysicHeight + "\n";

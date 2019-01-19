@@ -31,6 +31,9 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			PaintOrderModel.instance.curSelectMat = matvo;
+			
+			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
+
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
 		}
 		

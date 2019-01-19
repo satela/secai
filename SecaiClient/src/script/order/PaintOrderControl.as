@@ -182,7 +182,7 @@ package script.order
 		private function onClosePanel():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.closeView(ViewManager.VIEW_PAINT_ORDER);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 
 		}
 	}

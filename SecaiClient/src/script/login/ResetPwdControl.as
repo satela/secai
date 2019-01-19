@@ -29,7 +29,7 @@ package script.login
 		private function onCloseScen():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.closeView(ViewManager.VIEW_CHANGEPWD);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 		}
 	}
 }

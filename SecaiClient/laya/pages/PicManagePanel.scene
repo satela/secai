@@ -1,9 +1,10 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
+    "selectedBox":4,
+    "selecteID":22,
     "searchKey":"View",
-    "props":{"width":1920,"sceneColor":"#000000","height":1080},
+    "props":{"width":1920,"sceneColor":"#fff9f9","height":1080},
     "nodeParent":-1,
     "maxID":58,
     "label":"View",
@@ -17,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"x":0,"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},
+            "props":{"x":0,"top":-10,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"Image",
             "isOpen":true,
@@ -49,13 +50,14 @@
                     "props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},
                     "nodeParent":4,
                     "label":"Image",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":5,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},
@@ -69,6 +71,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},
@@ -82,6 +85,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":17,"text":"|","right":117,"fontSize":20},
@@ -95,6 +99,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},
@@ -108,6 +113,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Text",
                             "searchKey":"Text,firstpage",
                             "props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20},
@@ -125,7 +131,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnNewDir",
-                    "props":{"y":82,"x":325,"width":150,"var":"btnNewDir","skin":"comp/button.png","labelSize":20,"label":"新建一级目录","height":40},
+                    "props":{"y":82,"x":325,"width":150,"var":"btnNewDir","skin":"comp/button.png","labelSize":20,"label":"新建文件夹","height":40},
                     "nodeParent":4,
                     "label":"btnNewDir",
                     "isDirectory":false,
@@ -139,7 +145,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnUploadPic",
-                    "props":{"y":82,"x":603,"width":115,"var":"btnUploadPic","skin":"comp/button.png","labelSize":20,"label":"上传图片","height":40},
+                    "props":{"y":82,"x":603,"width":115,"var":"btnUploadPic","skin":"comp/button.png","labelSize":20,"label":"上传文件","height":40},
                     "nodeParent":4,
                     "label":"btnUploadPic",
                     "isDirectory":false,
@@ -195,7 +201,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnNewFolder",
-                    "props":{"y":82,"x":729,"width":115,"var":"btnNewFolder","skin":"comp/button.png","labelSize":20,"label":"新建目录","height":40},
+                    "props":{"y":82,"x":729,"width":115,"var":"btnNewFolder","skin":"comp/button.png","labelSize":20,"label":"新建文件夹","height":40},
                     "nodeParent":4,
                     "label":"btnNewFolder",
                     "isDirectory":false,

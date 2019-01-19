@@ -48,6 +48,10 @@ package script.picUpload
 			
 		}
 		
+		public override function onDestroy():void
+		{
+			Laya.loader.clearTextureRes(HttpRequestUtil.biggerPicUrl + (param as PicInfoVo).fid + ".jpg");
+		}
 		private function onClosePanel():void
 		{
 			// TODO Auto Generated method stub

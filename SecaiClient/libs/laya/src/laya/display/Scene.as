@@ -2,6 +2,7 @@ package laya.display {
 	import eventUtil.EventCenter;
 	
 	import laya.Const;
+	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.events.Event;
 	import laya.net.Loader;
@@ -37,6 +38,20 @@ package laya.display {
 		public var _idMap:Object;
 		/**@private */
 		public var _$componentType:String = "Scene";
+		
+		//xujianhua 创建时 带的参数
+		private var _param:Object;
+		
+		public function set param(value:Object):void
+		{
+			_param = value;
+			if(_viewCreated)
+			{
+				var control:Script = this.getComponent(Script);
+				if(control != null)
+					control["param"] = _param;
+			}
+		}
 		
 		public function Scene() {
 			this._setBit(Const.NOT_READY, true);
@@ -91,6 +106,10 @@ package laya.display {
 			if (view && !_viewCreated) {
 				_viewCreated = true;
 				SceneUtils.createByData(this, view);
+				
+				var control:Script = this.getComponent(Script);
+				if(control != null)
+					control["param"] = _param;
 			}
 		}
 		

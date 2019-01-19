@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":100,
+    "selectedBox":104,
+    "selecteID":105,
     "searchKey":"View",
-    "props":{"width":800,"sceneColor":"#ffffff","height":1130},
+    "props":{"width":950,"sceneColor":"#ffffff","height":1130},
     "nodeParent":-1,
-    "maxID":101,
+    "maxID":106,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -284,7 +284,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,btnSelCity",
-            "props":{"y":248,"x":368,"width":170,"var":"btnSelCity","stateNum":"1","height":35},
+            "props":{"y":248,"x":363,"width":170,"var":"btnSelCity","stateNum":"1","height":35},
             "nodeParent":2,
             "label":"btnSelCity",
             "isOpen":true,
@@ -326,7 +326,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,btnSelArea",
-            "props":{"y":248,"x":561,"width":170,"var":"btnSelArea","stateNum":"1","height":35},
+            "props":{"y":248,"x":552,"width":170,"var":"btnSelArea","stateNum":"1","height":35},
             "nodeParent":2,
             "label":"btnSelArea",
             "isOpen":false,
@@ -1009,7 +1009,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,citybox",
-            "props":{"y":285,"x":366,"width":172,"var":"citybox","skin":"commers/blackbg.png","height":278,"alpha":0.8},
+            "props":{"y":285,"x":363,"width":172,"var":"citybox","skin":"commers/blackbg.png","height":278,"alpha":0.8},
             "nodeParent":2,
             "label":"citybox",
             "isOpen":false,
@@ -1037,7 +1037,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,areabox",
-            "props":{"y":285,"x":560,"width":172,"var":"areabox","skin":"commers/blackbg.png","height":278,"alpha":0.8},
+            "props":{"y":285,"x":551,"width":172,"var":"areabox","skin":"commers/blackbg.png","height":278,"alpha":0.8},
             "nodeParent":2,
             "label":"areabox",
             "isOpen":false,
@@ -1091,6 +1091,77 @@
             "compId":98,
             "child":[
                 ]
+        },
+        {
+            "x":15,
+            "type":"Button",
+            "searchKey":"Button,btnSelTown",
+            "props":{"y":248,"x":741,"width":170,"var":"btnSelTown","stateNum":"1","height":35},
+            "nodeParent":2,
+            "label":"btnSelTown",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":101,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,towntxt",
+                    "props":{"y":0,"x":0,"width":170,"var":"towntxt","valign":"middle","text":"北京市","height":35,"fontSize":20,"color":"#201e1e","borderColor":"#3e3939","align":"center"},
+                    "nodeParent":101,
+                    "label":"towntxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":102,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":11,"x":136,"skin":"commers/combxbtn.png"},
+                    "nodeParent":101,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":103,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image,townbox",
+            "props":{"y":285,"x":740,"width":172,"var":"townbox","skin":"commers/blackbg.png","height":278,"alpha":0.8},
+            "nodeParent":2,
+            "label":"townbox",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":104,
+            "child":[
+                {
+                    "x":30,
+                    "type":"List",
+                    "searchKey":"List,townList",
+                    "props":{"var":"townList","top":0,"right":0,"left":0,"bottom":0},
+                    "nodeParent":104,
+                    "label":"townList",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":105,
+                    "child":[
+                        ]
+                }],
+            "$HIDDEN":false
         }],
     "animations":[
         {

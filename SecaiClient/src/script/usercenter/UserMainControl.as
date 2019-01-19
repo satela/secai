@@ -109,7 +109,7 @@ package script.usercenter
 		private function onBackToMain():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.closeView(ViewManager.VIEW_USERCENTER);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 		}
 		
 		public override function onDestroy():void
