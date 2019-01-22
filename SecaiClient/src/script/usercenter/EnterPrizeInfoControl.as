@@ -6,6 +6,8 @@ package script.usercenter
 	import laya.utils.Handler;
 	
 	import model.ChinaAreaModel;
+	import model.HttpRequestUtil;
+	import model.Userdata;
 	import model.users.CityAreaVo;
 	
 	import script.login.CityAreaItem;
@@ -78,9 +80,24 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.townbox.visible = false;
 			uiSkin.on(Event.CLICK,this,hideAddressPanel);
+			uiSkin.btnsave.on(Event.CLICK,this,onSaveCompanyInfo);
 
 		}
 		
+		private function onSaveCompanyInfo():void
+		{
+			// TODO Auto Generated method stub
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name=" + uiSkin.input_companyname.text + "&addr=" + Userdata.instance.defaultAddrid,"post");
+		}
+		
+		private function onSaveCompnayBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				
+			}
+		}
 		private function hideAddressPanel(e:Event):void
 		{
 			if(e.target is List)
@@ -195,6 +212,7 @@ package script.usercenter
 				return;
 			uiSkin.townbox.visible = false;
 			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
+			Userdata.instance.defaultAddrid = uiSkin.townList.array[index].id;
 			
 		}
 	}

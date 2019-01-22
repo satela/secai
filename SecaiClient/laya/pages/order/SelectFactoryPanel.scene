@@ -1,7 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
+    "selectedBox":4,
+    "selecteID":11,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -87,7 +88,7 @@
                     "x":30,
                     "type":"List",
                     "searchKey":"List,list_address",
-                    "props":{"y":191,"x":364,"width":1192,"var":"list_address","height":671},
+                    "props":{"y":191,"x":364,"width":1192,"var":"list_address","spaceY":8,"height":671},
                     "nodeParent":4,
                     "label":"list_address",
                     "isDirectory":false,

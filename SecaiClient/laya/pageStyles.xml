@@ -35,4 +35,5 @@
    <item name="usercenter/NewAddressPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="login/LoadingPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="LoginView.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/OrderAddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

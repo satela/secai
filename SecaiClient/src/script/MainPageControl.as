@@ -22,6 +22,8 @@ package script {
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
 	
+	import utils.UtilTool;
+	
 	/**
 	 * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
 	 * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
@@ -60,6 +62,34 @@ package script {
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
+			
+			if(!Userdata.instance.isLogin)
+				loginAccount();
+		}
+		
+		private function loginAccount():void
+		{
+			var account:String = UtilTool.getLocalVar("useraccount","");
+			var pwd:String = UtilTool.getLocalVar("userpwd","");
+			if(account != "" && pwd != "")
+			{
+				var param:String = "phone=" + account + "&pwd=" + pwd + "&mode=0";
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.loginInUrl,this,onLoginBack,param,"post");
+			}
+
+		}
+		
+		private function onLoginBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				var account:String = UtilTool.getLocalVar("useraccount","");
+				Userdata.instance.isLogin = true;
+				txtLogin.text = account;
+				txtReg.text = "退出";
+			}
+			
 		}
 		
 		private function onResizeBrower():void
@@ -152,7 +182,12 @@ package script {
 		public function onTipClick(e:Event):void {
 			
 		}
-		
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
+
+			
+		}
 		
 	}
 }

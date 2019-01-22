@@ -15,6 +15,8 @@ package script.login
 	
 	import ui.login.LogPanelUI;
 	
+	import utils.UtilTool;
+	
 	public class LogPanelControl extends Script
 	{
 		private var uiSKin:LogPanelUI;
@@ -78,7 +80,9 @@ package script.login
 				Userdata.instance.isLogin = true;
 				ViewManager.showAlert("登陆成功");
 				EventCenter.instance.event(EventCenter.LOGIN_SUCESS, uiSKin.input_account.text);
-				
+				UtilTool.setLocalVar("useraccount",uiSKin.input_account.text);
+				UtilTool.setLocalVar("userpwd",uiSKin.input_pwd.text);
+
 				ViewManager.instance.closeView(ViewManager.VIEW_lOGPANEL);
 			}
 			

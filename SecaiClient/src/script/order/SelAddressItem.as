@@ -3,9 +3,9 @@ package script.order
 	import model.orderModel.PaintOrderModel;
 	import model.users.AddressVo;
 	
-	import ui.order.AddressItemUI;
+	import ui.order.OrderAddressItemUI;
 	
-	public class SelAddressItem extends AddressItemUI
+	public class SelAddressItem extends OrderAddressItemUI
 	{
 		public var address:AddressVo;
 		
@@ -24,7 +24,10 @@ package script.order
 		
 		public function set ShowSelected(value:Boolean):void
 		{
-			this.selimg.visible = value;
+			if(value)
+				this.addresstxt.borderColor = "#FF0000";
+			else
+				this.addresstxt.borderColor = "#222222";
 			
 		}
 	}

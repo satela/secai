@@ -21,6 +21,8 @@ package model
 		
 		public var isLogin:Boolean = false;
 		
+		public var defaultAddrid:String = "0";
+		
 
 		public static function get instance():Userdata
 		{

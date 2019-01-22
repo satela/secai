@@ -7,7 +7,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static const httpUrl:String = "http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	
+		public static const httpUrl:String = "http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		
@@ -27,6 +27,13 @@ package model
 
 		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+		
+		
+		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
+
+		public static const getOuputAddr:String = "business/manufacturers?client_code=og001&";//addr_id=120106";获取输出工厂地址
+		public static const getProdCategory:String = "business/prodcategory?client_code=og001&";//addr_id=120106";获取工厂材料列表
+
 
 		public static function get instance():HttpRequestUtil
 		{

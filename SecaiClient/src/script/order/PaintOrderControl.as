@@ -4,8 +4,12 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.net.HttpRequest;
 	import laya.utils.Browser;
 	
+	import model.ChinaAreaModel;
+	import model.HttpRequestUtil;
+	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
 	import model.orderModel.PicOrderItemVo;
@@ -73,6 +77,16 @@ package script.order
 			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
 
 
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=120106",this,onGetOutPutAddress,null,null);
+		}
+		
+		private function onGetOutPutAddress(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				PaintOrderModel.instance.initOutputAddr(result as Array);
+			}
 		}
 		private function onResizeBrower():void
 		{
@@ -95,7 +109,20 @@ package script.order
 		
 		private function onSelectedAddress():void
 		{
-			this.uiSkin.myaddresstxt.text = PaintOrderModel.instance.selectAddress.addressDetail;
+			if(PaintOrderModel.instance.selectFactoryAddress)
+			this.uiSkin.myaddresstxt.text = ChinaAreaModel.instance.getFullAddressByid(PaintOrderModel.instance.selectFactoryAddress.addr);
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=120106",this,onGetProductBack,null,null);
+
+			
+		}
+		private function onGetProductBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				
+			}
 		}
 		private function onShowSelectAddress():void
 		{

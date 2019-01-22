@@ -6,6 +6,7 @@ package ui.usercenter {
 	import script.usercenter.EnterPrizeInfoControl;
 
 	public class EnterPrizeInfoPaneUI extends View {
+		public var input_companyname:TextInput;
 		public var btnSelProv:Button;
 		public var province:Label;
 		public var btnSelCity:Button;
@@ -18,6 +19,7 @@ package ui.usercenter {
 		public var cityList:List;
 		public var areabox:Image;
 		public var areaList:List;
+		public var btnsave:Button;
 		public var btnSelTown:Button;
 		public var towntxt:Label;
 		public var townbox:Image;
