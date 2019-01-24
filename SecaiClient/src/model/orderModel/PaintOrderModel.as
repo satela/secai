@@ -19,9 +19,10 @@ package model.orderModel
 		
 		public var selectFactoryAddress:FactoryInfoVo;
 		
+		
 		public var curSelectPic:PicInfoVo;
 		
-		public var curSelectMat:MaterialItemVo;
+		public var curSelectMat:ProductVo;
 		
 		public var outPutAddr:Array;
 		

@@ -10,6 +10,7 @@ package script.order
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
 	import model.orderModel.PicOrderItemVo;
@@ -68,7 +69,9 @@ package script.order
 			uiSkin.changemyadd.on(Event.CLICK,this,onShowSelectAddress);
 			uiSkin.changefactory.on(Event.CLICK,this,onShowSelectFactory);
 
-			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedAddress);
+			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
+			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
+
 			EventCenter.instance.on(EventCenter.ADD_PIC_FOR_ORDER,this,onUpdateOrderPic);
 			
 			EventCenter.instance.on(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
@@ -107,10 +110,14 @@ package script.order
 
 		}
 		
+		private function onSelectedSelfAddress():void
+		{
+			
+		}
 		private function onSelectedAddress():void
 		{
 			if(PaintOrderModel.instance.selectFactoryAddress)
-			this.uiSkin.myaddresstxt.text = ChinaAreaModel.instance.getFullAddressByid(PaintOrderModel.instance.selectFactoryAddress.addr);
+			this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=120106",this,onGetProductBack,null,null);
 
@@ -121,7 +128,14 @@ package script.order
 			var result:Object = JSON.parse(data as String);
 			if(!result.hasOwnProperty("status"))
 			{
-				
+				var product:Array = result as Array;
+				PaintOrderModel.instance.productList = [];
+
+				for(var i:int=0;i < product.length;i++)
+				{
+					var matvo:MatetialClassVo = new MatetialClassVo(product[i].prodCat_name);
+					PaintOrderModel.instance.productList.push(matvo);
+				}
 			}
 		}
 		private function onShowSelectAddress():void

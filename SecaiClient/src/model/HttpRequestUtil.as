@@ -34,6 +34,9 @@ package model
 		public static const getOuputAddr:String = "business/manufacturers?client_code=og001&";//addr_id=120106";获取输出工厂地址
 		public static const getProdCategory:String = "business/prodcategory?client_code=og001&";//addr_id=120106";获取工厂材料列表
 
+		public static const getProdList:String = "business/prodlist?client_code=og001&addr_id=120106&";//prodCat_name=纸&;获取工厂材料列表
+
+		public static const getProcessCatList:String = "business/processcatlist?prod_code=";//
 
 		public static function get instance():HttpRequestUtil
 		{

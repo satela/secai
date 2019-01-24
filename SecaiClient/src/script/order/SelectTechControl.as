@@ -10,6 +10,7 @@ package script.order
 	import model.orderModel.MaterialItemVo;
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
+	import model.orderModel.ProcessCatVo;
 	import model.orderModel.TechMainVo;
 	
 	import script.ViewManager;
@@ -54,14 +55,14 @@ package script.order
 			//var num:int = Math.random()*18;
 			this.uiSKin.techcontent.vScrollBarSkin = "";
 			//this.uiSKin.main_panel.vScrollBarSkin = "";
-			var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			var arr:Vector.<ProcessCatVo> = PaintOrderModel.instance.curSelectMat.prcessCatList;
 			var startpos:int = (this.uiSKin.techcontent.height - arr.length*itemheight -  itemspaceV * (arr.length - 1))/2;
 
 			for(var i:int=0;i < arr.length;i++)
 			{
 				//var tcvo:TechMainVo = new TechMainVo();
 				var itembox:TechBoxItem = new TechBoxItem();
-				itembox.setData(arr[i]);
+				itembox.setProcessData(arr[i]);
 				itembox.on(Event.CLICK,this,onClickMat,[itembox,arr[i]]);		
 
 				itembox.x = startposx;
@@ -189,14 +190,14 @@ package script.order
 		
 		private function updateSelectedTech():void
 		{
-			var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			var arr:Vector.<ProcessCatVo> = PaintOrderModel.instance.curSelectMat.prcessCatList;
 			
 			var techstr:String = "";
 			for(var i:int=0;i < arr.length;i++)
 			{
 				if(arr[i].selected)
 				{
-					techstr += arr[i].matName;
+					techstr += arr[i].procCat_Name;
 					var childtech:String = getTechStr(arr[i].nextMatList);
 					if(childtech != "")
 						techstr +=  "(" + childtech.substr(0,childtech.length - 1) + ")";

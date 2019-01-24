@@ -65,6 +65,11 @@ package script {
 			
 			if(!Userdata.instance.isLogin)
 				loginAccount();
+			else
+			{
+				txtLogin.text =Userdata.instance.userAccount;
+				txtReg.text = "退出";
+			}
 		}
 		
 		private function loginAccount():void
@@ -85,6 +90,7 @@ package script {
 			if(result.status == 0)
 			{
 				var account:String = UtilTool.getLocalVar("useraccount","");
+				Userdata.instance.userAccount = account;
 				Userdata.instance.isLogin = true;
 				txtLogin.text = account;
 				txtReg.text = "退出";

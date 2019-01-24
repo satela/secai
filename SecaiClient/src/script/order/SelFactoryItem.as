@@ -18,7 +18,7 @@ package script.order
 		public function setData(data:Object):void
 		{
 			factoryvo = data as FactoryInfoVo;
-			this.addresstxt.text = factoryvo.name + "(" + ChinaAreaModel.instance.getFullAddressByid(factoryvo.addr) + ")";
+			this.addresstxt.text = factoryvo.name + "(" + factoryvo.addr+ ")";
 			ShowSelected =PaintOrderModel.instance.selectFactoryAddress == factoryvo;
 		}
 		

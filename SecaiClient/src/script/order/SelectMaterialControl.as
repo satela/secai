@@ -4,7 +4,10 @@ package script.order
 	import laya.events.Event;
 	import laya.utils.Handler;
 	
+	import model.HttpRequestUtil;
 	import model.orderModel.MatetialClassVo;
+	import model.orderModel.PaintOrderModel;
+	import model.orderModel.ProductVo;
 	
 	import script.ViewManager;
 	
@@ -37,17 +40,14 @@ package script.order
 			uiSkin.matlist.spaceY = 10;
 			uiSkin.matlist.renderHandler = new Handler(this, updateMatNameItem);
 			
-			uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
+			//uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
 			
-			var arr:Array = [];
-			for(var i:int=0;i < 2;i++)
-			{
-				arr.push(new MatetialClassVo());
-			}
-			uiSkin.tablist.array = arr;
 			
-			if(arr.length > 0)
+			uiSkin.tablist.array = PaintOrderModel.instance.productList;
+			
+			if(PaintOrderModel.instance.productList.length > 0)
 			{
+				uiSkin.tablist.selectedIndex = 0;
 				onSlecteMatClass(0);
 				(uiSkin.tablist.cells[0] as MaterialClassBtn).ShowSelected = true;
 			}
@@ -67,9 +67,29 @@ package script.order
 				item.ShowSelected = item.matclassvo == uiSkin.tablist.array[index];
 			}
 			
-			uiSkin.matlist.array = (uiSkin.tablist.array[index] as MatetialClassVo).childMatList;
+			var matvo:MatetialClassVo = uiSkin.tablist.array[index] as MatetialClassVo;
+			if(matvo.childMatList != null)
+				uiSkin.matlist.array = (uiSkin.tablist.array[index] as MatetialClassVo).childMatList;
+			else
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + "prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
+
 		}
 		
+		private function onGetProductListBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var matvo:MatetialClassVo = uiSkin.tablist.array[uiSkin.tablist.selectedIndex] as MatetialClassVo;
+				matvo.childMatList = [];
+				for(var i:int=0;i < result.length;i++)
+				{
+					matvo.childMatList.push(new ProductVo(result[i]));
+					
+				}
+				uiSkin.matlist.array = matvo.childMatList;
+			}
+		}
 		private function updateMatNameItem(cell:MaterialItem):void
 		{
 			cell.setData(cell.dataSource);

@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1220,7 +1220,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderAddressItem.scene";
+	GameConfig.startScene="PaintOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1360,93 +1360,10 @@ var ChinaAreaModel=(function(){
 
 //class model.orderModel.MatetialClassVo
 var MatetialClassVo=(function(){
-	function MatetialClassVo(){
+	function MatetialClassVo(data){
 		this.matclassname="喷绘材料";
 		this.childMatList=null;
-		this.childMatList=[];
-		var arr=["喷绘材料","布类材料","印刷材料"];
-		var ccc=Math.floor(Math.random()*arr.length);
-		this.matclassname=arr[ccc];
-		var maimat=new MaterialItemVo();
-		maimat.matName="油画布";
-		maimat.nextMatList=[];
-		var mat=new MaterialItemVo();
-		mat.matName="喷印方式";
-		mat.nextMatList=[];
-		var childmat=new MaterialItemVo();
-		childmat.matName="户内写真";
-		childmat.nextMatList=[];
-		var childchildmat=new MaterialItemVo();
-		childchildmat.matName="4pass";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="6pass";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		mat.nextMatList.push(childmat);
-		childmat=new MaterialItemVo();
-		childmat.matName="户外写真";
-		childmat.nextMatList=[];
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="4pass";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="6pass";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		mat.nextMatList.push(childmat);
-		childmat=new MaterialItemVo();
-		childmat.matName="卷材UV";
-		childmat.nextMatList=[];
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="正喷";
-		childchildmat.nextMatList=[];
-		var childchildmat1=new MaterialItemVo();
-		childchildmat1.matName="1层白";
-		childchildmat1.nextMatList=[];
-		childchildmat.nextMatList.push(childchildmat1);
-		childchildmat1=new MaterialItemVo();
-		childchildmat1.matName="2层白";
-		childchildmat1.nextMatList=[];
-		childchildmat.nextMatList.push(childchildmat1);
-		childchildmat1=new MaterialItemVo();
-		childchildmat1.matName="3层白";
-		childchildmat1.nextMatList=[];
-		childchildmat.nextMatList.push(childchildmat1);
-		childmat.nextMatList.push(childchildmat);
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="背喷";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		childchildmat=new MaterialItemVo();
-		childchildmat.matName="双面喷";
-		childchildmat.nextMatList=[];
-		childmat.nextMatList.push(childchildmat);
-		mat.nextMatList.push(childmat);
-		maimat.nextMatList.push(mat);
-		mat=new MaterialItemVo();
-		mat.matName="上光油";
-		mat.nextMatList=[];
-		var childmat=new MaterialItemVo();
-		childmat.matName="哑面";
-		childmat.nextMatList=[];
-		mat.nextMatList.push(childmat);
-		childmat=new MaterialItemVo();
-		childmat.matName="亮面";
-		childmat.nextMatList=[];
-		mat.nextMatList.push(childmat);
-		maimat.nextMatList.push(mat);
-		mat=new MaterialItemVo();
-		mat.matName="异性切割";
-		mat.nextMatList=[];
-		maimat.nextMatList.push(mat);
-		mat=new MaterialItemVo();
-		mat.matName="装裱";
-		mat.nextMatList=[];
-		maimat.nextMatList.push(mat);
-		this.childMatList.push(maimat);
+		this.matclassname=data;
 	}
 
 	__class(MatetialClassVo,'model.orderModel.MatetialClassVo');
@@ -1668,6 +1585,73 @@ var PicInfoVo=(function(){
 })()
 
 
+//工艺类vo
+//class model.orderModel.ProcessCatVo
+var ProcessCatVo=(function(){
+	function ProcessCatVo(data){
+		this.procCat_Seq=0;
+		// 工艺类顺序
+		this.procCat_Name="";
+		// 工艺类名称
+		this.selected=false;
+		this.nextMatList=null;
+		for(var key in data)
+		this[key]=data[key];
+	}
+
+	__class(ProcessCatVo,'model.orderModel.ProcessCatVo');
+	return ProcessCatVo;
+})()
+
+
+//产品列表 vo
+//class model.orderModel.ProductVo
+var ProductVo=(function(){
+	function ProductVo(data){
+		this.prod_code="";
+		// 产品编码
+		this.prod_name="";
+		// 产品名称
+		this.min_length=0;
+		// 最小长度
+		this.max_length=0;
+		// 最大长度
+		this.min_width=0;
+		// 最小宽度
+		this.max_width=0;
+		// 最大宽度
+		this.material_code="";
+		// 材料编码
+		this.material_name="";
+		// 材料名称
+		this.material_color="";
+		// 颜色
+		this.material_brand="";
+		// 材料品牌
+		this.material_supplier="";
+		// 材料供应商
+		this.measure_unit="";
+		// 计量单位
+		this.unit_weight=0;
+		// 单位重量
+		this.manufacturer_code="";
+		// 输出中心编码
+		this.manufacturer_name="";
+		// 输出中心名称
+		this.unit_price=0;
+		// 材料单位价格
+		this.additional_unitFee=0;
+		// 单位附加金额
+		this.prcessCatList=null;
+		for(var key in data)
+		this[key]=data[key];
+	}
+
+	__class(ProductVo,'model.orderModel.ProductVo');
+	return ProductVo;
+})()
+
+
 //class model.picmanagerModel.DirectoryFileModel
 var DirectoryFileModel=(function(){
 	function DirectoryFileModel(){
@@ -1823,7 +1807,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//addr_id=120106";获取工厂材料列表
+	//
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -1846,6 +1830,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.addCompanyInfo="group/create?";
 	HttpRequestUtil.getOuputAddr="business/manufacturers?client_code=og001&";
 	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=og001&";
+	HttpRequestUtil.getProdList="business/prodlist?client_code=og001&addr_id=120106&";
+	HttpRequestUtil.getProcessCatList="business/processcatlist?prod_code=";
 	return HttpRequestUtil;
 })()
 
@@ -26222,6 +26208,7 @@ var EventCenter=(function(_super){
 	EventCenter.UPDATE_FILE_LIST="UPDATE_FILE_LIST";
 	EventCenter.SELECT_PIC_ORDER="SELECT_PIC_ORDER";
 	EventCenter.SELECT_ORDER_ADDRESS="SELECT_ORDER_ADDRESS";
+	EventCenter.SELECT_OUT_ADDRESS="SELECT_OUT_ADDRESS";
 	EventCenter.ADD_PIC_FOR_ORDER="ADD_PIC_FOR_ORDER";
 	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
@@ -29818,35 +29805,6 @@ var WebAudioSound=(function(_super){
 
 
 /**
-*@private
-*/
-//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
-var HTMLStyleElement=(function(_super){
-	function HTMLStyleElement(){
-		HTMLStyleElement.__super.call(this);;
-	}
-
-	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
-	var __proto=HTMLStyleElement.prototype;
-	__proto._creates=function(){}
-	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
-	//TODO:coverage
-	__proto.reset=function(){
-		return this;
-	}
-
-	/**
-	*解析样式
-	*/
-	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
-		HTMLStyle.parseCSS(value,null);
-	});
-
-	return HTMLStyleElement;
-})(HTMLElement)
-
-
-/**
 *<code>Sound</code> 类是用来播放控制声音的类。
 *引擎默认有两套声音方案，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
 */
@@ -29888,6 +29846,35 @@ var Sound=(function(_super){
 
 	return Sound;
 })(EventDispatcher)
+
+
+/**
+*@private
+*/
+//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
+var HTMLStyleElement=(function(_super){
+	function HTMLStyleElement(){
+		HTMLStyleElement.__super.call(this);;
+	}
+
+	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
+	var __proto=HTMLStyleElement.prototype;
+	__proto._creates=function(){}
+	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
+	//TODO:coverage
+	__proto.reset=function(){
+		return this;
+	}
+
+	/**
+	*解析样式
+	*/
+	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
+		HTMLStyle.parseCSS(value,null);
+	});
+
+	return HTMLStyleElement;
+})(HTMLElement)
 
 
 /**
@@ -33878,6 +33865,10 @@ var MainPageControl=(function(_super){
 		(this.owner ["panel_main"]).height=Browser.clientHeight-20;
 		if(!Userdata.instance.isLogin)
 			this.loginAccount();
+		else{
+			this.txtLogin.text=Userdata.instance.userAccount;
+			this.txtReg.text="退出";
+		}
 	}
 
 	__proto.loginAccount=function(){
@@ -33893,6 +33884,7 @@ var MainPageControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			var account=UtilTool.getLocalVar("useraccount","");
+			Userdata.instance.userAccount=account;
 			Userdata.instance.isLogin=true;
 			this.txtLogin.text=account;
 			this.txtReg.text="退出";
@@ -34257,6 +34249,7 @@ var LogPanelControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.isLogin=true;
+			Userdata.instance.userAccount=this.uiSKin.input_account.text;
 			ViewManager.showAlert("登陆成功");
 			EventCenter.instance.event("LOGIN_SUCESS",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("useraccount",this.uiSKin.input_account.text);
@@ -34727,7 +34720,8 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.changefactory.underlineColor="#222222";
 		this.uiSkin.changemyadd.on("click",this,this.onShowSelectAddress);
 		this.uiSkin.changefactory.on("click",this,this.onShowSelectFactory);
-		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.on("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
 		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
 		EventCenter.instance.on("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
 		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
@@ -34756,15 +34750,22 @@ var PaintOrderControl=(function(_super){
 		ViewManager.instance.openView("VIEW_SELECT_FACTORY");
 	}
 
+	__proto.onSelectedSelfAddress=function(){}
 	__proto.onSelectedAddress=function(){
 		if(PaintOrderModel.instance.selectFactoryAddress)
-			this.uiSkin.myaddresstxt.text=ChinaAreaModel.instance.getFullAddressByid(PaintOrderModel.instance.selectFactoryAddress.addr);
+			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=og001&"+"addr_id=120106",this,this.onGetProductBack,null,null);
 	}
 
 	__proto.onGetProductBack=function(data){
 		var result=JSON.parse(data);
 		if(!result.hasOwnProperty("status")){
+			var product=result;
+			PaintOrderModel.instance.productList=[];
+			for(var i=0;i < product.length;i++){
+				var matvo=new MatetialClassVo(product[i].prodCat_name);
+				PaintOrderModel.instance.productList.push(matvo);
+			}
 		}
 	}
 
@@ -35031,11 +35032,11 @@ var SelectTechControl=(function(_super){
 		this.linelist=[];
 		this.firstTechlist=[];
 		this.uiSKin.techcontent.vScrollBarSkin="";
-		var arr=PaintOrderModel.instance.curSelectMat.nextMatList;
+		var arr=PaintOrderModel.instance.curSelectMat.prcessCatList;
 		var startpos=(this.uiSKin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
 		for(var i=0;i < arr.length;i++){
 			var itembox=new TechBoxItem();
-			itembox.setData(arr[i]);
+			itembox.setProcessData(arr[i]);
 			itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
 			itembox.x=this.startposx;
 			itembox.y=startpos;
@@ -35129,11 +35130,11 @@ var SelectTechControl=(function(_super){
 	}
 
 	__proto.updateSelectedTech=function(){
-		var arr=PaintOrderModel.instance.curSelectMat.nextMatList;
+		var arr=PaintOrderModel.instance.curSelectMat.prcessCatList;
 		var techstr="";
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				techstr+=arr[i].matName;
+				techstr+=arr[i].procCat_Name;
 				var childtech=this.getTechStr(arr[i].nextMatList);
 				if(childtech !="")
 					techstr+="("+childtech.substr(0,childtech.length-1)+")";
@@ -35280,13 +35281,7 @@ var SelectFactoryControl=(function(_super){
 		this.uiSkin.list_address.spaceY=8;
 		this.uiSkin.list_address.renderHandler=new Handler(this,this.updateAddressItem);
 		this.uiSkin.list_address.selectHandler=new Handler(this,this.onSlecteAddress);
-		var temparr=[];
-		var addrs=["130921100","210905002","371323"];
-		for(var i=0;i < 3;i++){
-			var fvo=new FactoryInfoVo({addr:addrs[i],name:"测试地址1"});
-			temparr.push(fvo);
-		}
-		this.uiSkin.list_address.array=temparr;
+		this.uiSkin.list_address.array=PaintOrderModel.instance.outPutAddr;
 		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
 		this.uiSkin.okbtn.on("click",this,this.onConfirmSelectAddress);
 	}
@@ -35306,7 +35301,7 @@ var SelectFactoryControl=(function(_super){
 
 	__proto.onConfirmSelectAddress=function(index){
 		if(PaintOrderModel.instance.selectFactoryAddress !=null)
-			EventCenter.instance.event("SELECT_ORDER_ADDRESS");
+			EventCenter.instance.event("SELECT_OUT_ADDRESS");
 		this.onCloseView();
 	}
 
@@ -35680,13 +35675,9 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.matlist.selectEnable=true;
 		this.uiSkin.matlist.spaceY=10;
 		this.uiSkin.matlist.renderHandler=new Handler(this,this.updateMatNameItem);
-		this.uiSkin.matlist.selectHandler=new Handler(this,this.onSlecteMat);
-		var arr=[];
-		for(var i=0;i < 2;i++){
-			arr.push(new MatetialClassVo());
-		}
-		this.uiSkin.tablist.array=arr;
-		if(arr.length > 0){
+		this.uiSkin.tablist.array=PaintOrderModel.instance.productList;
+		if(PaintOrderModel.instance.productList.length > 0){
+			this.uiSkin.tablist.selectedIndex=0;
 			this.onSlecteMatClass(0);
 			(this.uiSkin.tablist.cells [0]).ShowSelected=true;
 		}
@@ -35703,8 +35694,24 @@ var SelectMaterialControl=(function(_super){
 		for(var $each_item in this.uiSkin.tablist.cells){
 			item=this.uiSkin.tablist.cells[$each_item];
 			item.ShowSelected=item.matclassvo==this.uiSkin.tablist.array[index];
+		};
+		var matvo=this.uiSkin.tablist.array [index];
+		if(matvo.childMatList !=null)
+			this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
+		else
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodlist?client_code=og001&addr_id=120106&"+"prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
+	}
+
+	__proto.onGetProductListBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var matvo=this.uiSkin.tablist.array [this.uiSkin.tablist.selectedIndex];
+			matvo.childMatList=[];
+			for(var i=0;i < result.length;i++){
+				matvo.childMatList.push(new ProductVo(result[i]));
+			}
+			this.uiSkin.matlist.array=matvo.childMatList;
 		}
-		this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
 	}
 
 	__proto.updateMatNameItem=function(cell){
@@ -53019,32 +53026,12 @@ var CompanyAddressItem=(function(_super){
 })(AddressItemUI)
 
 
-//class script.login.CityAreaItem extends ui.login.CityAreaItemUI
-var CityAreaItem=(function(_super){
-	function CityAreaItem(){
-		this.areaVo=null;
-		CityAreaItem.__super.call(this);
-	}
-
-	__class(CityAreaItem,'script.login.CityAreaItem',_super);
-	var __proto=CityAreaItem.prototype;
-	__proto.setData=function(areavo){
-		this.areaVo=areavo;
-		this.productname.text=this.areaVo.areaName;
-	}
-
-	return CityAreaItem;
-})(CityAreaItemUI)
-
-
 //class script.order.TechBoxItem extends ui.order.TechorItemUI
 var TechBoxItem=(function(_super){
 	function TechBoxItem(){
 		this.techmainvo=null;
-		this.originPos=110;
-		this.allItems=[];
-		this.lastSelectIndex=-1;
 		this.isSelected=false;
+		this.processCatVo=null;
 		TechBoxItem.__super.call(this);
 	}
 
@@ -53053,6 +53040,12 @@ var TechBoxItem=(function(_super){
 	__proto.setData=function(tvo){
 		this.techmainvo=tvo;
 		this.initView();
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.processCatVo=pvo;
+		this.txt.text=pvo.procCat_Name;
 		this.setSelected(false);
 	}
 
@@ -53073,6 +53066,24 @@ var TechBoxItem=(function(_super){
 })(TechorItemUI)
 
 
+//class script.login.CityAreaItem extends ui.login.CityAreaItemUI
+var CityAreaItem=(function(_super){
+	function CityAreaItem(){
+		this.areaVo=null;
+		CityAreaItem.__super.call(this);
+	}
+
+	__class(CityAreaItem,'script.login.CityAreaItem',_super);
+	var __proto=CityAreaItem.prototype;
+	__proto.setData=function(areavo){
+		this.areaVo=areavo;
+		this.productname.text=this.areaVo.areaName;
+	}
+
+	return CityAreaItem;
+})(CityAreaItemUI)
+
+
 //class script.order.SelFactoryItem extends ui.order.OrderAddressItemUI
 var SelFactoryItem=(function(_super){
 	function SelFactoryItem(){
@@ -53084,7 +53095,7 @@ var SelFactoryItem=(function(_super){
 	var __proto=SelFactoryItem.prototype;
 	__proto.setData=function(data){
 		this.factoryvo=data;
-		this.addresstxt.text=this.factoryvo.name+"("+ChinaAreaModel.instance.getFullAddressByid(this.factoryvo.addr)+")";
+		this.addresstxt.text=this.factoryvo.name+"("+this.factoryvo.addr+")";
 		this.ShowSelected=PaintOrderModel.instance.selectFactoryAddress==this.factoryvo;
 	}
 
@@ -53258,17 +53269,29 @@ var MaterialItem=(function(_super){
 
 	__class(MaterialItem,'script.order.MaterialItem',_super);
 	var __proto=MaterialItem.prototype;
-	__proto.setData=function(matName){
-		this.matvo=matName;
-		this.matname.text=this.matvo.matName;
+	__proto.setData=function(product){
+		this.matvo=product;
+		this.matname.text=this.matvo.prod_name;
 		this.on("click",this,this.onClickMat);
 	}
 
 	//this.redrect.visible=false;
 	__proto.onClickMat=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/processcatlist?prod_code="+this.matvo.prod_code,this,this.onGetProcessListBack,null,null);
 		PaintOrderModel.instance.curSelectMat=this.matvo;
-		ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
-		ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
+	}
+
+	__proto.onGetProcessListBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			PaintOrderModel.instance.curSelectMat=this.matvo;
+			PaintOrderModel.instance.curSelectMat.prcessCatList=[];
+			for(var i=0;i < result.length;i++){
+				PaintOrderModel.instance.curSelectMat.prcessCatList.push(new ProcessCatVo(result[i]));
+			}
+			ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
+			ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
+		}
 	}
 
 	__getset(0,__proto,'ShowSelected',null,function(value){

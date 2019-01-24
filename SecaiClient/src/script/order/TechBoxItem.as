@@ -3,6 +3,7 @@ package script.order
 	import laya.events.Event;
 	
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.ProcessCatVo;
 	import model.orderModel.TechMainVo;
 	
 	import ui.order.TechBoxItemUI;
@@ -10,15 +11,12 @@ package script.order
 	
 	public class TechBoxItem extends TechorItemUI
 	{
-		public var techmainvo:MaterialItemVo;
+		public var techmainvo:MaterialItemVo;		
 		
-		public var originPos:int = 110;
-		
-		private var allItems:Array = [];
-		
-		private var lastSelectIndex:int = -1;
 		
 		public var isSelected:Boolean = false;
+		
+		public var processCatVo:ProcessCatVo;
 		public function TechBoxItem()
 		{
 			super();			
@@ -30,6 +28,14 @@ package script.order
 			initView();
 			setSelected(false);
 		}
+		
+		public function setProcessData(pvo:ProcessCatVo):void
+		{
+			processCatVo = pvo;
+			this.txt.text = pvo.procCat_Name;
+			setSelected(false);
+		}
+		
 		private function initView():void
 		{
 			this.txt.text = techmainvo.matName;

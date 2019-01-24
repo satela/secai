@@ -35,14 +35,14 @@ package script.order
 			
 			uiSkin.list_address.selectHandler = new Handler(this,onSlecteAddress);
 			
-			var temparr:Array = [];
-			var addrs:Array = ["130921100","210905002","371323"];
-			for(var i:int=0;i < 3;i++)
-			{
-				var fvo:FactoryInfoVo = new FactoryInfoVo({addr:addrs[i],name:"测试地址1"});
-				temparr.push(fvo);
-			}
-			uiSkin.list_address.array = temparr;
+//			var temparr:Array = [];
+//			var addrs:Array = ["130921100","210905002","371323"];
+//			for(var i:int=0;i < 3;i++)
+//			{
+//				var fvo:FactoryInfoVo = new FactoryInfoVo({addr:addrs[i],name:"测试地址1"});
+//				temparr.push(fvo);
+//			}
+			uiSkin.list_address.array = PaintOrderModel.instance.outPutAddr;
 			
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCloseView);
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmSelectAddress);
@@ -68,7 +68,7 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			if(PaintOrderModel.instance.selectFactoryAddress != null)
-				EventCenter.instance.event(EventCenter.SELECT_ORDER_ADDRESS);
+				EventCenter.instance.event(EventCenter.SELECT_OUT_ADDRESS);
 			onCloseView();
 		}
 		
