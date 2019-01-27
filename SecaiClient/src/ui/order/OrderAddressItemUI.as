@@ -6,7 +6,7 @@ package ui.order {
 	public class OrderAddressItemUI extends View {
 		public var addresstxt:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":2,"x":3,"width":825,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},"compId":3}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":2,"x":3,"width":1034,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},"compId":3}],"loadList":[],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

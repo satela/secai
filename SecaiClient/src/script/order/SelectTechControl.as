@@ -7,6 +7,7 @@ package script.order
 	import laya.events.Event;
 	import laya.utils.Browser;
 	
+	import model.HttpRequestUtil;
 	import model.orderModel.MaterialItemVo;
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
@@ -98,8 +99,29 @@ package script.order
 			
 			linelist.push(sp);
 		}
-		private function onClickMat(parentitem:TechBoxItem,matvo:MaterialItemVo):void
+		
+		private function onGetProFlowt(parentitem:TechBoxItem,processCatvo:ProcessCatVo):void
 		{
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + processCatvo.procCat_Name,this,function(data:Object):void{
+				
+				var result:Object = JSON.parse(data as String);
+				if(!result.hasOwnProperty("status"))
+				{
+					processCatvo.initProcFlow(result);
+					onClickMat(parentitem,processCatvo);
+				}
+				
+			},null,null);
+		}
+		private function onClickMat(parentitem:TechBoxItem,matvo:Object):void
+		{
+			
+			if(matvo.nextMatList == null && matvo is ProcessCatVo)
+			{
+				onGetProFlowt(parentitem, matvo as ProcessCatVo);
+				
+				return;
+			}
 			if(parentitem.isSelected)
 				hideItems(parentitem.x,true);
 			else if(firstTechlist.indexOf(parentitem) >= 0)

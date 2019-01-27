@@ -13,5 +13,10 @@ package model.orderModel
 			for(var key in data)
 				this[key] = data[key];
 		}
+		
+		public function initProcFlow(flowdata:Object):void
+		{
+			
+		}
 	}
 }

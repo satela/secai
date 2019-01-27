@@ -12,8 +12,9 @@ package {
 	import utils.AddMsgControl;
 	import script.prefabScript.LinkTextControl;
 	import script.order.SelectAddressControl;
-	import script.order.SelectFactoryControl;
 	import script.order.SelectMaterialControl;
+	import script.order.SelectDeliveryControl;
+	import script.order.SelectFactoryControl;
 	import laya.html.dom.HTMLDivElement;
 	import script.order.SelectPicControl;
 	import script.order.SelectTechControl;
@@ -36,7 +37,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "PaintOrderPanel.scene";
+		public static var startScene:* = "order/SelectFactoryPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -55,8 +56,9 @@ package {
 			reg("utils.AddMsgControl",AddMsgControl);
 			reg("script.prefabScript.LinkTextControl",LinkTextControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);
-			reg("script.order.SelectFactoryControl",SelectFactoryControl);
 			reg("script.order.SelectMaterialControl",SelectMaterialControl);
+			reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
+			reg("script.order.SelectFactoryControl",SelectFactoryControl);
 			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.order.SelectPicControl",SelectPicControl);
 			reg("script.order.SelectTechControl",SelectTechControl);

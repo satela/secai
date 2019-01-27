@@ -27,10 +27,26 @@ package model.orderModel
 		public var outPutAddr:Array;
 		
 		public var productList:Array;//产品材料 列表
+		
+		public var deliveryList:Array;//配送方式列表
+		
+		public var selectDelivery:DeliveryTypeVo;//选择的配送方式
+
 		public function PaintOrderModel()
 		{
 		}
 		
+		public function resetData():void
+		{
+			selectAddress = null;
+			selectFactoryAddress = null;
+			curSelectMat = null;
+			outPutAddr = null;
+			productList = null;
+			deliveryList = null;
+			selectDelivery = null;			
+			
+		}
 		public function initOutputAddr(addrobj:Array):void
 		{
 			outPutAddr = [];

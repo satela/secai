@@ -55,7 +55,6 @@ package script.order
 			{
 				item.ShowSelected = item.address == uiSkin.list_address.array[index];
 			}
-			//(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
 			PaintOrderModel.instance.selectFactoryAddress = uiSkin.list_address.array[index];
 		}
 		

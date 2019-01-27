@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":5,
+    "selectedBox":84,
+    "selecteID":87,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
-    "maxID":106,
+    "maxID":108,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -1106,6 +1106,47 @@
                             "child":[
                                 {
                                     "x":60,
+                                    "type":"Text",
+                                    "selectedBox":3,
+                                    "searchKey":"Text,deliverybtn",
+                                    "props":{"y":10,"x":136,"var":"deliverybtn","text":"选择配送方式","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"color":"#0f2288"},
+                                    "nodeParent":84,
+                                    "maxID":5,
+                                    "label":"deliverybtn",
+                                    "isOpen":null,
+                                    "isDirectory":true,
+                                    "isAniNode":true,
+                                    "hasChild":true,
+                                    "compId":106,
+                                    "child":[
+                                        {
+                                            "type":"Script",
+                                            "switchAble":true,
+                                            "source":"src/script/prefabScript/LinkTextControl.as",
+                                            "searchKey":"Script,LinkTextControl",
+                                            "removeAble":true,
+                                            "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                            "nodeParent":106,
+                                            "label":"LinkTextControl",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":107,
+                                            "child":[
+                                                ]
+                                        }],
+                                    "animations":[
+                                        {
+                                            "nodes":[
+                                                ],
+                                            "name":"ani1",
+                                            "id":1,
+                                            "frameRate":24,
+                                            "action":0
+                                        }]
+                                },
+                                {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"text":"配送方式","fontSize":30},
@@ -1120,25 +1161,11 @@
                                 },
                                 {
                                     "x":60,
-                                    "type":"Text",
-                                    "searchKey":"Text",
-                                    "props":{"y":5,"x":132,"text":"更改配送方式","fontSize":24,"color":"#3028ea"},
-                                    "nodeParent":84,
-                                    "label":"Text",
-                                    "isDirectory":false,
-                                    "isAniNode":true,
-                                    "hasChild":false,
-                                    "compId":86,
-                                    "child":[
-                                        ]
-                                },
-                                {
-                                    "x":60,
                                     "type":"Label",
-                                    "searchKey":"Label",
-                                    "props":{"y":42,"x":0,"width":425,"text":"送货上门 手宋家：0元","height":30,"fontSize":24},
+                                    "searchKey":"Label,deliverytxt",
+                                    "props":{"y":42,"x":0,"width":425,"var":"deliverytxt","text":"送货上门 手宋家：0元","height":30,"fontSize":24},
                                     "nodeParent":84,
-                                    "label":"Label",
+                                    "label":"deliverytxt",
                                     "isDirectory":false,
                                     "isAniNode":true,
                                     "hasChild":false,

@@ -1209,8 +1209,9 @@ var GameConfig=(function(){
 		reg("utils.AddMsgControl",AddMsgControl);
 		reg("script.prefabScript.LinkTextControl",LinkTextControl);
 		reg("script.order.SelectAddressControl",SelectAddressControl);
-		reg("script.order.SelectFactoryControl",SelectFactoryControl);
 		reg("script.order.SelectMaterialControl",SelectMaterialControl);
+		reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
+		reg("script.order.SelectFactoryControl",SelectFactoryControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.order.SelectPicControl",SelectPicControl);
 		reg("script.order.SelectTechControl",SelectTechControl);
@@ -1231,7 +1232,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PaintOrderPanel.scene";
+	GameConfig.startScene="order/SelectDeliveryPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1382,6 +1383,56 @@ var MatetialClassVo=(function(){
 })()
 
 
+//class utils.WaitingRespond
+var WaitingRespond=(function(){
+	function WaitingRespond(){}
+	__class(WaitingRespond,'utils.WaitingRespond');
+	var __proto=WaitingRespond.prototype;
+	__proto.showWaitingView=function(requesTime){
+		(requesTime===void 0)&& (requesTime=10000);
+		if(WaitingRespond.gui.parent==null){
+			Laya.stage.addChild(WaitingRespond.gui);
+		}
+		Laya.timer.clear(WaitingRespond,WaitingRespond.rotatecircle);
+		Laya.timer.clear(WaitingRespond,WaitingRespond.requestTimeOut);
+		Laya.timer.loop(10,WaitingRespond,WaitingRespond.rotatecircle);
+	}
+
+	__proto.hideWaitingView=function(){
+		if(WaitingRespond.gui.parent !=null)
+			Laya.stage.removeChild(WaitingRespond.gui);
+		Laya.timer.clear(WaitingRespond,WaitingRespond.rotatecircle);
+		Laya.timer.clear(WaitingRespond,WaitingRespond.requestTimeOut);
+	}
+
+	__getset(1,WaitingRespond,'instance',function(){
+		if(WaitingRespond._instance==null){
+			WaitingRespond._instance=new WaitingRespond();
+			WaitingRespond.initView();
+		}
+		return WaitingRespond._instance;
+	});
+
+	WaitingRespond.initView=function(){
+		WaitingRespond.gui=new WaitRespondPanelUI();
+	}
+
+	WaitingRespond.rotatecircle=function(){
+		WaitingRespond.gui.zhuanq.rotation+=10;
+	}
+
+	WaitingRespond.requestTimeOut=function(){
+		if(WaitingRespond.gui.parent !=null)
+			Laya.stage.removeChild(WaitingRespond.gui);
+		Laya.timer.clear(WaitingRespond,WaitingRespond.rotatecircle);
+	}
+
+	WaitingRespond._instance=null;
+	WaitingRespond.gui=null;
+	return WaitingRespond;
+})()
+
+
 //class script.ViewManager
 var ViewManager=(function(){
 	function ViewManager(){
@@ -1408,6 +1459,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_PIC_TO_ORDER"]=SelectPicPanelUI;
 		this.viewDict["VIEW_SELECT_MATERIAL"]=SelectMaterialPanelUI;
 		this.viewDict["VIEW_SELECT_TECHNORLOGY"]=SelectTechPanelUI;
+		this.viewDict["VIEW_SELECT_DELIVERY_TYPE"]=SelectDeliveryPanelUI;
 		this.viewDict["VIEW_ADD_MESSAGE"]=AddCommentPanelUI;
 		this.viewDict["VIEW_ADD_NEW_ADDRESS"]=NewAddressPanelUI;
 		this.viewDict["VIEW_LOADING_PRO"]=LoadingPanelUI;
@@ -1471,6 +1523,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_MATERIAL="VIEW_SELECT_MATERIAL";
 	ViewManager.VIEW_SELECT_TECHNORLOGY="VIEW_SELECT_TECHNORLOGY";
 	ViewManager.VIEW_ADD_MESSAGE="VIEW_ADD_MESSAGE";
+	ViewManager.VIEW_SELECT_DELIVERY_TYPE="VIEW_SELECT_DELIVERY_TYPE";
 	ViewManager.VIEW_LOADING_PRO="VIEW_LOADING_PRO";
 	ViewManager.VIEW_ADD_NEW_ADDRESS="VIEW_ADD_NEW_ADDRESS";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
@@ -1611,6 +1664,8 @@ var ProcessCatVo=(function(){
 	}
 
 	__class(ProcessCatVo,'model.orderModel.ProcessCatVo');
+	var __proto=ProcessCatVo.prototype;
+	__proto.initProcFlow=function(flowdata){}
 	return ProcessCatVo;
 })()
 
@@ -1803,13 +1858,18 @@ var HttpRequestUtil=(function(){
 	}
 
 	__proto.onRequestCompete=function(caller,complete,request,data){
+		WaitingRespond.instance.hideWaitingView();
 		Laya.timer.clearAll(request);
 		if(caller&&complete)complete.call(caller,data);
 		request.offAll();
 	}
 
-	__proto.Request=function(url,caller,complete,param,type,onProgressFun){
+	__proto.Request=function(url,caller,complete,param,type,onProgressFun,showwaiting){
 		(type===void 0)&& (type="get");
+		(showwaiting===void 0)&& (showwaiting=true);
+		if(showwaiting){
+			WaitingRespond.instance.showWaitingView();
+		}
 		this.newRequest(url,caller,complete,param,type);
 	}
 
@@ -1818,7 +1878,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//
+	//procCat_name=//获取工艺流
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -1843,6 +1903,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=og001&";
 	HttpRequestUtil.getProdList="business/prodlist?client_code=og001&addr_id=120106&";
 	HttpRequestUtil.getProcessCatList="business/processcatlist?prod_code=";
+	HttpRequestUtil.getProcessFlow="business/procflowlist?manufacturer_code=og002&procCat_name=";
+	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700";
 	return HttpRequestUtil;
 })()
 
@@ -1907,6 +1969,56 @@ var FactoryInfoVo=(function(){
 })()
 
 
+//class model.orderModel.DeliveryTypeVo
+var DeliveryTypeVo=(function(){
+	function DeliveryTypeVo(data){
+		this.delivery_Code="";
+		// 配送方式编码
+		this.delivery_Name="";
+		// 配送方式名称
+		this.start_weight=0;
+		// 首重(kg)
+		this.post_weight=0;
+		// 续重(kg)
+		this.first_volume=0;
+		// 首体积(立方)
+		this.post_volume=0;
+		// 续体积(立方)
+		this.factor=0;
+		// 转换系数
+		this.limit_weight=0;
+		// 限重(kg)
+		this.limit_length=0;
+		// 限长(cm)
+		this.limit_width=0;
+		// 限宽(cm)
+		this.limit_height=0;
+		// 限高(cm)
+		this.deliverynet_code="";
+		// 网点编码
+		this.deliverynet_name="";
+		// 网点名称
+		this.firstweight_price=0;
+		// 首重价格
+		this.addedweight_price=0;
+		// 续重价格
+		this.firstvol_price=0;
+		// 首体积价格
+		this.addedvol_price=0;
+		for(var key in data)
+		this[key]=data[key];
+	}
+
+	__class(DeliveryTypeVo,'model.orderModel.DeliveryTypeVo');
+	var __proto=DeliveryTypeVo.prototype;
+	__getset(0,__proto,'deliveryDesc',function(){
+		return this.deliverynet_name+",首重："+this.start_weight+"kg,"+"续重"+this.post_weight+"kg,"+"首重价格："+this.firstweight_price+"元/kg,"+"续重价格："+this.addedweight_price+"元/kg。";
+	});
+
+	return DeliveryTypeVo;
+})()
+
+
 //class model.users.CityAreaVo
 var CityAreaVo=(function(){
 	function CityAreaVo(){
@@ -1931,10 +2043,24 @@ var PaintOrderModel=(function(){
 		this.curSelectMat=null;
 		this.outPutAddr=null;
 		this.productList=null;
+		//产品材料 列表
+		this.deliveryList=null;
+		//配送方式列表
+		this.selectDelivery=null;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
 	var __proto=PaintOrderModel.prototype;
+	__proto.resetData=function(){
+		this.selectAddress=null;
+		this.selectFactoryAddress=null;
+		this.curSelectMat=null;
+		this.outPutAddr=null;
+		this.productList=null;
+		this.deliveryList=null;
+		this.selectDelivery=null;
+	}
+
 	__proto.initOutputAddr=function(addrobj){
 		this.outPutAddr=[];
 		for(var i=0;i < addrobj.length;i++){
@@ -26220,6 +26346,7 @@ var EventCenter=(function(_super){
 	EventCenter.SELECT_PIC_ORDER="SELECT_PIC_ORDER";
 	EventCenter.SELECT_ORDER_ADDRESS="SELECT_ORDER_ADDRESS";
 	EventCenter.SELECT_OUT_ADDRESS="SELECT_OUT_ADDRESS";
+	EventCenter.SELECT_DELIVERY_TYPE="SELECT_DELIVERY_TYPE";
 	EventCenter.ADD_PIC_FOR_ORDER="ADD_PIC_FOR_ORDER";
 	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
@@ -27437,6 +27564,777 @@ var Loader=(function(_super){
 	Loader._isWorking=false;
 	Loader._startIndex=0;
 	return Loader;
+})(EventDispatcher)
+
+
+/**
+*<p> <code>LoaderManager</code> 类用于用于批量加载资源。此类是单例，不要手动实例化此类，请通过Laya.loader访问。</p>
+*<p>全部队列加载完成，会派发 Event.COMPLETE 事件；如果队列中任意一个加载失败，会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
+*<p> <code>LoaderManager</code> 类提供了以下几种功能：<br/>
+*多线程：默认5个加载线程，可以通过maxLoader属性修改线程数量；<br/>
+*多优先级：有0-4共5个优先级，优先级高的优先加载。0最高，4最低；<br/>
+*重复过滤：自动过滤重复加载（不会有多个相同地址的资源同时加载）以及复用缓存资源，防止重复加载；<br/>
+*错误重试：资源加载失败后，会重试加载（以最低优先级插入加载队列），retryNum设定加载失败后重试次数，retryDelay设定加载重试的时间间隔。</p>
+*@see laya.net.Loader
+*/
+//class laya.net.LoaderManager extends laya.events.EventDispatcher
+var LoaderManager=(function(_super){
+	var ResInfo;
+	function LoaderManager(){
+		/**加载出错后的重试次数，默认重试一次*/
+		this.retryNum=1;
+		/**延迟时间多久再进行错误重试，默认立即重试*/
+		this.retryDelay=0;
+		/**最大下载线程，默认为5个*/
+		this.maxLoader=5;
+		/**@private */
+		this._loaders=[];
+		/**@private */
+		this._loaderCount=0;
+		/**@private */
+		this._resInfos=[];
+		/**@private */
+		this._infoPool=[];
+		/**@private */
+		this._maxPriority=5;
+		/**@private */
+		this._failRes={};
+		/**@private */
+		this._statInfo={count:1,loaded:1};
+		LoaderManager.__super.call(this);
+		for (var i=0;i < this._maxPriority;i++)this._resInfos[i]=[];
+	}
+
+	__class(LoaderManager,'laya.net.LoaderManager',_super);
+	var __proto=LoaderManager.prototype;
+	/**@private */
+	__proto.getProgress=function(){
+		return this._statInfo.loaded / this._statInfo.count;
+	}
+
+	/**@private */
+	__proto.resetProgress=function(){
+		this._statInfo.count=this._statInfo.loaded=1;
+	}
+
+	/**
+	*<p>根据clas类型创建一个未初始化资源的对象，随后进行异步加载，资源加载完成后，初始化对象的资源，并通过此对象派发 Event.LOADED 事件，事件回调参数值为此对象本身。套嵌资源的子资源会保留资源路径"?"后的部分。</p>
+	*<p>如果url为数组，返回true；否则返回指定的资源类对象，可以通过侦听此对象的 Event.LOADED 事件来判断资源是否已经加载完毕。</p>
+	*<p><b>注意：</b>cache参数只能对文件后缀为atlas的资源进行缓存控制，其他资源会忽略缓存，强制重新加载。</p>
+	*@param url 资源地址或者数组。如果url和clas同时指定了资源类型，优先使用url指定的资源类型。参数形如：[{url:xx,clas:xx,priority:xx,params:xx},{url:xx,clas:xx,priority:xx,params:xx}]。
+	*@param complete 加载结束回调。根据url类型不同分为2种情况：1. url为String类型，也就是单个资源地址，如果加载成功，则回调参数值为加载完成的资源，否则为null；2. url为数组类型，指定了一组要加载的资源，如果全部加载成功，则回调参数值为true，否则为false。
+	*@param progress 资源加载进度回调，回调参数值为当前资源加载的进度信息(0-1)。
+	*@param type 资源类型。
+	*@param constructParams 资源构造函数参数。
+	*@param propertyParams 资源属性参数。
+	*@param priority (default=1)加载的优先级，优先级高的优先加载。有0-4共5个优先级，0最高，4最低。
+	*@param cache 是否缓存加载的资源。
+	*@return 如果url为数组，返回true；否则返回指定的资源类对象。
+	*/
+	__proto.create=function(url,complete,progress,type,constructParams,propertyParams,priority,cache){
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		this._create(url,true,complete,progress,type,constructParams,propertyParams,priority,cache);
+	}
+
+	/**
+	*@private
+	*/
+	__proto._create=function(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache){
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		if ((url instanceof Array)){
+			var items=url;
+			var itemCount=items.length;
+			var loadedCount=0;
+			if (progress){
+				var progress2=Handler.create(progress.caller,progress.method,progress.args,false);
+			}
+			for (var i=0;i < itemCount;i++){
+				var item=items[i];
+				if ((typeof item=='string'))
+					item=items[i]={url:item};
+				item.progress=0;
+			}
+			for (i=0;i < itemCount;i++){
+				item=items[i];
+				var progressHandler=progress ? Handler.create(null,onProgress,[item],false):null;
+				var completeHandler=(progress || complete)? Handler.create(null,onComplete,[item]):null;
+				this._createOne(item.url,mainResou,completeHandler,progressHandler,item.type || type,item.constructParams || constructParams,item.propertyParams || propertyParams,item.priority || priority,cache);
+			}
+			function onComplete (item,content){
+				loadedCount++;
+				item.progress=1;
+				if (loadedCount===itemCount && complete){
+					complete.run();
+				}
+			}
+			function onProgress (item,value){
+				item.progress=value;
+				var num=0;
+				for (var j=0;j < itemCount;j++){
+					var item1=items[j];
+					num+=item1.progress;
+				};
+				var v=num / itemCount;
+				progress2.runWith(v);
+			}
+			}else {
+			this._createOne(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache);
+		}
+	}
+
+	/**
+	*@private
+	*/
+	__proto._createOne=function(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache){
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		var item=this.getRes(url);
+		if (!item){
+			var extension=Utils.getFileExtension(url);
+			(type)|| (type=LoaderManager.createMap[extension]? LoaderManager.createMap[extension][0]:null);
+			if (!type){
+				this.load(url,complete,progress,type,priority,cache);
+				return;
+			};
+			var parserMap=Loader.parserMap;
+			if (!parserMap[type]){
+				this.load(url,complete,progress,type,priority,cache);
+				return;
+			}
+			this._createLoad(url,Handler.create(null,onLoaded),progress,type,constructParams,propertyParams,priority,cache,true);
+			function onLoaded (item){
+				if (!mainResou && (item instanceof laya.resource.Resource ))
+					item._addReference();
+				complete && complete.runWith(item);
+				Laya.loader.event(url);
+			};
+			}else {
+			if (!mainResou && (item instanceof laya.resource.Resource ))
+				item._addReference();
+			progress && progress.runWith(1);
+			complete && complete.runWith(item);
+		}
+	}
+
+	/**
+	*<p>加载资源。资源加载错误时，本对象会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
+	*<p>因为返回值为 LoaderManager 对象本身，所以可以使用如下语法：loaderManager.load(...).load(...);</p>
+	*@param url 要加载的单个资源地址或资源信息数组。比如：简单数组：["a.png","b.png"]；复杂数组[{url:"a.png",type:Loader.IMAGE,size:100,priority:1},{url:"b.json",type:Loader.JSON,size:50,priority:1}]。
+	*@param complete 加载结束回调。根据url类型不同分为2种情况：1. url为String类型，也就是单个资源地址，如果加载成功，则回调参数值为加载完成的资源，否则为null；2. url为数组类型，指定了一组要加载的资源，如果全部加载成功，则回调参数值为true，否则为false。
+	*@param progress 加载进度回调。回调参数值为当前资源的加载进度信息(0-1)。
+	*@param type 资源类型。比如：Loader.IMAGE。
+	*@param priority (default=1)加载的优先级，优先级高的优先加载。有0-4共5个优先级，0最高，4最低。
+	*@param cache 是否缓存加载结果。
+	*@param group 分组，方便对资源进行管理。
+	*@param ignoreCache 是否忽略缓存，强制重新加载。
+	*@param useWorkerLoader(default=false)是否使用worker加载（只针对IMAGE类型和ATLAS类型，并且浏览器支持的情况下生效）
+	*@return 此 LoaderManager 对象本身。
+	*/
+	__proto.load=function(url,complete,progress,type,priority,cache,group,ignoreCache,useWorkerLoader){
+		var _$this=this;
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		(ignoreCache===void 0)&& (ignoreCache=false);
+		(useWorkerLoader===void 0)&& (useWorkerLoader=false);
+		if ((url instanceof Array))return this._loadAssets(url,complete,progress,type,priority,cache,group);
+		var content=Loader.getRes(url);
+		if (!ignoreCache && content !=null){
+			Laya.systemTimer.frameOnce(1,null,function(){
+				progress && progress.runWith(1);
+				complete && complete.runWith(content);
+				_$this._loaderCount || _$this.event("complete");
+			});
+			}else {
+			var original;
+			original=url;
+			url=AtlasInfoManager.getFileLoadPath(url);
+			if (url !=original && type!=="nativeimage"){
+				type="atlas";
+				}else {
+				original=null;
+			};
+			var info=LoaderManager._resMap[url];
+			if (!info){
+				info=this._infoPool.length ? this._infoPool.pop():new ResInfo();
+				info.url=url;
+				info.type=type;
+				info.cache=cache;
+				info.group=group;
+				info.ignoreCache=ignoreCache;
+				info.useWorkerLoader=useWorkerLoader;
+				info.originalUrl=original;
+				complete && info.on("complete",complete.caller,complete.method,complete.args);
+				progress && info.on("progress",progress.caller,progress.method,progress.args);
+				LoaderManager._resMap[url]=info;
+				priority=priority < this._maxPriority ? priority :this._maxPriority-1;
+				this._resInfos[priority].push(info);
+				this._statInfo.count++;
+				this.event("progress",this.getProgress());
+				this._next();
+				}else {
+				if (complete){
+					if (original){
+						complete && info._createListener("complete",this,this._resInfoLoaded,[original,complete],false,false);
+						}else {
+						complete && info._createListener("complete",complete.caller,complete.method,complete.args,false,false);
+					}
+				}
+				progress && info._createListener("progress",progress.caller,progress.method,progress.args,false,false);
+			}
+		}
+		return this;
+	}
+
+	__proto._resInfoLoaded=function(original,complete){
+		complete.runWith(Loader.getRes(original));
+	}
+
+	/**
+	*@private
+	*/
+	__proto._createLoad=function(url,complete,progress,type,constructParams,propertyParams,priority,cache,ignoreCache){
+		var _$this=this;
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		(ignoreCache===void 0)&& (ignoreCache=false);
+		if ((url instanceof Array))return this._loadAssets(url,complete,progress,type,priority,cache);
+		var content=Loader.getRes(url);
+		if (content !=null){
+			Laya.systemTimer.frameOnce(1,null,function(){
+				progress && progress.runWith(1);
+				complete && complete.runWith(content);
+				_$this._loaderCount || _$this.event("complete");
+			});
+			}else {
+			var info=LoaderManager._resMap[url];
+			if (!info){
+				info=this._infoPool.length ? this._infoPool.pop():new ResInfo();
+				info.url=url;
+				info.type=type;
+				info.cache=false;
+				info.ignoreCache=ignoreCache;
+				info.originalUrl=null;
+				info.createCache=cache;
+				info.createConstructParams=constructParams;
+				info.createPropertyParams=propertyParams;
+				complete && info.on("complete",complete.caller,complete.method,complete.args);
+				progress && info.on("progress",progress.caller,progress.method,progress.args);
+				LoaderManager._resMap[url]=info;
+				priority=priority < this._maxPriority ? priority :this._maxPriority-1;
+				this._resInfos[priority].push(info);
+				this._statInfo.count++;
+				this.event("progress",this.getProgress());
+				this._next();
+				}else {
+				complete && info._createListener("complete",complete.caller,complete.method,complete.args,false,false);
+				progress && info._createListener("progress",progress.caller,progress.method,progress.args,false,false);
+			}
+		}
+		return this;
+	}
+
+	__proto._next=function(){
+		if (this._loaderCount >=this.maxLoader)return;
+		for (var i=0;i < this._maxPriority;i++){
+			var infos=this._resInfos[i];
+			while (infos.length > 0){
+				var info=infos.shift();
+				if (info)return this._doLoad(info);
+			}
+		}
+		this._loaderCount || this.event("complete");
+	}
+
+	__proto._doLoad=function(resInfo){
+		this._loaderCount++;
+		var loader=this._loaders.length ? this._loaders.pop():new Loader();
+		loader.on("complete",null,onLoaded);
+		loader.on("progress",null,function(num){
+			resInfo.event("progress",num);
+		});
+		loader.on("error",null,function(msg){
+			onLoaded(null);
+		});
+		var _me=this;
+		function onLoaded (data){
+			loader.offAll();
+			loader._data=null;
+			loader._customParse=false;
+			_me._loaders.push(loader);
+			_me._endLoad(resInfo,(data instanceof Array)? [data] :data);
+			_me._loaderCount--;
+			_me._next();
+		}
+		loader._constructParams=resInfo.createConstructParams;
+		loader._propertyParams=resInfo.createPropertyParams;
+		loader._createCache=resInfo.createCache;
+		loader.load(resInfo.url,resInfo.type,resInfo.cache,resInfo.group,resInfo.ignoreCache,resInfo.useWorkerLoader);
+	}
+
+	__proto._endLoad=function(resInfo,content){
+		var url=resInfo.url;
+		if (content==null){
+			var errorCount=this._failRes[url] || 0;
+			if (errorCount < this.retryNum){
+				console.warn("[warn]Retry to load:",url);
+				this._failRes[url]=errorCount+1;
+				Laya.systemTimer.once(this.retryDelay,this,this._addReTry,[resInfo],false);
+				return;
+				}else {
+				Loader.clearRes(url);
+				console.warn("[error]Failed to load:",url);
+				this.event("error",url);
+			}
+		}
+		if (this._failRes[url])this._failRes[url]=0;
+		delete LoaderManager._resMap[url];
+		if (resInfo.originalUrl){
+			content=Loader.getRes(resInfo.originalUrl);
+		}
+		resInfo.event("complete",content);
+		resInfo.offAll();
+		this._infoPool.push(resInfo);
+		this._statInfo.loaded++;
+		this.event("progress",this.getProgress());
+	}
+
+	__proto._addReTry=function(resInfo){
+		this._resInfos[this._maxPriority-1].push(resInfo);
+		this._next();
+	}
+
+	/**
+	*清理指定资源地址缓存。
+	*@param url 资源地址。
+	*/
+	__proto.clearRes=function(url){
+		Loader.clearRes(url);
+	}
+
+	/**
+	*销毁Texture使用的图片资源，保留texture壳，如果下次渲染的时候，发现texture使用的图片资源不存在，则会自动恢复
+	*相比clearRes，clearTextureRes只是清理texture里面使用的图片资源，并不销毁texture，再次使用到的时候会自动恢复图片资源
+	*而clearRes会彻底销毁texture，导致不能再使用；clearTextureRes能确保立即销毁图片资源，并且不用担心销毁错误，clearRes则采用引用计数方式销毁
+	*【注意】如果图片本身在自动合集里面（默认图片小于512*512），内存是不能被销毁的，此图片被大图合集管理器管理
+	*@param url 图集地址或者texture地址，比如 Loader.clearTextureRes("res/atlas/comp.atlas");Loader.clearTextureRes("hall/bg.jpg");
+	*/
+	__proto.clearTextureRes=function(url){
+		Loader.clearTextureRes(url);
+	}
+
+	/**
+	*获取指定资源地址的资源。
+	*@param url 资源地址。
+	*@return 返回资源。
+	*/
+	__proto.getRes=function(url){
+		return Loader.getRes(url);
+	}
+
+	/**
+	*缓存资源。
+	*@param url 资源地址。
+	*@param data 要缓存的内容。
+	*/
+	__proto.cacheRes=function(url,data){
+		Loader.cacheRes(url,data);
+	}
+
+	/**
+	*设置资源分组。
+	*@param url 资源地址。
+	*@param group 分组名
+	*/
+	__proto.setGroup=function(url,group){
+		Loader.setGroup(url,group);
+	}
+
+	/**
+	*根据分组清理资源。
+	*@param group 分组名
+	*/
+	__proto.clearResByGroup=function(group){
+		Loader.clearResByGroup(group);
+	}
+
+	/**清理当前未完成的加载，所有未加载的内容全部停止加载。*/
+	__proto.clearUnLoaded=function(){
+		for (var i=0;i < this._maxPriority;i++){
+			var infos=this._resInfos[i];
+			for (var j=infos.length-1;j >-1;j--){
+				var info=infos[j];
+				if (info){
+					info.offAll();
+					this._infoPool.push(info);
+				}
+			}
+			infos.length=0;
+		}
+		this._loaderCount=0;
+		LoaderManager._resMap={};
+	}
+
+	/**
+	*根据地址集合清理掉未加载的内容
+	*@param urls 资源地址集合
+	*/
+	__proto.cancelLoadByUrls=function(urls){
+		if (!urls)return;
+		for (var i=0,n=urls.length;i < n;i++){
+			this.cancelLoadByUrl(urls[i]);
+		}
+	}
+
+	/**
+	*根据地址清理掉未加载的内容
+	*@param url 资源地址
+	*/
+	__proto.cancelLoadByUrl=function(url){
+		for (var i=0;i < this._maxPriority;i++){
+			var infos=this._resInfos[i];
+			for (var j=infos.length-1;j >-1;j--){
+				var info=infos[j];
+				if (info && info.url===url){
+					infos[j]=null;
+					info.offAll();
+					this._infoPool.push(info);
+				}
+			}
+		}
+		if (LoaderManager._resMap[url])delete LoaderManager._resMap[url];
+	}
+
+	/**
+	*@private
+	*加载数组里面的资源。
+	*@param arr 简单：["a.png","b.png"]，复杂[{url:"a.png",type:Loader.IMAGE,size:100,priority:1,useWorkerLoader:true},{url:"b.json",type:Loader.JSON,size:50,priority:1}]*/
+	__proto._loadAssets=function(arr,complete,progress,type,priority,cache,group){
+		(priority===void 0)&& (priority=1);
+		(cache===void 0)&& (cache=true);
+		var itemCount=arr.length;
+		var loadedCount=0;
+		var totalSize=0;
+		var items=[];
+		var success=true;
+		for (var i=0;i < itemCount;i++){
+			var item=arr[i];
+			if ((typeof item=='string'))item={url:item,type:type,size:1,priority:priority};
+			if (!item.size)item.size=1;
+			item.progress=0;
+			totalSize+=item.size;
+			items.push(item);
+			var progressHandler=progress ? Handler.create(null,loadProgress,[item],false):null;
+			var completeHandler=(complete || progress)? Handler.create(null,loadComplete,[item]):null;
+			this.load(item.url,completeHandler,progressHandler,item.type,item.priority || 1,cache,item.group || group,false,item.useWorkerLoader);
+		}
+		function loadComplete (item,content){
+			loadedCount++;
+			item.progress=1;
+			if (!content)success=false;
+			if (loadedCount===itemCount && complete){
+				complete.runWith(success);
+			}
+		}
+		function loadProgress (item,value){
+			if (progress !=null){
+				item.progress=value;
+				var num=0;
+				for (var j=0;j < items.length;j++){
+					var item1=items[j];
+					num+=item1.size *item1.progress;
+				};
+				var v=num / totalSize;
+				progress.runWith(v);
+			}
+		}
+		return this;
+	}
+
+	//TODO:TESTs
+	__proto.decodeBitmaps=function(urls){
+		var i=0,len=urls.length;
+		var ctx;
+		ctx=Render._context;
+		for (i=0;i < len;i++){
+			var atlas;
+			atlas=Loader.getAtlas(urls[i]);
+			if (atlas){
+				this._decodeTexture(atlas[0],ctx);
+				}else {
+				var tex;
+				tex=this.getRes(urls[i]);
+				if (tex && (tex instanceof laya.resource.Texture )){
+					this._decodeTexture(tex,ctx);
+				}
+			}
+		}
+	}
+
+	__proto._decodeTexture=function(tex,ctx){
+		var bitmap=tex.bitmap;
+		if (!tex || !bitmap)return;
+		var tImg=bitmap.source || bitmap.image;
+		if (!tImg)return;
+		if (Laya.__typeof(tImg,Browser.window.HTMLImageElement)){
+			ctx.drawImage(tImg,0,0,1,1);
+			var info=ctx.getImageData(0,0,1,1);
+		}
+	}
+
+	LoaderManager.cacheRes=function(url,data){
+		Loader.cacheRes(url,data);
+	}
+
+	LoaderManager._resMap={};
+	__static(LoaderManager,
+	['createMap',function(){return this.createMap={atlas:[null,"atlas"]};}
+	]);
+	LoaderManager.__init$=function(){
+		//class ResInfo extends laya.events.EventDispatcher
+		ResInfo=(function(_super){
+			function ResInfo(){
+				this.url=null;
+				this.type=null;
+				this.cache=false;
+				this.group=null;
+				this.ignoreCache=false;
+				this.useWorkerLoader=false;
+				this.originalUrl=null;
+				this.createCache=false;
+				this.createConstructParams=null;
+				this.createPropertyParams=null;
+				ResInfo.__super.call(this);
+			}
+			__class(ResInfo,'',_super);
+			return ResInfo;
+		})(EventDispatcher)
+	}
+
+	return LoaderManager;
+})(EventDispatcher)
+
+
+/**
+*@private
+*web audio api方式播放声音
+*/
+//class laya.media.webaudio.WebAudioSound extends laya.events.EventDispatcher
+var WebAudioSound=(function(_super){
+	function WebAudioSound(){
+		/**
+		*声音URL
+		*/
+		this.url=null;
+		/**
+		*是否已加载完成
+		*/
+		this.loaded=false;
+		/**
+		*声音文件数据
+		*/
+		this.data=null;
+		/**
+		*声音原始文件数据
+		*/
+		this.audioBuffer=null;
+		/**
+		*待播放的声音列表
+		*/
+		this.__toPlays=null;
+		/**
+		*@private
+		*/
+		this._disposed=false;
+		WebAudioSound.__super.call(this);
+	}
+
+	__class(WebAudioSound,'laya.media.webaudio.WebAudioSound',_super);
+	var __proto=WebAudioSound.prototype;
+	/**
+	*加载声音
+	*@param url
+	*
+	*/
+	__proto.load=function(url){
+		var me=this;
+		url=URL.formatURL(url);
+		this.url=url;
+		this.audioBuffer=WebAudioSound._dataCache[url];
+		if (this.audioBuffer){
+			this._loaded(this.audioBuffer);
+			return;
+		}
+		WebAudioSound.e.on("loaded:"+url,this,this._loaded);
+		WebAudioSound.e.on("err:"+url,this,this._err);
+		if (WebAudioSound.__loadingSound[url]){
+			return;
+		}
+		WebAudioSound.__loadingSound[url]=true;
+		var request=new Browser.window.XMLHttpRequest();
+		request.open("GET",url,true);
+		request.responseType="arraybuffer";
+		request.onload=function (){
+			if (me._disposed){
+				me._removeLoadEvents();
+				return;
+			}
+			me.data=request.response;
+			WebAudioSound.buffs.push({"buffer":me.data,"url":me.url});
+			WebAudioSound.decode();
+		};
+		request.onerror=function (e){
+			me._err();
+		}
+		request.send();
+	}
+
+	__proto._err=function(){
+		this._removeLoadEvents();
+		WebAudioSound.__loadingSound[this.url]=false;
+		this.event("error");
+	}
+
+	__proto._loaded=function(audioBuffer){
+		this._removeLoadEvents();
+		if (this._disposed){
+			return;
+		}
+		this.audioBuffer=audioBuffer;
+		WebAudioSound._dataCache[this.url]=this.audioBuffer;
+		this.loaded=true;
+		this.event("complete");
+	}
+
+	__proto._removeLoadEvents=function(){
+		WebAudioSound.e.off("loaded:"+this.url,this,this._loaded);
+		WebAudioSound.e.off("err:"+this.url,this,this._err);
+	}
+
+	__proto.__playAfterLoaded=function(){
+		if (!this.__toPlays)return;
+		var i=0,len=0;
+		var toPlays;
+		toPlays=this.__toPlays;
+		len=toPlays.length;
+		var tParams;
+		for (i=0;i < len;i++){
+			tParams=toPlays[i];
+			if (tParams[2] && !(tParams [2]).isStopped){
+				this.play(tParams[0],tParams[1],tParams[2]);
+			}
+		}
+		this.__toPlays.length=0;
+	}
+
+	/**
+	*播放声音
+	*@param startTime 起始时间
+	*@param loops 循环次数
+	*@return
+	*
+	*/
+	__proto.play=function(startTime,loops,channel){
+		(startTime===void 0)&& (startTime=0);
+		(loops===void 0)&& (loops=0);
+		channel=channel ? channel :new WebAudioSoundChannel();
+		if (!this.audioBuffer){
+			if (this.url){
+				if (!this.__toPlays)this.__toPlays=[];
+				this.__toPlays.push([startTime,loops,channel]);
+				this.once("complete",this,this.__playAfterLoaded);
+				this.load(this.url);
+			}
+		}
+		channel.url=this.url;
+		channel.loops=loops;
+		channel["audioBuffer"]=this.audioBuffer;
+		channel.startTime=startTime;
+		channel.play();
+		SoundManager.addChannel(channel);
+		return channel;
+	}
+
+	__proto.dispose=function(){
+		this._disposed=true;
+		delete WebAudioSound._dataCache[this.url];
+		delete WebAudioSound.__loadingSound[this.url];
+		this.audioBuffer=null;
+		this.data=null;
+		this.__toPlays=[];
+	}
+
+	__getset(0,__proto,'duration',function(){
+		if (this.audioBuffer){
+			return this.audioBuffer.duration;
+		}
+		return 0;
+	});
+
+	WebAudioSound.decode=function(){
+		if (WebAudioSound.buffs.length <=0 || WebAudioSound.isDecoding){
+			return;
+		}
+		WebAudioSound.isDecoding=true;
+		WebAudioSound.tInfo=WebAudioSound.buffs.shift();
+		WebAudioSound.ctx.decodeAudioData(WebAudioSound.tInfo["buffer"],WebAudioSound._done,WebAudioSound._fail);
+	}
+
+	WebAudioSound._done=function(audioBuffer){
+		WebAudioSound.e.event("loaded:"+WebAudioSound.tInfo.url,audioBuffer);
+		WebAudioSound.isDecoding=false;
+		WebAudioSound.decode();
+	}
+
+	WebAudioSound._fail=function(){
+		WebAudioSound.e.event("err:"+WebAudioSound.tInfo.url,null);
+		WebAudioSound.isDecoding=false;
+		WebAudioSound.decode();
+	}
+
+	WebAudioSound._playEmptySound=function(){
+		if (WebAudioSound.ctx==null){
+			return;
+		};
+		var source=WebAudioSound.ctx.createBufferSource();
+		source.buffer=WebAudioSound._miniBuffer;
+		source.connect(WebAudioSound.ctx.destination);
+		source.start(0,0,0);
+	}
+
+	WebAudioSound._unlock=function(){
+		if (WebAudioSound._unlocked){
+			return;
+		}
+		WebAudioSound._playEmptySound();
+		if (WebAudioSound.ctx.state=="running"){
+			Browser.document.removeEventListener("mousedown",WebAudioSound._unlock,true);
+			Browser.document.removeEventListener("touchend",WebAudioSound._unlock,true);
+			Browser.document.removeEventListener("touchstart",WebAudioSound._unlock,true);
+			WebAudioSound._unlocked=true;
+		}
+	}
+
+	WebAudioSound.initWebAudio=function(){
+		if (WebAudioSound.ctx.state !="running"){
+			WebAudioSound._unlock();
+			Browser.document.addEventListener("mousedown",WebAudioSound._unlock,true);
+			Browser.document.addEventListener("touchend",WebAudioSound._unlock,true);
+			Browser.document.addEventListener("touchstart",WebAudioSound._unlock,true);
+		}
+	}
+
+	WebAudioSound._dataCache={};
+	WebAudioSound.buffs=[];
+	WebAudioSound.isDecoding=false;
+	WebAudioSound._unlocked=false;
+	WebAudioSound.tInfo=null;
+	WebAudioSound.__loadingSound={};
+	__static(WebAudioSound,
+	['window',function(){return this.window=Browser.window;},'webAudioEnabled',function(){return this.webAudioEnabled=WebAudioSound.window["AudioContext"] || WebAudioSound.window["webkitAudioContext"] || WebAudioSound.window["mozAudioContext"];},'ctx',function(){return this.ctx=WebAudioSound.webAudioEnabled ? new (WebAudioSound.window["AudioContext"] || WebAudioSound.window["webkitAudioContext"] || WebAudioSound.window["mozAudioContext"])():undefined;},'_miniBuffer',function(){return this._miniBuffer=WebAudioSound.ctx.createBuffer(1,1,22050);},'e',function(){return this.e=new EventDispatcher();}
+	]);
+	return WebAudioSound;
 })(EventDispatcher)
 
 
@@ -29045,777 +29943,6 @@ var WebGLContext2D=(function(_super){
 
 
 /**
-*<p> <code>LoaderManager</code> 类用于用于批量加载资源。此类是单例，不要手动实例化此类，请通过Laya.loader访问。</p>
-*<p>全部队列加载完成，会派发 Event.COMPLETE 事件；如果队列中任意一个加载失败，会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
-*<p> <code>LoaderManager</code> 类提供了以下几种功能：<br/>
-*多线程：默认5个加载线程，可以通过maxLoader属性修改线程数量；<br/>
-*多优先级：有0-4共5个优先级，优先级高的优先加载。0最高，4最低；<br/>
-*重复过滤：自动过滤重复加载（不会有多个相同地址的资源同时加载）以及复用缓存资源，防止重复加载；<br/>
-*错误重试：资源加载失败后，会重试加载（以最低优先级插入加载队列），retryNum设定加载失败后重试次数，retryDelay设定加载重试的时间间隔。</p>
-*@see laya.net.Loader
-*/
-//class laya.net.LoaderManager extends laya.events.EventDispatcher
-var LoaderManager=(function(_super){
-	var ResInfo;
-	function LoaderManager(){
-		/**加载出错后的重试次数，默认重试一次*/
-		this.retryNum=1;
-		/**延迟时间多久再进行错误重试，默认立即重试*/
-		this.retryDelay=0;
-		/**最大下载线程，默认为5个*/
-		this.maxLoader=5;
-		/**@private */
-		this._loaders=[];
-		/**@private */
-		this._loaderCount=0;
-		/**@private */
-		this._resInfos=[];
-		/**@private */
-		this._infoPool=[];
-		/**@private */
-		this._maxPriority=5;
-		/**@private */
-		this._failRes={};
-		/**@private */
-		this._statInfo={count:1,loaded:1};
-		LoaderManager.__super.call(this);
-		for (var i=0;i < this._maxPriority;i++)this._resInfos[i]=[];
-	}
-
-	__class(LoaderManager,'laya.net.LoaderManager',_super);
-	var __proto=LoaderManager.prototype;
-	/**@private */
-	__proto.getProgress=function(){
-		return this._statInfo.loaded / this._statInfo.count;
-	}
-
-	/**@private */
-	__proto.resetProgress=function(){
-		this._statInfo.count=this._statInfo.loaded=1;
-	}
-
-	/**
-	*<p>根据clas类型创建一个未初始化资源的对象，随后进行异步加载，资源加载完成后，初始化对象的资源，并通过此对象派发 Event.LOADED 事件，事件回调参数值为此对象本身。套嵌资源的子资源会保留资源路径"?"后的部分。</p>
-	*<p>如果url为数组，返回true；否则返回指定的资源类对象，可以通过侦听此对象的 Event.LOADED 事件来判断资源是否已经加载完毕。</p>
-	*<p><b>注意：</b>cache参数只能对文件后缀为atlas的资源进行缓存控制，其他资源会忽略缓存，强制重新加载。</p>
-	*@param url 资源地址或者数组。如果url和clas同时指定了资源类型，优先使用url指定的资源类型。参数形如：[{url:xx,clas:xx,priority:xx,params:xx},{url:xx,clas:xx,priority:xx,params:xx}]。
-	*@param complete 加载结束回调。根据url类型不同分为2种情况：1. url为String类型，也就是单个资源地址，如果加载成功，则回调参数值为加载完成的资源，否则为null；2. url为数组类型，指定了一组要加载的资源，如果全部加载成功，则回调参数值为true，否则为false。
-	*@param progress 资源加载进度回调，回调参数值为当前资源加载的进度信息(0-1)。
-	*@param type 资源类型。
-	*@param constructParams 资源构造函数参数。
-	*@param propertyParams 资源属性参数。
-	*@param priority (default=1)加载的优先级，优先级高的优先加载。有0-4共5个优先级，0最高，4最低。
-	*@param cache 是否缓存加载的资源。
-	*@return 如果url为数组，返回true；否则返回指定的资源类对象。
-	*/
-	__proto.create=function(url,complete,progress,type,constructParams,propertyParams,priority,cache){
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		this._create(url,true,complete,progress,type,constructParams,propertyParams,priority,cache);
-	}
-
-	/**
-	*@private
-	*/
-	__proto._create=function(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache){
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		if ((url instanceof Array)){
-			var items=url;
-			var itemCount=items.length;
-			var loadedCount=0;
-			if (progress){
-				var progress2=Handler.create(progress.caller,progress.method,progress.args,false);
-			}
-			for (var i=0;i < itemCount;i++){
-				var item=items[i];
-				if ((typeof item=='string'))
-					item=items[i]={url:item};
-				item.progress=0;
-			}
-			for (i=0;i < itemCount;i++){
-				item=items[i];
-				var progressHandler=progress ? Handler.create(null,onProgress,[item],false):null;
-				var completeHandler=(progress || complete)? Handler.create(null,onComplete,[item]):null;
-				this._createOne(item.url,mainResou,completeHandler,progressHandler,item.type || type,item.constructParams || constructParams,item.propertyParams || propertyParams,item.priority || priority,cache);
-			}
-			function onComplete (item,content){
-				loadedCount++;
-				item.progress=1;
-				if (loadedCount===itemCount && complete){
-					complete.run();
-				}
-			}
-			function onProgress (item,value){
-				item.progress=value;
-				var num=0;
-				for (var j=0;j < itemCount;j++){
-					var item1=items[j];
-					num+=item1.progress;
-				};
-				var v=num / itemCount;
-				progress2.runWith(v);
-			}
-			}else {
-			this._createOne(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache);
-		}
-	}
-
-	/**
-	*@private
-	*/
-	__proto._createOne=function(url,mainResou,complete,progress,type,constructParams,propertyParams,priority,cache){
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		var item=this.getRes(url);
-		if (!item){
-			var extension=Utils.getFileExtension(url);
-			(type)|| (type=LoaderManager.createMap[extension]? LoaderManager.createMap[extension][0]:null);
-			if (!type){
-				this.load(url,complete,progress,type,priority,cache);
-				return;
-			};
-			var parserMap=Loader.parserMap;
-			if (!parserMap[type]){
-				this.load(url,complete,progress,type,priority,cache);
-				return;
-			}
-			this._createLoad(url,Handler.create(null,onLoaded),progress,type,constructParams,propertyParams,priority,cache,true);
-			function onLoaded (item){
-				if (!mainResou && (item instanceof laya.resource.Resource ))
-					item._addReference();
-				complete && complete.runWith(item);
-				Laya.loader.event(url);
-			};
-			}else {
-			if (!mainResou && (item instanceof laya.resource.Resource ))
-				item._addReference();
-			progress && progress.runWith(1);
-			complete && complete.runWith(item);
-		}
-	}
-
-	/**
-	*<p>加载资源。资源加载错误时，本对象会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
-	*<p>因为返回值为 LoaderManager 对象本身，所以可以使用如下语法：loaderManager.load(...).load(...);</p>
-	*@param url 要加载的单个资源地址或资源信息数组。比如：简单数组：["a.png","b.png"]；复杂数组[{url:"a.png",type:Loader.IMAGE,size:100,priority:1},{url:"b.json",type:Loader.JSON,size:50,priority:1}]。
-	*@param complete 加载结束回调。根据url类型不同分为2种情况：1. url为String类型，也就是单个资源地址，如果加载成功，则回调参数值为加载完成的资源，否则为null；2. url为数组类型，指定了一组要加载的资源，如果全部加载成功，则回调参数值为true，否则为false。
-	*@param progress 加载进度回调。回调参数值为当前资源的加载进度信息(0-1)。
-	*@param type 资源类型。比如：Loader.IMAGE。
-	*@param priority (default=1)加载的优先级，优先级高的优先加载。有0-4共5个优先级，0最高，4最低。
-	*@param cache 是否缓存加载结果。
-	*@param group 分组，方便对资源进行管理。
-	*@param ignoreCache 是否忽略缓存，强制重新加载。
-	*@param useWorkerLoader(default=false)是否使用worker加载（只针对IMAGE类型和ATLAS类型，并且浏览器支持的情况下生效）
-	*@return 此 LoaderManager 对象本身。
-	*/
-	__proto.load=function(url,complete,progress,type,priority,cache,group,ignoreCache,useWorkerLoader){
-		var _$this=this;
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		(ignoreCache===void 0)&& (ignoreCache=false);
-		(useWorkerLoader===void 0)&& (useWorkerLoader=false);
-		if ((url instanceof Array))return this._loadAssets(url,complete,progress,type,priority,cache,group);
-		var content=Loader.getRes(url);
-		if (!ignoreCache && content !=null){
-			Laya.systemTimer.frameOnce(1,null,function(){
-				progress && progress.runWith(1);
-				complete && complete.runWith(content);
-				_$this._loaderCount || _$this.event("complete");
-			});
-			}else {
-			var original;
-			original=url;
-			url=AtlasInfoManager.getFileLoadPath(url);
-			if (url !=original && type!=="nativeimage"){
-				type="atlas";
-				}else {
-				original=null;
-			};
-			var info=LoaderManager._resMap[url];
-			if (!info){
-				info=this._infoPool.length ? this._infoPool.pop():new ResInfo();
-				info.url=url;
-				info.type=type;
-				info.cache=cache;
-				info.group=group;
-				info.ignoreCache=ignoreCache;
-				info.useWorkerLoader=useWorkerLoader;
-				info.originalUrl=original;
-				complete && info.on("complete",complete.caller,complete.method,complete.args);
-				progress && info.on("progress",progress.caller,progress.method,progress.args);
-				LoaderManager._resMap[url]=info;
-				priority=priority < this._maxPriority ? priority :this._maxPriority-1;
-				this._resInfos[priority].push(info);
-				this._statInfo.count++;
-				this.event("progress",this.getProgress());
-				this._next();
-				}else {
-				if (complete){
-					if (original){
-						complete && info._createListener("complete",this,this._resInfoLoaded,[original,complete],false,false);
-						}else {
-						complete && info._createListener("complete",complete.caller,complete.method,complete.args,false,false);
-					}
-				}
-				progress && info._createListener("progress",progress.caller,progress.method,progress.args,false,false);
-			}
-		}
-		return this;
-	}
-
-	__proto._resInfoLoaded=function(original,complete){
-		complete.runWith(Loader.getRes(original));
-	}
-
-	/**
-	*@private
-	*/
-	__proto._createLoad=function(url,complete,progress,type,constructParams,propertyParams,priority,cache,ignoreCache){
-		var _$this=this;
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		(ignoreCache===void 0)&& (ignoreCache=false);
-		if ((url instanceof Array))return this._loadAssets(url,complete,progress,type,priority,cache);
-		var content=Loader.getRes(url);
-		if (content !=null){
-			Laya.systemTimer.frameOnce(1,null,function(){
-				progress && progress.runWith(1);
-				complete && complete.runWith(content);
-				_$this._loaderCount || _$this.event("complete");
-			});
-			}else {
-			var info=LoaderManager._resMap[url];
-			if (!info){
-				info=this._infoPool.length ? this._infoPool.pop():new ResInfo();
-				info.url=url;
-				info.type=type;
-				info.cache=false;
-				info.ignoreCache=ignoreCache;
-				info.originalUrl=null;
-				info.createCache=cache;
-				info.createConstructParams=constructParams;
-				info.createPropertyParams=propertyParams;
-				complete && info.on("complete",complete.caller,complete.method,complete.args);
-				progress && info.on("progress",progress.caller,progress.method,progress.args);
-				LoaderManager._resMap[url]=info;
-				priority=priority < this._maxPriority ? priority :this._maxPriority-1;
-				this._resInfos[priority].push(info);
-				this._statInfo.count++;
-				this.event("progress",this.getProgress());
-				this._next();
-				}else {
-				complete && info._createListener("complete",complete.caller,complete.method,complete.args,false,false);
-				progress && info._createListener("progress",progress.caller,progress.method,progress.args,false,false);
-			}
-		}
-		return this;
-	}
-
-	__proto._next=function(){
-		if (this._loaderCount >=this.maxLoader)return;
-		for (var i=0;i < this._maxPriority;i++){
-			var infos=this._resInfos[i];
-			while (infos.length > 0){
-				var info=infos.shift();
-				if (info)return this._doLoad(info);
-			}
-		}
-		this._loaderCount || this.event("complete");
-	}
-
-	__proto._doLoad=function(resInfo){
-		this._loaderCount++;
-		var loader=this._loaders.length ? this._loaders.pop():new Loader();
-		loader.on("complete",null,onLoaded);
-		loader.on("progress",null,function(num){
-			resInfo.event("progress",num);
-		});
-		loader.on("error",null,function(msg){
-			onLoaded(null);
-		});
-		var _me=this;
-		function onLoaded (data){
-			loader.offAll();
-			loader._data=null;
-			loader._customParse=false;
-			_me._loaders.push(loader);
-			_me._endLoad(resInfo,(data instanceof Array)? [data] :data);
-			_me._loaderCount--;
-			_me._next();
-		}
-		loader._constructParams=resInfo.createConstructParams;
-		loader._propertyParams=resInfo.createPropertyParams;
-		loader._createCache=resInfo.createCache;
-		loader.load(resInfo.url,resInfo.type,resInfo.cache,resInfo.group,resInfo.ignoreCache,resInfo.useWorkerLoader);
-	}
-
-	__proto._endLoad=function(resInfo,content){
-		var url=resInfo.url;
-		if (content==null){
-			var errorCount=this._failRes[url] || 0;
-			if (errorCount < this.retryNum){
-				console.warn("[warn]Retry to load:",url);
-				this._failRes[url]=errorCount+1;
-				Laya.systemTimer.once(this.retryDelay,this,this._addReTry,[resInfo],false);
-				return;
-				}else {
-				Loader.clearRes(url);
-				console.warn("[error]Failed to load:",url);
-				this.event("error",url);
-			}
-		}
-		if (this._failRes[url])this._failRes[url]=0;
-		delete LoaderManager._resMap[url];
-		if (resInfo.originalUrl){
-			content=Loader.getRes(resInfo.originalUrl);
-		}
-		resInfo.event("complete",content);
-		resInfo.offAll();
-		this._infoPool.push(resInfo);
-		this._statInfo.loaded++;
-		this.event("progress",this.getProgress());
-	}
-
-	__proto._addReTry=function(resInfo){
-		this._resInfos[this._maxPriority-1].push(resInfo);
-		this._next();
-	}
-
-	/**
-	*清理指定资源地址缓存。
-	*@param url 资源地址。
-	*/
-	__proto.clearRes=function(url){
-		Loader.clearRes(url);
-	}
-
-	/**
-	*销毁Texture使用的图片资源，保留texture壳，如果下次渲染的时候，发现texture使用的图片资源不存在，则会自动恢复
-	*相比clearRes，clearTextureRes只是清理texture里面使用的图片资源，并不销毁texture，再次使用到的时候会自动恢复图片资源
-	*而clearRes会彻底销毁texture，导致不能再使用；clearTextureRes能确保立即销毁图片资源，并且不用担心销毁错误，clearRes则采用引用计数方式销毁
-	*【注意】如果图片本身在自动合集里面（默认图片小于512*512），内存是不能被销毁的，此图片被大图合集管理器管理
-	*@param url 图集地址或者texture地址，比如 Loader.clearTextureRes("res/atlas/comp.atlas");Loader.clearTextureRes("hall/bg.jpg");
-	*/
-	__proto.clearTextureRes=function(url){
-		Loader.clearTextureRes(url);
-	}
-
-	/**
-	*获取指定资源地址的资源。
-	*@param url 资源地址。
-	*@return 返回资源。
-	*/
-	__proto.getRes=function(url){
-		return Loader.getRes(url);
-	}
-
-	/**
-	*缓存资源。
-	*@param url 资源地址。
-	*@param data 要缓存的内容。
-	*/
-	__proto.cacheRes=function(url,data){
-		Loader.cacheRes(url,data);
-	}
-
-	/**
-	*设置资源分组。
-	*@param url 资源地址。
-	*@param group 分组名
-	*/
-	__proto.setGroup=function(url,group){
-		Loader.setGroup(url,group);
-	}
-
-	/**
-	*根据分组清理资源。
-	*@param group 分组名
-	*/
-	__proto.clearResByGroup=function(group){
-		Loader.clearResByGroup(group);
-	}
-
-	/**清理当前未完成的加载，所有未加载的内容全部停止加载。*/
-	__proto.clearUnLoaded=function(){
-		for (var i=0;i < this._maxPriority;i++){
-			var infos=this._resInfos[i];
-			for (var j=infos.length-1;j >-1;j--){
-				var info=infos[j];
-				if (info){
-					info.offAll();
-					this._infoPool.push(info);
-				}
-			}
-			infos.length=0;
-		}
-		this._loaderCount=0;
-		LoaderManager._resMap={};
-	}
-
-	/**
-	*根据地址集合清理掉未加载的内容
-	*@param urls 资源地址集合
-	*/
-	__proto.cancelLoadByUrls=function(urls){
-		if (!urls)return;
-		for (var i=0,n=urls.length;i < n;i++){
-			this.cancelLoadByUrl(urls[i]);
-		}
-	}
-
-	/**
-	*根据地址清理掉未加载的内容
-	*@param url 资源地址
-	*/
-	__proto.cancelLoadByUrl=function(url){
-		for (var i=0;i < this._maxPriority;i++){
-			var infos=this._resInfos[i];
-			for (var j=infos.length-1;j >-1;j--){
-				var info=infos[j];
-				if (info && info.url===url){
-					infos[j]=null;
-					info.offAll();
-					this._infoPool.push(info);
-				}
-			}
-		}
-		if (LoaderManager._resMap[url])delete LoaderManager._resMap[url];
-	}
-
-	/**
-	*@private
-	*加载数组里面的资源。
-	*@param arr 简单：["a.png","b.png"]，复杂[{url:"a.png",type:Loader.IMAGE,size:100,priority:1,useWorkerLoader:true},{url:"b.json",type:Loader.JSON,size:50,priority:1}]*/
-	__proto._loadAssets=function(arr,complete,progress,type,priority,cache,group){
-		(priority===void 0)&& (priority=1);
-		(cache===void 0)&& (cache=true);
-		var itemCount=arr.length;
-		var loadedCount=0;
-		var totalSize=0;
-		var items=[];
-		var success=true;
-		for (var i=0;i < itemCount;i++){
-			var item=arr[i];
-			if ((typeof item=='string'))item={url:item,type:type,size:1,priority:priority};
-			if (!item.size)item.size=1;
-			item.progress=0;
-			totalSize+=item.size;
-			items.push(item);
-			var progressHandler=progress ? Handler.create(null,loadProgress,[item],false):null;
-			var completeHandler=(complete || progress)? Handler.create(null,loadComplete,[item]):null;
-			this.load(item.url,completeHandler,progressHandler,item.type,item.priority || 1,cache,item.group || group,false,item.useWorkerLoader);
-		}
-		function loadComplete (item,content){
-			loadedCount++;
-			item.progress=1;
-			if (!content)success=false;
-			if (loadedCount===itemCount && complete){
-				complete.runWith(success);
-			}
-		}
-		function loadProgress (item,value){
-			if (progress !=null){
-				item.progress=value;
-				var num=0;
-				for (var j=0;j < items.length;j++){
-					var item1=items[j];
-					num+=item1.size *item1.progress;
-				};
-				var v=num / totalSize;
-				progress.runWith(v);
-			}
-		}
-		return this;
-	}
-
-	//TODO:TESTs
-	__proto.decodeBitmaps=function(urls){
-		var i=0,len=urls.length;
-		var ctx;
-		ctx=Render._context;
-		for (i=0;i < len;i++){
-			var atlas;
-			atlas=Loader.getAtlas(urls[i]);
-			if (atlas){
-				this._decodeTexture(atlas[0],ctx);
-				}else {
-				var tex;
-				tex=this.getRes(urls[i]);
-				if (tex && (tex instanceof laya.resource.Texture )){
-					this._decodeTexture(tex,ctx);
-				}
-			}
-		}
-	}
-
-	__proto._decodeTexture=function(tex,ctx){
-		var bitmap=tex.bitmap;
-		if (!tex || !bitmap)return;
-		var tImg=bitmap.source || bitmap.image;
-		if (!tImg)return;
-		if (Laya.__typeof(tImg,Browser.window.HTMLImageElement)){
-			ctx.drawImage(tImg,0,0,1,1);
-			var info=ctx.getImageData(0,0,1,1);
-		}
-	}
-
-	LoaderManager.cacheRes=function(url,data){
-		Loader.cacheRes(url,data);
-	}
-
-	LoaderManager._resMap={};
-	__static(LoaderManager,
-	['createMap',function(){return this.createMap={atlas:[null,"atlas"]};}
-	]);
-	LoaderManager.__init$=function(){
-		//class ResInfo extends laya.events.EventDispatcher
-		ResInfo=(function(_super){
-			function ResInfo(){
-				this.url=null;
-				this.type=null;
-				this.cache=false;
-				this.group=null;
-				this.ignoreCache=false;
-				this.useWorkerLoader=false;
-				this.originalUrl=null;
-				this.createCache=false;
-				this.createConstructParams=null;
-				this.createPropertyParams=null;
-				ResInfo.__super.call(this);
-			}
-			__class(ResInfo,'',_super);
-			return ResInfo;
-		})(EventDispatcher)
-	}
-
-	return LoaderManager;
-})(EventDispatcher)
-
-
-/**
-*@private
-*web audio api方式播放声音
-*/
-//class laya.media.webaudio.WebAudioSound extends laya.events.EventDispatcher
-var WebAudioSound=(function(_super){
-	function WebAudioSound(){
-		/**
-		*声音URL
-		*/
-		this.url=null;
-		/**
-		*是否已加载完成
-		*/
-		this.loaded=false;
-		/**
-		*声音文件数据
-		*/
-		this.data=null;
-		/**
-		*声音原始文件数据
-		*/
-		this.audioBuffer=null;
-		/**
-		*待播放的声音列表
-		*/
-		this.__toPlays=null;
-		/**
-		*@private
-		*/
-		this._disposed=false;
-		WebAudioSound.__super.call(this);
-	}
-
-	__class(WebAudioSound,'laya.media.webaudio.WebAudioSound',_super);
-	var __proto=WebAudioSound.prototype;
-	/**
-	*加载声音
-	*@param url
-	*
-	*/
-	__proto.load=function(url){
-		var me=this;
-		url=URL.formatURL(url);
-		this.url=url;
-		this.audioBuffer=WebAudioSound._dataCache[url];
-		if (this.audioBuffer){
-			this._loaded(this.audioBuffer);
-			return;
-		}
-		WebAudioSound.e.on("loaded:"+url,this,this._loaded);
-		WebAudioSound.e.on("err:"+url,this,this._err);
-		if (WebAudioSound.__loadingSound[url]){
-			return;
-		}
-		WebAudioSound.__loadingSound[url]=true;
-		var request=new Browser.window.XMLHttpRequest();
-		request.open("GET",url,true);
-		request.responseType="arraybuffer";
-		request.onload=function (){
-			if (me._disposed){
-				me._removeLoadEvents();
-				return;
-			}
-			me.data=request.response;
-			WebAudioSound.buffs.push({"buffer":me.data,"url":me.url});
-			WebAudioSound.decode();
-		};
-		request.onerror=function (e){
-			me._err();
-		}
-		request.send();
-	}
-
-	__proto._err=function(){
-		this._removeLoadEvents();
-		WebAudioSound.__loadingSound[this.url]=false;
-		this.event("error");
-	}
-
-	__proto._loaded=function(audioBuffer){
-		this._removeLoadEvents();
-		if (this._disposed){
-			return;
-		}
-		this.audioBuffer=audioBuffer;
-		WebAudioSound._dataCache[this.url]=this.audioBuffer;
-		this.loaded=true;
-		this.event("complete");
-	}
-
-	__proto._removeLoadEvents=function(){
-		WebAudioSound.e.off("loaded:"+this.url,this,this._loaded);
-		WebAudioSound.e.off("err:"+this.url,this,this._err);
-	}
-
-	__proto.__playAfterLoaded=function(){
-		if (!this.__toPlays)return;
-		var i=0,len=0;
-		var toPlays;
-		toPlays=this.__toPlays;
-		len=toPlays.length;
-		var tParams;
-		for (i=0;i < len;i++){
-			tParams=toPlays[i];
-			if (tParams[2] && !(tParams [2]).isStopped){
-				this.play(tParams[0],tParams[1],tParams[2]);
-			}
-		}
-		this.__toPlays.length=0;
-	}
-
-	/**
-	*播放声音
-	*@param startTime 起始时间
-	*@param loops 循环次数
-	*@return
-	*
-	*/
-	__proto.play=function(startTime,loops,channel){
-		(startTime===void 0)&& (startTime=0);
-		(loops===void 0)&& (loops=0);
-		channel=channel ? channel :new WebAudioSoundChannel();
-		if (!this.audioBuffer){
-			if (this.url){
-				if (!this.__toPlays)this.__toPlays=[];
-				this.__toPlays.push([startTime,loops,channel]);
-				this.once("complete",this,this.__playAfterLoaded);
-				this.load(this.url);
-			}
-		}
-		channel.url=this.url;
-		channel.loops=loops;
-		channel["audioBuffer"]=this.audioBuffer;
-		channel.startTime=startTime;
-		channel.play();
-		SoundManager.addChannel(channel);
-		return channel;
-	}
-
-	__proto.dispose=function(){
-		this._disposed=true;
-		delete WebAudioSound._dataCache[this.url];
-		delete WebAudioSound.__loadingSound[this.url];
-		this.audioBuffer=null;
-		this.data=null;
-		this.__toPlays=[];
-	}
-
-	__getset(0,__proto,'duration',function(){
-		if (this.audioBuffer){
-			return this.audioBuffer.duration;
-		}
-		return 0;
-	});
-
-	WebAudioSound.decode=function(){
-		if (WebAudioSound.buffs.length <=0 || WebAudioSound.isDecoding){
-			return;
-		}
-		WebAudioSound.isDecoding=true;
-		WebAudioSound.tInfo=WebAudioSound.buffs.shift();
-		WebAudioSound.ctx.decodeAudioData(WebAudioSound.tInfo["buffer"],WebAudioSound._done,WebAudioSound._fail);
-	}
-
-	WebAudioSound._done=function(audioBuffer){
-		WebAudioSound.e.event("loaded:"+WebAudioSound.tInfo.url,audioBuffer);
-		WebAudioSound.isDecoding=false;
-		WebAudioSound.decode();
-	}
-
-	WebAudioSound._fail=function(){
-		WebAudioSound.e.event("err:"+WebAudioSound.tInfo.url,null);
-		WebAudioSound.isDecoding=false;
-		WebAudioSound.decode();
-	}
-
-	WebAudioSound._playEmptySound=function(){
-		if (WebAudioSound.ctx==null){
-			return;
-		};
-		var source=WebAudioSound.ctx.createBufferSource();
-		source.buffer=WebAudioSound._miniBuffer;
-		source.connect(WebAudioSound.ctx.destination);
-		source.start(0,0,0);
-	}
-
-	WebAudioSound._unlock=function(){
-		if (WebAudioSound._unlocked){
-			return;
-		}
-		WebAudioSound._playEmptySound();
-		if (WebAudioSound.ctx.state=="running"){
-			Browser.document.removeEventListener("mousedown",WebAudioSound._unlock,true);
-			Browser.document.removeEventListener("touchend",WebAudioSound._unlock,true);
-			Browser.document.removeEventListener("touchstart",WebAudioSound._unlock,true);
-			WebAudioSound._unlocked=true;
-		}
-	}
-
-	WebAudioSound.initWebAudio=function(){
-		if (WebAudioSound.ctx.state !="running"){
-			WebAudioSound._unlock();
-			Browser.document.addEventListener("mousedown",WebAudioSound._unlock,true);
-			Browser.document.addEventListener("touchend",WebAudioSound._unlock,true);
-			Browser.document.addEventListener("touchstart",WebAudioSound._unlock,true);
-		}
-	}
-
-	WebAudioSound._dataCache={};
-	WebAudioSound.buffs=[];
-	WebAudioSound.isDecoding=false;
-	WebAudioSound._unlocked=false;
-	WebAudioSound.tInfo=null;
-	WebAudioSound.__loadingSound={};
-	__static(WebAudioSound,
-	['window',function(){return this.window=Browser.window;},'webAudioEnabled',function(){return this.webAudioEnabled=WebAudioSound.window["AudioContext"] || WebAudioSound.window["webkitAudioContext"] || WebAudioSound.window["mozAudioContext"];},'ctx',function(){return this.ctx=WebAudioSound.webAudioEnabled ? new (WebAudioSound.window["AudioContext"] || WebAudioSound.window["webkitAudioContext"] || WebAudioSound.window["mozAudioContext"])():undefined;},'_miniBuffer',function(){return this._miniBuffer=WebAudioSound.ctx.createBuffer(1,1,22050);},'e',function(){return this.e=new EventDispatcher();}
-	]);
-	return WebAudioSound;
-})(EventDispatcher)
-
-
-/**
 *<code>Sound</code> 类是用来播放控制声音的类。
 *引擎默认有两套声音方案，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
 */
@@ -29857,35 +29984,6 @@ var Sound=(function(_super){
 
 	return Sound;
 })(EventDispatcher)
-
-
-/**
-*@private
-*/
-//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
-var HTMLStyleElement=(function(_super){
-	function HTMLStyleElement(){
-		HTMLStyleElement.__super.call(this);;
-	}
-
-	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
-	var __proto=HTMLStyleElement.prototype;
-	__proto._creates=function(){}
-	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
-	//TODO:coverage
-	__proto.reset=function(){
-		return this;
-	}
-
-	/**
-	*解析样式
-	*/
-	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
-		HTMLStyle.parseCSS(value,null);
-	});
-
-	return HTMLStyleElement;
-})(HTMLElement)
 
 
 /**
@@ -30052,6 +30150,35 @@ var HttpRequest=(function(_super){
 
 	return HttpRequest;
 })(EventDispatcher)
+
+
+/**
+*@private
+*/
+//class laya.html.dom.HTMLStyleElement extends laya.html.dom.HTMLElement
+var HTMLStyleElement=(function(_super){
+	function HTMLStyleElement(){
+		HTMLStyleElement.__super.call(this);;
+	}
+
+	__class(HTMLStyleElement,'laya.html.dom.HTMLStyleElement',_super);
+	var __proto=HTMLStyleElement.prototype;
+	__proto._creates=function(){}
+	__proto.drawToGraphic=function(graphic,gX,gY,recList){}
+	//TODO:coverage
+	__proto.reset=function(){
+		return this;
+	}
+
+	/**
+	*解析样式
+	*/
+	__getset(0,__proto,'innerTEXT',_super.prototype._$get_innerTEXT,function(value){
+		HTMLStyle.parseCSS(value,null);
+	});
+
+	return HTMLStyleElement;
+})(HTMLElement)
 
 
 /**
@@ -34731,10 +34858,12 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.changefactory.underlineColor="#222222";
 		this.uiSkin.changemyadd.on("click",this,this.onShowSelectAddress);
 		this.uiSkin.changefactory.on("click",this,this.onShowSelectFactory);
+		this.uiSkin.deliverybtn.on("click",this,this.onShowSelectDelivery);
 		EventCenter.instance.on("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
 		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
 		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
 		EventCenter.instance.on("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
+		EventCenter.instance.on("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
 		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
@@ -34745,6 +34874,11 @@ var PaintOrderControl=(function(_super){
 		var result=JSON.parse(data);
 		if(!result.hasOwnProperty("status")){
 			PaintOrderModel.instance.initOutputAddr(result);
+			if(PaintOrderModel.instance.outPutAddr.length > 0){
+				PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr[0];
+				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=og001&"+"addr_id=120106",this,this.onGetProductBack,null,null);
+			}
 		}
 	}
 
@@ -34782,6 +34916,10 @@ var PaintOrderControl=(function(_super){
 
 	__proto.onShowSelectAddress=function(){
 		ViewManager.instance.openView("VIEW_SELECT_ADDRESS");
+	}
+
+	__proto.onShowSelectDelivery=function(){
+		ViewManager.instance.openView("VIEW_SELECT_DELIVERY_TYPE");
 	}
 
 	__proto.onUpdateOrderPic=function(){
@@ -34828,6 +34966,11 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.ordervbox.refresh();
 	}
 
+	__proto.updateDeliveryType=function(){
+		if(PaintOrderModel.instance.selectDelivery !=null)
+			this.uiSkin.deliverytxt.text=PaintOrderModel.instance.selectDelivery.deliveryDesc;
+	}
+
 	__proto.onAdjustHeight=function(changeht){
 		this.uiSkin.ordervbox.height+=changeht;
 	}
@@ -34842,6 +34985,8 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
 		EventCenter.instance.off("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.off("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
 	}
 
 	__proto.onClosePanel=function(){
@@ -35075,7 +35220,22 @@ var SelectTechControl=(function(_super){
 		this.linelist.push(sp);
 	}
 
+	__proto.onGetProFlowt=function(parentitem,processCatvo){
+		var _$this=this;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/procflowlist?manufacturer_code=og002&procCat_name="+processCatvo.procCat_Name,this,function(data){
+			var result=JSON.parse(data);
+			if(!result.hasOwnProperty("status")){
+				processCatvo.initProcFlow(result);
+				_$this.onClickMat(parentitem,processCatvo);
+			}
+		},null,null);
+	}
+
 	__proto.onClickMat=function(parentitem,matvo){
+		if(matvo.nextMatList==null && (matvo instanceof model.orderModel.ProcessCatVo )){
+			this.onGetProFlowt(parentitem,matvo);
+			return;
+		}
 		if(parentitem.isSelected)
 			this.hideItems(parentitem.x,true);
 		else if(this.firstTechlist.indexOf(parentitem)>=0)
@@ -35321,6 +35481,67 @@ var SelectFactoryControl=(function(_super){
 	}
 
 	return SelectFactoryControl;
+})(Script)
+
+
+//class script.order.SelectDeliveryControl extends laya.components.Script
+var SelectDeliveryControl=(function(_super){
+	function SelectDeliveryControl(){
+		this.uiSkin=null;
+		SelectDeliveryControl.__super.call(this);
+	}
+
+	__class(SelectDeliveryControl,'script.order.SelectDeliveryControl',_super);
+	var __proto=SelectDeliveryControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.list_delivery.itemRender=DeliveryTypeItem;
+		this.uiSkin.list_delivery.vScrollBarSkin="";
+		this.uiSkin.list_delivery.selectEnable=true;
+		this.uiSkin.list_delivery.spaceY=8;
+		this.uiSkin.list_delivery.renderHandler=new Handler(this,this.updateAddressItem);
+		this.uiSkin.list_delivery.selectHandler=new Handler(this,this.onSlecteDelivery);
+		this.uiSkin.list_delivery.array=[];
+		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
+		this.uiSkin.okbtn.on("click",this,this.onConfirmSelectAddress);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700",this,this.onGetDeliveryBack,null,null);
+	}
+
+	__proto.onGetDeliveryBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			PaintOrderModel.instance.deliveryList=[];
+			for(var i=0;i < result.length;i++){
+				PaintOrderModel.instance.deliveryList.push(new DeliveryTypeVo(result[i]));
+			}
+			this.uiSkin.list_delivery.array=PaintOrderModel.instance.deliveryList;
+		}
+	}
+
+	__proto.onSlecteDelivery=function(index){
+		var item;
+		for(var $each_item in this.uiSkin.list_delivery.cells){
+			item=this.uiSkin.list_delivery.cells[$each_item];
+			item.ShowSelected=item.deliveryVo==this.uiSkin.list_delivery.array[index];
+		}
+		PaintOrderModel.instance.selectDelivery=this.uiSkin.list_delivery.array[index];
+	}
+
+	__proto.updateAddressItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onConfirmSelectAddress=function(index){
+		if(PaintOrderModel.instance.selectDelivery !=null)
+			EventCenter.instance.event("SELECT_DELIVERY_TYPE");
+		this.onCloseView();
+	}
+
+	__proto.onCloseView=function(){
+		ViewManager.instance.closeView("VIEW_SELECT_DELIVERY_TYPE");
+	}
+
+	return SelectDeliveryControl;
 })(Script)
 
 
@@ -41986,6 +42207,25 @@ var PartsItemUI=(function(_super){
 })(Scene)
 
 
+//class ui.WaitRespondPanelUI extends laya.display.Scene
+var WaitRespondPanelUI=(function(_super){
+	function WaitRespondPanelUI(){
+		this.zhuanq=null;
+		WaitRespondPanelUI.__super.call(this);
+	}
+
+	__class(WaitRespondPanelUI,'ui.WaitRespondPanelUI',_super);
+	var __proto=WaitRespondPanelUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.createView(WaitRespondPanelUI.uiView);
+	}
+
+	WaitRespondPanelUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.9,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Image","props":{"y":540,"x":960,"var":"zhuanq","skin":"commers/circlebg.png","anchorY":0.5,"anchorX":0.5,"alpha":0.9},"compId":4}],"loadList":["commers/blackbg.png","commers/circlebg.png"],"loadList3D":[]};
+	return WaitRespondPanelUI;
+})(Scene)
+
+
 /**
 *<code>Box</code> 类是一个控件容器类。
 */
@@ -47839,7 +48079,7 @@ var OrderAddressItemUI=(function(_super){
 		this.createView(OrderAddressItemUI.uiView);
 	}
 
-	OrderAddressItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":2,"x":3,"width":825,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},"compId":3}],"loadList":[],"loadList3D":[]};
+	OrderAddressItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":2,"x":3,"width":1034,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},"compId":3}],"loadList":[],"loadList3D":[]};
 	return OrderAddressItemUI;
 })(View)
 
@@ -47893,6 +48133,8 @@ var PaintOrderPanelUI=(function(_super){
 		this.ordervbox=null;
 		this.btn_addattach=null;
 		this.partvbox=null;
+		this.deliverybtn=null;
+		this.deliverytxt=null;
 		PaintOrderPanelUI.__super.call(this);
 	}
 
@@ -48122,6 +48364,26 @@ var NewAddressPanelUI=(function(_super){
 })(View)
 
 
+//class ui.order.SelectDeliveryPanelUI extends laya.ui.View
+var SelectDeliveryPanelUI=(function(_super){
+	function SelectDeliveryPanelUI(){
+		this.list_delivery=null;
+		this.okbtn=null;
+		this.cancelbtn=null;
+		SelectDeliveryPanelUI.__super.call(this);
+	}
+
+	__class(SelectDeliveryPanelUI,'ui.order.SelectDeliveryPanelUI',_super);
+	var __proto=SelectDeliveryPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/SelectDeliveryPanel");
+	}
+
+	return SelectDeliveryPanelUI;
+})(View)
+
+
 //class ui.picManager.PicShortItemUI extends laya.ui.View
 var PicShortItemUI=(function(_super){
 	function PicShortItemUI(){
@@ -48174,25 +48436,6 @@ var UserMainPanelUI=(function(_super){
 
 	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"var":"panel_main","right":0,"left":0,"height":1080},"compId":4,"child":[{"type":"Label","props":{"y":101,"x":320,"width":236,"valign":"middle","text":"用户中心","height":48,"fontSize":24,"color":"#f8f0ef","bgColor":"#f60f0b","align":"center"},"compId":14},{"type":"Image","props":{"y":147,"x":320,"width":236,"skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":639},"compId":52},{"type":"VBox","props":{"y":148,"x":321,"space":2},"compId":5,"child":[{"type":"Box","props":{"y":50,"x":2,"width":232,"height":127},"compId":20,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},"compId":17,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":16}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":26,"child":[{"type":"Label","props":{"var":"btntxt0","text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":43,"var":"btntxt1","text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":19}]}]},{"type":"Box","props":{"y":182,"x":2,"width":232,"height":171},"compId":21,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},"compId":22,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":23}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":27,"child":[{"type":"Label","props":{"y":0,"var":"btntxt2","text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":24},{"type":"Label","props":{"y":44,"var":"btntxt3","text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":25},{"type":"Label","props":{"y":88,"var":"btntxt4","text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":28}]}]},{"type":"Box","props":{"y":353,"x":2,"width":232,"height":127},"compId":29,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},"compId":30,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":31}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":32,"child":[{"type":"Label","props":{"y":0,"var":"btntxt5","text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":33},{"type":"Label","props":{"y":44,"var":"btntxt6","text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":34}]}]},{"type":"Box","props":{"y":508,"x":2,"width":232,"height":117},"compId":36,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},"compId":37,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":38}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":39,"child":[{"type":"Label","props":{"y":0,"var":"btntxt7","text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":40},{"type":"Label","props":{"y":33,"var":"btntxt8","text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":41}]}]}]},{"type":"Image","props":{"y":1,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":6,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":7},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":10},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":11}]},{"type":"Label","props":{"y":108,"x":603,"text":"企业资料","fontSize":24,"color":"#c3221f"},"compId":49},{"type":"Sprite","props":{"y":150,"x":600,"width":900,"var":"sp_container","height":800},"compId":50}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/whitebg.png","commers/sel.png","comp/label.png"],"loadList3D":[]};
 	return UserMainPanelUI;
-})(View)
-
-
-//class ui.order.MaterialNameItemUI extends laya.ui.View
-var MaterialNameItemUI=(function(_super){
-	function MaterialNameItemUI(){
-		this.matname=null;
-		MaterialNameItemUI.__super.call(this);
-	}
-
-	__class(MaterialNameItemUI,'ui.order.MaterialNameItemUI',_super);
-	var __proto=MaterialNameItemUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(MaterialNameItemUI.uiView);
-	}
-
-	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
-	return MaterialNameItemUI;
 })(View)
 
 
@@ -48292,6 +48535,25 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
+
+
+//class ui.order.MaterialNameItemUI extends laya.ui.View
+var MaterialNameItemUI=(function(_super){
+	function MaterialNameItemUI(){
+		this.matname=null;
+		MaterialNameItemUI.__super.call(this);
+	}
+
+	__class(MaterialNameItemUI,'ui.order.MaterialNameItemUI',_super);
+	var __proto=MaterialNameItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(MaterialNameItemUI.uiView);
+	}
+
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+	return MaterialNameItemUI;
+})(View)
 
 
 //class ui.order.TechBoxItemUI extends laya.ui.View
@@ -48411,6 +48673,25 @@ var UpLoadPanelUI=(function(_super){
 })(View)
 
 
+//class script.order.PartItem extends ui.order.PartsItemUI
+var PartItem=(function(_super){
+	function PartItem(partvo){
+		this.partItemvo=null;
+		this.partItemvo=partvo;
+		PartItem.__super.call(this);
+	}
+
+	__class(PartItem,'script.order.PartItem',_super);
+	var __proto=PartItem.prototype;
+	__proto.initView=function(){
+		this.pname.text=this.partItemvo.partName;
+		this.psize.text=this.partItemvo.partSize;
+	}
+
+	return PartItem;
+})(PartsItemUI)
+
+
 //class ui.uploadpic.UpLoadItemUI extends laya.ui.View
 var UpLoadItemUI=(function(_super){
 	function UpLoadItemUI(){
@@ -48431,25 +48712,6 @@ var UpLoadItemUI=(function(_super){
 	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
 	return UpLoadItemUI;
 })(View)
-
-
-//class script.order.PartItem extends ui.order.PartsItemUI
-var PartItem=(function(_super){
-	function PartItem(partvo){
-		this.partItemvo=null;
-		this.partItemvo=partvo;
-		PartItem.__super.call(this);
-	}
-
-	__class(PartItem,'script.order.PartItem',_super);
-	var __proto=PartItem.prototype;
-	__proto.initView=function(){
-		this.pname.text=this.partItemvo.partName;
-		this.psize.text=this.partItemvo.partSize;
-	}
-
-	return PartItem;
-})(PartsItemUI)
 
 
 //class ui.PopUpDialogUI extends laya.ui.View
@@ -53121,6 +53383,32 @@ var SelFactoryItem=(function(_super){
 })(OrderAddressItemUI)
 
 
+//class script.order.DeliveryTypeItem extends ui.order.OrderAddressItemUI
+var DeliveryTypeItem=(function(_super){
+	function DeliveryTypeItem(){
+		this.deliveryVo=null;
+		DeliveryTypeItem.__super.call(this);
+	}
+
+	__class(DeliveryTypeItem,'script.order.DeliveryTypeItem',_super);
+	var __proto=DeliveryTypeItem.prototype;
+	__proto.setData=function(devo){
+		this.deliveryVo=devo;
+		this.addresstxt.text=this.deliveryVo.deliveryDesc;
+		this.ShowSelected=this.deliveryVo==PaintOrderModel.instance.selectDelivery;
+	}
+
+	__getset(0,__proto,'ShowSelected',null,function(value){
+		if(value)
+			this.addresstxt.borderColor="#FF0000";
+		else
+		this.addresstxt.borderColor="#222222";
+	});
+
+	return DeliveryTypeItem;
+})(OrderAddressItemUI)
+
+
 //class script.picUpload.PicInfoItem extends ui.picManager.PicShortItemUI
 var PicInfoItem=(function(_super){
 	function PicInfoItem(){
@@ -53872,7 +54160,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,CallLater,WebGLContext2D,EventCenter]);
+	Laya.__init([EventDispatcher,CharBook,View,CallLater,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
 	/**LayaGameStart**/
 	new Main();
 

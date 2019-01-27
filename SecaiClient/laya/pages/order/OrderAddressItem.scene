@@ -18,7 +18,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,addresstxt",
-            "props":{"y":2,"x":3,"width":825,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},
+            "props":{"y":2,"x":3,"width":1034,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},
             "nodeParent":2,
             "label":"addresstxt",
             "isDirectory":false,

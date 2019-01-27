@@ -68,6 +68,7 @@ package script.order
 			
 			uiSkin.changemyadd.on(Event.CLICK,this,onShowSelectAddress);
 			uiSkin.changefactory.on(Event.CLICK,this,onShowSelectFactory);
+			uiSkin.deliverybtn.on(Event.CLICK,this,onShowSelectDelivery);
 
 			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
 			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
@@ -75,6 +76,9 @@ package script.order
 			EventCenter.instance.on(EventCenter.ADD_PIC_FOR_ORDER,this,onUpdateOrderPic);
 			
 			EventCenter.instance.on(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
+			
+			EventCenter.instance.on(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
+
 			EventCenter.instance.on(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
@@ -89,6 +93,13 @@ package script.order
 			if(!result.hasOwnProperty("status"))
 			{
 				PaintOrderModel.instance.initOutputAddr(result as Array);
+				if(PaintOrderModel.instance.outPutAddr.length > 0)
+				{
+					PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
+					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
+					
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=120106",this,onGetProductBack,null,null);
+				}
 			}
 		}
 		private function onResizeBrower():void
@@ -144,6 +155,10 @@ package script.order
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_ADDRESS);
 		}
 		
+		private function onShowSelectDelivery():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_DELIVERY_TYPE);
+		}
 		private function onUpdateOrderPic():void
 		{
 			var curindex:int = uiSkin.ordervbox.numChildren;
@@ -201,6 +216,11 @@ package script.order
 
 		}
 		
+		private function updateDeliveryType():void
+		{
+			if(PaintOrderModel.instance.selectDelivery != null)
+				uiSkin.deliverytxt.text = PaintOrderModel.instance.selectDelivery.deliveryDesc;
+		}
 		private function onAdjustHeight(changeht:int):void
 		{
 			this.uiSkin.ordervbox.height += changeht;
@@ -218,6 +238,10 @@ package script.order
 			EventCenter.instance.off(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
 			EventCenter.instance.off(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			
+			EventCenter.instance.off(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
+						
+			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
 
 		}
 		private function onClosePanel():void

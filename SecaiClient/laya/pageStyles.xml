@@ -36,4 +36,7 @@
    <item name="login/LoadingPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="LoginView.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/OrderAddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/SelectAttachPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SelectDeliveryPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="WaitRespondPanel.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

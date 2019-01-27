@@ -2,6 +2,8 @@ package model
 {
 	import laya.events.Event;
 	import laya.net.HttpRequest;
+	
+	import utils.WaitingRespond;
 
 	public class HttpRequestUtil
 	{
@@ -37,6 +39,10 @@ package model
 		public static const getProdList:String = "business/prodlist?client_code=og001&addr_id=120106&";//prodCat_name=纸&;获取工厂材料列表
 
 		public static const getProcessCatList:String = "business/processcatlist?prod_code=";//
+
+		public static const getProcessFlow:String = "business/procflowlist?manufacturer_code=og002&procCat_name=";//procCat_name= //获取工艺流
+
+		public static const getDeliveryList:String = "business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700";//procCat_name= //获取工艺流
 
 		public static function get instance():HttpRequestUtil
 		{
@@ -100,13 +106,19 @@ package model
 		
 		private function onRequestCompete(caller:Object,complete:Function,request:HttpRequest,data:Object):void
 		{
+			WaitingRespond.instance.hideWaitingView();
+
 			Laya.timer.clearAll(request);
 			// TODO Auto Generated method stub
 			if(caller&&complete)complete.call(caller,data);
 			request.offAll();
 		}
 		
-		public  function Request(url:String,caller:Object=null,complete:Function=null,param:Object=null,type:String="get",onProgressFun:Function = null):void{
+		public  function Request(url:String,caller:Object=null,complete:Function=null,param:Object=null,type:String="get",onProgressFun:Function = null,showwaiting:Boolean=true):void{
+			if(showwaiting)
+			{
+				WaitingRespond.instance.showWaitingView();
+			}
 			newRequest(url,caller,complete,param,type);
 		}
 		// --- Static Functions ------------------------------------------------------------------------------------------------------------------------------------ //

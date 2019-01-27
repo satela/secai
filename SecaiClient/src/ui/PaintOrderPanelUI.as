@@ -18,6 +18,8 @@ package ui {
 		public var ordervbox:VBox;
 		public var btn_addattach:Button;
 		public var partvbox:VBox;
+		public var deliverybtn:Text;
+		public var deliverytxt:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();
