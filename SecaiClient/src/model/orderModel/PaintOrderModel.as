@@ -4,6 +4,8 @@ package model.orderModel
 	import model.users.AddressVo;
 	import model.users.CityAreaVo;
 	import model.users.FactoryInfoVo;
+	
+	import script.order.PicOrderItem;
 
 	public class PaintOrderModel
 	{
@@ -15,6 +17,8 @@ package model.orderModel
 			return _instance;
 		}
 		
+		public var curSelectOrderItem:PicOrderItem;
+
 		public var selectAddress:AddressVo;//当前选择的收获地址
 		
 		public var selectFactoryAddress:FactoryInfoVo;
@@ -32,6 +36,7 @@ package model.orderModel
 		
 		public var selectDelivery:DeliveryTypeVo;//选择的配送方式
 
+		public var curSelectProcList:Array;
 		public function PaintOrderModel()
 		{
 		}
@@ -55,6 +60,19 @@ package model.orderModel
 				var addvo:FactoryInfoVo = new FactoryInfoVo(addrobj[i]);
 				outPutAddr.push(addvo);
 			}
+		}
+		
+		public function getProcDataByProcName(procName:String):Object
+		{
+			if(curSelectProcList == null)
+				return null;
+			for(var i:int=0;i < curSelectProcList.length;i++)
+			{
+				if(curSelectProcList[i].preProc_Name == procName)
+					return curSelectProcList[i];
+			}
+			
+			return null;
 		}
 	}
 }

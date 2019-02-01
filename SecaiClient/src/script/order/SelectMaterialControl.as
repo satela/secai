@@ -42,10 +42,11 @@ package script.order
 			
 			//uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
 			
+			uiSkin.matlist.array = [];
 			
 			uiSkin.tablist.array = PaintOrderModel.instance.productList;
 			
-			if(PaintOrderModel.instance.productList.length > 0)
+			if(PaintOrderModel.instance.productList && PaintOrderModel.instance.productList.length > 0)
 			{
 				uiSkin.tablist.selectedIndex = 0;
 				onSlecteMatClass(0);

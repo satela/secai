@@ -36,7 +36,7 @@ package utils
 			Laya.timer.clear(WaitingRespond,rotatecircle);
 			Laya.timer.clear(WaitingRespond,requestTimeOut);
 			Laya.timer.loop(10,WaitingRespond,rotatecircle);
-			//Laya.timer.once(requesTime,WaitingRespond,requestTimeOut);
+			Laya.timer.once(requesTime,WaitingRespond,requestTimeOut);
 
 		}
 		

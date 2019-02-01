@@ -25,6 +25,8 @@ package script.order
 	{
 		private var uiSkin:PaintOrderPanelUI;
 		public var param:Object;
+		
+		private var orderlist:Vector.<PicOrderItem>;
 		public function PaintOrderControl()
 		{
 			super();
@@ -42,12 +44,15 @@ package script.order
 			//uiSkin.ordervbox.autoSize = true;
 			var num:int = 0;
 			var totalheight:int= 0;
+			
+			orderlist = new Vector.<PicOrderItem>();
 			for each(var fvo in DirectoryFileModel.instance.haselectPic)
 			{
 				var ovo:PicOrderItemVo = new PicOrderItemVo(fvo);
 				ovo.indexNum = i++;
 				var item:PicOrderItem = new PicOrderItem(ovo);
 				uiSkin.ordervbox.addChild(item);
+				orderlist.push(item);
 				//if(num > 0)
 				//	uiSkin.ordervbox.height += item.height + uiSkin.ordervbox.space;
 				totalheight += item.height + uiSkin.ordervbox.space;
@@ -83,8 +88,18 @@ package script.order
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
 
+			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
+//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
+//				
+//				var result:Object = JSON.parse(data as String);
+//				if(result.hasOwnProperty("status"))
+//				{
+//					
+//				}
+//				trace(data);
+//			});
 
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=120106",this,onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=330782",this,onGetOutPutAddress,null,null);
 		}
 		
 		private function onGetOutPutAddress(data:*):void
@@ -98,7 +113,7 @@ package script.order
 					PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
 					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
 					
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=120106",this,onGetProductBack,null,null);
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=330782",this,onGetProductBack,null,null);
 				}
 			}
 		}
@@ -180,7 +195,7 @@ package script.order
 
 				uiSkin.ordervbox.height += item.height;
 				uiSkin.ordervbox.addChild(item);
-
+				orderlist.push(item);
 			}
 			
 			for(var i:int=0;i < uiSkin.ordervbox.numChildren;i++)
@@ -197,6 +212,10 @@ package script.order
 		private function onDeletePicOrder(orderitem:PicOrderItem):void
 		{
 			var ordervo:PicOrderItemVo = orderitem.ordervo;
+			
+			if(orderlist.indexOf(orderitem) >=0 )
+				orderlist.splice(orderlist.indexOf(orderitem),1);
+
 			for(var i:int=0;i < uiSkin.ordervbox.numChildren;i++)
 			{
 				var pvo:PicOrderItemVo = (uiSkin.ordervbox.getChildAt(i) as PicOrderItem).ordervo;
@@ -231,6 +250,71 @@ package script.order
 			
 		}
 		
+		private function onOrderPaint():void
+		{
+			if(orderlist.length <= 0)
+			{
+				ViewManager.showAlert("未选择下单图片");
+				return;
+			}
+			
+			var orderitem:PicOrderItem = orderlist[0];
+			if(orderitem.ordervo.productVo == null)
+			{
+				ViewManager.showAlert("未选择材料工业");
+				return;
+			}
+			
+			var orderdata:Object = {};
+			orderdata.order_sn = "";
+			orderdata.client_code = "";
+			orderdata.consignee = "色彩飞扬";
+			orderdata.tel = "13568989899";
+			orderdata.addr = "上海市浦东新区年家浜路58号汇腾南苑";
+			orderdata.order_amount = 0;
+			orderdata.shipping_fee = 0;
+			orderdata.money_paid = 0;
+			orderdata.discount = 0;
+			orderdata.pay_time = (new Date()).getTime();
+			orderdata.manufacturer_code = orderitem.ordervo.productVo.manufacturer_code;
+			orderdata.manufacturer_name = orderitem.ordervo.productVo.manufacturer_name;
+			
+			if(PaintOrderModel.instance.selectDelivery)
+			{
+				orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
+				orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_Name;
+			}
+			
+			orderdata.orderItemList = [];
+			for(var i:int=0;i < orderlist.length;i++)
+			{
+				if(orderlist[i].ordervo.productVo != null)
+				{
+					orderdata.order_amount += orderlist[i].getPrice();
+					orderdata.money_paid += orderlist[i].getPrice();
+
+					orderdata.rrderItemList.push(orderlist[i].getOrderData());
+				}
+				else
+				{
+					ViewManager.showAlert("有图片未选择材料工艺");
+					return;
+				}
+					
+			}
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,orderdata,"post");
+
+		}
+		
+		private function onPlaceOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				
+			}
+		}
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedAddress);

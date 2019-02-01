@@ -11,6 +11,8 @@ package model.orderModel
 		
 		public var materialName:String;//材料名称
 		
+		public var productVo:ProductVo;
+		
 		public var editWidth:Number;
 		
 		public var editHeight:Number;
@@ -32,11 +34,7 @@ package model.orderModel
 		public function PicOrderItemVo(picvo:PicInfoVo)
 		{
 			picinfo = picvo;
-			var num:int = Math.random()*8;
-			for(var i:int=0;i < num;i++)
-			{
-				techStr += "工艺" + i + "\n";
-			}
+			
 		}
 	}
 }

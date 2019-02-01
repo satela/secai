@@ -27,5 +27,110 @@ package model.orderModel
 			for(var key in data)
 				this[key] = data[key];
 		}
+		
+		public function getTechDes():String
+		{
+			var techstr:String = "";
+			for(var i:int=0;i < prcessCatList.length;i++)
+			{
+				if(prcessCatList[i].selected)
+				{
+					techstr += prcessCatList[i].procCat_Name;
+					var childtech:String = getTechStr(prcessCatList[i].nextMatList);
+					if(childtech != "")
+						techstr +=  "(" + childtech.substr(0,childtech.length - 1) + ")";
+					techstr += ",";
+				}
+				
+				//techstr += ",";
+			}
+			return techstr;
+		}
+		
+		private function getTechStr(arr:Vector.<MaterialItemVo>):String
+		{
+			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					return arr[i].preProc_Name + "-" + getTechStr(arr[i].nextMatList);
+				}
+			}
+			return "";
+		}
+		
+		public function getTotalPrice(area:Number):Number
+		{
+			var prices:Number = area*unit_price;
+			var allprices:Array = [];
+			for(var i:int=0;i < prcessCatList.length;i++)
+			{
+				if(prcessCatList[i].selected)
+				{
+					//prices += area * prcessCatList[i].;
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList));
+					
+				}
+				
+				//techstr += ",";
+			}
+			for(i=0;i < allprices.length;i++)
+			{
+				prices += area * allprices[i];
+			}
+			return parseFloat(prices.toFixed(2));
+		}
+		
+		private function getTechPrice(arr:Vector.<MaterialItemVo>):Array
+		{
+			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			var prices:Array = [];
+			if(arr == null)
+				return [];
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					prices.push(arr[i].preProc_Price);
+					prices = prices.concat(getTechPrice(arr[i].nextMatList));
+				}
+			}
+			return prices;
+		}
+		
+		private function getMaterialProInfoList(arr:Vector.<MaterialItemVo>):Array
+		{
+			var prolist:Array = [];
+			if(arr == null)
+				return [];
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					
+					prolist.push({proc_description:arr[i].preProc_Name,proc_attachpath:""});
+					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList));
+					
+				}
+				
+			}
+			return prolist;
+		}
+		
+		public function getProInfoList():Array
+		{
+			var arr:Array = [];
+			
+			for(var i:int=0;i < prcessCatList.length;i++)
+			{
+				if(prcessCatList[i].selected)
+				{
+					arr.push({proc_description:prcessCatList[i].procCat_Name,proc_attachpath:""});
+					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList));
+				}
+			}
+			return arr;
+		}
 	}
 }

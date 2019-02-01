@@ -24,6 +24,7 @@ package script.order
 		
 		public function setData(tvo:MaterialItemVo):void
 		{
+			processCatVo = null;
 			techmainvo = tvo;
 			initView();
 			setSelected(false);
@@ -31,6 +32,7 @@ package script.order
 		
 		public function setProcessData(pvo:ProcessCatVo):void
 		{
+			techmainvo = null;
 			processCatVo = pvo;
 			this.txt.text = pvo.procCat_Name;
 			setSelected(false);
@@ -38,7 +40,7 @@ package script.order
 		
 		private function initView():void
 		{
-			this.txt.text = techmainvo.matName;
+			this.txt.text = techmainvo.preProc_Name;
 		}
 		
 		public function setSelected(sel:Boolean):void
@@ -48,6 +50,15 @@ package script.order
 			else
 				this.txt.borderColor = "#FF0000";
 			isSelected = sel;
+			
+		}
+		
+		public function setTechSelected(sel:Boolean):void
+		{
+			if(techmainvo != null)
+				techmainvo.selected = sel;
+			else
+				processCatVo.selected = sel;
 		}
 		private function onClickTech(index:int):void
 		{

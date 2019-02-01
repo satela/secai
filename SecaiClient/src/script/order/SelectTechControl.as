@@ -73,7 +73,7 @@ package script.order
 				this.uiSKin.techcontent.addChild(itembox);
 				firstTechlist.push(itembox);
 			}
-			this.uiSKin.btnok.on(Event.CLICK,this,onCloseView);
+			this.uiSKin.btnok.on(Event.CLICK,this,onConfirmTech);
 			this.uiSKin.btncancel.on(Event.CLICK,this,onCloseView);
 			allitemlist = [];
 
@@ -102,11 +102,13 @@ package script.order
 		
 		private function onGetProFlowt(parentitem:TechBoxItem,processCatvo:ProcessCatVo):void
 		{
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + processCatvo.procCat_Name,this,function(data:Object):void{
+			var manufacturecode = PaintOrderModel.instance.curSelectMat.manufacturer_code;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + manufacturecode + "&procCat_name=" + processCatvo.procCat_Name,this,function(data:Object):void{
 				
 				var result:Object = JSON.parse(data as String);
 				if(!result.hasOwnProperty("status"))
 				{
+					PaintOrderModel.instance.curSelectProcList = result as Array;
 					processCatvo.initProcFlow(result);
 					onClickMat(parentitem,processCatvo);
 				}
@@ -133,9 +135,9 @@ package script.order
 			if(parentitem.isSelected)
 			{
 				parentitem.setSelected(false);
-				parentitem.techmainvo.selected = false;
+				parentitem.setTechSelected(false);
 				if(firstTechlist.indexOf(parentitem) >= 0)
-					cancelTech(parentitem.techmainvo);
+					cancelTech(parentitem.processCatVo.nextMatList);
 				updateSelectedTech();
 
 				return;
@@ -143,7 +145,7 @@ package script.order
 			}
 			
 			parentitem.setSelected(true);
-			parentitem.techmainvo.selected = true;
+			parentitem.setTechSelected(true);
 			
 			if(matvo.nextMatList && matvo.nextMatList.length > 0)
 			{
@@ -212,50 +214,23 @@ package script.order
 		
 		private function updateSelectedTech():void
 		{
-			var arr:Vector.<ProcessCatVo> = PaintOrderModel.instance.curSelectMat.prcessCatList;
-			
-			var techstr:String = "";
-			for(var i:int=0;i < arr.length;i++)
-			{
-				if(arr[i].selected)
-				{
-					techstr += arr[i].procCat_Name;
-					var childtech:String = getTechStr(arr[i].nextMatList);
-					if(childtech != "")
-						techstr +=  "(" + childtech.substr(0,childtech.length - 1) + ")";
-					techstr += ",";
-				}
-			
-				//techstr += ",";
-			}
-			
-			this.uiSKin.selecttech.text = techstr;
+						
+			this.uiSKin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes();
 		}
 		
-		private function cancelTech(matvo:MaterialItemVo):void
+		private function cancelTech(arr:Vector.<MaterialItemVo>):void
 		{
-			var arr:Vector.<MaterialItemVo> = matvo.nextMatList;
+			//var arr:Vector.<MaterialItemVo> = matvo.nextMatList;
 			if(arr)
 			{
 				for(var i:int=0;i < arr.length;i++)
 				{
 					arr[i].selected = false;
-					cancelTech(arr[i]);
+					cancelTech(arr[i].nextMatList);
 				}
 			}
 		}
-		private function getTechStr(arr:Vector.<MaterialItemVo>):String
-		{
-			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
-			for(var i:int=0;i < arr.length;i++)
-			{
-				if(arr[i].selected)
-				{
-					return arr[i].matName + "-" + getTechStr(arr[i].nextMatList);
-				}
-			}
-			return "";
-		}
+		
 		private function getItembox():TechBoxItem
 		{
 			if(allitemlist.length > 0)
@@ -268,6 +243,12 @@ package script.order
 				var itembox:TechBoxItem = new TechBoxItem();
 				return itembox;
 			}
+		}
+		private function onConfirmTech():void
+		{
+			if(PaintOrderModel.instance.curSelectOrderItem)
+				PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
+			onCloseView();
 		}
 		private function onCloseView():void
 		{

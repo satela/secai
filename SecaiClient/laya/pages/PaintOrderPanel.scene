@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":84,
-    "selecteID":87,
+    "selectedBox":96,
+    "selecteID":95,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
@@ -912,14 +912,13 @@
                             "props":{"y":100,"x":0,"space":10,"right":0,"left":0},
                             "nodeParent":63,
                             "label":"VBox",
-                            "isOpen":true,
+                            "isOpen":false,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":65,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Box",
                                     "searchKey":"Box",
                                     "props":{"y":50,"x":0},
@@ -932,7 +931,6 @@
                                     "compId":68,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Image",
                                             "searchKey":"Image",
                                             "props":{"y":0,"x":0,"width":1280,"skin":"commers/blackbg.png","height":45,"alpha":0.2},
@@ -947,7 +945,6 @@
                                             "$LOCKED":true
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":89,"text":"商品名称","fontSize":24},
@@ -961,7 +958,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":344,"text":"物料规格","fontSize":24},
@@ -975,7 +971,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":578,"text":"数量","fontSize":24},
@@ -989,7 +984,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":773,"text":"单价","fontSize":24},
@@ -1003,7 +997,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":1017,"text":"总价","fontSize":24},
@@ -1017,7 +1010,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":10,"x":1207,"text":"操作","fontSize":24},
@@ -1032,7 +1024,6 @@
                                         }]
                                 },
                                 {
-                                    "x":60,
                                     "type":"Box",
                                     "searchKey":"Box",
                                     "props":{"y":0,"x":0},
@@ -1045,7 +1036,6 @@
                                     "compId":83,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label",
                                             "props":{"y":0,"x":0,"text":"配件清单","fontSize":30},
@@ -1059,7 +1049,6 @@
                                                 ]
                                         },
                                         {
-                                            "x":75,
                                             "type":"Button",
                                             "searchKey":"Button,btn_addattach",
                                             "props":{"y":0,"x":168,"width":100,"var":"btn_addattach","skin":"comp/button.png","labelSize":20,"label":"选择配件","height":30},
@@ -1251,13 +1240,14 @@
                             "props":{"y":591,"x":959},
                             "nodeParent":63,
                             "label":"Box",
-                            "isOpen":null,
+                            "isOpen":true,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":96,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button",
                                     "props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},
@@ -1271,11 +1261,12 @@
                                         ]
                                 },
                                 {
+                                    "x":60,
                                     "type":"Button",
-                                    "searchKey":"Button",
-                                    "props":{"x":159,"width":120,"skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},
+                                    "searchKey":"Button,btnordernow",
+                                    "props":{"x":159,"width":120,"var":"btnordernow","skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},
                                     "nodeParent":96,
-                                    "label":"Button",
+                                    "label":"btnordernow",
                                     "isDirectory":false,
                                     "isAniNode":true,
                                     "hasChild":false,

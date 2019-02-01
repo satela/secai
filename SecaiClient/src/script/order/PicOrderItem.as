@@ -5,7 +5,9 @@ package script.order
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
+	import model.orderModel.ProductVo;
 	
 	import script.ViewManager;
 	
@@ -27,6 +29,8 @@ package script.order
 			
 			this.fileimg.skin = HttpRequestUtil.smallerrPicUrl + ordervo.picinfo.fid + ".jpg";
 			
+			this.editwidth.text = ordervo.picinfo.picPhysicWidth.toString();
+			this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
 			this.filename.text = ordervo.picinfo.directName;
 			this.architype.text = ordervo.techStr;
 			
@@ -127,6 +131,69 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
+			PaintOrderModel.instance.curSelectOrderItem = this;
+		}
+		
+		public function changeProduct(provo:ProductVo):void
+		{
+			this.ordervo.productVo = provo;
+			
+			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
+			
+			this.price.text = this.ordervo.productVo.getTotalPrice(area).toString();
+			
+			this.total.text = parseInt(this.inputnum.text) * this.ordervo.productVo.getTotalPrice(area) + "";
+			
+			this.mattxt.text = this.ordervo.productVo.prod_name;
+			var lastheight:int = this.height;
+
+			this.architype.text = this.ordervo.productVo.getTechDes();
+			
+			if(this.architype.textField.textHeight > 30)
+				this.architype.height = this.architype.textField.textHeight;
+			else
+				this.architype.height = 30;
+			
+			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
+			
+			if(this.architype.height > 30)
+				this.height = this.architype.height + 35;
+			else
+				this.height = 60;
+			this.bgimg.height = this.height;
+			alighComponet();
+			
+			EventCenter.instance.event(EventCenter.ADJUST_PIC_ORDER_TECH,this.height - lastheight);
+		}
+		
+		public function getPrice():Number
+		{
+			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
+			
+			return this.ordervo.productVo.getTotalPrice(area);
+		}
+		public function getOrderData():Object
+		{
+			
+			
+			var orderitemdata:Object = {};
+			
+			orderitemdata.prod_name = this.ordervo.productVo.prod_name;
+			orderitemdata.prod_code = this.ordervo.productVo.prod_code;
+			
+			orderitemdata.prod_description = "";
+			orderitemdata.LWH = "";
+			orderitemdata.weight = 1;
+			orderitemdata.item_number = parseInt(this.inputnum.text);
+			orderitemdata.item_price = 1;
+			orderitemdata.item_status = "";
+			orderitemdata.comments = this.ordervo.comment;
+			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;
+			
+			orderitemdata.procInfoList = this.ordervo.productVo.getProInfoList();
+			
+
+			return orderitemdata;
 		}
 	}
 }

@@ -2,16 +2,53 @@ package model.orderModel
 {
 	public class MaterialItemVo
 	{
-		public var matName:String = "PVP塑料管";
-		public var matId:int = 1;
-		public var matClassType:int = 1;//材料大分类
+		public var preProc_Code:String = "";// 前置工艺编码
+		public var preProc_Name:String= "";// 前置工艺名称
+		public var preProc_AttachmentType:String = "";//  前置工艺附件类型
+		public var preProc_Price: Number = 0;//  前置工艺价格
+
+		public var is_mandatory:int = 0;// 是否必选工艺
+		
+		public var procLvl:int = 0;//工艺层级
 		
 		public var nextMatList:Vector.<MaterialItemVo>;
 		
 		public var selected:Boolean = false;
 		
-		public function MaterialItemVo()
+		public function MaterialItemVo(data:Object)
 		{
+			if(data != null)
+			{
+				for(var key in data)
+				{
+					if(this.hasOwnProperty(key))
+						this[key] = data[key];
+				}
+				var nextpro:Array = data.procProcList;
+				nextMatList = new Vector.<MaterialItemVo>();
+
+				if(nextpro && nextpro.length > 0)
+				{
+					for(var i:int=0;i < nextpro.length;i++)
+					{
+						if(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name) != null)
+						{
+							nextMatList.push(new MaterialItemVo(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name)));
+						}
+						else
+						{
+							var matvo:MaterialItemVo = new MaterialItemVo({});
+							matvo.is_mandatory = 0;
+							matvo.preProc_AttachmentType = nextpro[i].postProc_attachmentType;
+							matvo.preProc_Code =  nextpro[i].postProc_code;
+							matvo.preProc_Name = nextpro[i].postProc_name;
+							matvo.procLvl = 2;
+							matvo.preProc_Price = nextpro[i].postProc_price;
+							nextMatList.push(matvo);
+						}
+					}
+				}
+			}
 		}
 	}
 }
