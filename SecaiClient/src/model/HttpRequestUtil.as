@@ -9,7 +9,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static const httpUrl:String = "http://9cqq4j.natappfree.cc/";//"http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
+		public static const httpUrl:String = "http://8p7jqx.natappfree.cc/";//"http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		

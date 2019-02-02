@@ -267,22 +267,22 @@ package script.order
 			
 			var orderdata:Object = {};
 			orderdata.order_sn = "";
-			orderdata.client_code = "";
+			orderdata.client_code = "SCFY001";
 			orderdata.consignee = "色彩飞扬";
 			orderdata.tel = "13568989899";
 			orderdata.addr = "上海市浦东新区年家浜路58号汇腾南苑";
 			orderdata.order_amount = 0;
 			orderdata.shipping_fee = 0;
 			orderdata.money_paid = 0;
-			orderdata.discount = 0;
-			orderdata.pay_time = (new Date()).getTime();
+			orderdata.discountStr = "";
+			orderdata.pay_timeStr = (new Date()).getTime();
 			orderdata.manufacturer_code = orderitem.ordervo.productVo.manufacturer_code;
 			orderdata.manufacturer_name = orderitem.ordervo.productVo.manufacturer_name;
 			
 			if(PaintOrderModel.instance.selectDelivery)
 			{
 				orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
-				orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_Name;
+				orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.deliverynet_name;
 			}
 			
 			orderdata.orderItemList = [];
@@ -293,7 +293,7 @@ package script.order
 					orderdata.order_amount += orderlist[i].getPrice();
 					orderdata.money_paid += orderlist[i].getPrice();
 
-					orderdata.rrderItemList.push(orderlist[i].getOrderData());
+					orderdata.orderItemList.push(orderlist[i].getOrderData());
 				}
 				else
 				{
@@ -302,8 +302,7 @@ package script.order
 				}
 					
 			}
-			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,orderdata,"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 
 		}
 		
