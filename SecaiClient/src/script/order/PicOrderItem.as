@@ -183,9 +183,9 @@ package script.order
 			
 			orderitemdata.prod_description = "";
 			orderitemdata.LWH = "";
-			orderitemdata.weight = 1;
+			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
-			orderitemdata.item_price = 1;
+			orderitemdata.item_priceStr = 1;
 			orderitemdata.item_status = "";
 			orderitemdata.comments = this.ordervo.comment;
 			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;

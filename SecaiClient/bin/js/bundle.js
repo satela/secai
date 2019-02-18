@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1232,7 +1232,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PaintOrderPanel.scene";
+	GameConfig.startScene="order/SelectPicPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1289,6 +1289,7 @@ var MaterialItemVo=(function(){
 		//工艺层级
 		this.nextMatList=null;
 		this.selected=false;
+		this.attchMentFileId="";
 		if(data !=null){
 			for(var key in data){
 				if(this.hasOwnProperty(key))
@@ -1318,21 +1319,6 @@ var MaterialItemVo=(function(){
 
 	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
 	return MaterialItemVo;
-})()
-
-
-//class model.orderModel.SingleTechVo
-var SingleTechVo=(function(){
-	function SingleTechVo(){
-		this.techId=0;
-		this.techName="蓝色包边";
-		this.needAttach=false;
-		var index=Math.floor(5*Math.random());
-		this.techName=["蓝色包边","3毫米PVC板","不裁剪","中金边","画面正上方打孔"][index];
-	}
-
-	__class(SingleTechVo,'model.orderModel.SingleTechVo');
-	return SingleTechVo;
 })()
 
 
@@ -1916,24 +1902,6 @@ var PicOrderItemVo=(function(){
 })()
 
 
-//class model.orderModel.TechMainVo
-var TechMainVo=(function(){
-	function TechMainVo(){
-		this.totalName="包边";
-		this.techlist=null;
-		this.techlist=[];
-		var num=Math.random()*28;
-		for(var i=0;i < num;i++){
-			var tech=new SingleTechVo();
-			this.techlist.push(tech);
-		}
-	}
-
-	__class(TechMainVo,'model.orderModel.TechMainVo');
-	return TechMainVo;
-})()
-
-
 //class model.HttpRequestUtil
 var HttpRequestUtil=(function(){
 	function HttpRequestUtil(){}
@@ -2003,7 +1971,7 @@ var HttpRequestUtil=(function(){
 	});
 
 	HttpRequestUtil._instance=null;
-	HttpRequestUtil.httpUrl="http://8p7jqx.natappfree.cc/";
+	HttpRequestUtil.httpUrl="http://jywu6y.natappfree.cc/";
 	HttpRequestUtil.registerUrl="account/create?";
 	HttpRequestUtil.loginInUrl="account/login?";
 	HttpRequestUtil.loginOutUrl="account/logout?";
@@ -34145,7 +34113,7 @@ var MainPageControl=(function(_super){
 		var pwd=UtilTool.getLocalVar("userpwd","");
 		if(account !="" && pwd !=""){
 			var param="phone="+account+"&pwd="+pwd+"&mode=0";
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"account/login?",this,this.onLoginBack,param,"post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"account/login?",this,this.onLoginBack,param,"post");
 		}
 	}
 
@@ -34185,7 +34153,7 @@ var MainPageControl=(function(_super){
 		if(!Userdata.instance.isLogin)
 			ViewManager.instance.openView("VIEW_REGPANEL");
 		else{
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"account/logout?",this,this.onLoginOutBack,"","post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"account/logout?",this,this.onLoginOutBack,"","post");
 		}
 	}
 
@@ -34321,6 +34289,7 @@ var SelectPicControl=(function(_super){
 	function SelectPicControl(){
 		this.uiSkin=null;
 		this.directTree=[];
+		this.param=null;
 		SelectPicControl.__super.call(this);
 	}
 
@@ -34349,7 +34318,7 @@ var SelectPicControl=(function(_super){
 		Laya.timer.once(10,this,function(){
 			_$this.uiSkin.folderList.array=[];
 			_$this.uiSkin.picList.array=[];
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
 		});
 		this.uiSkin.htmltext.style.fontSize=20;
 		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
@@ -34370,6 +34339,12 @@ var SelectPicControl=(function(_super){
 	}
 
 	__proto.seletPicToOrder=function(fvo){
+		if((this.param instanceof model.orderModel.MaterialItemVo )){
+			if((this.param).attchMentFileId==fvo.fid)
+				(this.param).attchMentFileId="";
+			else
+			(this.param).attchMentFileId=fvo.fid;
+		};
 		var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
 		if(hasfic){
 			delete DirectoryFileModel.instance.haselectPic[fvo.fid];
@@ -34402,7 +34377,7 @@ var SelectPicControl=(function(_super){
 	}
 
 	__proto.getFileList=function(){
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
 	}
 
 	__proto.onGetDirFileListBack=function(data){
@@ -34511,7 +34486,7 @@ var LogPanelControl=(function(_super){
 			return;
 		};
 		var param="phone="+this.uiSKin.input_account.text+"&pwd="+this.uiSKin.input_pwd.text+"&mode=0";
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"account/login?",this,this.onLoginBack,param,"post");
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"account/login?",this,this.onLoginBack,param,"post");
 	}
 
 	__proto.onLoginBack=function(data){
@@ -34657,7 +34632,7 @@ var PicManagerControl=(function(_super){
 		Laya.timer.once(10,this,function(){
 			_$this.uiSkin.folderList.array=[];
 			_$this.uiSkin.picList.array=[];
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
 		});
 		this.uiSkin.htmltext.style.fontSize=20;
 		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
@@ -34706,7 +34681,7 @@ var PicManagerControl=(function(_super){
 	}
 
 	__proto.getFileList=function(){
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
 	}
 
 	__proto.onGetDirFileListBack=function(data){
@@ -34746,9 +34721,9 @@ var PicManagerControl=(function(_super){
 			return;
 		else{
 			if(!this.isCreateTopDir)
-				HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
+				HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
 			else
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
 			this.createbox.visible=false;
 		}
 	}
@@ -35002,7 +34977,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/manufacturers?client_code=SCFY001&"+"addr_id=330782",this,this.onGetOutPutAddress,null,null);
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/manufacturers?client_code=SCFY001&"+"addr_id=330782",this,this.onGetOutPutAddress,null,null);
 	}
 
 	__proto.onGetOutPutAddress=function(data){
@@ -35012,7 +34987,7 @@ var PaintOrderControl=(function(_super){
 			if(PaintOrderModel.instance.outPutAddr.length > 0){
 				PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr[0];
 				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
-				HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=330782",this,this.onGetProductBack,null,null);
+				HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=330782",this,this.onGetProductBack,null,null);
 			}
 		}
 	}
@@ -35034,7 +35009,7 @@ var PaintOrderControl=(function(_super){
 	__proto.onSelectedAddress=function(){
 		if(PaintOrderModel.instance.selectFactoryAddress)
 			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=120106",this,this.onGetProductBack,null,null);
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=120106",this,this.onGetProductBack,null,null);
 	}
 
 	__proto.onGetProductBack=function(data){
@@ -35128,18 +35103,19 @@ var PaintOrderControl=(function(_super){
 			return;
 		};
 		var orderdata={};
-		orderdata.order_sn="";
+		orderdata.order_sn="123";
 		orderdata.client_code="SCFY001";
 		orderdata.consignee="色彩飞扬";
 		orderdata.tel="13568989899";
 		orderdata.addr="上海市浦东新区年家浜路58号汇腾南苑";
-		orderdata.order_amount=0;
-		orderdata.shipping_fee=0;
-		orderdata.money_paid=0;
-		orderdata.discountStr="";
-		orderdata.pay_timeStr=(new Date()).getTime();
+		orderdata.order_amountStr="0";
+		orderdata.shipping_feeStr="0";
+		orderdata.money_paidStr="0";
+		orderdata.discountStr="0";
+		orderdata.pay_timeStr="2019-02-19 21:15:00";
 		orderdata.manufacturer_code=orderitem.ordervo.productVo.manufacturer_code;
 		orderdata.manufacturer_name=orderitem.ordervo.productVo.manufacturer_name;
+		var totalMoney=0;
 		if(PaintOrderModel.instance.selectDelivery){
 			orderdata.logistic_code=PaintOrderModel.instance.selectDelivery.deliverynet_code;
 			orderdata.logistic_name=PaintOrderModel.instance.selectDelivery.deliverynet_name;
@@ -35147,8 +35123,7 @@ var PaintOrderControl=(function(_super){
 		orderdata.orderItemList=[];
 		for(var i=0;i < this.orderlist.length;i++){
 			if(this.orderlist[i].ordervo.productVo !=null){
-				orderdata.order_amount+=this.orderlist[i].getPrice();
-				orderdata.money_paid+=this.orderlist[i].getPrice();
+				totalMoney+=this.orderlist[i].getPrice();
 				orderdata.orderItemList.push(this.orderlist[i].getOrderData());
 			}
 			else{
@@ -35156,12 +35131,15 @@ var PaintOrderControl=(function(_super){
 				return;
 			}
 		}
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
+		orderdata.order_amountStr=totalMoney.toString();
+		orderdata.money_paidStr=totalMoney.toString();
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 	}
 
 	__proto.onPlaceOrderBack=function(data){
 		var result=JSON.parse(data);
-		if(!result.hasOwnProperty("status")){
+		if(!result.hasOwnProperty("code")){
+			ViewManager.showAlert("下单成功");
 		}
 	}
 
@@ -35238,10 +35216,16 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.townbox.visible=false;
 		this.uiSkin.on("click",this,this.hideAddressPanel);
 		this.uiSkin.btnsave.on("click",this,this.onSaveCompanyInfo);
+		this.uiSkin.txt_license.text="";
+		this.uiSkin.btn_uplicense.on("click",this,this.onUploadlicense);
+	}
+
+	__proto.onUploadlicense=function(){
+		ViewManager.instance.openView("VIEW_MYPICPANEL",false,{type:"License",path:"/company/licence"});
 	}
 
 	__proto.onSaveCompanyInfo=function(){
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"group/create?",this,this.onSaveCompnayBack,"name="+this.uiSkin.input_companyname.text+"&addr="+Userdata.instance.defaultAddrid,"post");
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"group/create?",this,this.onSaveCompnayBack,"name="+this.uiSkin.input_companyname.text+"&addr="+Userdata.instance.defaultAddrid,"post");
 	}
 
 	__proto.onSaveCompnayBack=function(data){
@@ -35409,7 +35393,7 @@ var SelectTechControl=(function(_super){
 	__proto.onGetProFlowt=function(parentitem,processCatvo){
 		var _$this=this;
 		var manufacturecode=PaintOrderModel.instance.curSelectMat.manufacturer_code;
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/procflowlist?manufacturer_code="+manufacturecode+"&procCat_name="+processCatvo.procCat_Name,this,function(data){
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/procflowlist?manufacturer_code="+manufacturecode+"&procCat_name="+processCatvo.procCat_Name,this,function(data){
 			var result=JSON.parse(data);
 			if(!result.hasOwnProperty("status")){
 				PaintOrderModel.instance.curSelectProcList=result;
@@ -35677,7 +35661,7 @@ var SelectDeliveryControl=(function(_super){
 		this.uiSkin.list_delivery.array=[];
 		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
 		this.uiSkin.okbtn.on("click",this,this.onConfirmSelectAddress);
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700",this,this.onGetDeliveryBack,null,null);
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700",this,this.onGetDeliveryBack,null,null);
 	}
 
 	__proto.onGetDeliveryBack=function(data){
@@ -35807,7 +35791,7 @@ var RegisterCntrol=(function(_super){
 			Browser.window.alert("请填写正确的手机号");
 			return;
 		}
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"api/getcode?" ,this,this.onGetPhoneCodeBack,"phone="+this.uiSkin.input_phone.text,"post");
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"api/getcode?" ,this,this.onGetPhoneCodeBack,"phone="+this.uiSkin.input_phone.text,"post");
 	}
 
 	__proto.onGetPhoneCodeBack=function(data){
@@ -35844,7 +35828,7 @@ var RegisterCntrol=(function(_super){
 				return;
 			};
 			var param="phone="+this.uiSkin.input_phone.text+"&pwd="+this.uiSkin.input_pwd.text+"&code="+this.phonecode;
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"account/create?",this,this.onRegisterBack,param,"post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"account/create?",this,this.onRegisterBack,param,"post");
 		}
 		else{
 			Browser.window.alert("验证码错误");
@@ -35857,7 +35841,8 @@ var RegisterCntrol=(function(_super){
 		if(result.status==0){
 			Browser.window.alert("注册成功！");
 			Browser.document.body.removeChild(this.verifycode);
-			ViewManager.instance.openView("VIEW_lOGPANEL",true);
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+			ViewManager.instance.openView("VIEW_lOGPANEL",false);
 		}
 	}
 
@@ -35993,6 +35978,9 @@ var UpLoadAndOrderContrl=(function(_super){
 		var _$this=this;
 		this.file=Browser.document.createElement("input");
 		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
+		if(this.param && this.param.type=="License")
+			this.file.multiple="";
+		else
 		this.file.multiple="multiple";
 		this.file.accept=".jpg,.jpeg,.png,.tif";
 		this.file.type="file";
@@ -36105,7 +36093,7 @@ var SelectMaterialControl=(function(_super){
 		if(matvo.childMatList !=null)
 			this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
 		else
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/prodlist?client_code=SCFY001&addr_id=330782&"+"prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/prodlist?client_code=SCFY001&addr_id=330782&"+"prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
 	}
 
 	__proto.onGetProductListBack=function(data){
@@ -48268,6 +48256,8 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.citytxt=null;
 		this.btnSelArea=null;
 		this.areatxt=null;
+		this.txt_license=null;
+		this.btn_uplicense=null;
 		this.provbox=null;
 		this.provList=null;
 		this.citybox=null;
@@ -48743,9 +48733,9 @@ var PicOrderItem=(function(_super){
 		orderitemdata.prod_code=this.ordervo.productVo.prod_code;
 		orderitemdata.prod_description="";
 		orderitemdata.LWH="";
-		orderitemdata.weight=1;
+		orderitemdata.weightStr=1;
 		orderitemdata.item_number=parseInt(this.inputnum.text);
-		orderitemdata.item_price=1;
+		orderitemdata.item_priceStr=1;
 		orderitemdata.item_status="";
 		orderitemdata.comments=this.ordervo.comment;
 		orderitemdata.imagefile_path=this.ordervo.picinfo.fid;
@@ -53557,8 +53547,15 @@ var TechBoxItem=(function(_super){
 	}
 
 	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null)
+		if(this.techmainvo !=null){
 			this.techmainvo.selected=sel;
+			if(sel && this.techmainvo.preProc_AttachmentType !=null && this.techmainvo.preProc_AttachmentType !=""){
+				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
+			}
+			else{
+				this.techmainvo.attchMentFileId="";
+			}
+		}
 		else
 		this.processCatVo.selected=sel;
 	}
@@ -53705,9 +53702,9 @@ var PicInfoItem=(function(_super){
 				EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo);
 			}
 			if(this.picInfo.picType==1)
-				HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+				HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
 			else
-			HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+			HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
 		}
 	}
 
@@ -53805,7 +53802,7 @@ var MaterialItem=(function(_super){
 
 	//this.redrect.visible=false;
 	__proto.onClickMat=function(){
-		HttpRequestUtil.instance.Request("http://8p7jqx.natappfree.cc/"+"business/processcatlist?prod_code="+this.matvo.prod_code,this,this.onGetProcessListBack,null,null);
+		HttpRequestUtil.instance.Request("http://jywu6y.natappfree.cc/"+"business/processcatlist?prod_code="+this.matvo.prod_code,this,this.onGetProcessListBack,null,null);
 		PaintOrderModel.instance.curSelectMat=this.matvo;
 	}
 

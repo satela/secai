@@ -13,6 +13,8 @@ package ui.usercenter {
 		public var citytxt:Label;
 		public var btnSelArea:Button;
 		public var areatxt:Label;
+		public var txt_license:Label;
+		public var btn_uplicense:Button;
 		public var provbox:Image;
 		public var provList:List;
 		public var citybox:Image;

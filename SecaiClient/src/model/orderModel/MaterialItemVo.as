@@ -15,6 +15,8 @@ package model.orderModel
 		
 		public var selected:Boolean = false;
 		
+		public var attchMentFileId:String = "";
+		
 		public function MaterialItemVo(data:Object)
 		{
 			if(data != null)

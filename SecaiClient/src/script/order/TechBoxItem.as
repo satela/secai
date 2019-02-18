@@ -4,7 +4,8 @@ package script.order
 	
 	import model.orderModel.MaterialItemVo;
 	import model.orderModel.ProcessCatVo;
-	import model.orderModel.TechMainVo;
+	
+	import script.ViewManager;
 	
 	import ui.order.TechBoxItemUI;
 	import ui.order.TechorItemUI;
@@ -56,9 +57,20 @@ package script.order
 		public function setTechSelected(sel:Boolean):void
 		{
 			if(techmainvo != null)
+			{
 				techmainvo.selected = sel;
+				if(sel && techmainvo.preProc_AttachmentType != null && techmainvo.preProc_AttachmentType != "")
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,techmainvo);
+				}
+				else
+				{
+					techmainvo.attchMentFileId = "";
+				}
+			}
 			else
 				processCatVo.selected = sel;
+			
 		}
 		private function onClickTech(index:int):void
 		{

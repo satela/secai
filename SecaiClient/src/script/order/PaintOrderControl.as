@@ -266,19 +266,20 @@ package script.order
 			}
 			
 			var orderdata:Object = {};
-			orderdata.order_sn = "";
+			orderdata.order_sn = "123";
 			orderdata.client_code = "SCFY001";
 			orderdata.consignee = "色彩飞扬";
 			orderdata.tel = "13568989899";
 			orderdata.addr = "上海市浦东新区年家浜路58号汇腾南苑";
-			orderdata.order_amount = 0;
-			orderdata.shipping_fee = 0;
-			orderdata.money_paid = 0;
-			orderdata.discountStr = "";
-			orderdata.pay_timeStr = (new Date()).getTime();
+			orderdata.order_amountStr = "0";
+			orderdata.shipping_feeStr = "0";
+			orderdata.money_paidStr = "0";
+			orderdata.discountStr = "0";
+			orderdata.pay_timeStr = "2019-02-19 21:15:00";//(new Date()).getTime();
 			orderdata.manufacturer_code = orderitem.ordervo.productVo.manufacturer_code;
 			orderdata.manufacturer_name = orderitem.ordervo.productVo.manufacturer_name;
 			
+			var totalMoney:Number = 0;
 			if(PaintOrderModel.instance.selectDelivery)
 			{
 				orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
@@ -290,8 +291,8 @@ package script.order
 			{
 				if(orderlist[i].ordervo.productVo != null)
 				{
-					orderdata.order_amount += orderlist[i].getPrice();
-					orderdata.money_paid += orderlist[i].getPrice();
+					totalMoney += orderlist[i].getPrice();
+					//totalMoney += orderlist[i].getPrice();
 
 					orderdata.orderItemList.push(orderlist[i].getOrderData());
 				}
@@ -302,6 +303,8 @@ package script.order
 				}
 					
 			}
+			orderdata.order_amountStr = totalMoney.toString();
+			orderdata.money_paidStr =  totalMoney.toString();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 
 		}
@@ -309,9 +312,9 @@ package script.order
 		private function onPlaceOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
-			if(!result.hasOwnProperty("status"))
+			if(!result.hasOwnProperty("code"))
 			{
-				
+				ViewManager.showAlert("下单成功");
 			}
 		}
 		public override function onDestroy():void

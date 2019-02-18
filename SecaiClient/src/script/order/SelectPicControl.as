@@ -7,6 +7,7 @@ package script.order
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.MaterialItemVo;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
 	
@@ -22,6 +23,8 @@ package script.order
 		
 		private var directTree:Array = [];
 	
+		public var param:Object;
+
 		public function SelectPicControl()
 		{
 			super();
@@ -89,6 +92,13 @@ package script.order
 		
 		private function seletPicToOrder(fvo:PicInfoVo):void
 		{
+			if(param is MaterialItemVo)
+			{
+				if((param as MaterialItemVo).attchMentFileId == fvo.fid)
+					(param as MaterialItemVo).attchMentFileId = "";
+				else
+					(param as MaterialItemVo).attchMentFileId = fvo.fid;
+			}
 			var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
 			if( hasfic)
 			{

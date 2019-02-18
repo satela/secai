@@ -12,7 +12,6 @@ package script.order
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.ProcessCatVo;
-	import model.orderModel.TechMainVo;
 	
 	import script.ViewManager;
 	

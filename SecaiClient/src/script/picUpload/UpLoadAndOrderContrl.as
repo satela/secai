@@ -57,7 +57,11 @@ package script.picUpload
 			
 			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
 			
-			file.multiple="multiple";
+			if(param && param.type == "License")
+				file.multiple="";
+			else
+				file.multiple="multiple";
+
 			file.accept = ".jpg,.jpeg,.png,.tif";
 			file.type ="file";
 			file.style.position ="absolute";

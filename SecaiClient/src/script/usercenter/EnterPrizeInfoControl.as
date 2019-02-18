@@ -10,6 +10,7 @@ package script.usercenter
 	import model.Userdata;
 	import model.users.CityAreaVo;
 	
+	import script.ViewManager;
 	import script.login.CityAreaItem;
 	
 	import ui.usercenter.EnterPrizeInfoPaneUI;
@@ -81,9 +82,17 @@ package script.usercenter
 			uiSkin.townbox.visible = false;
 			uiSkin.on(Event.CLICK,this,hideAddressPanel);
 			uiSkin.btnsave.on(Event.CLICK,this,onSaveCompanyInfo);
+			
+			uiSkin.txt_license.text = "";
+			
+			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
 
 		}
 		
+		private function onUploadlicense():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,{type:"License",path:"/company/licence"});
+		}
 		private function onSaveCompanyInfo():void
 		{
 			// TODO Auto Generated method stub
