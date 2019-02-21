@@ -89,7 +89,7 @@
                 xhr = new ActiveXObject("Microsoft.XMLHTTP");
             }
 
-            xhr.open("post", "http://j37s5u.natappfree.cc/file/add", true);//设置提交方式，url，异步提交
+            xhr.open("post", fileobj.urlpath, true);//设置提交方式，url，异步提交
             xhr.onload = function () {
                 var data = xhr.responseText;    //得到返回值
                // alert(data);
@@ -104,6 +104,45 @@
 						uploadApp.onProgressHandler(schedule);
 
 		   }
+
+
+			//req.addEventListener("load", transferComplete, false); req.addEventListener("error", transferFailed, false); req.addEventListener("abort", transferCanceled, false); 
+			
+            xhr.send(formData);
+        }
+		
+		function createGroup(fileobj) {
+                     
+            //原生ajax实现文件上传
+            var formData = new FormData();
+            formData.append("cname", fileobj.cname);
+
+           
+			formData.append("caddr", fileobj.caddr);
+
+           formData.append("cshortname", fileobj.cshortname);
+         
+           formData.append("czoneid", fileobj.czoneid);
+           formData.append("cyyzz", fileobj.file);
+
+            //得到xhr对象
+            var xhr = null;
+            if (XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xhr.open("post", fileobj.urlpath, true);//设置提交方式，url，异步提交
+            xhr.onload = function () {
+                var data = xhr.responseText;    //得到返回值
+               // alert(data);
+			   if(uploadApp != null)
+			   uploadApp.onSaveCompnayBack(data);
+            }
+					
+
+		   
 
 
 			//req.addEventListener("load", transferComplete, false); req.addEventListener("error", transferFailed, false); req.addEventListener("abort", transferCanceled, false); 

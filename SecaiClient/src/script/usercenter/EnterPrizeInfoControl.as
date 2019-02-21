@@ -1,8 +1,11 @@
 package script.usercenter
 {
 	import laya.components.Script;
+	import laya.display.Sprite;
 	import laya.events.Event;
 	import laya.ui.List;
+	import laya.ui.Panel;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.ChinaAreaModel;
@@ -22,6 +25,11 @@ package script.usercenter
 		private var cityname:CityAreaVo;
 		private var areaname:CityAreaVo;
 		
+		private var file:Object; 
+		
+		private var companyareaId:String;
+
+		private var curYyzzFile:Object;
 		public function EnterPrizeInfoControl()
 		{
 			super();
@@ -86,17 +94,62 @@ package script.usercenter
 			uiSkin.txt_license.text = "";
 			
 			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
-
+			Browser.window.uploadApp = this;
+			initFileOpen();
+			
+			Laya.timer.frameLoop(10,this,updateFileOpenPos);
 		}
 		
+		private function updateFileOpenPos()
+		{
+			if((uiSkin.parent.parent.parent as Panel).vScrollBar)
+			trace("skinpos:" + (uiSkin.parent.parent.parent as Panel).y + "," + (uiSkin.parent.parent.parent as Panel).vScrollBar.value);
+			if(file)
+				file.style.top = (510 - (uiSkin.parent.parent.parent as Panel).vScrollBar.value).toString() + "px";
+		}
+		private function initFileOpen():void
+		{
+			file = Browser.document.createElement("input");
+			
+			file.style="filter:alpha(opacity=100);opacity:100;width: 100;height:34px;left:1080px;top:510";		
+			
+			file.accept = ".jpg,.jpeg,.png,.tif";
+			file.type ="file";
+			file.style.position ="absolute";
+			file.style.zIndex = 999;
+			Browser.document.body.appendChild(file);//添加到舞台
+			file.onchange = function(e):void
+			{
+				
+				
+				curYyzzFile = file.files[0];
+				uiSkin.txt_license.text = curYyzzFile.name;
+				
+			};
+		
+		}
+		
+		public override function onDestroy():void
+		{
+			Browser.document.body.removeChild(file);//添加到舞台
+			Laya.timer.clear(this,updateFileOpenPos);
+
+		}
 		private function onUploadlicense():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,{type:"License",path:"/company/licence"});
+			//ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,{type:"License",path:"/company/licence"});
 		}
 		private function onSaveCompanyInfo():void
 		{
 			// TODO Auto Generated method stub
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name=" + uiSkin.input_companyname.text + "&addr=" + Userdata.instance.defaultAddrid,"post");
+			if(curYyzzFile == null)
+			{
+				ViewManager.showAlert("请选择营业执照");
+				return;
+			}
+			Browser.window.createGroup({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.createGroup, cname:uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:companyareaId,caddr:uiSkin.detail_addr.text,file:curYyzzFile});
+
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name=" + uiSkin.input_companyname.text + "&addr=" + Userdata.instance.defaultAddrid,"post");
 		}
 		
 		private function onSaveCompnayBack(data:Object):void
@@ -104,7 +157,12 @@ package script.usercenter
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				
+				ViewManager.showAlert("保存成功");
+			}
+			else
+			{
+				ViewManager.showAlert("保存失败");
+
 			}
 		}
 		private function hideAddressPanel(e:Event):void
@@ -178,9 +236,11 @@ package script.usercenter
 			
 			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
 			
+			
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
 			uiSkin.townList.selectedIndex = -1;
-			
+			companyareaId = uiSkin.townList.array[0].id;
+
 		}
 		
 		private function selectCity(index:int):void
@@ -198,6 +258,9 @@ package script.usercenter
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
 			uiSkin.townList.selectedIndex = -1;
 			
+			companyareaId = uiSkin.townList.array[0].id;
+
+			
 		}
 		
 		private function selectArea(index:int):void
@@ -211,7 +274,8 @@ package script.usercenter
 			uiSkin.townList.refresh();
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
 			uiSkin.townList.selectedIndex = -1;
-			
+			companyareaId = uiSkin.townList.array[0].id;
+
 			
 		}
 		
@@ -221,8 +285,8 @@ package script.usercenter
 				return;
 			uiSkin.townbox.visible = false;
 			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
-			Userdata.instance.defaultAddrid = uiSkin.townList.array[index].id;
-			
+			companyareaId = uiSkin.townList.array[index].id;
+
 		}
 	}
 }

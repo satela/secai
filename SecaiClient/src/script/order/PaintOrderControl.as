@@ -252,6 +252,9 @@ package script.order
 		
 		private function onOrderPaint():void
 		{
+//			var obj:Object = {client_code:"SCFY001",order_sn:"123456",refund_amount:"9.12"};
+//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,onPlaceOrderBack,{data:JSON.stringify(obj)},"post");
+//			return;
 			if(orderlist.length <= 0)
 			{
 				ViewManager.showAlert("未选择下单图片");
@@ -266,11 +269,11 @@ package script.order
 			}
 			
 			var orderdata:Object = {};
-			orderdata.order_sn = "123";
+			orderdata.order_sn = "123456";
 			orderdata.client_code = "SCFY001";
 			orderdata.consignee = "色彩飞扬";
 			orderdata.tel = "13568989899";
-			orderdata.addr = "上海市浦东新区年家浜路58号汇腾南苑";
+			orderdata.address = "上海市浦东新区年家浜路58号汇腾南苑";
 			orderdata.order_amountStr = "0";
 			orderdata.shipping_feeStr = "0";
 			orderdata.money_paidStr = "0";
@@ -305,7 +308,7 @@ package script.order
 			}
 			orderdata.order_amountStr = totalMoney.toString();
 			orderdata.money_paidStr =  totalMoney.toString();
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 
 		}
 		

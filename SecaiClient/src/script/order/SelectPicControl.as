@@ -98,6 +98,7 @@ package script.order
 					(param as MaterialItemVo).attchMentFileId = "";
 				else
 					(param as MaterialItemVo).attchMentFileId = fvo.fid;
+				return;
 			}
 			var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
 			if( hasfic)

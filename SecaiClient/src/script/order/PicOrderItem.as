@@ -186,7 +186,7 @@ package script.order
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
 			orderitemdata.item_priceStr = 1;
-			orderitemdata.item_status = "";
+			orderitemdata.item_status = "1";
 			orderitemdata.comments = this.ordervo.comment;
 			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;
 			

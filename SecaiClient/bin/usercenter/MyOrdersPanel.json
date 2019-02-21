@@ -1,0 +1,1 @@
+{"type":"Scene","props":{"width":1000,"height":1080},"compId":2,"child":[{"type":"Panel","props":{"top":0,"right":0,"left":0,"bottom":0},"compId":3,"child":[{"type":"VBox","props":{"right":0,"left":0,"height":900},"compId":4},{"type":"Label","props":{"y":947,"x":476,"text":"1/20","fontSize":24},"compId":5}]}],"loadList":[],"loadList3D":[]}

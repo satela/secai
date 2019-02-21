@@ -63,6 +63,7 @@ package script {
 
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
 			
+			
 			if(!Userdata.instance.isLogin)
 				loginAccount();
 			else
@@ -147,6 +148,9 @@ package script {
 				Userdata.instance.isLogin = false;
 				txtLogin.text = "登录";
 				txtReg.text = "注册";
+				
+				UtilTool.setLocalVar("useraccount","");
+				UtilTool.setLocalVar("userpwd","");
 
 			}
 		}

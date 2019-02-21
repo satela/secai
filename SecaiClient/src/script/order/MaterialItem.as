@@ -33,10 +33,18 @@ package script.order
 		private function onClickMat():void
 		{
 			// TODO Auto Generated method stub
-			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessCatList + matvo.prod_code,this,onGetProcessListBack,null,null);
-
-			PaintOrderModel.instance.curSelectMat = matvo;
+			if(matvo.prcessCatList != null && matvo.prcessCatList.length > 0)
+			{
+				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
+				
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
+			}
+			else
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessCatList + matvo.prod_code,this,onGetProcessListBack,null,null);
+				
+				PaintOrderModel.instance.curSelectMat = matvo;
+			}
 			
 			
 		}

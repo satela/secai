@@ -76,7 +76,11 @@ package script.usercenter
 		private function onShowEditView(index:int):void
 		{
 			while(uiSkin.sp_container.numChildren > 0)
+			{
+				(uiSkin.sp_container.getChildAt(0)).destroy(true);
 				uiSkin.sp_container.removeChildAt(0);
+
+			}
 			for(var i:int=0;i < btntxtArr.length;i++)
 			{
 				(btntxtArr[i] as Label).color = "#272524";

@@ -109,7 +109,7 @@ package model.orderModel
 				if(arr[i].selected)
 				{
 					
-					prolist.push({proc_description:arr[i].preProc_Name,proc_attachpath:""});
+					prolist.push({proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
 					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList));
 					
 				}

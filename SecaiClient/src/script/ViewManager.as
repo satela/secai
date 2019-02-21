@@ -116,10 +116,8 @@ package script
 		}
 		public function openView(viewClass:String,closeOther:Boolean=false,params:Object = null):void
 		{
-			if(openViewList[viewClass] != null)
-				return;
-			if(viewDict[viewClass] == null)
-				return;
+			
+			
 			if(closeOther)
 			{
 				for each(var oldview in openViewList)
@@ -130,6 +128,12 @@ package script
 				}
 				openViewList = {};
 			}
+			
+			if(viewDict[viewClass] == null)
+				return;
+			
+			if(openViewList[viewClass] != null)
+				return;
 			var view:View = new viewDict[viewClass]();
 			view.param = params;
 //			var control:Script = view.getComponent(Script);

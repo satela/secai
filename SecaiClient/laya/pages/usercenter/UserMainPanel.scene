@@ -2,7 +2,7 @@
     "x":0,
     "type":"View",
     "selectedBox":4,
-    "selecteID":50,
+    "selecteID":14,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -79,14 +79,13 @@
                     "props":{"y":148,"x":321,"space":2},
                     "nodeParent":4,
                     "label":"VBox",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":5,
                     "child":[
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":50,"x":2,"width":232,"height":127},
@@ -99,7 +98,6 @@
                             "compId":20,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},
@@ -112,7 +110,6 @@
                                     "compId":17,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -129,7 +126,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -142,7 +138,6 @@
                                     "compId":26,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt0",
                                             "props":{"var":"btntxt0","text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
@@ -157,7 +152,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt1",
                                             "props":{"y":43,"var":"btntxt1","text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
@@ -176,7 +170,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":182,"x":2,"width":232,"height":171},
@@ -189,7 +182,6 @@
                             "compId":21,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},
@@ -202,7 +194,6 @@
                                     "compId":22,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -219,7 +210,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -232,7 +222,6 @@
                                     "compId":27,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt2",
                                             "props":{"y":0,"var":"btntxt2","text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
@@ -247,7 +236,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt3",
                                             "props":{"y":44,"var":"btntxt3","text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
@@ -262,7 +250,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt4",
                                             "props":{"y":88,"var":"btntxt4","text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
@@ -281,7 +268,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":353,"x":2,"width":232,"height":127},
@@ -294,7 +280,6 @@
                             "compId":29,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},
@@ -307,7 +292,6 @@
                                     "compId":30,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -324,7 +308,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -337,7 +320,6 @@
                                     "compId":32,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt5",
                                             "props":{"y":0,"var":"btntxt5","text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
@@ -352,7 +334,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt6",
                                             "props":{"y":44,"var":"btntxt6","text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},
@@ -371,7 +352,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":508,"x":2,"width":232,"height":117},
@@ -384,7 +364,6 @@
                             "compId":36,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},
@@ -397,7 +376,6 @@
                                     "compId":37,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Rect",
                                             "searchKey":"Rect",
                                             "props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},
@@ -414,7 +392,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":53,"x":0,"width":230,"space":20},
@@ -427,7 +404,6 @@
                                     "compId":39,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt7",
                                             "props":{"y":0,"var":"btntxt7","text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},
@@ -442,7 +418,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt8",
                                             "props":{"y":33,"var":"btntxt8","text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},

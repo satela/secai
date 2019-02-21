@@ -108,7 +108,7 @@ package script.picUpload
 		{
 			if(fileListData && fileListData.length > curUploadIndex)
 			{
-				Browser.window.uploadPic({path:DirectoryFileModel.instance.curSelectDir.dpath,file:fileListData[curUploadIndex]});
+				Browser.window.uploadPic({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic, path:DirectoryFileModel.instance.curSelectDir.dpath,file:fileListData[curUploadIndex]});
 				//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic,this,onCompleteUpload,{path:"0|11|",file:file.files[0]},"post",onProgressHandler);
 			}
 			else
