@@ -11,8 +11,14 @@ package model.orderModel
 		
 		public var materialName:String;//材料名称
 		
-		public var productVo:ProductVo;
+		public var orderData:Object; //最早下单的数据
 		
+		public var orderPrice:Number;//该单的单价
+		
+		public var manufacturer_code:String;//输出中心编码
+		public var manufacturer_name:String;//输出中心编码
+
+
 		public var editWidth:Number;
 		
 		public var editHeight:Number;

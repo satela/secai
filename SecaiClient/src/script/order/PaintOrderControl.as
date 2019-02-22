@@ -262,9 +262,9 @@ package script.order
 			}
 			
 			var orderitem:PicOrderItem = orderlist[0];
-			if(orderitem.ordervo.productVo == null)
+			if(orderitem.ordervo.orderData == null)
 			{
-				ViewManager.showAlert("未选择材料工业");
+				ViewManager.showAlert("未选择材料工艺");
 				return;
 			}
 			
@@ -279,8 +279,8 @@ package script.order
 			orderdata.money_paidStr = "0";
 			orderdata.discountStr = "0";
 			orderdata.pay_timeStr = "2019-02-19 21:15:00";//(new Date()).getTime();
-			orderdata.manufacturer_code = orderitem.ordervo.productVo.manufacturer_code;
-			orderdata.manufacturer_name = orderitem.ordervo.productVo.manufacturer_name;
+			orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
+			orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
 			
 			var totalMoney:Number = 0;
 			if(PaintOrderModel.instance.selectDelivery)
@@ -292,12 +292,12 @@ package script.order
 			orderdata.orderItemList = [];
 			for(var i:int=0;i < orderlist.length;i++)
 			{
-				if(orderlist[i].ordervo.productVo != null)
+				if(orderlist[i].ordervo.orderData != null)
 				{
 					totalMoney += orderlist[i].getPrice();
 					//totalMoney += orderlist[i].getPrice();
 
-					orderdata.orderItemList.push(orderlist[i].getOrderData());
+					orderdata.orderItemList.push(orderlist[i].ordervo.orderData);
 				}
 				else
 				{

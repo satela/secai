@@ -136,18 +136,18 @@ package script.order
 		
 		public function changeProduct(provo:ProductVo):void
 		{
-			this.ordervo.productVo = provo;
-			
+			//this.ordervo.orderData = provo;
+			updateOrderData(provo);
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
 			
-			this.price.text = this.ordervo.productVo.getTotalPrice(area).toString();
+			this.price.text = provo.getTotalPrice(area).toString();
 			
-			this.total.text = parseInt(this.inputnum.text) * this.ordervo.productVo.getTotalPrice(area) + "";
+			this.total.text = parseInt(this.inputnum.text) *provo.getTotalPrice(area) + "";
 			
-			this.mattxt.text = this.ordervo.productVo.prod_name;
+			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
 
-			this.architype.text = this.ordervo.productVo.getTechDes();
+			this.architype.text = provo.getTechDes();
 			
 			if(this.architype.textField.textHeight > 30)
 				this.architype.height = this.architype.textField.textHeight;
@@ -167,19 +167,22 @@ package script.order
 		}
 		
 		public function getPrice():Number
+		{			
+			return parseInt(this.inputnum.text) * this.ordervo.orderPrice;
+		}
+		public function updateOrderData(productVo:ProductVo)
 		{
+			
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
 			
-			return this.ordervo.productVo.getTotalPrice(area);
-		}
-		public function getOrderData():Object
-		{
-			
+			this.ordervo.orderPrice = productVo.getTotalPrice(area);
+			ordervo.manufacturer_code = productVo.manufacturer_code;
+			ordervo.manufacturer_name = productVo.manufacturer_name;
 			
 			var orderitemdata:Object = {};
 			
-			orderitemdata.prod_name = this.ordervo.productVo.prod_name;
-			orderitemdata.prod_code = this.ordervo.productVo.prod_code;
+			orderitemdata.prod_name = productVo.prod_name;
+			orderitemdata.prod_code = productVo.prod_code;
 			
 			orderitemdata.prod_description = "";
 			orderitemdata.LWH = "";
@@ -190,10 +193,10 @@ package script.order
 			orderitemdata.comments = this.ordervo.comment;
 			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;
 			
-			orderitemdata.procInfoList = this.ordervo.productVo.getProInfoList();
+			orderitemdata.procInfoList = productVo.getProInfoList();
 			
 
-			return orderitemdata;
+			this.ordervo.orderData =  orderitemdata;
 		}
 	}
 }

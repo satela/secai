@@ -35,6 +35,9 @@ package script.order
 			// TODO Auto Generated method stub
 			if(matvo.prcessCatList != null && matvo.prcessCatList.length > 0)
 			{
+				matvo.resetData();
+				PaintOrderModel.instance.curSelectMat = matvo;
+
 				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
 				
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);

@@ -29,5 +29,17 @@ package model.orderModel
 				}
 			}
 		}
+		
+		public function resetData():void
+		{
+			selected = false;
+			if(nextMatList != null)
+			{
+				for(var i:int=0;i < nextMatList.length;i++)
+				{
+					nextMatList[i].resetData();
+				}
+			}
+		}
 	}
 }

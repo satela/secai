@@ -62,7 +62,7 @@ package model.orderModel
 		
 		public function getTotalPrice(area:Number):Number
 		{
-			var prices:Number = area*unit_price;
+			var prices:Number = area*(unit_price + additional_unitFee);
 			var allprices:Array = [];
 			for(var i:int=0;i < prcessCatList.length;i++)
 			{
@@ -131,6 +131,17 @@ package model.orderModel
 				}
 			}
 			return arr;
+		}
+		
+		public function resetData():void
+		{
+			if(prcessCatList != null)
+			{
+				for(var i:int=0;i < prcessCatList.length;i++)
+				{
+					prcessCatList[i].resetData();
+				}
+			}
 		}
 	}
 }
