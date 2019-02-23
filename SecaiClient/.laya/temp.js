@@ -1211,6 +1211,7 @@ var GameConfig=(function(){
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 		reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 		reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
+		reg("script.usercenter.MyOrderControl",MyOrderControl);
 		reg("script.usercenter.AddressEditControl",AddressEditControl);
 		reg("script.usercenter.UserMainControl",UserMainControl);
 	}
@@ -1221,7 +1222,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/UserMainPanel.scene";
+	GameConfig.startScene="order/OrderItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1307,6 +1308,17 @@ var MaterialItemVo=(function(){
 	}
 
 	__class(MaterialItemVo,'model.orderModel.MaterialItemVo');
+	var __proto=MaterialItemVo.prototype;
+	__proto.resetData=function(){
+		this.selected=false;
+		this.attchMentFileId="";
+		if(this.nextMatList !=null){
+			for(var i=0;i < this.nextMatList.length;i++){
+				this.nextMatList[i].resetData();
+			}
+		}
+	}
+
 	return MaterialItemVo;
 })()
 
@@ -1686,6 +1698,15 @@ var ProcessCatVo=(function(){
 		}
 	}
 
+	__proto.resetData=function(){
+		this.selected=false;
+		if(this.nextMatList !=null){
+			for(var i=0;i < this.nextMatList.length;i++){
+				this.nextMatList[i].resetData();
+			}
+		}
+	}
+
 	return ProcessCatVo;
 })()
 
@@ -1759,7 +1780,7 @@ var ProductVo=(function(){
 	}
 
 	__proto.getTotalPrice=function(area){
-		var prices=area*this.unit_price;
+		var prices=area*(this.unit_price+this.additional_unitFee);
 		var allprices=[];
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
@@ -1807,6 +1828,14 @@ var ProductVo=(function(){
 			}
 		}
 		return arr;
+	}
+
+	__proto.resetData=function(){
+		if(this.prcessCatList !=null){
+			for(var i=0;i < this.prcessCatList.length;i++){
+				this.prcessCatList[i].resetData();
+			}
+		}
 	}
 
 	return ProductVo;
@@ -1872,7 +1901,14 @@ var PicOrderItemVo=(function(){
 		//材料id
 		this.materialName=null;
 		//材料名称
-		this.productVo=null;
+		this.orderData=null;
+		//最早下单的数据
+		this.orderPrice=NaN;
+		//该单的单价
+		this.manufacturer_code=null;
+		//输出中心编码
+		this.manufacturer_name=null;
+		//输出中心编码
 		this.editWidth=NaN;
 		this.editHeight=NaN;
 		this.technolegs=null;
@@ -2002,6 +2038,7 @@ var Main=(function(){
 		if (GameConfig.stat)Stat.show();
 		Laya.alertGlobalError=true;
 		ResourceVersion.enable("version.json",Handler.create(this,this.onVersionLoaded),2);
+		Laya.stage.on("resize",this,this.onResizeBrower);
 	}
 
 	__class(Main,'Main');
@@ -34089,7 +34126,7 @@ var MainPageControl=(function(_super){
 		var btnUserCenter=this.owner["btnUserCenter"];
 		btnUserCenter.on("click",this,this.onShowUserCenter);
 		EventCenter.instance.on("LOGIN_SUCESS",this,this.onSucessLogin);
-		Laya.stage.on("resize",this,this.onResizeBrower);
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		(this.owner ["panel_main"]).height=Browser.clientHeight-20;
 		if(!Userdata.instance.isLogin)
 			this.loginAccount();
@@ -34121,12 +34158,14 @@ var MainPageControl=(function(_super){
 
 	__proto.onResizeBrower=function(){
 		console.log("height:"+Browser.clientHeight);
-		EventCenter.instance.event("BROWER_WINDOW_RESIZE");
 		(this.owner ["panel_main"]).height=Browser.clientHeight-20;
 	}
 
 	__proto.onShowUpload=function(){
-		ViewManager.instance.openView("VIEW_PICMANAGER",true);
+		if(Userdata.instance.isLogin)
+			ViewManager.instance.openView("VIEW_PICMANAGER",true);
+		else
+		ViewManager.showAlert("请先登录");
 	}
 
 	//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
@@ -34192,6 +34231,7 @@ var MainPageControl=(function(_super){
 	__proto.onTipClick=function(e){}
 	__proto.onDestroy=function(){
 		EventCenter.instance.off("LOGIN_SUCESS",this,this.onSucessLogin);
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 	}
 
 	return MainPageControl;
@@ -34214,7 +34254,7 @@ var UserMainControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
-		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null];
+		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI];
 		this.btntxtArr=[];
 		for(var i=0;i < 9;i++){
 			this.uiSkin["btntxt"+i].on("click",this,this.onShowEditView,[i]);
@@ -35094,8 +35134,8 @@ var PaintOrderControl=(function(_super){
 			return;
 		};
 		var orderitem=this.orderlist[0];
-		if(orderitem.ordervo.productVo==null){
-			ViewManager.showAlert("未选择材料工业");
+		if(orderitem.ordervo.orderData==null){
+			ViewManager.showAlert("未选择材料工艺");
 			return;
 		};
 		var orderdata={};
@@ -35109,8 +35149,8 @@ var PaintOrderControl=(function(_super){
 		orderdata.money_paidStr="0";
 		orderdata.discountStr="0";
 		orderdata.pay_timeStr="2019-02-19 21:15:00";
-		orderdata.manufacturer_code=orderitem.ordervo.productVo.manufacturer_code;
-		orderdata.manufacturer_name=orderitem.ordervo.productVo.manufacturer_name;
+		orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
+		orderdata.manufacturer_name=orderitem.ordervo.manufacturer_name;
 		var totalMoney=0;
 		if(PaintOrderModel.instance.selectDelivery){
 			orderdata.logistic_code=PaintOrderModel.instance.selectDelivery.deliverynet_code;
@@ -35118,9 +35158,9 @@ var PaintOrderControl=(function(_super){
 		}
 		orderdata.orderItemList=[];
 		for(var i=0;i < this.orderlist.length;i++){
-			if(this.orderlist[i].ordervo.productVo !=null){
+			if(this.orderlist[i].ordervo.orderData !=null){
 				totalMoney+=this.orderlist[i].getPrice();
-				orderdata.orderItemList.push(this.orderlist[i].getOrderData());
+				orderdata.orderItemList.push(this.orderlist[i].ordervo.orderData);
 			}
 			else{
 				ViewManager.showAlert("有图片未选择材料工艺");
@@ -35738,6 +35778,36 @@ var SelectDeliveryControl=(function(_super){
 	}
 
 	return SelectDeliveryControl;
+})(Script)
+
+
+//class script.usercenter.MyOrderControl extends laya.components.Script
+var MyOrderControl=(function(_super){
+	function MyOrderControl(){
+		this.uiSkin=null;
+		MyOrderControl.__super.call(this);
+	}
+
+	__class(MyOrderControl,'script.usercenter.MyOrderControl',_super);
+	var __proto=MyOrderControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		for(var i=18965898;i < 18965905;i++){
+			var ordetata={};
+			ordetata.orderId=i.toString();
+			var orderitem=new QuestOrderItem();
+			orderitem.setData(ordetata);
+			orderitem.adjustHeight=this.updateVbox;
+			orderitem.caller=this;
+			this.uiSkin.orderbox.addChild(orderitem);
+		}
+	}
+
+	__proto.updateVbox=function(){
+		this.uiSkin.orderbox.refresh();
+	}
+
+	return MyOrderControl;
 })(Script)
 
 
@@ -42355,7 +42425,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Image","props":{"y":0,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":60},"compId":4},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"1","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"0","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"1","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Image","props":{"y":4,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":52},"compId":4},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"1","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"0","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"1","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -42423,6 +42493,54 @@ var WaitRespondPanelUI=(function(_super){
 
 	WaitRespondPanelUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.9,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Image","props":{"y":540,"x":960,"var":"zhuanq","skin":"commers/circlebg.png","anchorY":0.5,"anchorX":0.5,"alpha":0.9},"compId":4}],"loadList":["commers/blackbg.png","commers/circlebg.png"],"loadList3D":[]};
 	return WaitRespondPanelUI;
+})(Scene)
+
+
+//class ui.usercenter.MyOrdersPanelUI extends laya.display.Scene
+var MyOrdersPanelUI=(function(_super){
+	function MyOrdersPanelUI(){
+		this.orderbox=null;
+		MyOrdersPanelUI.__super.call(this);
+	}
+
+	__class(MyOrdersPanelUI,'ui.usercenter.MyOrdersPanelUI',_super);
+	var __proto=MyOrdersPanelUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.loadScene("usercenter/MyOrdersPanel");
+	}
+
+	return MyOrdersPanelUI;
+})(Scene)
+
+
+//class ui.usercenter.OrderQuestItemUI extends laya.display.Scene
+var OrderQuestItemUI=(function(_super){
+	function OrderQuestItemUI(){
+		this.bgimg=null;
+		this.fileimg=null;
+		this.order_sn=null;
+		this.filename=null;
+		this.filenum=null;
+		this.price=null;
+		this.deleteOrder=null;
+		this.detailbtn=null;
+		this.filewidth=null;
+		this.fileheight=null;
+		this.detailbox=null;
+		this.txtMaterial=null;
+		OrderQuestItemUI.__super.call(this);
+	}
+
+	__class(OrderQuestItemUI,'ui.usercenter.OrderQuestItemUI',_super);
+	var __proto=OrderQuestItemUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.createView(OrderQuestItemUI.uiView);
+	}
+
+	OrderQuestItemUI.uiView={"type":"Scene","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":798,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":141},"compId":3},{"type":"Image","props":{"y":5,"x":123,"width":85,"var":"fileimg","skin":"comp/image.png","height":50},"compId":4},{"type":"Label","props":{"y":21,"x":9,"width":104,"var":"order_sn","text":"186969696789","height":21,"fontSize":16,"align":"center"},"compId":6},{"type":"Label","props":{"y":15,"x":218,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":7},{"type":"Label","props":{"y":23,"x":568,"width":58,"var":"filenum","text":"0","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":23,"x":626,"width":77,"var":"price","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":10},{"type":"Box","props":{"y":10,"x":717},"compId":11,"child":[{"type":"Text","props":{"var":"deleteOrder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":15},{"type":"Text","props":{"y":26,"var":"detailbtn","text":"订单详情","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":16}]},{"type":"Box","props":{"y":10,"x":412},"compId":12,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":18},{"type":"TextInput","props":{"x":58,"width":74,"var":"filewidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":19},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"fileheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":20}]},{"type":"VBox","props":{"y":65,"var":"detailbox","space":0,"right":5,"left":5},"compId":13,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":780,"var":"txtMaterial","valign":"top","text":"户外材料--白胶车贴","height":71,"fontSize":18,"align":"left"},"compId":21}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png"],"loadList3D":[]};
+	return OrderQuestItemUI;
 })(Scene)
 
 
@@ -48741,13 +48859,13 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.changeProduct=function(provo){
-		this.ordervo.productVo=provo;
+		this.updateOrderData(provo);
 		var area=(this.ordervo.picinfo.picPhysicHeight *this.ordervo.picinfo.picPhysicWidth)/10000;
-		this.price.text=this.ordervo.productVo.getTotalPrice(area).toString();
-		this.total.text=parseInt(this.inputnum.text)*this.ordervo.productVo.getTotalPrice(area)+"";
-		this.mattxt.text=this.ordervo.productVo.prod_name;
+		this.price.text=provo.getTotalPrice(area).toString();
+		this.total.text=parseInt(this.inputnum.text)*provo.getTotalPrice(area)+"";
+		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
-		this.architype.text=this.ordervo.productVo.getTechDes();
+		this.architype.text=provo.getTechDes();
 		if(this.architype.textField.textHeight > 30)
 			this.architype.height=this.architype.textField.textHeight;
 		else
@@ -48762,14 +48880,17 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.getPrice=function(){
-		var area=(this.ordervo.picinfo.picPhysicHeight *this.ordervo.picinfo.picPhysicWidth)/10000;
-		return this.ordervo.productVo.getTotalPrice(area);
+		return parseInt(this.inputnum.text)*this.ordervo.orderPrice;
 	}
 
-	__proto.getOrderData=function(){
+	__proto.updateOrderData=function(productVo){
+		var area=(this.ordervo.picinfo.picPhysicHeight *this.ordervo.picinfo.picPhysicWidth)/10000;
+		this.ordervo.orderPrice=productVo.getTotalPrice(area);
+		this.ordervo.manufacturer_code=productVo.manufacturer_code;
+		this.ordervo.manufacturer_name=productVo.manufacturer_name;
 		var orderitemdata={};
-		orderitemdata.prod_name=this.ordervo.productVo.prod_name;
-		orderitemdata.prod_code=this.ordervo.productVo.prod_code;
+		orderitemdata.prod_name=productVo.prod_name;
+		orderitemdata.prod_code=productVo.prod_code;
 		orderitemdata.prod_description="";
 		orderitemdata.LWH="";
 		orderitemdata.weightStr=1;
@@ -48778,8 +48899,8 @@ var PicOrderItem=(function(_super){
 		orderitemdata.item_status="1";
 		orderitemdata.comments=this.ordervo.comment;
 		orderitemdata.imagefile_path=this.ordervo.picinfo.fid;
-		orderitemdata.procInfoList=this.ordervo.productVo.getProInfoList();
-		return orderitemdata;
+		orderitemdata.procInfoList=productVo.getProInfoList();
+		this.ordervo.orderData=orderitemdata;
 	}
 
 	return PicOrderItem;
@@ -49045,6 +49166,43 @@ var PicCheckPanelUI=(function(_super){
 	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6},{"type":"Panel","props":{"var":"mainpanel","top":0,"right":0,"left":0,"bottom":100},"compId":7,"child":[{"type":"Image","props":{"y":571,"x":980,"width":1000,"var":"img","height":999,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return PicCheckPanelUI;
 })(View)
+
+
+//class script.usercenter.QuestOrderItem extends ui.usercenter.OrderQuestItemUI
+var QuestOrderItem=(function(_super){
+	function QuestOrderItem(){
+		this.adjustHeight=null;
+		this.caller=null;
+		QuestOrderItem.__super.call(this);
+	}
+
+	__class(QuestOrderItem,'script.usercenter.QuestOrderItem',_super);
+	var __proto=QuestOrderItem.prototype;
+	__proto.setData=function(orderdata){
+		this.order_sn.text=orderdata.orderId;
+		this.txtMaterial.text="材料：油画布3*6，工艺：喷印方式（户内写真-4pass),外表面装裱（上光油-哑面),异性切割（附件),装裱（有狂装裱-框条（A框条)。"+
+		"快递方式（义务物语物流-上门送货";
+		this.detailbox.visible=false;
+		this.bgimg.height=65;
+		this.detailbtn.on("click",this,this.onClickShowDetail);
+	}
+
+	__proto.onClickShowDetail=function(){
+		this.detailbox.visible=!this.detailbox.visible;
+		if(this.detailbox.visible)
+			this.bgimg.height=141;
+		else
+		this.bgimg.height=65;
+		this.adjustHeight.call(this.caller);
+	}
+
+	__proto.hideDetail=function(){
+		this.detailbox.visible=false;
+		this.bgimg.height=65;
+	}
+
+	return QuestOrderItem;
+})(OrderQuestItemUI)
 
 
 /**
@@ -50002,95 +50160,6 @@ var List=(function(_super){
 
 
 /**
-*<code>LayoutBox</code> 是一个布局容器类。
-*/
-//class laya.ui.LayoutBox extends laya.ui.Box
-var LayoutBox=(function(_super){
-	function LayoutBox(){
-		/**@private */
-		this._space=0;
-		/**@private */
-		this._align="none";
-		/**@private */
-		this._itemChanged=false;
-		LayoutBox.__super.call(this);
-	}
-
-	__class(LayoutBox,'laya.ui.LayoutBox',_super);
-	var __proto=LayoutBox.prototype;
-	/**@inheritDoc */
-	__proto.addChild=function(child){
-		child.on("resize",this,this.onResize);
-		this._setItemChanged();
-		return laya.display.Node.prototype.addChild.call(this,child);
-	}
-
-	__proto.onResize=function(e){
-		this._setItemChanged();
-	}
-
-	/**@inheritDoc */
-	__proto.addChildAt=function(child,index){
-		child.on("resize",this,this.onResize);
-		this._setItemChanged();
-		return laya.display.Node.prototype.addChildAt.call(this,child,index);
-	}
-
-	/**@inheritDoc */
-	__proto.removeChildAt=function(index){
-		this.getChildAt(index).off("resize",this,this.onResize);
-		this._setItemChanged();
-		return laya.display.Node.prototype.removeChildAt.call(this,index);
-	}
-
-	/**刷新。*/
-	__proto.refresh=function(){
-		this._setItemChanged();
-	}
-
-	/**
-	*改变子对象的布局。
-	*/
-	__proto.changeItems=function(){
-		this._itemChanged=false;
-	}
-
-	/**
-	*排序项目列表。可通过重写改变默认排序规则。
-	*@param items 项目列表。
-	*/
-	__proto.sortItem=function(items){
-		if (items)items.sort(function(a,b){return a.y-b.y;});
-	}
-
-	__proto._setItemChanged=function(){
-		if (!this._itemChanged){
-			this._itemChanged=true;
-			this.callLater(this.changeItems);
-		}
-	}
-
-	/**子对象的间隔。*/
-	__getset(0,__proto,'space',function(){
-		return this._space;
-		},function(value){
-		this._space=value;
-		this._setItemChanged();
-	});
-
-	/**子对象对齐方式。*/
-	__getset(0,__proto,'align',function(){
-		return this._align;
-		},function(value){
-		this._align=value;
-		this._setItemChanged();
-	});
-
-	return LayoutBox;
-})(Box)
-
-
-/**
 *<code>Dialog</code> 组件是一个弹出对话框，实现对话框弹出，拖动，模式窗口功能。
 *可以通过UIConfig设置弹出框背景透明度，模式窗口点击边缘是否关闭等
 *通过设置zOrder属性，可以更改弹出的层次
@@ -50422,6 +50491,95 @@ var Dialog=(function(_super){
 	Dialog._manager=null;
 	return Dialog;
 })(View)
+
+
+/**
+*<code>LayoutBox</code> 是一个布局容器类。
+*/
+//class laya.ui.LayoutBox extends laya.ui.Box
+var LayoutBox=(function(_super){
+	function LayoutBox(){
+		/**@private */
+		this._space=0;
+		/**@private */
+		this._align="none";
+		/**@private */
+		this._itemChanged=false;
+		LayoutBox.__super.call(this);
+	}
+
+	__class(LayoutBox,'laya.ui.LayoutBox',_super);
+	var __proto=LayoutBox.prototype;
+	/**@inheritDoc */
+	__proto.addChild=function(child){
+		child.on("resize",this,this.onResize);
+		this._setItemChanged();
+		return laya.display.Node.prototype.addChild.call(this,child);
+	}
+
+	__proto.onResize=function(e){
+		this._setItemChanged();
+	}
+
+	/**@inheritDoc */
+	__proto.addChildAt=function(child,index){
+		child.on("resize",this,this.onResize);
+		this._setItemChanged();
+		return laya.display.Node.prototype.addChildAt.call(this,child,index);
+	}
+
+	/**@inheritDoc */
+	__proto.removeChildAt=function(index){
+		this.getChildAt(index).off("resize",this,this.onResize);
+		this._setItemChanged();
+		return laya.display.Node.prototype.removeChildAt.call(this,index);
+	}
+
+	/**刷新。*/
+	__proto.refresh=function(){
+		this._setItemChanged();
+	}
+
+	/**
+	*改变子对象的布局。
+	*/
+	__proto.changeItems=function(){
+		this._itemChanged=false;
+	}
+
+	/**
+	*排序项目列表。可通过重写改变默认排序规则。
+	*@param items 项目列表。
+	*/
+	__proto.sortItem=function(items){
+		if (items)items.sort(function(a,b){return a.y-b.y;});
+	}
+
+	__proto._setItemChanged=function(){
+		if (!this._itemChanged){
+			this._itemChanged=true;
+			this.callLater(this.changeItems);
+		}
+	}
+
+	/**子对象的间隔。*/
+	__getset(0,__proto,'space',function(){
+		return this._space;
+		},function(value){
+		this._space=value;
+		this._setItemChanged();
+	});
+
+	/**子对象对齐方式。*/
+	__getset(0,__proto,'align',function(){
+		return this._align;
+		},function(value){
+		this._align=value;
+		this._setItemChanged();
+	});
+
+	return LayoutBox;
+})(Box)
 
 
 /**
@@ -53842,6 +54000,8 @@ var MaterialItem=(function(_super){
 	//this.redrect.visible=false;
 	__proto.onClickMat=function(){
 		if(this.matvo.prcessCatList !=null && this.matvo.prcessCatList.length > 0){
+			this.matvo.resetData();
+			PaintOrderModel.instance.curSelectMat=this.matvo;
 			ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
 			ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
 		}

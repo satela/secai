@@ -25,6 +25,7 @@ package {
 	import script.picUpload.UpLoadAndOrderContrl;
 	import script.usercenter.AddressMgrControl;
 	import script.usercenter.EnterPrizeInfoControl;
+	import script.usercenter.MyOrderControl;
 	import script.usercenter.AddressEditControl;
 	import script.usercenter.UserMainControl;
 	/**
@@ -37,7 +38,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "usercenter/UserMainPanel.scene";
+		public static var startScene:* = "order/OrderItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -69,6 +70,7 @@ package {
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 			reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
+			reg("script.usercenter.MyOrderControl",MyOrderControl);
 			reg("script.usercenter.AddressEditControl",AddressEditControl);
 			reg("script.usercenter.UserMainControl",UserMainControl);
 		}

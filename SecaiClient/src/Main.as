@@ -51,6 +51,8 @@
 			
 			//激活资源版本控制，版本文件由发布功能生成
 			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
+			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
+
 		}
 		
 		private function onVersionLoaded():void {

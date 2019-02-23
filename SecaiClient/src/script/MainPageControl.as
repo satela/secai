@@ -58,8 +58,7 @@ package script {
 			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
 			
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
-			//EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
-			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
 			
@@ -103,14 +102,17 @@ package script {
 		{
 			// TODO Auto Generated method stub
 			console.log("height:" + Browser.clientHeight);
-			EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
+			//EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
 
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
 		}
 		
 		private function onShowUpload():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
+			if(Userdata.instance.isLogin)
+				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
+			else
+				ViewManager.showAlert("请先登录");
 			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
 		}
 		
@@ -195,6 +197,7 @@ package script {
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			
 		}

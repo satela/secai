@@ -13,6 +13,7 @@ package script.usercenter
 	
 	import ui.usercenter.AddressMgrPanelUI;
 	import ui.usercenter.EnterPrizeInfoPaneUI;
+	import ui.usercenter.MyOrdersPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 	
 	public class UserMainControl extends Script
@@ -36,7 +37,7 @@ package script.usercenter
 			//uiSkin.sp_container.autoSize = true;
 			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
-			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null];
+			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI];
 			
 			
 			

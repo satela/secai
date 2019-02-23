@@ -2,8 +2,10 @@
 package ui.usercenter {
 	import laya.ui.*;
 	import laya.display.*;
+	import script.usercenter.MyOrderControl;
 
 	public class MyOrdersPanelUI extends Scene {
+		public var orderbox:VBox;
 
 		override protected function createChildren():void {
 			super.createChildren();
