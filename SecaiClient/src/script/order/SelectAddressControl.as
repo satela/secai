@@ -6,6 +6,7 @@ package script.order
 	import laya.events.Event;
 	import laya.utils.Handler;
 	
+	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
 	import model.users.AddressVo;
 	
@@ -37,14 +38,8 @@ package script.order
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
 			
-			var arr:Array = [];
-			for(var i:int=0;i < 20;i++)
-			{
-				var address:AddressVo = new AddressVo();
-				address.city = "浦东新区" + i;
-				arr.push(address);
-			}
-			uiSkin.list_address.array = arr;
+
+			uiSkin.list_address.array = Userdata.instance.addressList;
 			PaintOrderModel.instance.selectAddress = null;
 		}
 		
@@ -55,8 +50,8 @@ package script.order
 			{
 				item.ShowSelected = item.address == uiSkin.list_address.array[index];
 			}
-			//(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
-			PaintOrderModel.instance.selectAddress = uiSkin.list_address.array[index];
+			(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
+			PaintOrderModel.instance.selectAddress = uiSkin.list_address.array[index];;
 		}
 		
 		private function updateAddressItem(cell:SelAddressItem):void

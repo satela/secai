@@ -99,7 +99,12 @@ package script.order
 //				trace(data);
 //			});
 
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=330782",this,onGetOutPutAddress,null,null);
+			if(Userdata.instance.addressList.length > 0)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.addressList[0].searchZoneid,this,onGetOutPutAddress,null,null);
+				uiSkin.myaddresstxt.text = Userdata.instance.addressList[0].addressDetail;
+				PaintOrderModel.instance.selectAddress = Userdata.instance.addressList[0];
+			}
 		}
 		
 		private function onGetOutPutAddress(data:*):void
@@ -113,7 +118,13 @@ package script.order
 					PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
 					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
 					
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=330782",this,onGetProductBack,null,null);
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid ,this,onGetProductBack,null,null);
+				}
+				else
+				{
+					PaintOrderModel.instance.selectFactoryAddress = null;
+					PaintOrderModel.instance.productList = [];
+					this.uiSkin.factorytxt.text = "你选择的地址暂无生产商";
 				}
 			}
 		}
@@ -138,14 +149,18 @@ package script.order
 		
 		private function onSelectedSelfAddress():void
 		{
-			
+			if(PaintOrderModel.instance.selectAddress)
+			{
+			uiSkin.myaddresstxt.text = PaintOrderModel.instance.selectAddress.addressDetail;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetOutPutAddress,null,null);
+			}
 		}
 		private function onSelectedAddress():void
 		{
 			if(PaintOrderModel.instance.selectFactoryAddress)
 			this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=120106",this,onGetProductBack,null,null);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetProductBack,null,null);
 
 			
 		}
@@ -308,7 +323,7 @@ package script.order
 			}
 			orderdata.order_amountStr = totalMoney.toString();
 			orderdata.money_paidStr =  totalMoney.toString();
-			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 
 		}
 		
@@ -327,7 +342,8 @@ package script.order
 			EventCenter.instance.off(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
 			EventCenter.instance.off(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
-			
+			EventCenter.instance.off(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
+
 			EventCenter.instance.off(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
 						
 			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);

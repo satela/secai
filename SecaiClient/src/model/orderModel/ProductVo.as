@@ -68,12 +68,9 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					//prices += area * prcessCatList[i].;
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList));
-					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList));					
 				}
 				
-				//techstr += ",";
 			}
 			for(i=0;i < allprices.length;i++)
 			{
@@ -84,7 +81,6 @@ package model.orderModel
 		
 		private function getTechPrice(arr:Vector.<MaterialItemVo>):Array
 		{
-			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
 			var prices:Array = [];
 			if(arr == null)
 				return [];

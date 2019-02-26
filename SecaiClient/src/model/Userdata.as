@@ -15,7 +15,7 @@ package model
 		
 		public var company:String;
 		
-		public var addressList:Vector.<AddressVo>;
+		public var addressList:Array = [];
 		
 		public var money:Number;
 		
@@ -33,6 +33,46 @@ package model
 		public function Userdata()
 		{
 			
+		}
+		
+		public function initMyAddress(adddata:Array):void
+		{
+			addressList = [];
+			for(var i:int=0;i < adddata.length;i++)
+			{
+				addressList.push(new AddressVo(adddata[i]));
+			}
+		}
+		
+		public function addNewAddress(adddata:Object):void
+		{
+			if(addressList == null)
+				addressList = [];
+			addressList.push(new AddressVo(adddata));
+
+		}
+		
+		public function updateAddress(adddata:Object):void
+		{
+			for(var i:int=0;i < addressList.length;i++)
+			{
+				if(addressList[i].id == adddata.id)
+				{
+					addressList[i] = new AddressVo(adddata);
+					break;
+				}
+			}
+		}
+		public function deleteAddr(id:String):void
+		{
+			for(var i:int=0;i < addressList.length;i++)
+			{
+				if(addressList[i].id == id)
+				{
+					addressList.splice(i,1);
+					break;
+				}
+			}
 		}
 	}
 }

@@ -88,6 +88,17 @@ package model
 					
 		}
 		
+		public function getAreaName(cityid:String):String
+		{
+			if(allAreaDict.hasOwnProperty(cityid))
+				return allAreaDict[cityid].areaName;
+			return "";
+		}
+		public function getParentId(cityid:String):String
+		{
+			return allAreaDict[cityid].parentid;
+			
+		}
 		public function getFullAddressByid(cityid:String):String
 		{
 			if(allAreaDict.hasOwnProperty(cityid))

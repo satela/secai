@@ -2,6 +2,7 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
+    "selecteID":4,
     "searchKey":"View",
     "props":{"width":800,"sceneColor":"#ffffff","height":800},
     "nodeParent":-1,
@@ -31,7 +32,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"y":40,"x":5,"width":789,"skin":"commers/blackbg.png","height":35,"alpha":0.4},
+            "props":{"y":40,"x":5,"width":789,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","height":35,"alpha":0.4},
             "nodeParent":2,
             "label":"Image",
             "isDirectory":false,
@@ -39,7 +40,8 @@
             "hasChild":false,
             "compId":4,
             "child":[
-                ]
+                ],
+            "$HIDDEN":false
         },
         {
             "x":15,

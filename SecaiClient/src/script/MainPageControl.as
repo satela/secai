@@ -94,10 +94,19 @@ package script {
 				Userdata.instance.isLogin = true;
 				txtLogin.text = account;
 				txtReg.text = "退出";
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
+
 			}
 			
 		}
-		
+		private function getMyAddressBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Userdata.instance.initMyAddress(result.data as Array);
+			}
+		}
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub

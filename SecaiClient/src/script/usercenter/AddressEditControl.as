@@ -1,16 +1,22 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.List;
 	import laya.utils.Handler;
 	
 	import model.ChinaAreaModel;
+	import model.HttpRequestUtil;
+	import model.Userdata;
+	import model.users.AddressVo;
 	import model.users.CityAreaVo;
 	
 	import script.ViewManager;
 	import script.login.CityAreaItem;
 	
+	import ui.order.AddCommentPanelUI;
 	import ui.usercenter.NewAddressPanelUI;
 	
 	public class AddressEditControl extends Script
@@ -19,6 +25,10 @@ package script.usercenter
 		
 		private var province:CityAreaVo;
 		
+		private var zoneid:String;
+		
+		private var param:Object;
+		private var isAddOrEdit:Boolean = true;//true add false edit
 		public function AddressEditControl()
 		{
 			super();
@@ -27,6 +37,9 @@ package script.usercenter
 		override public function onStart():void
 		{
 			uiSkin = this.owner as NewAddressPanelUI;
+			
+			if(param != null && param is AddressVo)
+				isAddOrEdit = false;
 			
 			uiSkin.input_username.maxChars = 10;
 			uiSkin.input_phone.maxChars = 11;
@@ -42,7 +55,6 @@ package script.usercenter
 			uiSkin.provList.selectEnable = true;
 			uiSkin.provList.selectHandler = new Handler(this, selectProvince);
 			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
-			selectProvince(0);
 			uiSkin.provList.refresh();
 			uiSkin.cityList.itemRender = CityAreaItem;
 			uiSkin.cityList.vScrollBarSkin = "";
@@ -84,9 +96,16 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.townbox.visible = false;
 
+			if(isAddOrEdit == false)
+			{
+				initAddr();
+			}
+			else
+				selectProvince(0);
+
 			uiSkin.on(Event.CLICK,this,hideAddressPanel);
 
-			this.uiSkin.btnok.on(Event.CLICK,this,onCloseView);
+			this.uiSkin.btnok.on(Event.CLICK,this,onSubmitAdd);
 			this.uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 		}
 		
@@ -140,6 +159,31 @@ package script.usercenter
 		{
 			cell.setData(cell.dataSource);
 		}
+		private function initAddr():void
+		{
+			var addvo:AddressVo = param as AddressVo;
+			
+			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(addvo.searchZoneid);
+			
+			uiSkin.towntxt.text =  ChinaAreaModel.instance.getAreaName(addvo.zoneid);
+			
+			var cityid:String = ChinaAreaModel.instance.getParentId(addvo.searchZoneid);
+			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(cityid);
+			
+			uiSkin.areatxt.text =  ChinaAreaModel.instance.getAreaName(addvo.searchZoneid);
+			
+			uiSkin.citytxt.text =  ChinaAreaModel.instance.getAreaName(cityid);
+
+			 cityid = ChinaAreaModel.instance.getParentId(cityid);
+			uiSkin.cityList.array = ChinaAreaModel.instance.getAllArea(cityid);			
+			
+			uiSkin.province.text = ChinaAreaModel.instance.getAreaName(cityid);
+			uiSkin.input_username.text = addvo.receiverName;
+			uiSkin.input_phone.text = addvo.phone;
+			uiSkin.input_address.text = addvo.address;
+			zoneid = addvo.zoneid;
+			
+		}
 		private function selectProvince(index:int):void
 		{
 			province = uiSkin.provList.array[index];
@@ -162,6 +206,7 @@ package script.usercenter
 			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
 			
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			zoneid =  uiSkin.townList.array[0].id;
 			uiSkin.townList.selectedIndex = -1;
 			
 		}
@@ -179,6 +224,8 @@ package script.usercenter
 			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
 			
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			zoneid =  uiSkin.townList.array[0].id;
+
 			uiSkin.townList.selectedIndex = -1;
 			
 		}
@@ -193,6 +240,8 @@ package script.usercenter
 			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
 			uiSkin.townList.refresh();
 			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			zoneid =  uiSkin.townList.array[0].id;
+
 			uiSkin.townList.selectedIndex = -1;
 			
 			
@@ -204,14 +253,56 @@ package script.usercenter
 				return;
 			uiSkin.townbox.visible = false;
 			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
+			zoneid =  uiSkin.townList.array[index].id;
+
+		}
+		
+		private function onSubmitAdd():void
+		{
+			// TODO Auto Generated method stub
+			if(uiSkin.input_username.text == "")
+			{
+				ViewManager.showAlert("请填写收货人姓名");
+				return;
+			}
+			if(uiSkin.input_phone.text == "" || uiSkin.input_phone.text.length < 11)
+			{
+				ViewManager.showAlert("请填写正确的收货人电话");
+				return;
+			}
+			if(uiSkin.input_address.text == "")
+			{
+				ViewManager.showAlert("请填写具体的地址");
+				return;
+			}
+			var requestStr:String = "opt=" + (isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE) + "&cnee=" + uiSkin.input_username.text + "&pn=" + uiSkin.input_phone.text + "&zone=" + zoneid +
+				"&addr=" + uiSkin.input_address.text;
+			if(isAddOrEdit == false)
+				requestStr += "&id=" + param.id;
 			
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,addAddressback,requestStr,"post");
+		
+
+			//ViewManager.instance.closeView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+		}
+		private function addAddressback(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				if(isAddOrEdit)
+					Userdata.instance.addNewAddress(result);
+				else
+					Userdata.instance.updateAddress(result);
+				EventCenter.instance.event(EventCenter.UPDATE_MYADDRESS_LIST);
+				ViewManager.showAlert("添加地址成功");
+			}
 		}
 		
 		private function onCloseView():void
 		{
-			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_ADD_NEW_ADDRESS);
-		}		
+		}
 		
 	}
 }

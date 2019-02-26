@@ -13,7 +13,7 @@ package model.orderModel
 		
 		public var orderData:Object; //最早下单的数据
 		
-		public var orderPrice:Number;//该单的单价
+		public var orderPrice:Number = 0;//该单的单价
 		
 		public var manufacturer_code:String;//输出中心编码
 		public var manufacturer_name:String;//输出中心编码

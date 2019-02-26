@@ -27,7 +27,8 @@
             "compId":4,
             "child":[
                 ],
-            "$LOCKED":false
+            "$LOCKED":false,
+            "$HIDDEN":false
         }],
     "animations":[
         {

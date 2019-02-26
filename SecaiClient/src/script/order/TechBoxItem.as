@@ -59,7 +59,7 @@ package script.order
 			if(techmainvo != null)
 			{
 				techmainvo.selected = sel;
-				if(sel && techmainvo.preProc_AttachmentType != null && techmainvo.preProc_AttachmentType != "")
+				if(sel && techmainvo.preProc_AttachmentType != null && techmainvo.preProc_AttachmentType != "" && techmainvo.preProc_AttachmentType != "无工艺附件")
 				{
 					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,techmainvo);
 				}

@@ -30,6 +30,9 @@ package eventUtil
 
 		
 		public static const UPDATE_LOADING_PROGRESS:String = "UPDATE_LOADING_PROGRESS";//刷新加载进度
+		
+		public static const UPDATE_MYADDRESS_LIST:String = "UPDATE_MYADDRESS_LIST";//刷新我的地址列表
+
 
 		public static const BROWER_WINDOW_RESIZE:String = "BROWER_WINDOW_RESIZE";//浏览器窗口大小改变
 

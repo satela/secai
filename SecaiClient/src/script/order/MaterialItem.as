@@ -24,7 +24,7 @@ package script.order
 		{
 			matvo = product as ProductVo;
 			this.matname.text = matvo.prod_name;
-			
+			this.matname.borderColor = "#222222";
 			this.on(Event.CLICK,this,onClickMat);
 			//this.blackrect.visible = false;
 			//this.redrect.visible = false;

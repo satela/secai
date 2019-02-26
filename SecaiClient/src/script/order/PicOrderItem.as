@@ -48,6 +48,7 @@ package script.order
 			this.changemat.underlineColor = "#222222";
 			this.changemat.on(Event.CLICK,this,onShowMaterialView);
 			this.changearchitxt.on(Event.CLICK,this,onchangeTech);
+			this.inputnum.on(Event.INPUT,this,onNumChange);
 
 			if(this.architype.textField.textHeight > 30)
 				this.architype.height = this.architype.textField.textHeight;
@@ -127,6 +128,11 @@ package script.order
 			EventCenter.instance.event(EventCenter.DELETE_PIC_ORDER,this);
 		}
 		
+		private function onNumChange():void
+		{
+			
+			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(2).toString();
+		}
 		private function onShowMaterialView():void
 		{
 			// TODO Auto Generated method stub

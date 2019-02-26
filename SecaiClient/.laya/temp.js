@@ -1157,25 +1157,36 @@ var Component=(function(){
 
 //class model.users.AddressVo
 var AddressVo=(function(){
-	function AddressVo(){
+	function AddressVo(data){
 		this.receiverName="王晓明";
 		this.phone="15256565485";
-		this.province="上海市";
-		this.city="浦东新区";
-		this.town="周浦镇";
+		this.zoneid="";
+		this.searchZoneid="";
+		//public var town:String="周浦镇";
 		this.address="汇腾南苑612好23号";
+		this.id=null;
+		this.receiverName=data.cnee;
+		this.phone=data.pn;
+		this.address=data.addr;
+		this.id=data.id;
+		this.zoneid=data.zone;
+		this.searchZoneid=ChinaAreaModel.instance.getParentId(this.zoneid);
 	}
 
 	__class(AddressVo,'model.users.AddressVo');
 	var __proto=AddressVo.prototype;
 	__getset(0,__proto,'proCityArea',function(){
-		return this.province+" "+this.city+" "+this.town+" "+this.address;
+		return ChinaAreaModel.instance.getFullAddressByid(this.zoneid)+" "+this.address;
 	});
 
 	__getset(0,__proto,'addressDetail',function(){
-		return this.receiverName+"-"+this.phone+" "+this.province+" "+this.city+" "+this.town+" "+this.address;
+		return this.receiverName+"-"+this.phone+" "+ChinaAreaModel.instance.getFullAddressByid(this.zoneid)+this.address;
 	});
 
+	AddressVo.ADDRESS_DELETE="delete";
+	AddressVo.ADDRESS_UPDATE="update";
+	AddressVo.ADDRESS_INSERT="insert";
+	AddressVo.ADDRESS_LIST="list";
 	return AddressVo;
 })()
 
@@ -1222,7 +1233,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="order/MaterialNameItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1244,13 +1255,45 @@ var Userdata=(function(){
 		this.userAccount=null;
 		this.userName=null;
 		this.company=null;
-		this.addressList=null;
+		this.addressList=[];
 		this.money=NaN;
 		this.isLogin=false;
 		this.defaultAddrid="0";
 	}
 
 	__class(Userdata,'model.Userdata');
+	var __proto=Userdata.prototype;
+	__proto.initMyAddress=function(adddata){
+		this.addressList=[];
+		for(var i=0;i < adddata.length;i++){
+			this.addressList.push(new AddressVo(adddata[i]));
+		}
+	}
+
+	__proto.addNewAddress=function(adddata){
+		if(this.addressList==null)
+			this.addressList=[];
+		this.addressList.push(new AddressVo(adddata));
+	}
+
+	__proto.updateAddress=function(adddata){
+		for(var i=0;i < this.addressList.length;i++){
+			if(this.addressList[i].id==adddata.id){
+				this.addressList[i]=new AddressVo(adddata);
+				break ;
+			}
+		}
+	}
+
+	__proto.deleteAddr=function(id){
+		for(var i=0;i < this.addressList.length;i++){
+			if(this.addressList[i].id==id){
+				this.addressList.splice(i,1);
+				break ;
+			}
+		}
+	}
+
 	__getset(1,Userdata,'instance',function(){
 		if(Userdata._instance==null)
 			Userdata._instance=new Userdata();
@@ -1338,6 +1381,16 @@ var ChinaAreaModel=(function(){
 
 	__proto.getAllArea=function(cityid){
 		return ChinaAreaModel.areadict[cityid];
+	}
+
+	__proto.getAreaName=function(cityid){
+		if(ChinaAreaModel.allAreaDict.hasOwnProperty(cityid))
+			return ChinaAreaModel.allAreaDict[cityid].areaName;
+		return "";
+	}
+
+	__proto.getParentId=function(cityid){
+		return ChinaAreaModel.allAreaDict[cityid].parentid;
 	}
 
 	__proto.getFullAddressByid=function(cityid){
@@ -1903,7 +1956,7 @@ var PicOrderItemVo=(function(){
 		//材料名称
 		this.orderData=null;
 		//最早下单的数据
-		this.orderPrice=NaN;
+		this.orderPrice=0;
 		//该单的单价
 		this.manufacturer_code=null;
 		//输出中心编码
@@ -2007,6 +2060,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.uploadPic="file/add";
 	HttpRequestUtil.deletePic="file/remove?";
 	HttpRequestUtil.createGroup="group/create-group?";
+	HttpRequestUtil.addressManageUrl="group/opt-group-express?";
 	HttpRequestUtil.biggerPicUrl="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.smallerrPicUrl="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.addCompanyInfo="group/create?";
@@ -26478,6 +26532,7 @@ var EventCenter=(function(_super){
 	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
 	EventCenter.UPDATE_LOADING_PROGRESS="UPDATE_LOADING_PROGRESS";
+	EventCenter.UPDATE_MYADDRESS_LIST="UPDATE_MYADDRESS_LIST";
 	EventCenter.BROWER_WINDOW_RESIZE="BROWER_WINDOW_RESIZE";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
@@ -34153,6 +34208,14 @@ var MainPageControl=(function(_super){
 			Userdata.instance.isLogin=true;
 			this.txtLogin.text=account;
 			this.txtReg.text="退出";
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
+		}
+	}
+
+	__proto.getMyAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.initMyAddress(result.data);
 		}
 	}
 
@@ -35013,7 +35076,11 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id=330782",this,this.onGetOutPutAddress,null,null);
+		if(Userdata.instance.addressList.length > 0){
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+Userdata.instance.addressList[0].searchZoneid,this,this.onGetOutPutAddress,null,null);
+			this.uiSkin.myaddresstxt.text=Userdata.instance.addressList[0].addressDetail;
+			PaintOrderModel.instance.selectAddress=Userdata.instance.addressList[0];
+		}
 	}
 
 	__proto.onGetOutPutAddress=function(data){
@@ -35023,7 +35090,12 @@ var PaintOrderControl=(function(_super){
 			if(PaintOrderModel.instance.outPutAddr.length > 0){
 				PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr[0];
 				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
-				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=330782",this,this.onGetProductBack,null,null);
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid ,this,this.onGetProductBack,null,null);
+			}
+			else{
+				PaintOrderModel.instance.selectFactoryAddress=null;
+				PaintOrderModel.instance.productList=[];
+				this.uiSkin.factorytxt.text="你选择的地址暂无生产商";
 			}
 		}
 	}
@@ -35041,11 +35113,17 @@ var PaintOrderControl=(function(_super){
 		ViewManager.instance.openView("VIEW_SELECT_FACTORY");
 	}
 
-	__proto.onSelectedSelfAddress=function(){}
+	__proto.onSelectedSelfAddress=function(){
+		if(PaintOrderModel.instance.selectAddress){
+			this.uiSkin.myaddresstxt.text=PaintOrderModel.instance.selectAddress.addressDetail;
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetOutPutAddress,null,null);
+		}
+	}
+
 	__proto.onSelectedAddress=function(){
 		if(PaintOrderModel.instance.selectFactoryAddress)
 			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id=120106",this,this.onGetProductBack,null,null);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetProductBack,null,null);
 	}
 
 	__proto.onGetProductBack=function(data){
@@ -35169,9 +35247,9 @@ var PaintOrderControl=(function(_super){
 		}
 		orderdata.order_amountStr=totalMoney.toString();
 		orderdata.money_paidStr=totalMoney.toString();
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 	}
 
-	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 	__proto.onPlaceOrderBack=function(data){
 		var result=JSON.parse(data);
 		if(!result.hasOwnProperty("code")){
@@ -35185,6 +35263,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
 		EventCenter.instance.off("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
 		EventCenter.instance.off("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
 		EventCenter.instance.off("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
 	}
@@ -35634,13 +35713,7 @@ var SelectAddressControl=(function(_super){
 		this.uiSkin.list_address.selectHandler=new Handler(this,this.onSlecteAddress);
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
-		var arr=[];
-		for(var i=0;i < 20;i++){
-			var address=new AddressVo();
-			address.city="浦东新区"+i;
-			arr.push(address);
-		}
-		this.uiSkin.list_address.array=arr;
+		this.uiSkin.list_address.array=Userdata.instance.addressList;
 		PaintOrderModel.instance.selectAddress=null;
 	}
 
@@ -35650,7 +35723,8 @@ var SelectAddressControl=(function(_super){
 			item=this.uiSkin.list_address.cells[$each_item];
 			item.ShowSelected=item.address==this.uiSkin.list_address.array[index];
 		}
-		PaintOrderModel.instance.selectAddress=this.uiSkin.list_address.array[index];
+		(this.uiSkin.list_address.cells [index]).ShowSelected=true;
+		PaintOrderModel.instance.selectAddress=this.uiSkin.list_address.array[index];;
 	}
 
 	__proto.updateAddressItem=function(cell){
@@ -36258,12 +36332,25 @@ var AddressMgrControl=(function(_super){
 		this.uiSkin.addlist.renderHandler=new Handler(this,this.updateAddressList);
 		this.uiSkin.addlist.selectEnable=false;
 		var temparr=[];
-		for(var i=0;i < 6;i++){
-			var addvo=new AddressVo();
-			temparr.push(addvo);
-		}
 		this.uiSkin.addlist.array=temparr;
 		this.uiSkin.btnaddAddress.on("click",this,this.onClickAdd);
+		if(Userdata.instance.addressList.length <=0)
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
+		else
+		this.uiSkin.addlist.array=Userdata.instance.addressList;
+		EventCenter.instance.on("UPDATE_MYADDRESS_LIST",this,this.updateList);
+	}
+
+	__proto.updateList=function(){
+		this.uiSkin.addlist.array=Userdata.instance.addressList;
+	}
+
+	__proto.getMyAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.initMyAddress(result.data);
+			this.uiSkin.addlist.array=Userdata.instance.addressList;
+		}
 	}
 
 	__proto.onClickAdd=function(){
@@ -36272,6 +36359,10 @@ var AddressMgrControl=(function(_super){
 
 	__proto.updateAddressList=function(cell,index){
 		cell.setData(cell.dataSource);
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("UPDATE_MYADDRESS_LIST",this,this.updateList);
 	}
 
 	return AddressMgrControl;
@@ -36283,6 +36374,9 @@ var AddressEditControl=(function(_super){
 	function AddressEditControl(){
 		this.uiSkin=null;
 		this.province=null;
+		this.zoneid=null;
+		this.param=null;
+		this.isAddOrEdit=true;
 		AddressEditControl.__super.call(this);
 	}
 
@@ -36290,6 +36384,8 @@ var AddressEditControl=(function(_super){
 	var __proto=AddressEditControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
+		if(this.param !=null && (this.param instanceof model.users.AddressVo ))
+			this.isAddOrEdit=false;
 		this.uiSkin.input_username.maxChars=10;
 		this.uiSkin.input_phone.maxChars=11;
 		this.uiSkin.input_phone.restrict="0-9";
@@ -36302,7 +36398,6 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.provList.selectEnable=true;
 		this.uiSkin.provList.selectHandler=new Handler(this,this.selectProvince);
 		this.uiSkin.provList.array=ChinaAreaModel.instance.getAllProvince();
-		this.selectProvince(0);
 		this.uiSkin.provList.refresh();
 		this.uiSkin.cityList.itemRender=CityAreaItem;
 		this.uiSkin.cityList.vScrollBarSkin="";
@@ -36333,8 +36428,13 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.provbox.visible=false;
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.townbox.visible=false;
+		if(this.isAddOrEdit==false){
+			this.initAddr();
+		}
+		else
+		this.selectProvince(0);
 		this.uiSkin.on("click",this,this.hideAddressPanel);
-		this.uiSkin.btnok.on("click",this,this.onCloseView);
+		this.uiSkin.btnok.on("click",this,this.onSubmitAdd);
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 	}
 
@@ -36383,6 +36483,23 @@ var AddressEditControl=(function(_super){
 		cell.setData(cell.dataSource);
 	}
 
+	__proto.initAddr=function(){
+		var addvo=this.param;
+		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(addvo.searchZoneid);
+		this.uiSkin.towntxt.text=ChinaAreaModel.instance.getAreaName(addvo.zoneid);
+		var cityid=ChinaAreaModel.instance.getParentId(addvo.searchZoneid);
+		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(cityid);
+		this.uiSkin.areatxt.text=ChinaAreaModel.instance.getAreaName(addvo.searchZoneid);
+		this.uiSkin.citytxt.text=ChinaAreaModel.instance.getAreaName(cityid);
+		cityid=ChinaAreaModel.instance.getParentId(cityid);
+		this.uiSkin.cityList.array=ChinaAreaModel.instance.getAllArea(cityid);
+		this.uiSkin.province.text=ChinaAreaModel.instance.getAreaName(cityid);
+		this.uiSkin.input_username.text=addvo.receiverName;
+		this.uiSkin.input_phone.text=addvo.phone;
+		this.uiSkin.input_address.text=addvo.address;
+		this.zoneid=addvo.zoneid;
+	}
+
 	__proto.selectProvince=function(index){
 		this.province=this.uiSkin.provList.array[index];
 		console.log(this.province);
@@ -36398,6 +36515,7 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.areaList.selectedIndex=-1;
 		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
 		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
+		this.zoneid=this.uiSkin.townList.array[0].id;
 		this.uiSkin.townList.selectedIndex=-1;
 	}
 
@@ -36411,6 +36529,7 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.areaList.selectedIndex=-1;
 		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
 		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
+		this.zoneid=this.uiSkin.townList.array[0].id;
 		this.uiSkin.townList.selectedIndex=-1;
 	}
 
@@ -36422,6 +36541,7 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[index].id);
 		this.uiSkin.townList.refresh();
 		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
+		this.zoneid=this.uiSkin.townList.array[0].id;
 		this.uiSkin.townList.selectedIndex=-1;
 	}
 
@@ -36430,6 +36550,40 @@ var AddressEditControl=(function(_super){
 			return;
 		this.uiSkin.townbox.visible=false;
 		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaName;
+		this.zoneid=this.uiSkin.townList.array[index].id;
+	}
+
+	__proto.onSubmitAdd=function(){
+		if(this.uiSkin.input_username.text==""){
+			ViewManager.showAlert("请填写收货人姓名");
+			return;
+		}
+		if(this.uiSkin.input_phone.text=="" || this.uiSkin.input_phone.text.length < 11){
+			ViewManager.showAlert("请填写正确的收货人电话");
+			return;
+		}
+		if(this.uiSkin.input_address.text==""){
+			ViewManager.showAlert("请填写具体的地址");
+			return;
+		};
+		var requestStr="opt="+(this.isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE)+"&cnee="+this.uiSkin.input_username.text+"&pn="+this.uiSkin.input_phone.text+"&zone="+this.zoneid+
+		"&addr="+this.uiSkin.input_address.text;
+		if(this.isAddOrEdit==false)
+			requestStr+="&id="+this.param.id;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.addAddressback,requestStr,"post");
+	}
+
+	//ViewManager.instance.closeView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+	__proto.addAddressback=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(this.isAddOrEdit)
+				Userdata.instance.addNewAddress(result);
+			else
+			Userdata.instance.updateAddress(result);
+			EventCenter.instance.event("UPDATE_MYADDRESS_LIST");
+			ViewManager.showAlert("添加地址成功");
+		}
 	}
 
 	__proto.onCloseView=function(){
@@ -48306,7 +48460,7 @@ var SelectAddressPanelUI=(function(_super){
 var AddressItemUI=(function(_super){
 	function AddressItemUI(){
 		this.conName=null;
-		this.phone=null;
+		this.phonetxt=null;
 		this.detailaddr=null;
 		this.btnDel=null;
 		this.btnEdit=null;
@@ -48320,7 +48474,7 @@ var AddressItemUI=(function(_super){
 		this.createView(AddressItemUI.uiView);
 	}
 
-	AddressItemUI.uiView={"type":"View","props":{"width":788,"height":24},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":1,"width":101,"var":"conName","valign":"middle","text":"徐建华","height":24,"fontSize":18,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":101,"width":170,"var":"phone","valign":"middle","text":"13564113173","height":24,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":270,"width":443,"var":"detailaddr","valign":"middle","text":"上海市浦东新区周浦镇瑞浦路612弄23号1001室","height":24,"fontSize":18,"align":"center"},"compId":6},{"type":"Rect","props":{"y":0,"x":0,"width":788,"lineWidth":1,"lineColor":"#1c1a1a","height":24},"compId":10},{"type":"Text","props":{"y":5,"x":753,"var":"btnDel","text":"删除","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":5,"x":718,"var":"btnEdit","text":"编辑","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":7,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}],"loadList":["prefabs/LinksText.prefab"],"loadList3D":[]};
+	AddressItemUI.uiView={"type":"View","props":{"width":788,"height":24},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":1,"width":101,"var":"conName","valign":"middle","text":"徐建华","height":24,"fontSize":18,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":101,"width":170,"var":"phonetxt","valign":"middle","text":"13564113173","height":24,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":270,"width":443,"var":"detailaddr","valign":"middle","text":"上海市浦东新区周浦镇瑞浦路612弄23号1001室","height":24,"fontSize":18,"align":"center"},"compId":6},{"type":"Rect","props":{"y":0,"x":0,"width":788,"lineWidth":1,"lineColor":"#1c1a1a","height":24},"compId":10},{"type":"Text","props":{"y":5,"x":753,"var":"btnDel","text":"删除","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":5,"x":718,"var":"btnEdit","text":"编辑","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":7,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}],"loadList":["prefabs/LinksText.prefab"],"loadList3D":[]};
 	return AddressItemUI;
 })(View)
 
@@ -48789,6 +48943,7 @@ var PicOrderItem=(function(_super){
 		this.changemat.underlineColor="#222222";
 		this.changemat.on("click",this,this.onShowMaterialView);
 		this.changearchitxt.on("click",this,this.onchangeTech);
+		this.inputnum.on("input",this,this.onNumChange);
 		if(this.architype.textField.textHeight > 30)
 			this.architype.height=this.architype.textField.textHeight;
 		else
@@ -48851,6 +49006,10 @@ var PicOrderItem=(function(_super){
 
 	__proto.onDeleteOrder=function(){
 		EventCenter.instance.event("DELETE_PIC_ORDER",this);
+	}
+
+	__proto.onNumChange=function(){
+		this.total.text=(parseInt(this.inputnum.text)*this.ordervo.orderPrice).toFixed(2).toString();
 	}
 
 	__proto.onShowMaterialView=function(){
@@ -53691,15 +53850,39 @@ var SelAddressItem=(function(_super){
 //class script.usercenter.CompanyAddressItem extends ui.usercenter.AddressItemUI
 var CompanyAddressItem=(function(_super){
 	function CompanyAddressItem(){
+		this.addvo=null;
 		CompanyAddressItem.__super.call(this);
 	}
 
 	__class(CompanyAddressItem,'script.usercenter.CompanyAddressItem',_super);
 	var __proto=CompanyAddressItem.prototype;
 	__proto.setData=function(add){
+		this.addvo=add;
 		this.conName.text=add.receiverName;
-		this.phone.text=add.phone;
+		this.phonetxt.text=add.phone;
 		this.detailaddr.text=add.proCityArea;
+		this.btnDel.on("click",this,this.onDeleteAddr);
+		this.btnEdit.on("click",this,this.onEditAddr);
+	}
+
+	__proto.onDeleteAddr=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该地址吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.delMyAddressBack,"opt=delete&id="+this.addvo.id,"post");
+	}
+
+	__proto.delMyAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.deleteAddr(result.id);
+			EventCenter.instance.event("UPDATE_MYADDRESS_LIST");
+		}
+	}
+
+	__proto.onEditAddr=function(){
+		ViewManager.instance.openView("VIEW_ADD_NEW_ADDRESS",false,this.addvo);
 	}
 
 	return CompanyAddressItem;
@@ -53746,7 +53929,7 @@ var TechBoxItem=(function(_super){
 	__proto.setTechSelected=function(sel){
 		if(this.techmainvo !=null){
 			this.techmainvo.selected=sel;
-			if(sel && this.techmainvo.preProc_AttachmentType !=null && this.techmainvo.preProc_AttachmentType !=""){
+			if(sel && this.techmainvo.preProc_AttachmentType !=null && this.techmainvo.preProc_AttachmentType !="" && this.techmainvo.preProc_AttachmentType !="无工艺附件"){
 				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
 			}
 			else{
@@ -53994,6 +54177,7 @@ var MaterialItem=(function(_super){
 	__proto.setData=function(product){
 		this.matvo=product;
 		this.matname.text=this.matvo.prod_name;
+		this.matname.borderColor="#222222";
 		this.on("click",this,this.onClickMat);
 	}
 

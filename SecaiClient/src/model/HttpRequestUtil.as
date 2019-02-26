@@ -30,6 +30,8 @@ package model
 		public static const createGroup:String = "group/create-group?";//cname,cshortname,czoneid,caddr,cyyzz
 
 
+		public static const addressManageUrl:String = "group/opt-group-express?";//1 delete 2 update 3 insert 4 list
+
 		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		
