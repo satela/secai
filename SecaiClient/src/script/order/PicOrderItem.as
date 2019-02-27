@@ -191,7 +191,7 @@ package script.order
 			orderitemdata.prod_code = productVo.prod_code;
 			
 			orderitemdata.prod_description = "";
-			orderitemdata.LWH = "";
+			orderitemdata.LWH = ordervo.picinfo.picPhysicWidth + "/" + ordervo.picinfo.picPhysicHeight + "/1";
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
 			orderitemdata.item_priceStr = 1;

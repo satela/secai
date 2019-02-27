@@ -182,12 +182,28 @@ package script.order
 		private function onShowSelectAddress():void
 		{
 			// TODO Auto Generated method stub
+			
+			
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_ADDRESS);
 		}
 		
 		private function onShowSelectDelivery():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_DELIVERY_TYPE);
+			if(orderlist.length <= 0)
+			{
+				ViewManager.showAlert("请先选择图片和工艺");
+				return;
+			}
+			
+			var orderitem:PicOrderItem = orderlist[0];
+			if(orderitem.ordervo.orderData == null)
+			{
+				ViewManager.showAlert("未选择材料工艺");
+				return;
+			}
+			
+			
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_DELIVERY_TYPE,false,orderitem.ordervo.manufacturer_code);
 		}
 		private function onUpdateOrderPic():void
 		{
@@ -284,7 +300,7 @@ package script.order
 			}
 			
 			var orderdata:Object = {};
-			orderdata.order_sn = "123456";
+			orderdata.order_sn = PaintOrderModel.getOrderSn();
 			orderdata.client_code = "SCFY001";
 			orderdata.consignee = "色彩飞扬";
 			orderdata.tel = "13568989899";

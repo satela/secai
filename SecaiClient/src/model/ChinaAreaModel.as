@@ -34,12 +34,12 @@ package model
 		
 		private static function initData():void
 		{
-			Laya.loader.load("res/xml/addr.xml",new Handler(ChinaAreaModel,onCompelteHandler),null,Loader.XML);
+			//Laya.loader.load("res/xml/addr.xml",new Handler(ChinaAreaModel,onCompelteHandler),null,Loader.XML);
 			//citys = JSON.parse(allareastr) as Array;
-		}
+		//}
 		
-		private static function onCompelteHandler(e:Event):void
-		{
+		//private static function onCompelteHandler(e:Event):void
+		//{
 			var xmlstr:* = Laya.loader.getRes("res/xml/addr.xml");
 			//var xml:XmlDom = Utils.parseXMLFromString(xmlstr);
 			var rootNode:XmlDom = xmlstr.firstChild as XmlDom;

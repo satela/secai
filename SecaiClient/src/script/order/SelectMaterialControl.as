@@ -72,7 +72,7 @@ package script.order
 			if(matvo.childMatList != null)
 				uiSkin.matlist.array = (uiSkin.tablist.array[index] as MatetialClassVo).childMatList;
 			else
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + "prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
 
 		}
 		

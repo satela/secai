@@ -1,5 +1,7 @@
 package model.orderModel
 {
+	import laya.maths.MathUtil;
+	
 	import model.picmanagerModel.PicInfoVo;
 	import model.users.AddressVo;
 	import model.users.CityAreaVo;
@@ -73,6 +75,19 @@ package model.orderModel
 			}
 			
 			return null;
+		}
+		
+		public static var VOCABURARY:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		public static function getOrderSn():String
+		{
+			var sn:String = "";
+			
+			for(var i:int=0;i<20;i++)
+			{
+				var rnd:int = Math.round(Math.random() * VOCABURARY.length);
+				sn += VOCABURARY.charAt(rnd);
+			}
+			return sn;
 		}
 	}
 }

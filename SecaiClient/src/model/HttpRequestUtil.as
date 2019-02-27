@@ -41,13 +41,13 @@ package model
 		public static const getOuputAddr:String = "business/manufacturers?client_code=SCFY001&";//addr_id=120106";获取输出工厂地址
 		public static const getProdCategory:String = "business/prodcategory?client_code=SCFY001&";//addr_id=120106";获取工厂材料列表
 
-		public static const getProdList:String = "business/prodlist?client_code=SCFY001&addr_id=330782&";//prodCat_name=纸&;获取工厂材料列表
+		public static const getProdList:String = "business/prodlist?client_code=SCFY001&addr_id=";//addr_id,prodCat_name=纸&;获取工厂材料列表
 
 		public static const getProcessCatList:String = "business/processcatlist?prod_code=";//
 
 		public static const getProcessFlow:String = "business/procflowlist?manufacturer_code=";//procCat_name= //获取工艺流
 
-		public static const getDeliveryList:String = "business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700";//获取配送列表
+		public static const getDeliveryList:String = "business/deliverylist?manufacturer_code=";//=SPSC00100&addr_id=330700";//获取配送列表
 
 		public static const placeOrder:String = "business/placeorder?";//下单接口
 

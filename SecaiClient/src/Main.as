@@ -57,7 +57,7 @@
 		
 		private function onVersionLoaded():void {
 			//激活大小图映射，加载小图的时候，如果发现小图在大图合集里面，则优先加载大图合集，而不是小图
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/xml/addr.xml",type:Loader.XML}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}
 		

@@ -1421,10 +1421,6 @@ var ChinaAreaModel=(function(){
 	});
 
 	ChinaAreaModel.initData=function(){
-		Laya.loader.load("res/xml/addr.xml",new Handler(ChinaAreaModel,ChinaAreaModel.onCompelteHandler),null,"xml");
-	}
-
-	ChinaAreaModel.onCompelteHandler=function(e){
 		var xmlstr=Laya.loader.getRes("res/xml/addr.xml");
 		var rootNode=xmlstr.firstChild;
 		var nodes=rootNode.childNodes;
@@ -2014,11 +2010,7 @@ var HttpRequestUtil=(function(){
 			if((typeof param=='string')){
 				}else if((param instanceof ArrayBuffer)){
 				}else{
-				var query=[];
-				for(var k in param){
-					query.push(k+"="+encodeURIComponent(param[k]));
-				}
-				param=query.join("&");
+				param=JSON.stringify(param);
 			}
 		}
 		console.log(url+param);
@@ -2077,10 +2069,10 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.addCompanyInfo="group/create?";
 	HttpRequestUtil.getOuputAddr="business/manufacturers?client_code=SCFY001&";
 	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=SCFY001&";
-	HttpRequestUtil.getProdList="business/prodlist?client_code=SCFY001&addr_id=330782&";
+	HttpRequestUtil.getProdList="business/prodlist?client_code=SCFY001&addr_id=";
 	HttpRequestUtil.getProcessCatList="business/processcatlist?prod_code=";
 	HttpRequestUtil.getProcessFlow="business/procflowlist?manufacturer_code=";
-	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700";
+	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=";
 	HttpRequestUtil.placeOrder="business/placeorder?";
 	HttpRequestUtil.cancelOrder="business/cancelorder?";
 	return HttpRequestUtil;
@@ -2109,7 +2101,7 @@ var Main=(function(){
 	__class(Main,'Main');
 	var __proto=Main.prototype;
 	__proto.onVersionLoaded=function(){
-		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
+		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/xml/addr.xml",type:"xml"}],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
 	__proto.onLoadedComp=function(){
@@ -2267,7 +2259,17 @@ var PaintOrderModel=(function(){
 		return PaintOrderModel._instance;
 	});
 
+	PaintOrderModel.getOrderSn=function(){
+		var sn="";
+		for(var i=0;i<20;i++){
+			var rnd=Math.round(Math.random()*PaintOrderModel.VOCABURARY.length);
+			sn+=PaintOrderModel.VOCABURARY.charAt(rnd);
+		}
+		return sn;
+	}
+
 	PaintOrderModel._instance=null;
+	PaintOrderModel.VOCABURARY="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	return PaintOrderModel;
 })()
 
@@ -35154,7 +35156,16 @@ var PaintOrderControl=(function(_super){
 	}
 
 	__proto.onShowSelectDelivery=function(){
-		ViewManager.instance.openView("VIEW_SELECT_DELIVERY_TYPE");
+		if(this.orderlist.length <=0){
+			ViewManager.showAlert("请先选择图片和工艺");
+			return;
+		};
+		var orderitem=this.orderlist[0];
+		if(orderitem.ordervo.orderData==null){
+			ViewManager.showAlert("未选择材料工艺");
+			return;
+		}
+		ViewManager.instance.openView("VIEW_SELECT_DELIVERY_TYPE",false,orderitem.ordervo.manufacturer_code);
 	}
 
 	__proto.onUpdateOrderPic=function(){
@@ -35228,7 +35239,7 @@ var PaintOrderControl=(function(_super){
 			return;
 		};
 		var orderdata={};
-		orderdata.order_sn="123456";
+		orderdata.order_sn=PaintOrderModel.getOrderSn();
 		orderdata.client_code="SCFY001";
 		orderdata.consignee="色彩飞扬";
 		orderdata.tel="13568989899";
@@ -35809,6 +35820,7 @@ var SelectFactoryControl=(function(_super){
 var SelectDeliveryControl=(function(_super){
 	function SelectDeliveryControl(){
 		this.uiSkin=null;
+		this.param=null;
 		SelectDeliveryControl.__super.call(this);
 	}
 
@@ -35825,7 +35837,8 @@ var SelectDeliveryControl=(function(_super){
 		this.uiSkin.list_delivery.array=[];
 		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
 		this.uiSkin.okbtn.on("click",this,this.onConfirmSelectAddress);
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/deliverylist?manufacturer_code=SPSC00100&addr_id=330700",this,this.onGetDeliveryBack,null,null);
+		if(this.param !=null)
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/deliverylist?manufacturer_code="+this.param+"&addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetDeliveryBack,null,null);
 	}
 
 	__proto.onGetDeliveryBack=function(data){
@@ -36286,7 +36299,7 @@ var SelectMaterialControl=(function(_super){
 		if(matvo.childMatList !=null)
 			this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
 		else
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodlist?client_code=SCFY001&addr_id=330782&"+"prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodlist?client_code=SCFY001&addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid+"&prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
 	}
 
 	__proto.onGetProductListBack=function(data){

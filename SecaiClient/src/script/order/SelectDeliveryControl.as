@@ -17,6 +17,8 @@ package script.order
 	public class SelectDeliveryControl extends Script
 	{
 		private var uiSkin:SelectDeliveryPanelUI;
+		
+		public var param:Object;
 		public function SelectDeliveryControl()
 		{
 			super();
@@ -45,7 +47,8 @@ package script.order
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCloseView);
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmSelectAddress);
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList,this,onGetDeliveryBack,null,null);
+			if(param != null)
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList + param + "&addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetDeliveryBack,null,null);
 
 		}
 		
