@@ -25,23 +25,27 @@ package model.users
 		
 		public var id:String;
 		
+		public var preAddName:String;
 		public function AddressVo(data:Object)
 		{
 			receiverName = data.cnee;
 			phone = data.pn;
 			address= data.addr;
 			id = data.id;
-			zoneid = data.zone;
-			searchZoneid = ChinaAreaModel.instance.getParentId(zoneid);
+			
+			preAddName = data.zonename;
+			var addid:Array = data.zone.split("|");
+			zoneid = addid[0];
+			searchZoneid = addid[1];
 		}
 		
 		public function get addressDetail():String
 		{
-			return receiverName + "-" + phone + " " + ChinaAreaModel.instance.getFullAddressByid(zoneid) + address;
+			return receiverName + "-" + phone + " " + preAddName + address;
 		}
 		public function get proCityArea():String
 		{
-			return  ChinaAreaModel.instance.getFullAddressByid(zoneid) + " " + address;
+			return  preAddName + " " + address;
 		}
 	}
 }

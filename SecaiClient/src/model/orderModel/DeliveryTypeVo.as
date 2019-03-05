@@ -28,7 +28,7 @@ package model.orderModel
 		
 		public function get deliveryDesc():String
 		{
-			return deliverynet_name + ",首重：" + start_weight + "kg," + "续重" + post_weight + "kg," + "首重价格：" + firstweight_price + "元/kg," + "续重价格：" + addedweight_price + "元/kg。";
+			return deliverynet_name + "，首重:" + start_weight + "kg," + "续重" + post_weight + "kg，" + "首重价格:" + firstweight_price + "元/kg，" + "续重价格:" + addedweight_price + "元/kg。";
 		}
 	}
 }

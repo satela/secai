@@ -275,8 +275,9 @@ package script.usercenter
 				ViewManager.showAlert("请填写具体的地址");
 				return;
 			}
-			var requestStr:String = "opt=" + (isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE) + "&cnee=" + uiSkin.input_username.text + "&pn=" + uiSkin.input_phone.text + "&zone=" + zoneid +
-				"&addr=" + uiSkin.input_address.text;
+			var thirdid:String = ChinaAreaModel.instance.getParentId(zoneid);
+			var requestStr:String = "opt=" + (isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE) + "&cnee=" + uiSkin.input_username.text + "&pn=" + uiSkin.input_phone.text + "&zone=" + zoneid + "|" + thirdid +
+				"&addr=" + uiSkin.input_address.text + "&zonename=" + ChinaAreaModel.instance.getFullAddressByid(zoneid);
 			if(isAddOrEdit == false)
 				requestStr += "&id=" + param.id;
 			

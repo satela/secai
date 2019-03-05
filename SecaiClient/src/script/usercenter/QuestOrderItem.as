@@ -19,7 +19,7 @@ package script.usercenter
 			this.order_sn.text = orderdata.orderId;
 			//this.fileimg.skin = 
 			this.txtMaterial.text = "材料：油画布3*6，工艺：喷印方式（户内写真-4pass),外表面装裱（上光油-哑面),异性切割（附件),装裱（有狂装裱-框条（A框条)。" +
-				"快递方式（义务物语物流-上门送货";
+				"快递方式（义务物语物流-上门送货）";
 			this.detailbox.visible = false;
 			this.bgimg.height = 65;
 			this.detailbtn.on(Event.CLICK,this,onClickShowDetail);

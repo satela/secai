@@ -3,6 +3,7 @@ package script.usercenter
 	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.events.Event;
+	import laya.net.Loader;
 	import laya.ui.List;
 	import laya.ui.Panel;
 	import laya.utils.Browser;
@@ -17,6 +18,8 @@ package script.usercenter
 	import script.login.CityAreaItem;
 	
 	import ui.usercenter.EnterPrizeInfoPaneUI;
+	
+	import utils.WaitingRespond;
 	
 	public class EnterPrizeInfoControl extends Script
 	{
@@ -46,8 +49,6 @@ package script.usercenter
 			uiSkin.provList.renderHandler = new Handler(this, updateCityList);
 			uiSkin.provList.selectEnable = true;
 			uiSkin.provList.selectHandler = new Handler(this, selectProvince);
-			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
-			selectProvince(0);
 			uiSkin.provList.refresh();
 			uiSkin.cityList.itemRender = CityAreaItem;
 			uiSkin.cityList.vScrollBarSkin = "";
@@ -98,8 +99,23 @@ package script.usercenter
 			initFileOpen();
 			
 			Laya.timer.frameLoop(10,this,updateFileOpenPos);
+			
+			if(!ChinaAreaModel.hasInit)
+			{
+				WaitingRespond.instance.showWaitingView(500000);
+				Laya.loader.load([{url:"res/xml/addr.xml",type:Loader.XML}], Handler.create(this, initView), null, Loader.ATLAS);
+			}
+			else
+				initView();
+
 		}
 		
+		private function initView():void
+		{
+			WaitingRespond.instance.hideWaitingView();
+			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
+			selectProvince(0);
+		}
 		private function updateFileOpenPos()
 		{
 			if((uiSkin.parent.parent.parent as Panel).vScrollBar)
@@ -111,7 +127,7 @@ package script.usercenter
 		{
 			file = Browser.document.createElement("input");
 			
-			file.style="filter:alpha(opacity=100);opacity:100;width: 100;height:34px;left:1080px;top:510";		
+			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:1080px;top:510";		
 			
 			file.accept = ".jpg,.jpeg,.png,.tif";
 			file.type ="file";

@@ -7,6 +7,8 @@ package model
 	
 	import model.users.CityAreaVo;
 	
+	import utils.WaitingRespond;
+	
 	
 	public class ChinaAreaModel
 	{
@@ -14,7 +16,7 @@ package model
 		
 		private static var allAreaDict:Object;
 		private static var _instance:ChinaAreaModel;
-		
+		public static var hasInit:Boolean = false;
 		
 		public function ChinaAreaModel()
 		{
@@ -34,12 +36,15 @@ package model
 		
 		private static function initData():void
 		{
+			//WaitingRespond.instance.showWaitingView(500000);
 			//Laya.loader.load("res/xml/addr.xml",new Handler(ChinaAreaModel,onCompelteHandler),null,Loader.XML);
-			//citys = JSON.parse(allareastr) as Array;
 		//}
 		
 		//private static function onCompelteHandler(e:Event):void
 		//{
+			//var times:Number = (new Date()).getTime();
+			//console.log("地址 配置 解析开始");
+			hasInit = true;
 			var xmlstr:* = Laya.loader.getRes("res/xml/addr.xml");
 			//var xml:XmlDom = Utils.parseXMLFromString(xmlstr);
 			var rootNode:XmlDom = xmlstr.firstChild as XmlDom;
@@ -67,8 +72,10 @@ package model
 					areadict[cityvo.parentid].push(cityvo);
 				}
 			}
-			
-			
+			WaitingRespond.instance.hideWaitingView();
+			//var times1:Number = (new Date()).getTime();
+
+			//console.log("地址 配置 解析完毕" + (times1 - times));
 		}
 		public function getAllProvince():Array
 		{			

@@ -54,6 +54,38 @@ package utils
 			LocalStorage.removeItem(key);
 		}
 		
+		public static function formatFullDateTime(date:Date):String  
+		{  
+			var datestr:String = "";
+			datestr += date.getFullYear() + "-" ;
+			if((date.getMonth()+1) >= 10)
+				datestr += (date.month+1) + "-";
+			else
+				datestr += "0" + (date.getMonth()+1) + "-";
+			
+			if(date.getDate() >= 10)
+				datestr += date.getDate() + "-";
+			else
+				datestr += "0" + date.getDate();
+			datestr += " ";
+			
+			if(date.getHours() >= 10)
+				datestr += date.getHours() + ":";
+			else
+				datestr += "0" + date.getHours() + ":";
+			
+			if(date.getMinutes() >= 10)
+				datestr += date.getMinutes() + ":";
+			else
+				datestr += "0" + date.getMinutes() + ":";
+			
+			if(date.getSeconds() >= 10)
+				datestr += date.getSeconds();
+			else
+				datestr += "0" + date.getSeconds();
+			return datestr;
+		}  
+		
 		public function UtilTool()
 		{
 		}

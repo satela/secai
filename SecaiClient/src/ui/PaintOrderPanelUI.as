@@ -12,6 +12,7 @@ package ui {
 		public var myaddresstxt:Label;
 		public var changemyadd:Text;
 		public var factorytxt:Label;
+		public var qqContact:Button;
 		public var changefactory:Text;
 		public var btnaddpic:Button;
 		public var mainvbox:VBox;

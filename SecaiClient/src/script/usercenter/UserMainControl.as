@@ -12,6 +12,7 @@ package script.usercenter
 	import script.ViewManager;
 	
 	import ui.usercenter.AddressMgrPanelUI;
+	import ui.usercenter.ChargePanelUI;
 	import ui.usercenter.EnterPrizeInfoPaneUI;
 	import ui.usercenter.MyOrdersPanelUI;
 	import ui.usercenter.UserMainPanelUI;
@@ -24,6 +25,7 @@ package script.usercenter
 		private var btntxtArr:Array;
 		
 		private var curView:View;
+		private var titleTxt:Array;
 		public function UserMainControl()
 		{
 			super();
@@ -37,11 +39,12 @@ package script.usercenter
 			//uiSkin.sp_container.autoSize = true;
 			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
-			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI];
+			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
 			
 			
 			
 			btntxtArr = [];
+			titleTxt = ["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单"];
 			for(var i:int=0;i < 9;i++)
 			{
 				uiSkin["btntxt" + i].on(Event.CLICK,this,onShowEditView,[i]);
@@ -76,6 +79,17 @@ package script.usercenter
 		
 		private function onShowEditView(index:int):void
 		{
+			if(index == 7)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_CHANGEPWD);
+				return;
+			}
+			if(index == 8)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
+				return;
+			}
+			uiSkin.toptitle.text = titleTxt[index];
 			while(uiSkin.sp_container.numChildren > 0)
 			{
 				(uiSkin.sp_container.getChildAt(0)).destroy(true);

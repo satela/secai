@@ -6,7 +6,7 @@ package ui.order {
 	public class TabChooseBtnUI extends View {
 		public var selbtn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":120,"var":"selbtn","stateNum":2,"skin":"button/Createselect.png","labelSize":20,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜","height":50},"compId":3}],"loadList":["button/Createselect.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":120,"var":"selbtn","stateNum":2,"skin":"commers/Createselect.png","labelSize":20,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜","height":50},"compId":3}],"loadList":["commers/Createselect.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

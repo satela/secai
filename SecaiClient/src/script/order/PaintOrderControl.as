@@ -6,6 +6,7 @@ package script.order
 	import laya.events.Event;
 	import laya.net.HttpRequest;
 	import laya.utils.Browser;
+	import laya.utils.Utils;
 	
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
@@ -20,6 +21,8 @@ package script.order
 	import script.ViewManager;
 	
 	import ui.PaintOrderPanelUI;
+	
+	import utils.UtilTool;
 	
 	public class PaintOrderControl extends Script
 	{
@@ -38,7 +41,7 @@ package script.order
 			uiSkin.firstpage.on(Event.CLICK,this,onClosePanel);
 			uiSkin.panel_main.vScrollBarSkin = "";
 			uiSkin.mainvbox.autoSize = true;
-			uiSkin.btn_addattach.on(Event.CLICK,this,onAddPart);
+			//uiSkin.btn_addattach.on(Event.CLICK,this,onAddPart);
 			uiSkin.btnaddpic.on(Event.CLICK,this,onShowSelectPic);
 			var i:int= 1;
 			//uiSkin.ordervbox.autoSize = true;
@@ -70,7 +73,7 @@ package script.order
 			
 			uiSkin.changefactory.underline = true;
 			uiSkin.changefactory.underlineColor = "#222222";
-			
+			uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 			uiSkin.changemyadd.on(Event.CLICK,this,onShowSelectAddress);
 			uiSkin.changefactory.on(Event.CLICK,this,onShowSelectFactory);
 			uiSkin.deliverybtn.on(Event.CLICK,this,onShowSelectDelivery);
@@ -302,14 +305,14 @@ package script.order
 			var orderdata:Object = {};
 			orderdata.order_sn = PaintOrderModel.getOrderSn();
 			orderdata.client_code = "SCFY001";
-			orderdata.consignee = "色彩飞扬";
-			orderdata.tel = "13568989899";
-			orderdata.address = "上海市浦东新区年家浜路58号汇腾南苑";
+			orderdata.consignee = PaintOrderModel.instance.selectAddress.receiverName
+			orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
+			orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
 			orderdata.order_amountStr = "0";
 			orderdata.shipping_feeStr = "0";
 			orderdata.money_paidStr = "0";
 			orderdata.discountStr = "0";
-			orderdata.pay_timeStr = "2019-02-19 21:15:00";//(new Date()).getTime();
+			orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
 			orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
 			orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
 			
@@ -350,6 +353,11 @@ package script.order
 			{
 				ViewManager.showAlert("下单成功");
 			}
+		}
+		
+		private function onClickOpenQQ():void
+		{
+			window.open('tencent://message/?uin=10987654321');
 		}
 		public override function onDestroy():void
 		{

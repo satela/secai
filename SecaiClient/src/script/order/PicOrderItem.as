@@ -33,7 +33,7 @@ package script.order
 			this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
 			this.filename.text = ordervo.picinfo.directName;
 			this.architype.text = ordervo.techStr;
-			
+			this.total.text = "0";
 			this.deleteorder.underline = true;
 			this.deleteorder.underlineColor = "#222222";
 			
@@ -76,31 +76,9 @@ package script.order
 		}
 		private function onchangeTech():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY);
 			return;
-			var num:int = Math.random()*8;
-			var techStr:String = "";
-			for(var i:int=0;i < num;i++)
-			{
-				techStr += "工艺" + i + "\n";
-			}
-			var lastheight:int = this.height;
-			this.architype.text = techStr;
-			if(this.architype.textField.textHeight > 30)
-				this.architype.height = this.architype.textField.textHeight;
-			else
-				this.architype.height = 30;
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY);
 			
-			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
-			
-			if(this.architype.height > 30)
-				this.height = this.architype.height + 35;
-			else
-				this.height = 60;
-			this.bgimg.height = this.height;
-			alighComponet();
-			
-			EventCenter.instance.event(EventCenter.ADJUST_PIC_ORDER_TECH,this.height - lastheight);
 		}
 		private function alighComponet():void
 		{
@@ -132,6 +110,8 @@ package script.order
 		{
 			
 			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(2).toString();
+			if(this.ordervo.orderData)
+			this.ordervo.orderData.item_number = parseInt(this.inputnum.text);
 		}
 		private function onShowMaterialView():void
 		{
@@ -194,7 +174,7 @@ package script.order
 			orderitemdata.LWH = ordervo.picinfo.picPhysicWidth + "/" + ordervo.picinfo.picPhysicHeight + "/1";
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
-			orderitemdata.item_priceStr = 1;
+			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
 			orderitemdata.item_status = "1";
 			orderitemdata.comments = this.ordervo.comment;
 			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;

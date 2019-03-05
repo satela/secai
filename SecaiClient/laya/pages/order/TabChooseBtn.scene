@@ -18,7 +18,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,selbtn",
-            "props":{"y":0,"x":0,"width":120,"var":"selbtn","stateNum":"2","skin":"button/Createselect.png","labelSize":20,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜","height":50},
+            "props":{"y":0,"x":0,"width":120,"var":"selbtn","stateNum":"2","skin":"commers/Createselect.png","labelSize":20,"labelColors":"#FFFFFF,#CDCDCD","label":"条幅旗帜","height":50},
             "nodeParent":2,
             "label":"selbtn",
             "isDirectory":false,

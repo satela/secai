@@ -1,11 +1,9 @@
 D .
-D button
-P 73C10EA2 clubDayoption.png
-P 6479F037 Createselect.png
 D commers
 P 88DCB116 blackbg.png
 P 338437A7 circlebg.png
 P C57A2229 combxbtn.png
+P 6479F037 Createselect.png
 P DF840E10 fold.png
 P BFB40AC3 inputbg.png
 P A72E1D10 sel.png
@@ -50,7 +48,7 @@ R 1D8DADA8 colorture.png
 R 96CD92EF epson.png
 R CFBAD2DA express.png
 R 488071B5 flow.jpg
-P 177FDD35 lenovo.png
+R 177FDD35 lenovo.png
 R C86CB33D logo.png
 R 488071B5 make.jpg
 R 488071B5 order.jpg
@@ -58,6 +56,3 @@ R 55762772 pantone.png
 R 775A638D samsung.png
 R 488071B5 send.jpg
 R 488071B5 upload.jpg
-D sound
-R 1DC3ABD8 destroy.wav
-R FF0B6E8D hit.wav

@@ -34,11 +34,12 @@
    <item name="usercenter/AddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/NewAddressPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="login/LoadingPanel.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="LoginView.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="LoginView.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/OrderAddressItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/SelectAttachPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/SelectDeliveryPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="WaitRespondPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/OrderQuestItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/MyOrdersPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/ChargePanel.scene" props="" ifExport="分离模式" aName=""/>
 </page>
