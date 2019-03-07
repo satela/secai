@@ -10,33 +10,12 @@ package ui.login {
 		public var input_phone:TextInput;
 		public var input_pwd:TextInput;
 		public var input_conpwd:TextInput;
-		public var input_company:TextInput;
-		public var input_receiver:TextInput;
-		public var input_receiverphone:TextInput;
-		public var input_adress:TextInput;
 		public var inputCode:TextInput;
 		public var txtRefresh:Text;
 		public var input_phonecode:TextInput;
 		public var btnGetCode:Button;
-		public var btnSelProv:Button;
-		public var province:Label;
-		public var btnSelCity:Button;
-		public var citytxt:Label;
-		public var btnSelArea:Button;
-		public var areatxt:Label;
-		public var btnSelTown:Button;
-		public var towntxt:Label;
 		public var btnClose:Button;
-		public var radio_default:RadioGroup;
 		public var btnReg:Button;
-		public var provbox:Image;
-		public var provList:List;
-		public var citybox:Image;
-		public var cityList:List;
-		public var areabox:Image;
-		public var areaList:List;
-		public var townbox:Image;
-		public var townList:List;
 
 		override protected function createChildren():void {
 			super.createChildren();

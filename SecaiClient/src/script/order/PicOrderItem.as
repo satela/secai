@@ -73,6 +73,8 @@ package script.order
 		private function onAddMsgBack(msg:String):void
 		{
 			this.ordervo.comment = msg;
+			if(this.ordervo.orderData)
+				this.ordervo.orderData.comments = this.ordervo.comment;
 		}
 		private function onchangeTech():void
 		{

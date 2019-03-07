@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":106,
-    "selecteID":109,
+    "selectedBox":2,
+    "selecteID":45,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":1180},
     "nodeParent":-1,
-    "maxID":112,
+    "maxID":113,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -499,7 +499,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":10,"x":13,"text":"公司电话：","fontSize":20,"font":"Arial"},
+                    "props":{"y":10,"x":13,"text":"统一征信代码：","fontSize":20,"font":"Arial"},
                     "nodeParent":45,
                     "label":"Label",
                     "isDirectory":false,
@@ -512,14 +512,28 @@
                 {
                     "x":30,
                     "type":"TextInput",
-                    "searchKey":"TextInput",
-                    "props":{"x":126,"width":250,"skin":"comp/textinput.png","height":40,"fontSize":20},
+                    "searchKey":"TextInput,reditcode",
+                    "props":{"y":0,"x":153,"width":250,"var":"reditcode","skin":"comp/textinput.png","height":40,"fontSize":20},
                     "nodeParent":45,
-                    "label":"TextInput",
+                    "label":"reditcode",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":47,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":6,"x":-1,"text":"*","fontSize":20,"color":"#ef0d09"},
+                    "nodeParent":45,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":112,
                     "child":[
                         ]
                 }]

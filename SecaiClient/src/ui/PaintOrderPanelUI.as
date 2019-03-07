@@ -21,6 +21,7 @@ package ui {
 		public var partvbox:VBox;
 		public var deliverybtn:Text;
 		public var deliverytxt:Label;
+		public var commentall:TextInput;
 		public var btnordernow:Button;
 
 		override protected function createChildren():void {

@@ -1,6 +1,8 @@
 package model
 {
 	import model.users.AddressVo;
+	
+	import ui.usercenter.AddressMgrPanelUI;
 
 	public class Userdata
 	{
@@ -16,6 +18,7 @@ package model
 		public var company:String;
 		
 		public var addressList:Array = [];
+		public var defaultAddId:String = "";//默认收货地址
 		
 		public var money:Number;
 		
@@ -73,6 +76,22 @@ package model
 					break;
 				}
 			}
+		}
+		
+		public function getDefaultAddress():AddressVo
+		{
+			if(addressList == null || addressList.length == 0)
+				return null;
+			else
+			{
+				for(var i:int=0;i < addressList.length;i++)
+				{
+					if(addressList[i].id == defaultAddId)
+						return addressList[i];
+				}
+			}
+			
+			return addressList[0];
 		}
 	}
 }

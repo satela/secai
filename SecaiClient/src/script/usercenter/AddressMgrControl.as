@@ -63,7 +63,10 @@ package script.usercenter
 			if(result.status == 0)
 			{
 				Userdata.instance.initMyAddress(result.data as Array);
+				Userdata.instance.defaultAddId = result["default"];
+
 				uiSkin.addlist.array = Userdata.instance.addressList;
+				
 			}
 		}
 		private function onClickAdd():void

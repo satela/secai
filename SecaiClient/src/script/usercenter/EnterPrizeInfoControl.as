@@ -163,7 +163,12 @@ package script.usercenter
 				ViewManager.showAlert("请选择营业执照");
 				return;
 			}
-			Browser.window.createGroup({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.createGroup, cname:uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:companyareaId,caddr:uiSkin.detail_addr.text,file:curYyzzFile});
+			if(uiSkin.reditcode.text == "")
+			{
+				ViewManager.showAlert("请填写统一社会征信代码");
+				return;
+			}
+			Browser.window.createGroup({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.createGroup, cname:uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:companyareaId,caddr:uiSkin.detail_addr.text,reditcode:uiSkin.reditcode.text,file:curYyzzFile});
 
 			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name=" + uiSkin.input_companyname.text + "&addr=" + Userdata.instance.defaultAddrid,"post");
 		}

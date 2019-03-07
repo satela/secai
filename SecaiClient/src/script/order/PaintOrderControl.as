@@ -102,11 +102,11 @@ package script.order
 //				trace(data);
 //			});
 
-			if(Userdata.instance.addressList.length > 0)
+			if(Userdata.instance.getDefaultAddress() != null)
 			{
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.addressList[0].searchZoneid,this,onGetOutPutAddress,null,null);
-				uiSkin.myaddresstxt.text = Userdata.instance.addressList[0].addressDetail;
-				PaintOrderModel.instance.selectAddress = Userdata.instance.addressList[0];
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid,this,onGetOutPutAddress,null,null);
+				uiSkin.myaddresstxt.text = Userdata.instance.getDefaultAddress().addressDetail;
+				PaintOrderModel.instance.selectAddress = Userdata.instance.getDefaultAddress();
 			}
 		}
 		
@@ -331,6 +331,8 @@ package script.order
 					totalMoney += orderlist[i].getPrice();
 					//totalMoney += orderlist[i].getPrice();
 
+					if(orderlist[i].ordervo.orderData.comments == "")
+						orderlist[i].ordervo.orderData.comments = uiSkin.commentall.text;
 					orderdata.orderItemList.push(orderlist[i].ordervo.orderData);
 				}
 				else

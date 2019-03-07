@@ -105,6 +105,7 @@ package script {
 			if(result.status == 0)
 			{
 				Userdata.instance.initMyAddress(result.data as Array);
+				Userdata.instance.defaultAddId = result["default"];
 			}
 		}
 		private function onResizeBrower():void
@@ -169,6 +170,8 @@ package script {
 		{
 			txtLogin.text = e as String;
 			txtReg.text = "退出";
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
+
 		}
 		override public function onEnable():void {
 			

@@ -1236,7 +1236,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/UserMainPanel.scene";
+	GameConfig.startScene="order/SelectTechPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1259,6 +1259,8 @@ var Userdata=(function(){
 		this.userName=null;
 		this.company=null;
 		this.addressList=[];
+		this.defaultAddId="";
+		//默认收货地址
 		this.money=NaN;
 		this.isLogin=false;
 		this.defaultAddrid="0";
@@ -1295,6 +1297,18 @@ var Userdata=(function(){
 				break ;
 			}
 		}
+	}
+
+	__proto.getDefaultAddress=function(){
+		if(this.addressList==null || this.addressList.length==0)
+			return null;
+		else{
+			for(var i=0;i < this.addressList.length;i++){
+				if(this.addressList[i].id==this.defaultAddId)
+					return this.addressList[i];
+			}
+		}
+		return this.addressList[0];
 	}
 
 	__getset(1,Userdata,'instance',function(){
@@ -1672,7 +1686,7 @@ var UtilTool=(function(){
 		else
 		datestr+="0"+date.getMinutes()+":";
 		if(date.getSeconds()>=10)
-			datestr+=date.getSeconds()+":";
+			datestr+=date.getSeconds();
 		else
 		datestr+="0"+date.getSeconds();
 		return datestr;
@@ -34254,6 +34268,7 @@ var MainPageControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.initMyAddress(result.data);
+			Userdata.instance.defaultAddId=result["default"];
 		}
 	}
 
@@ -34303,6 +34318,7 @@ var MainPageControl=(function(_super){
 	__proto.onSucessLogin=function(e){
 		this.txtLogin.text=e;
 		this.txtReg.text="退出";
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
 	}
 
 	__proto.onEnable=function(){
@@ -35125,10 +35141,10 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
-		if(Userdata.instance.addressList.length > 0){
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+Userdata.instance.addressList[0].searchZoneid,this,this.onGetOutPutAddress,null,null);
-			this.uiSkin.myaddresstxt.text=Userdata.instance.addressList[0].addressDetail;
-			PaintOrderModel.instance.selectAddress=Userdata.instance.addressList[0];
+		if(Userdata.instance.getDefaultAddress()!=null){
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid,this,this.onGetOutPutAddress,null,null);
+			this.uiSkin.myaddresstxt.text=Userdata.instance.getDefaultAddress().addressDetail;
+			PaintOrderModel.instance.selectAddress=Userdata.instance.getDefaultAddress();
 		}
 	}
 
@@ -35296,6 +35312,8 @@ var PaintOrderControl=(function(_super){
 		for(var i=0;i < this.orderlist.length;i++){
 			if(this.orderlist[i].ordervo.orderData !=null){
 				totalMoney+=this.orderlist[i].getPrice();
+				if(this.orderlist[i].ordervo.orderData.comments=="")
+					this.orderlist[i].ordervo.orderData.comments=this.uiSkin.commentall.text;
 				orderdata.orderItemList.push(this.orderlist[i].ordervo.orderData);
 			}
 			else{
@@ -35447,7 +35465,11 @@ var EnterPrizeInfoControl=(function(_super){
 			ViewManager.showAlert("请选择营业执照");
 			return;
 		}
-		Browser.window.createGroup({urlpath:"http://47.101.178.87/"+"group/create-group?",cname:this.uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:this.companyareaId,caddr:this.uiSkin.detail_addr.text,file:this.curYyzzFile});
+		if(this.uiSkin.reditcode.text==""){
+			ViewManager.showAlert("请填写统一社会征信代码");
+			return;
+		}
+		Browser.window.createGroup({urlpath:"http://47.101.178.87/"+"group/create-group?",cname:this.uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:this.companyareaId,caddr:this.uiSkin.detail_addr.text,reditcode:this.uiSkin.reditcode.text,file:this.curYyzzFile});
 	}
 
 	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name="+uiSkin.input_companyname.text+"&addr="+Userdata.instance.defaultAddrid,"post");
@@ -35588,6 +35610,7 @@ var SelectTechControl=(function(_super){
 		this.linelist=[];
 		this.firstTechlist=[];
 		this.uiSKin.techcontent.vScrollBarSkin="";
+		this.uiSKin.main_panel.vScrollBarSkin="";
 		var arr=PaintOrderModel.instance.curSelectMat.prcessCatList;
 		var startpos=(this.uiSKin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
 		for(var i=0;i < arr.length;i++){
@@ -35608,6 +35631,7 @@ var SelectTechControl=(function(_super){
 	}
 
 	__proto.onResizeBrower=function(){
+		console.log("panel heig:"+this.uiSKin.main_panel.height);
 		this.uiSKin.main_panel.height=Browser.clientHeight;
 	}
 
@@ -35974,8 +35998,6 @@ var RegisterCntrol=(function(_super){
 	var __proto=RegisterCntrol.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
-		this.uiSkin.input_adress.maxChars=200;
-		this.uiSkin.input_company.maxChars=50;
 		this.uiSkin.input_conpwd.maxChars=20;
 		this.uiSkin.input_conpwd.type="password";
 		this.uiSkin.input_phone.maxChars=11;
@@ -35983,66 +36005,23 @@ var RegisterCntrol=(function(_super){
 		this.uiSkin.input_phonecode.maxChars=6;
 		this.uiSkin.input_pwd.maxChars=20;
 		this.uiSkin.input_pwd.type="password";
-		this.uiSkin.input_receiver.maxChars=10;
-		this.uiSkin.input_receiverphone.maxChars=11;
-		this.uiSkin.input_receiverphone.restrict="0-9";
 		this.uiSkin.inputCode.maxChars=8;
-		this.uiSkin.radio_default.selectedIndex=0;
-		this.uiSkin.provList.itemRender=CityAreaItem;
-		this.uiSkin.provList.vScrollBarSkin="";
-		this.uiSkin.provList.repeatX=1;
-		this.uiSkin.provList.spaceY=2;
-		this.uiSkin.provList.renderHandler=new Handler(this,this.updateCityList);
-		this.uiSkin.provList.selectEnable=true;
-		this.uiSkin.provList.selectHandler=new Handler(this,this.selectProvince);
-		this.uiSkin.provList.array=ChinaAreaModel.instance.getAllProvince();
-		this.selectProvince(0);
-		this.uiSkin.provList.refresh();
-		this.uiSkin.cityList.itemRender=CityAreaItem;
-		this.uiSkin.cityList.vScrollBarSkin="";
-		this.uiSkin.cityList.repeatX=1;
-		this.uiSkin.cityList.spaceY=2;
-		this.uiSkin.cityList.selectEnable=true;
-		this.uiSkin.cityList.renderHandler=new Handler(this,this.updateCityList);
-		this.uiSkin.cityList.selectHandler=new Handler(this,this.selectCity);
-		this.uiSkin.areaList.itemRender=CityAreaItem;
-		this.uiSkin.areaList.vScrollBarSkin="";
-		this.uiSkin.areaList.selectEnable=true;
-		this.uiSkin.areaList.repeatX=1;
-		this.uiSkin.areaList.spaceY=2;
-		this.uiSkin.areaList.renderHandler=new Handler(this,this.updateCityList);
-		this.uiSkin.areaList.selectHandler=new Handler(this,this.selectArea);
-		this.uiSkin.townList.itemRender=CityAreaItem;
-		this.uiSkin.townList.vScrollBarSkin="";
-		this.uiSkin.townList.selectEnable=true;
-		this.uiSkin.townList.repeatX=1;
-		this.uiSkin.townList.spaceY=2;
-		this.uiSkin.townList.renderHandler=new Handler(this,this.updateCityList);
-		this.uiSkin.townList.selectHandler=new Handler(this,this.selectTown);
-		this.uiSkin.btnSelProv.on("click",this,this.onShowProvince);
-		this.uiSkin.btnSelCity.on("click",this,this.onShowCity);
-		this.uiSkin.btnSelArea.on("click",this,this.onShowArea);
-		this.uiSkin.btnSelTown.on("click",this,this.onShowTown);
 		this.uiSkin.btnGetCode.on("click",this,this.onGetPhoneCode);
 		this.uiSkin.btnClose.on("click",this,this.onCloseScene);
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.townbox.visible=false;
 		this.uiSkin.txtRefresh.underline=true;
 		this.uiSkin.txtRefresh.underlineColor="#121212";
 		this.uiSkin.txtRefresh.on("click",this,this.onRefreshVerify);
 		this.uiSkin.btnReg.on("click",this,this.onRegister);
 		this.verifycode=Browser.document.createElement("div");
 		this.verifycode.id="v_container";
-		this.verifycode.style="width: 200px;height: 50px;left:950px;top:705"
+		this.verifycode.style="width: 200px;height: 50px;left:950px;top:295"
 		this.verifycode.style.position="absolute";
 		this.verifycode.style.zIndex=999;
 		Browser.document.body.appendChild(this.verifycode);
-		this.uiSkin.on("click",this,this.hideAddressPanel);
 		Browser.window.loadVerifyCode();
 	}
 
+	// }
 	__proto.onGetPhoneCode=function(){
 		if(this.uiSkin.input_phone.text.length < 11){
 			Browser.window.alert("请填写正确的手机号");
@@ -36100,100 +36079,6 @@ var RegisterCntrol=(function(_super){
 			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 			ViewManager.instance.openView("VIEW_lOGPANEL",false);
 		}
-	}
-
-	__proto.hideAddressPanel=function(e){
-		if((e.target instanceof laya.ui.List ))
-			return;
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.townbox.visible=false;
-	}
-
-	__proto.onShowProvince=function(e){
-		this.uiSkin.provbox.visible=true;
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.townbox.visible=false;
-		e.stopPropagation();
-	}
-
-	__proto.onShowCity=function(e){
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.citybox.visible=true;
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.townbox.visible=false;
-		e.stopPropagation();
-	}
-
-	__proto.onShowArea=function(e){
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areabox.visible=true;
-		this.uiSkin.townbox.visible=false;
-		e.stopPropagation();
-	}
-
-	__proto.onShowTown=function(e){
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.townbox.visible=true;
-		e.stopPropagation();
-	}
-
-	__proto.updateCityList=function(cell,index){
-		cell.setData(cell.dataSource);
-	}
-
-	__proto.selectProvince=function(index){
-		this.province=this.uiSkin.provList.array[index];
-		console.log(this.province);
-		this.uiSkin.provbox.visible=false;
-		this.uiSkin.cityList.array=ChinaAreaModel.instance.getAllCity(this.province.id);
-		this.uiSkin.cityList.refresh();
-		this.uiSkin.province.text=this.province.areaName;
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[0].areaName;
-		this.uiSkin.cityList.selectedIndex=0;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[0].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-	}
-
-	__proto.selectCity=function(index){
-		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[index].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[index].areaName;
-		this.uiSkin.areatxt.text="";
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-	}
-
-	__proto.selectArea=function(index){
-		if(index==-1)
-			return;
-		this.uiSkin.areabox.visible=false;
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[index].areaName;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[index].id);
-		this.uiSkin.townList.refresh();
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-	}
-
-	__proto.selectTown=function(index){
-		if(index==-1)
-			return;
-		this.uiSkin.townbox.visible=false;
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaName;
 	}
 
 	return RegisterCntrol;
@@ -36313,6 +36198,7 @@ var SelectMaterialControl=(function(_super){
 	var __proto=SelectMaterialControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
+		this.uiSkin.main_panel.vScrollBarSkin="";
 		this.uiSkin.tablist.itemRender=MaterialClassBtn;
 		this.uiSkin.tablist.vScrollBarSkin="";
 		this.uiSkin.tablist.selectEnable=true;
@@ -36333,6 +36219,11 @@ var SelectMaterialControl=(function(_super){
 		}
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+	}
+
+	__proto.onResizeBrower=function(){
+		this.uiSkin.main_panel.height=Browser.clientHeight;
 	}
 
 	__proto.updateMatClassItem=function(cell){
@@ -36384,6 +36275,10 @@ var SelectMaterialControl=(function(_super){
 		ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
 	}
 
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+	}
+
 	return SelectMaterialControl;
 })(Script)
 
@@ -36423,6 +36318,7 @@ var AddressMgrControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.initMyAddress(result.data);
+			Userdata.instance.defaultAddId=result["default"];
 			this.uiSkin.addlist.array=Userdata.instance.addressList;
 		}
 	}
@@ -48540,6 +48436,7 @@ var AddressItemUI=(function(_super){
 		this.detailaddr=null;
 		this.btnDel=null;
 		this.btnEdit=null;
+		this.btndefault=null;
 		AddressItemUI.__super.call(this);
 	}
 
@@ -48550,7 +48447,7 @@ var AddressItemUI=(function(_super){
 		this.createView(AddressItemUI.uiView);
 	}
 
-	AddressItemUI.uiView={"type":"View","props":{"width":788,"height":24},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":1,"width":101,"var":"conName","valign":"middle","text":"徐建华","height":24,"fontSize":18,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":101,"width":170,"var":"phonetxt","valign":"middle","text":"13564113173","height":24,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":270,"width":443,"var":"detailaddr","valign":"middle","text":"上海市浦东新区周浦镇瑞浦路612弄23号1001室","height":24,"fontSize":18,"align":"center"},"compId":6},{"type":"Rect","props":{"y":0,"x":0,"width":788,"lineWidth":1,"lineColor":"#1c1a1a","height":24},"compId":10},{"type":"Text","props":{"y":5,"x":753,"var":"btnDel","text":"删除","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":5,"x":718,"var":"btnEdit","text":"编辑","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":7,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}],"loadList":["prefabs/LinksText.prefab"],"loadList3D":[]};
+	AddressItemUI.uiView={"type":"View","props":{"width":820,"height":24},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":1,"width":101,"var":"conName","valign":"middle","text":"徐建华","height":24,"fontSize":18,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":101,"width":170,"var":"phonetxt","valign":"middle","text":"13564113173","height":24,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":270,"width":443,"var":"detailaddr","valign":"middle","text":"上海市浦东新区周浦镇瑞浦路612弄23号1001室","height":24,"fontSize":18,"align":"center"},"compId":6},{"type":"Rect","props":{"y":0,"x":0,"width":820,"lineWidth":1,"lineColor":"#1c1a1a","height":24},"compId":10},{"type":"Text","props":{"y":5,"x":735,"var":"btnDel","text":"删除","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":5,"x":703,"var":"btnEdit","text":"编辑","presetID":1,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":7,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]},{"type":"Text","props":{"y":5,"x":767,"width":47,"var":"btndefault","text":"设为默认","presetID":1,"height":12,"color":"#1c893f","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]}],"loadList":["prefabs/LinksText.prefab"],"loadList3D":[]};
 	return AddressItemUI;
 })(View)
 
@@ -48662,6 +48559,7 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.detail_addr=null;
 		this.txt_license=null;
 		this.btn_uplicense=null;
+		this.reditcode=null;
 		this.provbox=null;
 		this.provList=null;
 		this.citybox=null;
@@ -48704,6 +48602,7 @@ var PaintOrderPanelUI=(function(_super){
 		this.partvbox=null;
 		this.deliverybtn=null;
 		this.deliverytxt=null;
+		this.commentall=null;
 		this.btnordernow=null;
 		PaintOrderPanelUI.__super.call(this);
 	}
@@ -48834,33 +48733,12 @@ var RegisterPanelUI=(function(_super){
 		this.input_phone=null;
 		this.input_pwd=null;
 		this.input_conpwd=null;
-		this.input_company=null;
-		this.input_receiver=null;
-		this.input_receiverphone=null;
-		this.input_adress=null;
 		this.inputCode=null;
 		this.txtRefresh=null;
 		this.input_phonecode=null;
 		this.btnGetCode=null;
-		this.btnSelProv=null;
-		this.province=null;
-		this.btnSelCity=null;
-		this.citytxt=null;
-		this.btnSelArea=null;
-		this.areatxt=null;
-		this.btnSelTown=null;
-		this.towntxt=null;
 		this.btnClose=null;
-		this.radio_default=null;
 		this.btnReg=null;
-		this.provbox=null;
-		this.provList=null;
-		this.citybox=null;
-		this.cityList=null;
-		this.areabox=null;
-		this.areaList=null;
-		this.townbox=null;
-		this.townList=null;
 		RegisterPanelUI.__super.call(this);
 	}
 
@@ -49058,6 +48936,8 @@ var PicOrderItem=(function(_super){
 
 	__proto.onAddMsgBack=function(msg){
 		this.ordervo.comment=msg;
+		if(this.ordervo.orderData)
+			this.ordervo.orderData.comments=this.ordervo.comment;
 	}
 
 	__proto.onchangeTech=function(){
@@ -49220,6 +49100,7 @@ var PicManagePanelUI=(function(_super){
 //class ui.order.SelectMaterialPanelUI extends laya.ui.View
 var SelectMaterialPanelUI=(function(_super){
 	function SelectMaterialPanelUI(){
+		this.main_panel=null;
 		this.matlist=null;
 		this.btnok=null;
 		this.btncancel=null;
@@ -53943,6 +53824,8 @@ var CompanyAddressItem=(function(_super){
 		this.detailaddr.text=add.proCityArea;
 		this.btnDel.on("click",this,this.onDeleteAddr);
 		this.btnEdit.on("click",this,this.onEditAddr);
+		this.btndefault.on("click",this,this.onSetDefaultAddr);
+		this.btndefault.visible=Userdata.instance.defaultAddId !=this.addvo.id;
 	}
 
 	__proto.onDeleteAddr=function(){
@@ -53963,6 +53846,18 @@ var CompanyAddressItem=(function(_super){
 
 	__proto.onEditAddr=function(){
 		ViewManager.instance.openView("VIEW_ADD_NEW_ADDRESS",false,this.addvo);
+	}
+
+	__proto.onSetDefaultAddr=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.defaultAddressBack,"opt=default&id="+this.addvo.id,"post");
+	}
+
+	__proto.defaultAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.defaultAddId=this.addvo.id;
+			EventCenter.instance.event("UPDATE_MYADDRESS_LIST");
+		}
 	}
 
 	return CompanyAddressItem;

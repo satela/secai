@@ -54,7 +54,7 @@ package script.order
 			firstTechlist = new Vector.<TechBoxItem>();
 			//var num:int = Math.random()*18;
 			this.uiSKin.techcontent.vScrollBarSkin = "";
-			//this.uiSKin.main_panel.vScrollBarSkin = "";
+			this.uiSKin.main_panel.vScrollBarSkin = "";
 			var arr:Vector.<ProcessCatVo> = PaintOrderModel.instance.curSelectMat.prcessCatList;
 			var startpos:int = (this.uiSKin.techcontent.height - arr.length*itemheight -  itemspaceV * (arr.length - 1))/2;
 
@@ -83,6 +83,7 @@ package script.order
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
+			console.log("panel heig:" +  uiSKin.main_panel.height);
 			uiSKin.main_panel.height = Browser.clientHeight;
 		}
 		

@@ -16,6 +16,7 @@ package ui.usercenter {
 		public var detail_addr:TextInput;
 		public var txt_license:Label;
 		public var btn_uplicense:Button;
+		public var reditcode:TextInput;
 		public var provbox:Image;
 		public var provList:List;
 		public var citybox:Image;

@@ -31,6 +31,8 @@ package script.usercenter
 			
 			this.btnDel.on(Event.CLICK,this,onDeleteAddr);
 			this.btnEdit.on(Event.CLICK,this,onEditAddr);
+			this.btndefault.on(Event.CLICK,this,onSetDefaultAddr);
+			this.btndefault.visible = Userdata.instance.defaultAddId != addvo.id;
 
 		}
 		
@@ -61,6 +63,19 @@ package script.usercenter
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS,false,addvo);
 
+		}
+		private function onSetDefaultAddr():void
+		{
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,defaultAddressBack,"opt=default&id=" + addvo.id,"post");
+		}
+		private function defaultAddressBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Userdata.instance.defaultAddId = addvo.id;
+				EventCenter.instance.event(EventCenter.UPDATE_MYADDRESS_LIST);
+			}
 		}
 	}
 }

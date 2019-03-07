@@ -1,7 +1,10 @@
 package script.order
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
@@ -25,7 +28,7 @@ package script.order
 		{
 			
 			uiSkin = this.owner as SelectMaterialPanelUI; 
-			
+			uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.tablist.itemRender = MaterialClassBtn;
 			uiSkin.tablist.vScrollBarSkin = "";
 			uiSkin.tablist.selectEnable = true;
@@ -55,6 +58,13 @@ package script.order
 			
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
+		}
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			 uiSkin.main_panel.height = Browser.clientHeight;
 		}
 		
 		private function updateMatClassItem(cell:MaterialClassBtn):void
@@ -113,6 +123,11 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
+		}
+		
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 		}
 	}
 }
