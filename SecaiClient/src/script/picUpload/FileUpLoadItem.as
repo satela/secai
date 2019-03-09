@@ -1,9 +1,14 @@
 package script.picUpload
 {
+	import eventUtil.EventCenter;
+	
+	import laya.events.Event;
+	
 	import ui.uploadpic.UpLoadItemUI;
 	
 	public class FileUpLoadItem extends UpLoadItemUI
 	{
+		public var fileobj:Object;
 		public function FileUpLoadItem()
 		{
 			super();
@@ -11,6 +16,7 @@ package script.picUpload
 		
 		public function setData(filedata:Object):void
 		{
+			fileobj = filedata;
 			this.filename.text = filedata.name;
 			this.prog.text = "0%";
 			
@@ -24,15 +30,21 @@ package script.picUpload
 				sizestr = ((filedata.size/1024).toFixed(2)).toString() + "k";
 			this.prgbar.value = 0;
 			this.filesize.text = sizestr;
+			this.btncancel.on(Event.CLICK,this,onCancelUpload);
+			updateProgress();
 		}
 		
-		public function updateProgress(progs:String):void
+		private function onCancelUpload():void
 		{
-			var pp:Number = Number(progs);
+			EventCenter.instance.event(EventCenter.CANCAEL_UPLOAD_ITEM,this);
+		}
+		public function updateProgress():void
+		{
+			var pp:Number = Number(fileobj.progress);
 			if(pp > 100)
 				pp = 100;
 			this.prgbar.value = pp/100;
-			this.prog.text = progs + "%";
+			this.prog.text = pp + "%";
 		}
 	}
 }

@@ -98,7 +98,6 @@ package script.usercenter
 			Browser.window.uploadApp = this;
 			initFileOpen();
 			
-			Laya.timer.frameLoop(10,this,updateFileOpenPos);
 			
 			if(!ChinaAreaModel.hasInit)
 			{
@@ -116,18 +115,12 @@ package script.usercenter
 			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
 			selectProvince(0);
 		}
-		private function updateFileOpenPos()
-		{
-			if((uiSkin.parent.parent.parent as Panel).vScrollBar)
-			trace("skinpos:" + (uiSkin.parent.parent.parent as Panel).y + "," + (uiSkin.parent.parent.parent as Panel).vScrollBar.value);
-			if(file)
-				file.style.top = (510 - (uiSkin.parent.parent.parent as Panel).vScrollBar.value).toString() + "px";
-		}
+		
 		private function initFileOpen():void
 		{
 			file = Browser.document.createElement("input");
 			
-			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:1080px;top:510";		
+			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:1080px;top:-210";		
 			
 			file.accept = ".jpg,.jpeg,.png,.tif";
 			file.type ="file";
@@ -139,7 +132,8 @@ package script.usercenter
 				
 				
 				curYyzzFile = file.files[0];
-				uiSkin.txt_license.text = curYyzzFile.name;
+				if(curYyzzFile != null)
+					uiSkin.txt_license.text = curYyzzFile.name;
 				
 			};
 		
@@ -148,12 +142,12 @@ package script.usercenter
 		public override function onDestroy():void
 		{
 			Browser.document.body.removeChild(file);//添加到舞台
-			Laya.timer.clear(this,updateFileOpenPos);
 
 		}
 		private function onUploadlicense():void
 		{
-			//ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,{type:"License",path:"/company/licence"});
+			file.click();
+			file.value ;
 		}
 		private function onSaveCompanyInfo():void
 		{

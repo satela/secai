@@ -4,6 +4,7 @@ package script.picUpload
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Box;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
@@ -36,6 +37,7 @@ package script.picUpload
 			uiSkin = this.owner as UpLoadPanelUI; 
 			uiSkin.btnClose.on(Event.CLICK,this,onCloseScene);
 			uiSkin.btnBegin.on(Event.CLICK,this,onClickBegin);
+			uiSkin.btnOpenFile.on(Event.CLICK,this,onClickOpenFile);
 
 			uiSkin.bgimg.alpha = 0.7;
 			uiSkin.fileList.itemRender = FileUpLoadItem;
@@ -43,23 +45,38 @@ package script.picUpload
 			uiSkin.fileList.selectEnable = false;
 			uiSkin.fileList.spaceY = 4;
 			uiSkin.fileList.renderHandler = new Handler(this, updateFileItem);
-			uiSkin.fileList.array = [];
 			initFileOpen();
 			
 			Browser.window.uploadApp = this;
+			if(param != null && (param as Array) != null)
+			{
+				uiSkin.fileList.array = param as Array;
+				fileListData = param as Array;
+			}
+			else
+				uiSkin.fileList.array = [];
 
 			
+			EventCenter.instance.on(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
+
+
 		}
 		
+		private function onClickOpenFile():void
+		{
+			Laya.timer.clearAll(this);
+			file.click();
+			file.value ;
+		}
 		private function initFileOpen():void
 		{
 			 file = Browser.document.createElement("input");
 			
-			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
+			file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:-248";
 			
-			if(param && param.type == "License")
-				file.multiple="";
-			else
+//			if(param && param.type == "License")
+//				file.multiple="";
+//			else
 				file.multiple="multiple";
 
 			file.accept = ".jpg,.jpeg,.png,.tif";
@@ -80,6 +97,7 @@ package script.picUpload
 				fileListData = [];
 				for(var i:int=0;i < file.files.length;i++)
 				{
+					file.files[i].progress = 0;
 					fileListData.push(file.files[i]);
 				}
 				
@@ -114,13 +132,15 @@ package script.picUpload
 			else
 			{
 				isUploading = false;
+				Laya.timer.once(5000,this,onCloseScene);
 			}
 		}
 		
 		private function onCompleteUpload(e:Object):void
 		{
-			(this.uiSkin.fileList.cells[curUploadIndex] as FileUpLoadItem).updateProgress("100");
-
+			if(fileListData[curUploadIndex])
+			fileListData[curUploadIndex].progress = 100;
+			updateProgress();
 			curUploadIndex++;
 			onBeginUpload();
 		}
@@ -129,12 +149,44 @@ package script.picUpload
 		{
 			if(Number(e) >= 100)
 				e = "99";
-			(this.uiSkin.fileList.cells[curUploadIndex] as FileUpLoadItem).updateProgress(e.toString());
-			trace("up progress" + JSON.stringify(e));
+			if(fileListData[curUploadIndex])
+			fileListData[curUploadIndex].progress = Number(e);
+			updateProgress();
+			//(this.uiSkin.fileList.cells[curUploadIndex] as FileUpLoadItem).updateProgress(e.toString());
+			//trace("up progress" + JSON.stringify(e));
+		}
+		private function updateProgress():void
+		{
+			var cells:Vector.<Box> = uiSkin.fileList.cells;
+			for(var i:int=0;i < cells.length;i++)
+			{
+				if(cells[i] as FileUpLoadItem != null && (cells[i] as FileUpLoadItem).fileobj == fileListData[curUploadIndex])
+				{
+					(cells[i] as FileUpLoadItem).updateProgress();
+					break;
+				}
+			}
 		}
 		private function updateFileItem(cell:FileUpLoadItem):void 
 		{
 			cell.setData(cell.dataSource);
+		}
+		
+		private function onDeleteItem(delitem:FileUpLoadItem):void
+		{
+			if(delitem.fileobj.progress >= 99)
+				return;
+			
+			var index:int = fileListData.indexOf(delitem.fileobj);
+			if(index == curUploadIndex)
+			{
+				Browser.window.cancelUpload();
+				if(isUploading)
+					onBeginUpload();
+			}
+			uiSkin.fileList.deleteItem(index);
+			
+			
 		}
 		private function onCloseScene():void
 		{
@@ -142,6 +194,8 @@ package script.picUpload
 			Browser.window.uploadApp = null;
 
 			EventCenter.instance.event(EventCenter.UPDATE_FILE_LIST);
+			EventCenter.instance.off(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_MYPICPANEL);
 			
 			Browser.document.body.removeChild(file);//添加到舞台

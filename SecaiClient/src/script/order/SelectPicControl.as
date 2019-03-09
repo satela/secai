@@ -24,6 +24,7 @@ package script.order
 		private var directTree:Array = [];
 	
 		public var param:Object;
+		private var curFileList:Array;
 
 		public function SelectPicControl()
 		{
@@ -36,13 +37,13 @@ package script.order
 			
 			directTree = [];
 
-			uiSkin.folderList.itemRender = DirectFolderItem;
-			uiSkin.folderList.vScrollBarSkin = "";
-			uiSkin.folderList.selectEnable = true;
-			uiSkin.folderList.spaceY = 2;
-			uiSkin.folderList.renderHandler = new Handler(this, updateDirectItem);
-			
-			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
+//			uiSkin.folderList.itemRender = DirectFolderItem;
+//			uiSkin.folderList.vScrollBarSkin = "";
+//			uiSkin.folderList.selectEnable = true;
+//			uiSkin.folderList.spaceY = 2;
+//			uiSkin.folderList.renderHandler = new Handler(this, updateDirectItem);
+//			
+//			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
 			
 			uiSkin.picList.itemRender = PicInfoItem;
 			uiSkin.picList.vScrollBarSkin = "";
@@ -55,21 +56,23 @@ package script.order
 			for(var i=0;i < 3;i++)
 				uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 			
-		
-			Laya.timer.once(10,this,function():void
-			{
+			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
+
+			//Laya.timer.once(10,this,function():void
+			//{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
-				uiSkin.folderList.array = [];
+				//uiSkin.folderList.array = [];
 				uiSkin.picList.array = [];
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
 				
-			});
+			//});
 			
 			uiSkin.htmltext.style.fontSize = 20;
 			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
 			
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelect);
+			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
@@ -122,20 +125,21 @@ package script.order
 			{
 				DirectoryFileModel.instance.initTopDirectoryList(result);
 				
-				uiSkin.folderList.array = DirectoryFileModel.instance.topDirectList;
-				uiSkin.picList.array = DirectoryFileModel.instance.curFileList;
-				if(DirectoryFileModel.instance.topDirectList.length > 0)
-				{
-					//curDirect += (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + "|";
-					DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.topDirectList[0] as PicInfoVo;
-					directTree.push(DirectoryFileModel.instance.curSelectDir);
-					
-					updateCurDirectLabel();
-					//uiSkin.flder0.visible = true;
-					//uiSkin.flder0.text = (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + ">";
-					(uiSkin.folderList.cells[0] as DirectFolderItem).ShowSelected = true;
-					getFileList();
-				}
+				//uiSkin.folderList.array = DirectoryFileModel.instance.topDirectList;
+				uiSkin.picList.array = DirectoryFileModel.instance.topDirectList;
+				curFileList = uiSkin.picList.array;
+//				if(DirectoryFileModel.instance.topDirectList.length > 0)
+//				{
+//					//curDirect += (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + "|";
+//					DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.topDirectList[0] as PicInfoVo;
+//					directTree.push(DirectoryFileModel.instance.curSelectDir);
+//					
+//					updateCurDirectLabel();
+//					//uiSkin.flder0.visible = true;
+//					//uiSkin.flder0.text = (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + ">";
+//					(uiSkin.folderList.cells[0] as DirectFolderItem).ShowSelected = true;
+//					getFileList();
+//				}
 			}
 			
 		}
@@ -153,10 +157,24 @@ package script.order
 			{
 				DirectoryFileModel.instance.initCurDirFiles(result);
 				uiSkin.picList.array = DirectoryFileModel.instance.curFileList;
-				
+				curFileList = DirectoryFileModel.instance.curFileList;
 			}
 		}
-	
+		private function onSearchInput():void
+		{
+			if(curFileList != null)
+			{
+				var temparr:Array = [];
+				for(var i:int=0;i < curFileList.length;i++)
+				{
+					if((curFileList[i].directName as String).indexOf(uiSkin.searchInput.text) >= 0)
+						temparr.push(curFileList[i]);
+				}
+				uiSkin.picList.array = temparr;
+			}
+			
+		}
+		
 		override public function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
@@ -167,21 +185,21 @@ package script.order
 	
 		private function onSlecteDirect(index:int):void
 		{
-			for each(var item:DirectFolderItem in uiSkin.folderList.cells)
-			{
-				item.ShowSelected = item.directData == uiSkin.folderList.array[index];
-			}
-			//(uiSkin.folderList.cells[index] as DirectFolderItem).ShowSelected = true;
-			var picinfo:PicInfoVo =  uiSkin.folderList.array[index];
+//			for each(var item:DirectFolderItem in uiSkin.folderList.cells)
+//			{
+//				item.ShowSelected = item.directData == uiSkin.folderList.array[index];
+//			}
+//			//(uiSkin.folderList.cells[index] as DirectFolderItem).ShowSelected = true;
+//			var picinfo:PicInfoVo =  uiSkin.folderList.array[index];
 			//curDirect = picinfo.parentDirect + picinfo.directName + "|";
-			DirectoryFileModel.instance.curSelectDir = picinfo;
-			
-			directTree = [];
-			directTree.push(DirectoryFileModel.instance.curSelectDir);
-			
-			
-			updateCurDirectLabel();
-			getFileList();
+//			DirectoryFileModel.instance.curSelectDir = picinfo;
+//			
+//			directTree = [];
+//			directTree.push(DirectoryFileModel.instance.curSelectDir);
+//			
+//			
+//			updateCurDirectLabel();
+//			getFileList();
 			
 		}
 		
@@ -204,6 +222,17 @@ package script.order
 			updateCurDirectLabel();
 			getFileList();
 		}
+		
+		private function backToRootDir():void
+		{
+			if(directTree.length <= 0)
+				return;
+			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
+			directTree = [];
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
+			updateCurDirectLabel();
+		}
+		
 		private function updateCurDirectLabel():void
 		{
 			this.uiSkin.flder0.visible = false;

@@ -42,8 +42,9 @@ package script.usercenter
 
 		}
 		
-		private function confirmDelete():void
+		private function confirmDelete(result:Boolean):void
 		{
+			if(result)
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,delMyAddressBack,"opt=delete&id=" + addvo.id,"post");
 
 		}

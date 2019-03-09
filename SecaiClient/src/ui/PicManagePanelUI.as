@@ -8,9 +8,7 @@ package ui {
 
 	public class PicManagePanelUI extends View {
 		public var firstpage:Text;
-		public var btnNewDir:Button;
 		public var btnUploadPic:Button;
-		public var folderList:List;
 		public var btnNewFolder:Button;
 		public var flder0:Label;
 		public var flder1:Label;
@@ -23,6 +21,9 @@ package ui {
 		public var input_folename:TextInput;
 		public var btnSureCreate:Button;
 		public var btnCloseInput:Button;
+		public var btnroot:Label;
+		public var searchInput:TextInput;
+		public var filetypeRadio:RadioGroup;
 
 		override protected function createChildren():void {
 			super.createChildren();

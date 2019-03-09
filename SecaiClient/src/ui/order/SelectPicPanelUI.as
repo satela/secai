@@ -6,7 +6,6 @@ package ui.order {
 	import script.order.SelectPicControl;
 
 	public class SelectPicPanelUI extends View {
-		public var folderList:List;
 		public var flder0:Label;
 		public var flder1:Label;
 		public var flder2:Label;
@@ -15,6 +14,8 @@ package ui.order {
 		public var btnok:Button;
 		public var picList:List;
 		public var btncancel:Button;
+		public var searchInput:TextInput;
+		public var btnroot:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

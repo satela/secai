@@ -14,7 +14,7 @@
    <item name="PaintOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/UserMainPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/EnterPrizeInfoPane.scene" props="" ifExport="分离模式" aName=""/>
-   <item name="picManager/PicCheckPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="picManager/PicCheckPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="PopUpDialog.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/OrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/PartsItem.scene" props="" ifExport="内嵌模式" aName=""/>

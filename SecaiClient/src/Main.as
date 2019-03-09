@@ -36,7 +36,7 @@
 			Laya.stage.scaleMode = Stage.SCALE_NOSCALE; // "noscale";//GameConfig.scaleMode;
 			Laya.stage.screenMode = GameConfig.screenMode;
 			Laya.stage.alignV = GameConfig.alignV;
-			Laya.stage.alignH = GameConfig.alignH;
+			Laya.stage.alignH = "center";//GameConfig.alignH;
 			//兼容微信不支持加载scene后缀场景
 			URL.exportSceneToJson = GameConfig.exportSceneToJson;
 			

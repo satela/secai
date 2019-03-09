@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":19,
-    "selecteID":25,
+    "selectedBox":2,
+    "selecteID":3,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
@@ -32,7 +32,7 @@
             "x":15,
             "type":"Panel",
             "searchKey":"Panel,panel_main",
-            "props":{"y":0,"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
+            "props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1800},
             "nodeParent":2,
             "label":"panel_main",
             "isOpen":true,
@@ -139,7 +139,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":250,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0},
+                    "props":{"y":250,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5"},
                     "nodeParent":3,
                     "label":"Image",
                     "isDirectory":false,
@@ -153,7 +153,7 @@
                     "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput",
-                    "props":{"y":138,"x":904,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24},
+                    "props":{"y":138,"x":1000,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24},
                     "nodeParent":3,
                     "label":"TextInput",
                     "isDirectory":false,
@@ -167,7 +167,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button",
-                    "props":{"y":138,"x":1104,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},
+                    "props":{"y":138,"x":1200,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},
                     "nodeParent":3,
                     "label":"Button",
                     "isDirectory":false,
@@ -181,7 +181,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnUserCenter",
-                    "props":{"y":139,"x":1281,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},
+                    "props":{"y":139,"x":1301,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},
                     "nodeParent":3,
                     "label":"btnUserCenter",
                     "isDirectory":false,
@@ -195,9 +195,10 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnBuyCar",
-                    "props":{"y":139,"x":1380,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},
+                    "props":{"y":139,"x":1401,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},
                     "nodeParent":3,
                     "label":"btnBuyCar",
+                    "isOpen":false,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -240,14 +241,13 @@
                     "props":{"y":1255,"x":320,"space":20,"align":"middle"},
                     "nodeParent":3,
                     "label":"HBox",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":19,
                     "child":[
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"y":0,"x":160,"width":150,"texture":"mainpage/lenovo.png","height":100},
@@ -261,7 +261,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"width":150,"texture":"mainpage/pantone.png","height":100},
@@ -275,7 +274,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"y":0,"x":320,"width":150,"texture":"mainpage/samsung.png","height":100},
@@ -289,7 +287,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"x":480,"width":150,"texture":"mainpage/epson.png","height":100},
@@ -303,7 +300,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"x":640,"width":150,"texture":"mainpage/colorture.png","height":100},
@@ -317,7 +313,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"x":800,"width":150,"texture":"mainpage/express.png","height":100},

@@ -9,10 +9,9 @@ package ui.picManager {
 		public var img:Image;
 		public var closeBtn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6},{"type":"Panel","props":{"var":"mainpanel","top":0,"right":0,"left":0,"bottom":100},"compId":7,"child":[{"type":"Image","props":{"y":571,"x":980,"width":1000,"var":"img","height":999,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
-			createView(uiView);
+			loadScene("picManager/PicCheckPanel");
 
 		}
 

@@ -1236,7 +1236,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/SelectTechPanel.scene";
+	GameConfig.startScene="order/SelectPicPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1948,7 +1948,8 @@ var DirectoryFileModel=(function(){
 		this.curFileList=[];
 		this.curSelectDir=null;
 		this.haselectPic={};
-		this.directoryList=[];
+		this.rootDir=null;
+		this.rootDir=new PicInfoVo({dname:"根目录",dpath:"",did:"0"},0);
 	}
 
 	__class(DirectoryFileModel,'model.picmanagerModel.DirectoryFileModel');
@@ -1959,6 +1960,10 @@ var DirectoryFileModel=(function(){
 		var dirList=dirInfo.dirs;
 		for(var i=0;i < dirList.length;i++){
 			this.topDirectList.push(new PicInfoVo(dirList[i],0));
+		};
+		var picList=dirInfo.files;
+		for(i=0;i < picList.length;i++){
+			this.topDirectList.push(new PicInfoVo(picList[i],1));
 		}
 	}
 
@@ -2129,7 +2134,7 @@ var Main=(function(){
 		Laya.stage.scaleMode="noscale";
 		Laya.stage.screenMode=GameConfig.screenMode;
 		Laya.stage.alignV=GameConfig.alignV;
-		Laya.stage.alignH=GameConfig.alignH;
+		Laya.stage.alignH="center";
 		URL.exportSceneToJson=GameConfig.exportSceneToJson;
 		if (GameConfig.debug || Utils.getQueryString("debug")=="true")Laya.enableDebugPanel();
 		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"])Laya["PhysicsDebugDraw"].enable();
@@ -26585,6 +26590,7 @@ var EventCenter=(function(_super){
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
 	EventCenter.UPDATE_LOADING_PROGRESS="UPDATE_LOADING_PROGRESS";
 	EventCenter.UPDATE_MYADDRESS_LIST="UPDATE_MYADDRESS_LIST";
+	EventCenter.CANCAEL_UPLOAD_ITEM="CANCAEL_UPLOAD_ITEM";
 	EventCenter.BROWER_WINDOW_RESIZE="BROWER_WINDOW_RESIZE";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
@@ -34453,21 +34459,15 @@ var SelectPicControl=(function(_super){
 		this.uiSkin=null;
 		this.directTree=[];
 		this.param=null;
+		this.curFileList=null;
 		SelectPicControl.__super.call(this);
 	}
 
 	__class(SelectPicControl,'script.order.SelectPicControl',_super);
 	var __proto=SelectPicControl.prototype;
 	__proto.onStart=function(){
-		var _$this=this;
 		this.uiSkin=this.owner;
 		this.directTree=[];
-		this.uiSkin.folderList.itemRender=DirectFolderItem;
-		this.uiSkin.folderList.vScrollBarSkin="";
-		this.uiSkin.folderList.selectEnable=true;
-		this.uiSkin.folderList.spaceY=2;
-		this.uiSkin.folderList.renderHandler=new Handler(this,this.updateDirectItem);
-		this.uiSkin.folderList.selectHandler=new Handler(this,this.onSlecteDirect);
 		this.uiSkin.picList.itemRender=PicInfoItem;
 		this.uiSkin.picList.vScrollBarSkin="";
 		this.uiSkin.picList.selectEnable=false;
@@ -34478,15 +34478,14 @@ var SelectPicControl=(function(_super){
 		this.uiSkin.flder2.visible=false;
 		for(var i=0;i < 3;i++)
 		this.uiSkin["flder"+i].on("click",this,this.onClickTopDirectLbl,[i]);
-		Laya.timer.once(10,this,function(){
-			_$this.uiSkin.folderList.array=[];
-			_$this.uiSkin.picList.array=[];
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
-		});
+		this.uiSkin.btnroot.on("click",this,this.backToRootDir);
+		this.uiSkin.picList.array=[];
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
 		this.uiSkin.htmltext.style.fontSize=20;
 		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelect);
+		this.uiSkin.searchInput.on("input",this,this.onSearchInput);
 		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
@@ -34528,18 +34527,12 @@ var SelectPicControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			DirectoryFileModel.instance.initTopDirectoryList(result);
-			this.uiSkin.folderList.array=DirectoryFileModel.instance.topDirectList;
-			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
-			if(DirectoryFileModel.instance.topDirectList.length > 0){
-				DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList [0];
-				this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-				this.updateCurDirectLabel();
-				(this.uiSkin.folderList.cells [0]).ShowSelected=true;
-				this.getFileList();
-			}
+			this.uiSkin.picList.array=DirectoryFileModel.instance.topDirectList;
+			this.curFileList=this.uiSkin.picList.array;
 		}
 	}
 
+	// }
 	__proto.getFileList=function(){
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
 	}
@@ -34549,6 +34542,18 @@ var SelectPicControl=(function(_super){
 		if(result.status==0){
 			DirectoryFileModel.instance.initCurDirFiles(result);
 			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+			this.curFileList=DirectoryFileModel.instance.curFileList;
+		}
+	}
+
+	__proto.onSearchInput=function(){
+		if(this.curFileList !=null){
+			var temparr=[];
+			for(var i=0;i < this.curFileList.length;i++){
+				if((this.curFileList[i] .directName).indexOf(this.uiSkin.searchInput.text)>=0)
+					temparr.push(this.curFileList[i]);
+			}
+			this.uiSkin.picList.array=temparr;
 		}
 	}
 
@@ -34558,20 +34563,8 @@ var SelectPicControl=(function(_super){
 		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
 	}
 
-	__proto.onSlecteDirect=function(index){
-		var item;
-		for(var $each_item in this.uiSkin.folderList.cells){
-			item=this.uiSkin.folderList.cells[$each_item];
-			item.ShowSelected=item.directData==this.uiSkin.folderList.array[index];
-		};
-		var picinfo=this.uiSkin.folderList.array[index];
-		DirectoryFileModel.instance.curSelectDir=picinfo;
-		this.directTree=[];
-		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-		this.updateCurDirectLabel();
-		this.getFileList();
-	}
-
+	__proto.onSlecteDirect=function(index){}
+	// getFileList();
 	__proto.onSelectChildFolder=function(filedata){
 		DirectoryFileModel.instance.curSelectDir=filedata;
 		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
@@ -34586,6 +34579,15 @@ var SelectPicControl=(function(_super){
 		this.directTree.splice(index+1,this.directTree.length-index-1);
 		this.updateCurDirectLabel();
 		this.getFileList();
+	}
+
+	__proto.backToRootDir=function(){
+		if(this.directTree.length <=0)
+			return;
+		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
+		this.directTree=[];
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
+		this.updateCurDirectLabel();
 	}
 
 	__proto.updateCurDirectLabel=function(){
@@ -34753,20 +34755,20 @@ var PicManagerControl=(function(_super){
 	function PicManagerControl(){
 		this.uiSkin=null;
 		this.createbox=null;
-		this.isCreateTopDir=true;
-		//是否创建一级目录
+		//private var isCreateTopDir:Boolean=true;//是否创建一级目录
 		this.directTree=[];
 		this.param=null;
+		this.fileListData=null;
+		this.file=null;
+		this.curFileList=null;
 		PicManagerControl.__super.call(this);
 	}
 
 	__class(PicManagerControl,'script.picUpload.PicManagerControl',_super);
 	var __proto=PicManagerControl.prototype;
 	__proto.onStart=function(){
-		var _$this=this;
 		this.directTree=[];
 		this.uiSkin=this.owner;
-		this.uiSkin.btnNewDir.on("click",this,this.onCreateNewDirect);
 		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
 		this.uiSkin.btnorder.on("click",this,this.onshowOrder);
 		this.createbox=this.uiSkin.boxNewFolder;
@@ -34776,12 +34778,6 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
 		this.uiSkin.input_folename.maxChars=10;
 		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
-		this.uiSkin.folderList.itemRender=DirectFolderItem;
-		this.uiSkin.folderList.vScrollBarSkin="";
-		this.uiSkin.folderList.selectEnable=true;
-		this.uiSkin.folderList.spaceY=2;
-		this.uiSkin.folderList.renderHandler=new Handler(this,this.updateDirectItem);
-		this.uiSkin.folderList.selectHandler=new Handler(this,this.onSlecteDirect);
 		this.uiSkin.picList.itemRender=PicInfoItem;
 		this.uiSkin.picList.vScrollBarSkin="";
 		this.uiSkin.picList.selectEnable=false;
@@ -34792,12 +34788,11 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.flder2.visible=false;
 		for(var i=0;i < 3;i++)
 		this.uiSkin["flder"+i].on("click",this,this.onClickTopDirectLbl,[i]);
+		this.uiSkin.btnroot.on("click",this,this.backToRootDir);
 		this.uiSkin.btnUploadPic.on("click",this,this.onShowUploadView);
-		Laya.timer.once(10,this,function(){
-			_$this.uiSkin.folderList.array=[];
-			_$this.uiSkin.picList.array=[];
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,_$this.onGetTopDirListBack,"path=0|","post");
-		});
+		this.uiSkin.picList.array=[];
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
+		this.initFileOpen();
 		this.uiSkin.htmltext.style.fontSize=20;
 		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>0</span>"+"<span color='#222222' size='20'>张图片</span>";
 		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
@@ -34805,9 +34800,31 @@ var PicManagerControl=(function(_super){
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
 		DirectoryFileModel.instance.haselectPic={};
+		this.uiSkin.searchInput.on("input",this,this.onSearchInput);
 		this.uiSkin.on("removed",this,this.onRemovedFromStage);
 	}
 
+	__proto.initFileOpen=function(){
+		var _$this=this;
+		this.file=Browser.document.createElement("input");
+		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:-248";
+		this.file.multiple="multiple";
+		this.file.accept=".jpg,.jpeg,.png,.tif";
+		this.file.type="file";
+		this.file.style.position="absolute";
+		this.file.style.zIndex=999;
+		Browser.document.body.appendChild(this.file);
+		this.file.onchange=function (e){
+			_$this.fileListData=[];
+			for(var i=0;i < _$this.file.files.length;i++){
+				_$this.file.files[i].progress=0;
+				_$this.fileListData.push(_$this.file.files[i]);
+			}
+			ViewManager.instance.openView("VIEW_MYPICPANEL",false,_$this.fileListData);
+		};
+	}
+
+	// }
 	__proto.onshowOrder=function(){
 		ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
 	}
@@ -34832,18 +34849,12 @@ var PicManagerControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			DirectoryFileModel.instance.initTopDirectoryList(result);
-			this.uiSkin.folderList.array=DirectoryFileModel.instance.topDirectList;
-			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
-			if(DirectoryFileModel.instance.topDirectList.length > 0){
-				DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList [0];
-				this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-				this.updateCurDirectLabel();
-				(this.uiSkin.folderList.cells [0]).ShowSelected=true;
-				this.getFileList();
-			}
+			this.uiSkin.picList.array=DirectoryFileModel.instance.topDirectList;
+			this.curFileList=DirectoryFileModel.instance.topDirectList;
 		}
 	}
 
+	// }
 	__proto.getFileList=function(){
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
 	}
@@ -34853,6 +34864,7 @@ var PicManagerControl=(function(_super){
 		if(result.status==0){
 			DirectoryFileModel.instance.initCurDirFiles(result);
 			this.uiSkin.picList.array=DirectoryFileModel.instance.curFileList;
+			this.curFileList=DirectoryFileModel.instance.curFileList;
 		}
 	}
 
@@ -34860,12 +34872,25 @@ var PicManagerControl=(function(_super){
 		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 	}
 
+	__proto.onSearchInput=function(){
+		if(this.curFileList !=null){
+			var temparr=[];
+			for(var i=0;i < this.curFileList.length;i++){
+				if((this.curFileList[i] .directName).indexOf(this.uiSkin.searchInput.text)>=0)
+					temparr.push(this.curFileList[i]);
+			}
+			this.uiSkin.picList.array=temparr;
+		}
+	}
+
 	__proto.onDestroy=function(){
 		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		Browser.document.body.removeChild(this.file);
 	}
 
+	//添加到舞台
 	__proto.onRemovedFromStage=function(){
 		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
@@ -34877,15 +34902,21 @@ var PicManagerControl=(function(_super){
 			ViewManager.showAlert("请先创建一个目录");
 			return;
 		}
-		ViewManager.instance.openView("VIEW_MYPICPANEL");
+		this.file.click();
+		this.file.value;
 	}
 
 	__proto.onSureCreeate=function(){
 		if(this.uiSkin.input_folename.text=="")
 			return;
 		else{
-			if(!this.isCreateTopDir)
+			if(this.directTree.length > 0){
+				if(DirectoryFileModel.instance.curSelectDir==null){
+					ViewManager.showAlert("请选择一个父目录");
+					return;
+				}
 				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&name="+this.uiSkin.input_folename.text,"post");
+			}
 			else
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/create?",this,this.onCreateDirBack,"path=0|"+"&name="+this.uiSkin.input_folename.text,"post");
 			this.createbox.visible=false;
@@ -34895,42 +34926,29 @@ var PicManagerControl=(function(_super){
 	__proto.onCreateDirBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
-			if(this.isCreateTopDir){
-				var picinfo=new PicInfoVo(result.dir,0);
-				this.uiSkin.folderList.addItem(picinfo);
-				if(DirectoryFileModel.instance.topDirectList.length==1){
-					(this.uiSkin.folderList.cells [0]).ShowSelected=true;
-					DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.topDirectList[0];
-					this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-					this.updateCurDirectLabel();
-				}
-			}
-			else{
-				picinfo=new PicInfoVo(result.dir,0);
-				this.uiSkin.picList.addItem(picinfo);
-			}
+			var picinfo=new PicInfoVo(result.dir,0);
+			this.uiSkin.picList.addItem(picinfo);
+			this.curFileList=this.uiSkin.picList.array;
 		}
 	}
 
-	__proto.onSlecteDirect=function(index){
-		var item;
-		for(var $each_item in this.uiSkin.folderList.cells){
-			item=this.uiSkin.folderList.cells[$each_item];
-			item.ShowSelected=item.directData==this.uiSkin.folderList.array[index];
-		};
-		var picinfo=this.uiSkin.folderList.array[index];
-		DirectoryFileModel.instance.curSelectDir=picinfo;
-		this.directTree=[];
-		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
-		this.updateCurDirectLabel();
-		this.getFileList();
-	}
-
+	// }
+	__proto.onSlecteDirect=function(index){}
+	// getFileList();
 	__proto.onSelectChildFolder=function(filedata){
 		DirectoryFileModel.instance.curSelectDir=filedata;
 		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
 		this.updateCurDirectLabel();
 		this.getFileList();
+	}
+
+	__proto.backToRootDir=function(){
+		if(this.directTree.length <=0)
+			return;
+		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
+		this.directTree=[];
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
+		this.updateCurDirectLabel();
 	}
 
 	__proto.onClickTopDirectLbl=function(index){
@@ -34967,12 +34985,10 @@ var PicManagerControl=(function(_super){
 	}
 
 	__proto.onCreateNewDirect=function(){
-		this.isCreateTopDir=true;
 		this.createbox.visible=true;
 	}
 
 	__proto.onCreateNewFolder=function(){
-		this.isCreateTopDir=false;
 		this.createbox.visible=true;
 	}
 
@@ -35416,7 +35432,6 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.btn_uplicense.on("click",this,this.onUploadlicense);
 		Browser.window.uploadApp=this;
 		this.initFileOpen();
-		Laya.timer.frameLoop(10,this,this.updateFileOpenPos);
 		if(!ChinaAreaModel.hasInit){
 			WaitingRespond.instance.showWaitingView(500000);
 			Laya.loader.load([{url:"res/xml/addr.xml",type:"xml"}],Handler.create(this,this.initView),null,"atlas");
@@ -35431,17 +35446,10 @@ var EnterPrizeInfoControl=(function(_super){
 		this.selectProvince(0);
 	}
 
-	__proto.updateFileOpenPos=function(){
-		if((this.uiSkin.parent.parent.parent).vScrollBar)
-			console.log("skinpos:"+(this.uiSkin.parent.parent.parent).y+","+(this.uiSkin.parent.parent.parent).vScrollBar.value);
-		if(this.file)
-			this.file.style.top=(510-(this.uiSkin.parent.parent.parent).vScrollBar.value).toString()+"px";
-	}
-
 	__proto.initFileOpen=function(){
 		var _$this=this;
 		this.file=Browser.document.createElement("input");
-		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:1080px;top:510";
+		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:1080px;top:-210";
 		this.file.accept=".jpg,.jpeg,.png,.tif";
 		this.file.type="file";
 		this.file.style.position="absolute";
@@ -35449,17 +35457,21 @@ var EnterPrizeInfoControl=(function(_super){
 		Browser.document.body.appendChild(this.file);
 		this.file.onchange=function (e){
 			_$this.curYyzzFile=_$this.file.files[0];
-			_$this.uiSkin.txt_license.text=_$this.curYyzzFile.name;
+			if(_$this.curYyzzFile !=null)
+				_$this.uiSkin.txt_license.text=_$this.curYyzzFile.name;
 		};
 	}
 
 	__proto.onDestroy=function(){
 		Browser.document.body.removeChild(this.file);
-		Laya.timer.clear(this,this.updateFileOpenPos);
 	}
 
-	__proto.onUploadlicense=function(){}
-	//ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,{type:"License",path:"/company/licence"});
+	//添加到舞台
+	__proto.onUploadlicense=function(){
+		this.file.click();
+		this.file.value;
+	}
+
 	__proto.onSaveCompanyInfo=function(){
 		if(this.curYyzzFile==null){
 			ViewManager.showAlert("请选择营业执照");
@@ -35794,6 +35806,7 @@ var ResetPwdControl=(function(_super){
 var SelectAddressControl=(function(_super){
 	function SelectAddressControl(){
 		this.uiSkin=null;
+		this.tempaddress=null;
 		SelectAddressControl.__super.call(this);
 	}
 
@@ -35810,9 +35823,9 @@ var SelectAddressControl=(function(_super){
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
 		this.uiSkin.list_address.array=Userdata.instance.addressList;
-		PaintOrderModel.instance.selectAddress=null;
 	}
 
+	//PaintOrderModel.instance.selectAddress=null;
 	__proto.onSlecteAddress=function(index){
 		var item;
 		for(var $each_item in this.uiSkin.list_address.cells){
@@ -35820,7 +35833,7 @@ var SelectAddressControl=(function(_super){
 			item.ShowSelected=item.address==this.uiSkin.list_address.array[index];
 		}
 		(this.uiSkin.list_address.cells [index]).ShowSelected=true;
-		PaintOrderModel.instance.selectAddress=this.uiSkin.list_address.array[index];;
+		this.tempaddress=this.uiSkin.list_address.array[index];;
 	}
 
 	__proto.updateAddressItem=function(cell){
@@ -35828,8 +35841,10 @@ var SelectAddressControl=(function(_super){
 	}
 
 	__proto.onConfirmSelectAddress=function(index){
-		if(PaintOrderModel.instance.selectAddress !=null)
+		if(this.tempaddress !=null){
+			PaintOrderModel.instance.selectAddress=this.tempaddress;
 			EventCenter.instance.event("SELECT_ORDER_ADDRESS");
+		}
 		this.onCloseView();
 	}
 
@@ -36104,24 +36119,34 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.btnClose.on("click",this,this.onCloseScene);
 		this.uiSkin.btnBegin.on("click",this,this.onClickBegin);
+		this.uiSkin.btnOpenFile.on("click",this,this.onClickOpenFile);
 		this.uiSkin.bgimg.alpha=0.7;
 		this.uiSkin.fileList.itemRender=FileUpLoadItem;
 		this.uiSkin.fileList.vScrollBarSkin="";
 		this.uiSkin.fileList.selectEnable=false;
 		this.uiSkin.fileList.spaceY=4;
 		this.uiSkin.fileList.renderHandler=new Handler(this,this.updateFileItem);
-		this.uiSkin.fileList.array=[];
 		this.initFileOpen();
 		Browser.window.uploadApp=this;
+		if(this.param !=null && (this.param)!=null){
+			this.uiSkin.fileList.array=this.param;
+			this.fileListData=this.param;
+		}
+		else
+		this.uiSkin.fileList.array=[];
+		EventCenter.instance.on("CANCAEL_UPLOAD_ITEM",this,this.onDeleteItem);
+	}
+
+	__proto.onClickOpenFile=function(){
+		Laya.timer.clearAll(this);
+		this.file.click();
+		this.file.value;
 	}
 
 	__proto.initFileOpen=function(){
 		var _$this=this;
 		this.file=Browser.document.createElement("input");
-		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:48";
-		if(this.param && this.param.type=="License")
-			this.file.multiple="";
-		else
+		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:-248";
 		this.file.multiple="multiple";
 		this.file.accept=".jpg,.jpeg,.png,.tif";
 		this.file.type="file";
@@ -36136,6 +36161,7 @@ var UpLoadAndOrderContrl=(function(_super){
 			_$this.curUploadIndex=0;
 			_$this.fileListData=[];
 			for(var i=0;i < _$this.file.files.length;i++){
+				_$this.file.files[i].progress=0;
 				_$this.fileListData.push(_$this.file.files[i]);
 			}
 			_$this.uiSkin.fileList.array=_$this.fileListData;
@@ -36156,11 +36182,14 @@ var UpLoadAndOrderContrl=(function(_super){
 		}
 		else{
 			this.isUploading=false;
+			Laya.timer.once(5000,this,this.onCloseScene);
 		}
 	}
 
 	__proto.onCompleteUpload=function(e){
-		(this.uiSkin.fileList.cells [this.curUploadIndex]).updateProgress("100");
+		if(this.fileListData[this.curUploadIndex])
+			this.fileListData[this.curUploadIndex].progress=100;
+		this.updateProgress();
 		this.curUploadIndex++;
 		this.onBeginUpload();
 	}
@@ -36168,17 +36197,42 @@ var UpLoadAndOrderContrl=(function(_super){
 	__proto.onProgressHandler=function(e){
 		if(Number(e)>=100)
 			e="99";
-		(this.uiSkin.fileList.cells [this.curUploadIndex]).updateProgress(e.toString());
-		console.log("up progress"+JSON.stringify(e));
+		if(this.fileListData[this.curUploadIndex])
+			this.fileListData[this.curUploadIndex].progress=Number(e);
+		this.updateProgress();
+	}
+
+	//trace("up progress"+JSON.stringify(e));
+	__proto.updateProgress=function(){
+		var cells=this.uiSkin.fileList.cells;
+		for(var i=0;i < cells.length;i++){
+			if(cells [i] !=null && (cells [i]).fileobj==this.fileListData[this.curUploadIndex]){
+				(cells [i]).updateProgress();
+				break ;
+			}
+		}
 	}
 
 	__proto.updateFileItem=function(cell){
 		cell.setData(cell.dataSource);
 	}
 
+	__proto.onDeleteItem=function(delitem){
+		if(delitem.fileobj.progress >=99)
+			return;
+		var index=this.fileListData.indexOf(delitem.fileobj);
+		if(index==this.curUploadIndex){
+			Browser.window.cancelUpload();
+			if(this.isUploading)
+				this.onBeginUpload();
+		}
+		this.uiSkin.fileList.deleteItem(index);
+	}
+
 	__proto.onCloseScene=function(){
 		Browser.window.uploadApp=null;
 		EventCenter.instance.event("UPDATE_FILE_LIST");
+		EventCenter.instance.off("CANCAEL_UPLOAD_ITEM",this,this.onDeleteItem);
 		ViewManager.instance.closeView("VIEW_MYPICPANEL");
 		Browser.document.body.removeChild(this.file);
 	}
@@ -42574,7 +42628,7 @@ var LoginViewUI=(function(_super){
 		this.createView(LoginViewUI.uiView);
 	}
 
-	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":4,"child":[{"type":"Label","props":{"x":30,"width":548,"top":20,"text":"欢迎来到 色彩飞扬-广告全产业链生态平台 联系方式：4006055998","styleSkin":"comp/label.png","height":18,"fontSize":18,"align":"left"},"compId":5},{"type":"Label","props":{"y":18,"x":1016,"width":139,"var":"txt_login","text":"登陆","mouseEnabled":true,"height":20,"fontSize":20,"align":"right"},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1166.1953125,"var":"txt_reg","text":"注册","mouseEnabled":true,"fontSize":20},"compId":10}]},{"type":"Sprite","props":{"y":63,"x":320,"texture":"mainpage/logo.png","scaleY":0.9,"scaleX":0.9},"compId":11},{"type":"Sprite","props":{"y":311,"x":320,"width":1280,"texture":"mainpage/bg.jpg"},"compId":12},{"type":"Image","props":{"y":250,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0},"compId":38},{"type":"TextInput","props":{"y":138,"x":904,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":13},{"type":"Button","props":{"y":138,"x":1104,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},"compId":14},{"type":"Button","props":{"y":139,"x":1281,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},"compId":15},{"type":"Button","props":{"y":139,"x":1380,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},"compId":16},{"type":"Sprite","props":{"y":991,"x":320,"texture":"mainpage/flow.jpg"},"compId":17},{"type":"Label","props":{"y":1219,"x":288,"text":"合作伙伴","fontSize":20,"font":"Arial","color":"#211e1e"},"compId":18},{"type":"HBox","props":{"y":1255,"x":320,"space":20,"align":"middle"},"compId":19,"child":[{"type":"Sprite","props":{"y":0,"x":160,"width":150,"texture":"mainpage/lenovo.png","height":100},"compId":20},{"type":"Sprite","props":{"width":150,"texture":"mainpage/pantone.png","height":100},"compId":21},{"type":"Sprite","props":{"y":0,"x":320,"width":150,"texture":"mainpage/samsung.png","height":100},"compId":22},{"type":"Sprite","props":{"x":480,"width":150,"texture":"mainpage/epson.png","height":100},"compId":23},{"type":"Sprite","props":{"x":640,"width":150,"texture":"mainpage/colorture.png","height":100},"compId":24},{"type":"Sprite","props":{"x":800,"width":150,"texture":"mainpage/express.png","height":100},"compId":25}]},{"type":"Button","props":{"y":252,"x":368,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":31},{"type":"Button","props":{"y":252,"x":548,"width":176,"var":"btnUpload","stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"上传下单","height":54},"compId":32},{"type":"Button","props":{"y":252,"x":725,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":33},{"type":"Button","props":{"y":252,"x":904,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":34}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27}],"loadList":["commers/whitebg.png","comp/label.png","mainpage/logo.png","mainpage/bg.jpg","commers/blackbg.png","comp/textinput.png","comp/button.png","mainpage/flow.jpg","mainpage/lenovo.png","mainpage/pantone.png","mainpage/samsung.png","mainpage/epson.png","mainpage/colorture.png","mainpage/express.png","commers/Createselect.png"],"loadList3D":[]};
+	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1800},"compId":3,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":4,"child":[{"type":"Label","props":{"x":30,"width":548,"top":20,"text":"欢迎来到 色彩飞扬-广告全产业链生态平台 联系方式：4006055998","styleSkin":"comp/label.png","height":18,"fontSize":18,"align":"left"},"compId":5},{"type":"Label","props":{"y":18,"x":1016,"width":139,"var":"txt_login","text":"登陆","mouseEnabled":true,"height":20,"fontSize":20,"align":"right"},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1166.1953125,"var":"txt_reg","text":"注册","mouseEnabled":true,"fontSize":20},"compId":10}]},{"type":"Sprite","props":{"y":63,"x":320,"texture":"mainpage/logo.png","scaleY":0.9,"scaleX":0.9},"compId":11},{"type":"Sprite","props":{"y":311,"x":320,"width":1280,"texture":"mainpage/bg.jpg"},"compId":12},{"type":"Image","props":{"y":250,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5"},"compId":38},{"type":"TextInput","props":{"y":138,"x":1000,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":13},{"type":"Button","props":{"y":138,"x":1200,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},"compId":14},{"type":"Button","props":{"y":139,"x":1301,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},"compId":15},{"type":"Button","props":{"y":139,"x":1401,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},"compId":16},{"type":"Sprite","props":{"y":991,"x":320,"texture":"mainpage/flow.jpg"},"compId":17},{"type":"Label","props":{"y":1219,"x":288,"text":"合作伙伴","fontSize":20,"font":"Arial","color":"#211e1e"},"compId":18},{"type":"HBox","props":{"y":1255,"x":320,"space":20,"align":"middle"},"compId":19,"child":[{"type":"Sprite","props":{"y":0,"x":160,"width":150,"texture":"mainpage/lenovo.png","height":100},"compId":20},{"type":"Sprite","props":{"width":150,"texture":"mainpage/pantone.png","height":100},"compId":21},{"type":"Sprite","props":{"y":0,"x":320,"width":150,"texture":"mainpage/samsung.png","height":100},"compId":22},{"type":"Sprite","props":{"x":480,"width":150,"texture":"mainpage/epson.png","height":100},"compId":23},{"type":"Sprite","props":{"x":640,"width":150,"texture":"mainpage/colorture.png","height":100},"compId":24},{"type":"Sprite","props":{"x":800,"width":150,"texture":"mainpage/express.png","height":100},"compId":25}]},{"type":"Button","props":{"y":252,"x":368,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":31},{"type":"Button","props":{"y":252,"x":548,"width":176,"var":"btnUpload","stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"上传下单","height":54},"compId":32},{"type":"Button","props":{"y":252,"x":725,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":33},{"type":"Button","props":{"y":252,"x":904,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":34}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27}],"loadList":["commers/whitebg.png","comp/label.png","mainpage/logo.png","mainpage/bg.jpg","commers/blackbg.png","comp/textinput.png","comp/button.png","mainpage/flow.jpg","mainpage/lenovo.png","mainpage/pantone.png","mainpage/samsung.png","mainpage/epson.png","mainpage/colorture.png","mainpage/express.png","commers/Createselect.png"],"loadList3D":[]};
 	return LoginViewUI;
 })(Scene)
 
@@ -48683,7 +48737,6 @@ var LogPanelUI=(function(_super){
 //class ui.order.SelectPicPanelUI extends laya.ui.View
 var SelectPicPanelUI=(function(_super){
 	function SelectPicPanelUI(){
-		this.folderList=null;
 		this.flder0=null;
 		this.flder1=null;
 		this.flder2=null;
@@ -48692,6 +48745,8 @@ var SelectPicPanelUI=(function(_super){
 		this.btnok=null;
 		this.picList=null;
 		this.btncancel=null;
+		this.searchInput=null;
+		this.btnroot=null;
 		SelectPicPanelUI.__super.call(this);
 	}
 
@@ -49068,9 +49123,7 @@ var TechBoxItemUI=(function(_super){
 var PicManagePanelUI=(function(_super){
 	function PicManagePanelUI(){
 		this.firstpage=null;
-		this.btnNewDir=null;
 		this.btnUploadPic=null;
-		this.folderList=null;
 		this.btnNewFolder=null;
 		this.flder0=null;
 		this.flder1=null;
@@ -49083,6 +49136,9 @@ var PicManagePanelUI=(function(_super){
 		this.input_folename=null;
 		this.btnSureCreate=null;
 		this.btnCloseInput=null;
+		this.btnroot=null;
+		this.searchInput=null;
+		this.filetypeRadio=null;
 		PicManagePanelUI.__super.call(this);
 	}
 
@@ -49147,6 +49203,7 @@ var UpLoadPanelUI=(function(_super){
 	function UpLoadPanelUI(){
 		this.bgimg=null;
 		this.btnClose=null;
+		this.btnOpenFile=null;
 		this.btnBegin=null;
 		this.fileList=null;
 		UpLoadPanelUI.__super.call(this);
@@ -49170,6 +49227,7 @@ var UpLoadItemUI=(function(_super){
 		this.prgbar=null;
 		this.prog=null;
 		this.filesize=null;
+		this.btncancel=null;
 		UpLoadItemUI.__super.call(this);
 	}
 
@@ -49180,7 +49238,7 @@ var UpLoadItemUI=(function(_super){
 		this.createView(UpLoadItemUI.uiView);
 	}
 
-	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7}],"loadList":["comp/progress.png"],"loadList3D":[]};
+	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7},{"type":"Button","props":{"y":9,"x":442,"width":65,"var":"btncancel","skin":"comp/button.png","label":"删除","height":23},"compId":9}],"loadList":["comp/progress.png","comp/button.png"],"loadList3D":[]};
 	return UpLoadItemUI;
 })(View)
 
@@ -49280,10 +49338,9 @@ var PicCheckPanelUI=(function(_super){
 	var __proto=PicCheckPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(PicCheckPanelUI.uiView);
+		this.loadScene("picManager/PicCheckPanel");
 	}
 
-	PicCheckPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"top":0,"skin":"commers/blackbg.png","right":0,"left":0,"bottom":0,"alpha":0.8,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Script","props":{"runtime":"script.picUpload.PictureCheckControl"},"compId":6},{"type":"Panel","props":{"var":"mainpanel","top":0,"right":0,"left":0,"bottom":100},"compId":7,"child":[{"type":"Image","props":{"y":571,"x":980,"width":1000,"var":"img","height":999,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Button","props":{"y":13,"x":1570,"width":75,"var":"closeBtn","skin":"comp/button.png","labelSize":24,"label":"X","height":43},"compId":5}],"loadList":["commers/blackbg.png","comp/button.png"],"loadList3D":[]};
 	return PicCheckPanelUI;
 })(View)
 
@@ -53832,8 +53889,9 @@ var CompanyAddressItem=(function(_super){
 		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该地址吗？",caller:this,callback:this.confirmDelete});
 	}
 
-	__proto.confirmDelete=function(){
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.delMyAddressBack,"opt=delete&id="+this.addvo.id,"post");
+	__proto.confirmDelete=function(result){
+		if(result)
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.delMyAddressBack,"opt=delete&id="+this.addvo.id,"post");
 	}
 
 	__proto.delMyAddressBack=function(data){
@@ -54193,12 +54251,14 @@ var MaterialItem=(function(_super){
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI
 var FileUpLoadItem=(function(_super){
 	function FileUpLoadItem(){
+		this.fileobj=null;
 		FileUpLoadItem.__super.call(this);
 	}
 
 	__class(FileUpLoadItem,'script.picUpload.FileUpLoadItem',_super);
 	var __proto=FileUpLoadItem.prototype;
 	__proto.setData=function(filedata){
+		this.fileobj=filedata;
 		this.filename.text=filedata.name;
 		this.prog.text="0%";
 		var mm=Math.floor(filedata.size/(1024*1024));
@@ -54209,14 +54269,20 @@ var FileUpLoadItem=(function(_super){
 		sizestr=((filedata.size/1024).toFixed(2)).toString()+"k";
 		this.prgbar.value=0;
 		this.filesize.text=sizestr;
+		this.btncancel.on("click",this,this.onCancelUpload);
+		this.updateProgress();
 	}
 
-	__proto.updateProgress=function(progs){
-		var pp=Number(progs);
+	__proto.onCancelUpload=function(){
+		EventCenter.instance.event("CANCAEL_UPLOAD_ITEM",this);
+	}
+
+	__proto.updateProgress=function(){
+		var pp=Number(this.fileobj.progress);
 		if(pp > 100)
 			pp=100;
 		this.prgbar.value=pp/100;
-		this.prog.text=progs+"%";
+		this.prog.text=pp+"%";
 	}
 
 	return FileUpLoadItem;

@@ -18,6 +18,7 @@ package script.order
 	{
 		private var uiSkin:SelectAddressPanelUI;
 		
+		private var tempaddress:AddressVo;
 		public function SelectAddressControl()
 		{
 			super();
@@ -40,7 +41,7 @@ package script.order
 			
 
 			uiSkin.list_address.array = Userdata.instance.addressList;
-			PaintOrderModel.instance.selectAddress = null;
+			//PaintOrderModel.instance.selectAddress = null;
 		}
 		
 		private function onSlecteAddress(index:int):void
@@ -51,7 +52,7 @@ package script.order
 				item.ShowSelected = item.address == uiSkin.list_address.array[index];
 			}
 			(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
-			PaintOrderModel.instance.selectAddress = uiSkin.list_address.array[index];;
+			tempaddress = uiSkin.list_address.array[index];;
 		}
 		
 		private function updateAddressItem(cell:SelAddressItem):void
@@ -61,8 +62,11 @@ package script.order
 		private function onConfirmSelectAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
-			if(PaintOrderModel.instance.selectAddress != null)
+			if(tempaddress != null)
+			{
+				PaintOrderModel.instance.selectAddress = tempaddress;
 				EventCenter.instance.event(EventCenter.SELECT_ORDER_ADDRESS);
+			}
 			onCloseView();
 		}
 		

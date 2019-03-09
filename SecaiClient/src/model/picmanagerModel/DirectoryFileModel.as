@@ -13,6 +13,9 @@ package model.picmanagerModel
 		public var curSelectDir:PicInfoVo;
 		
 		public var haselectPic:Object = {};
+		
+		public var rootDir:PicInfoVo;
+		
 		public static function get instance():DirectoryFileModel
 		{
 			if(_instance == null)
@@ -22,7 +25,7 @@ package model.picmanagerModel
 		
 		public function DirectoryFileModel()
 		{
-			directoryList = [];
+			rootDir = new PicInfoVo({dname:"根目录",dpath:"",did:"0"},0);
 		}
 		
 		//一级目录
@@ -33,6 +36,11 @@ package model.picmanagerModel
 			for(var i:int=0;i < dirList.length;i++)
 			{
 				topDirectList.push(new PicInfoVo(dirList[i],0));
+			}
+			var picList:Array = dirInfo.files;
+			for( i=0;i < picList.length;i++)
+			{
+				topDirectList.push(new PicInfoVo(picList[i],1));
 			}
 		}
 		

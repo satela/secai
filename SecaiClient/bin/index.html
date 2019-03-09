@@ -69,7 +69,7 @@
             
 		return res;
 		}
-		
+		var xhr;
 		 function uploadPic(fileobj) {
                      
             //原生ajax实现文件上传
@@ -82,7 +82,7 @@
           //  }
 
             //得到xhr对象
-            var xhr = null;
+             xhr = null;
             if (XMLHttpRequest) {
                 xhr = new XMLHttpRequest();
             } else {
@@ -110,7 +110,14 @@
 			
             xhr.send(formData);
         }
+		function cancelUpload()
+		{
+			if(xhr != null)
+			{
+				xhr.abort();
+			}
 		
+		}
 		function createGroup(fileobj) {
                      
             //原生ajax实现文件上传
