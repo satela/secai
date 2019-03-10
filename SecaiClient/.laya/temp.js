@@ -1236,7 +1236,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/SelectPicPanel.scene";
+	GameConfig.startScene="PaintOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -2187,9 +2187,9 @@ var FactoryInfoVo=(function(){
 //class model.orderModel.DeliveryTypeVo
 var DeliveryTypeVo=(function(){
 	function DeliveryTypeVo(data){
-		this.delivery_Code="";
+		this.delivery_code="";
 		// 配送方式编码
-		this.delivery_Name="";
+		this.delivery_name="";
 		// 配送方式名称
 		this.start_weight=0;
 		// 首重(kg)
@@ -2227,7 +2227,7 @@ var DeliveryTypeVo=(function(){
 	__class(DeliveryTypeVo,'model.orderModel.DeliveryTypeVo');
 	var __proto=DeliveryTypeVo.prototype;
 	__getset(0,__proto,'deliveryDesc',function(){
-		return this.deliverynet_name+"，首重:"+this.start_weight+"kg,"+"续重"+this.post_weight+"kg，"+"首重价格:"+this.firstweight_price+"元/kg，"+"续重价格:"+this.addedweight_price+"元/kg。";
+		return this.deliverynet_name+"，首重:"+this.start_weight+"kg,"+"续重"+this.post_weight+"kg，"+"首重价格:"+this.firstweight_price+"元/kg，"+"续重价格:"+this.addedweight_price+"元/kg。"+this.delivery_name;
 	});
 
 	return DeliveryTypeVo;
@@ -2265,6 +2265,7 @@ var PaintOrderModel=(function(){
 		this.selectDelivery=null;
 		//选择的配送方式
 		this.curSelectProcList=null;
+		this.batchChangeMatItems=null;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -26587,6 +26588,8 @@ var EventCenter=(function(_super){
 	EventCenter.SELECT_DELIVERY_TYPE="SELECT_DELIVERY_TYPE";
 	EventCenter.ADD_PIC_FOR_ORDER="ADD_PIC_FOR_ORDER";
 	EventCenter.DELETE_PIC_ORDER="DELETE_PIC_ORDER";
+	EventCenter.SHOW_SELECT_TECH="SHOW_SELECT_TECH";
+	EventCenter.UPDATE_ORDER_ITEM_TECH="UPDATE_ORDER_ITEM_TECH";
 	EventCenter.ADJUST_PIC_ORDER_TECH="ADJUST_PIC_ORDER_TECH";
 	EventCenter.UPDATE_LOADING_PROGRESS="UPDATE_LOADING_PROGRESS";
 	EventCenter.UPDATE_MYADDRESS_LIST="UPDATE_MYADDRESS_LIST";
@@ -35140,14 +35143,16 @@ var PaintOrderControl=(function(_super){
 		}
 		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,totalheight-this.uiSkin.ordervbox.space);
 		DirectoryFileModel.instance.haselectPic={};
-		this.uiSkin.changemyadd.underline=true;
-		this.uiSkin.changemyadd.underlineColor="#222222";
-		this.uiSkin.changefactory.underline=true;
-		this.uiSkin.changefactory.underlineColor="#222222";
+		this.uiSkin.myaddresstxt.underline=true;
+		this.uiSkin.myaddresstxt.underlineColor="#222222";
+		this.uiSkin.factorytxt.underline=true;
+		this.uiSkin.factorytxt.underlineColor="#222222";
 		this.uiSkin.qqContact.on("click",this,this.onClickOpenQQ);
-		this.uiSkin.changemyadd.on("click",this,this.onShowSelectAddress);
-		this.uiSkin.changefactory.on("click",this,this.onShowSelectFactory);
+		this.uiSkin.myaddresstxt.on("click",this,this.onShowSelectAddress);
+		this.uiSkin.factorytxt.on("click",this,this.onShowSelectFactory);
 		this.uiSkin.deliverybtn.on("click",this,this.onShowSelectDelivery);
+		this.uiSkin.batchChange.on("click",this,this.onBatchChangeMaterial);
+		this.uiSkin.selectAll.on("click",this,this.onSelectAll);
 		EventCenter.instance.on("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
 		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
 		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
@@ -35155,13 +35160,30 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
 		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.on("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
 		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
+		this.resetOrderInfo();
 		if(Userdata.instance.getDefaultAddress()!=null){
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid,this,this.onGetOutPutAddress,null,null);
 			this.uiSkin.myaddresstxt.text=Userdata.instance.getDefaultAddress().addressDetail;
 			PaintOrderModel.instance.selectAddress=Userdata.instance.getDefaultAddress();
 		}
+	}
+
+	__proto.resetOrderInfo=function(){
+		if(PaintOrderModel.instance.selectDelivery==null)
+			this.uiSkin.textDeliveryType.text="送货方式：无";
+		else
+		this.uiSkin.textDeliveryType.text="送货方式："+PaintOrderModel.instance.selectDelivery.delivery_name;
+		this.uiSkin.textProductNum.text="商品总数："+this.orderlist.length+"";
+		var total=0;
+		for(var i=0;i < this.orderlist.length;i++){
+			total+=Number(this.orderlist[i].total.text);
+		}
+		this.uiSkin.textTotalPrice.text="订单总额："+total.toString();
+		this.uiSkin.textDiscountPrice.text="折后总额："+total.toString();
+		this.uiSkin.textPayPrice.text="应付金额："+total.toString();
 	}
 
 	__proto.onGetOutPutAddress=function(data){
@@ -35170,7 +35192,7 @@ var PaintOrderControl=(function(_super){
 			PaintOrderModel.instance.initOutputAddr(result);
 			if(PaintOrderModel.instance.outPutAddr.length > 0){
 				PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr[0];
-				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
+				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.name+" "+PaintOrderModel.instance.selectFactoryAddress.addr;
 				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid ,this,this.onGetProductBack,null,null);
 			}
 			else{
@@ -35203,7 +35225,7 @@ var PaintOrderControl=(function(_super){
 
 	__proto.onSelectedAddress=function(){
 		if(PaintOrderModel.instance.selectFactoryAddress)
-			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.addr;
+			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.name+" "+PaintOrderModel.instance.selectFactoryAddress.addr;
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetProductBack,null,null);
 	}
 
@@ -35236,6 +35258,27 @@ var PaintOrderControl=(function(_super){
 		ViewManager.instance.openView("VIEW_SELECT_DELIVERY_TYPE",false,orderitem.ordervo.manufacturer_code);
 	}
 
+	__proto.onSelectAll=function(){
+		for(var i=0;i < this.orderlist.length;i++){
+			this.orderlist[i].checkSel.selected=this.uiSkin.selectAll.selected;
+		}
+	}
+
+	__proto.onBatchChangeMaterial=function(){
+		PaintOrderModel.instance.batchChangeMatItems=[];
+		for(var i=0;i < this.orderlist.length;i++){
+			if(this.orderlist[i].checkSel.selected){
+				PaintOrderModel.instance.batchChangeMatItems.push(this.orderlist[i]);
+			}
+		}
+		if(PaintOrderModel.instance.batchChangeMatItems.length <=0){
+			ViewManager.showAlert("请至少选择一个需要更换的产品");
+			return;
+		}
+		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
+		PaintOrderModel.instance.curSelectOrderItem=null;
+	}
+
 	__proto.onUpdateOrderPic=function(){
 		var curindex=this.uiSkin.ordervbox.numChildren;
 		curindex++;
@@ -35260,6 +35303,7 @@ var PaintOrderControl=(function(_super){
 		}
 		this.uiSkin.ordervbox.refresh();
 		DirectoryFileModel.instance.haselectPic={};
+		this.resetOrderInfo();
 	}
 
 	__proto.onDeletePicOrder=function(orderitem){
@@ -35281,19 +35325,17 @@ var PaintOrderControl=(function(_super){
 			this.uiSkin.ordervbox.height=0;
 		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,0);
 		this.uiSkin.ordervbox.refresh();
+		this.resetOrderInfo();
 	}
 
 	__proto.updateDeliveryType=function(){
 		if(PaintOrderModel.instance.selectDelivery !=null)
 			this.uiSkin.deliverytxt.text=PaintOrderModel.instance.selectDelivery.deliveryDesc;
+		this.resetOrderInfo();
 	}
 
 	__proto.onAdjustHeight=function(changeht){
 		this.uiSkin.ordervbox.height+=changeht;
-	}
-
-	__proto.onAddPart=function(){
-		this.uiSkin.partvbox.addChild(new PartItem(new PartItemVo()));
 	}
 
 	__proto.onOrderPaint=function(){
@@ -35362,6 +35404,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
 		EventCenter.instance.off("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
 		EventCenter.instance.off("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
+		EventCenter.instance.off("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
 	}
 
 	__proto.onClosePanel=function(){
@@ -35764,6 +35807,10 @@ var SelectTechControl=(function(_super){
 	__proto.onConfirmTech=function(){
 		if(PaintOrderModel.instance.curSelectOrderItem)
 			PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
+		else if(PaintOrderModel.instance.batchChangeMatItems && PaintOrderModel.instance.batchChangeMatItems.length > 0){
+			for(var i=0;i < PaintOrderModel.instance.batchChangeMatItems.length;i++)
+			PaintOrderModel.instance.batchChangeMatItems[i].changeProduct(PaintOrderModel.instance.curSelectMat);
+		}
 		this.onCloseView();
 	}
 
@@ -35910,6 +35957,7 @@ var SelectDeliveryControl=(function(_super){
 	function SelectDeliveryControl(){
 		this.uiSkin=null;
 		this.param=null;
+		this.tempSelect=null;
 		SelectDeliveryControl.__super.call(this);
 	}
 
@@ -35931,13 +35979,25 @@ var SelectDeliveryControl=(function(_super){
 	}
 
 	__proto.onGetDeliveryBack=function(data){
+		var _$this=this;
 		var result=JSON.parse(data);
 		if(!result.hasOwnProperty("status")){
 			PaintOrderModel.instance.deliveryList=[];
 			for(var i=0;i < result.length;i++){
-				PaintOrderModel.instance.deliveryList.push(new DeliveryTypeVo(result[i]));
+				var tempdevo=new DeliveryTypeVo(result[i]);
+				if(tempdevo.delivery_name=="送货上门")
+					this.tempSelect=tempdevo;
+				PaintOrderModel.instance.deliveryList.push(tempdevo);
 			}
+			if(this.tempSelect==null && PaintOrderModel.instance.deliveryList.length > 0)
+				this.tempSelect=PaintOrderModel.instance.deliveryList[0];
 			this.uiSkin.list_delivery.array=PaintOrderModel.instance.deliveryList;
+			Laya.timer.once(10,null,function(){
+				var cells=_$this.uiSkin.list_delivery.cells;
+				for(var i=0;i < cells.length;i++){
+					(cells [i]).ShowSelected=(cells [i]).deliveryVo==_$this.tempSelect;
+				}
+			});
 		}
 	}
 
@@ -35947,7 +36007,7 @@ var SelectDeliveryControl=(function(_super){
 			item=this.uiSkin.list_delivery.cells[$each_item];
 			item.ShowSelected=item.deliveryVo==this.uiSkin.list_delivery.array[index];
 		}
-		PaintOrderModel.instance.selectDelivery=this.uiSkin.list_delivery.array[index];
+		this.tempSelect=this.uiSkin.list_delivery.array[index];
 	}
 
 	__proto.updateAddressItem=function(cell){
@@ -35955,8 +36015,10 @@ var SelectDeliveryControl=(function(_super){
 	}
 
 	__proto.onConfirmSelectAddress=function(index){
-		if(PaintOrderModel.instance.selectDelivery !=null)
+		if(this.tempSelect !=null){
+			PaintOrderModel.instance.selectDelivery=this.tempSelect;
 			EventCenter.instance.event("SELECT_DELIVERY_TYPE");
+		}
 		this.onCloseView();
 	}
 
@@ -36245,6 +36307,15 @@ var UpLoadAndOrderContrl=(function(_super){
 var SelectMaterialControl=(function(_super){
 	function SelectMaterialControl(){
 		this.uiSkin=null;
+		this.startposx=10;
+		this.param=null;
+		this.itemheight=30;
+		this.itemspaceH=50;
+		this.itemspaceV=20;
+		this.allitemlist=null;
+		this.hasShowItemList=null;
+		this.firstTechlist=null;
+		this.linelist=null;
 		SelectMaterialControl.__super.call(this);
 	}
 
@@ -36266,14 +36337,21 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.matlist.renderHandler=new Handler(this,this.updateMatNameItem);
 		this.uiSkin.matlist.array=[];
 		this.uiSkin.tablist.array=PaintOrderModel.instance.productList;
+		this.uiSkin.techcontent.vScrollBarSkin="";
+		this.uiSkin.main_panel.vScrollBarSkin="";
 		if(PaintOrderModel.instance.productList && PaintOrderModel.instance.productList.length > 0){
 			this.uiSkin.tablist.selectedIndex=0;
 			this.onSlecteMatClass(0);
 			(this.uiSkin.tablist.cells [0]).ShowSelected=true;
 		}
+		this.uiSkin.box_tech.visible=false;
+		this.uiSkin.backBtn.label="工艺";
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
-		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
+		this.uiSkin.btnok.on("click",this,this.onConfirmTech);
+		this.uiSkin.backBtn.on("click",this,this.onSwitchPanel);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.on("SHOW_SELECT_TECH",this,this.initTechView);
+		this.uiSkin.main_panel.height=Browser.clientHeight
 	}
 
 	__proto.onResizeBrower=function(){
@@ -36321,7 +36399,175 @@ var SelectMaterialControl=(function(_super){
 		}
 	}
 
-	__proto.onConfirmSelectAddress=function(index){
+	__proto.onSwitchPanel=function(){
+		if(this.uiSkin.box_mat.visible){
+			if(PaintOrderModel.instance.curSelectMat==null){
+				ViewManager.showAlert("请先选择一种材料");
+				return;
+			}
+			else
+			this.showTechView();
+		}
+		else{
+			this.uiSkin.box_mat.visible=true;
+			this.uiSkin.box_tech.visible=false;
+			this.uiSkin.backBtn.label="true";
+		}
+	}
+
+	//选择工艺---------------------------------------------
+	__proto.showTechView=function(){
+		this.uiSkin.box_mat.visible=false;
+		this.uiSkin.box_tech.visible=true;
+		this.uiSkin.backBtn.label="材料";
+	}
+
+	__proto.initTechView=function(){
+		this.showTechView();
+		var list=[];
+		this.hasShowItemList=[];
+		this.linelist=[];
+		this.firstTechlist=[];
+		var arr=PaintOrderModel.instance.curSelectMat.prcessCatList;
+		var startpos=(this.uiSkin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
+		while(this.uiSkin.techcontent.numChildren > 0)
+		this.uiSkin.techcontent.removeChildAt(0);
+		for(var i=0;i < arr.length;i++){
+			var itembox=new TechBoxItem();
+			itembox.setProcessData(arr[i]);
+			itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
+			itembox.x=this.startposx;
+			itembox.y=startpos;
+			startpos+=itembox.height+this.itemspaceV;
+			this.uiSkin.techcontent.addChild(itembox);
+			this.firstTechlist.push(itembox);
+		}
+		this.allitemlist=[];
+	}
+
+	//(uiSkin.main_panel).height=Browser.clientHeight;
+	__proto.drawCurves=function(a,b){
+		var sp=new Sprite();
+		this.uiSkin.techcontent.addChild(sp);
+		var endy=b.y-a.y;
+		sp.graphics.drawCurves(0,a.y+0.5 *this.itemheight,[0,0,0.4*this.itemspaceH,0.8 *endy,this.itemspaceH,endy],"#ff0000",1);
+		sp.x=a.x+a.width;
+		this.linelist.push(sp);
+	}
+
+	__proto.onGetProFlowt=function(parentitem,processCatvo){
+		var _$this=this;
+		var manufacturecode=PaintOrderModel.instance.curSelectMat.manufacturer_code;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/procflowlist?manufacturer_code="+manufacturecode+"&procCat_name="+processCatvo.procCat_Name,this,function(data){
+			var result=JSON.parse(data);
+			if(!result.hasOwnProperty("status")){
+				PaintOrderModel.instance.curSelectProcList=result;
+				processCatvo.initProcFlow(result);
+				_$this.onClickMat(parentitem,processCatvo);
+			}
+		},null,null);
+	}
+
+	__proto.onClickMat=function(parentitem,matvo){
+		if(matvo.nextMatList==null && (matvo instanceof model.orderModel.ProcessCatVo )){
+			this.onGetProFlowt(parentitem,matvo);
+			return;
+		}
+		if(parentitem.isSelected)
+			this.hideItems(parentitem.x,true);
+		else if(this.firstTechlist.indexOf(parentitem)>=0)
+		this.hideItems(parentitem.x,false);
+		else
+		this.hideItems(parentitem.x,true);
+		if(parentitem.isSelected){
+			parentitem.setSelected(false);
+			parentitem.setTechSelected(false);
+			if(this.firstTechlist.indexOf(parentitem)>=0)
+				this.cancelTech(parentitem.processCatVo.nextMatList);
+			this.updateSelectedTech();
+			return;
+		}
+		parentitem.setSelected(true);
+		parentitem.setTechSelected(true);
+		if(matvo.nextMatList && matvo.nextMatList.length > 0){
+			var arr=matvo.nextMatList;
+			var startpos=parentitem.y+0.5 *this.itemheight-(arr.length*this.itemheight+this.itemspaceV *(arr.length-1))/2;
+			var starpox=parentitem.x+parentitem.width+this.itemspaceH;
+			for(var i=0;i < arr.length;i++){
+				var itembox=this.getItembox();
+				itembox.setData(arr[i]);
+				this.hasShowItemList.push(itembox);
+				itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
+				itembox.x=starpox;
+				itembox.y=startpos;
+				this.drawCurves(parentitem,itembox);
+				startpos+=itembox.height+this.itemspaceV;
+				this.uiSkin.techcontent.addChild(itembox);
+			}
+		}
+		else{
+			this.hideItems(this.firstTechlist[0].x,false);
+		}
+		this.updateSelectedTech();
+	}
+
+	__proto.hideItems=function(curposx,changedata){
+		for(var i=0;i < this.hasShowItemList.length;i++){
+			if(this.hasShowItemList[i].x > curposx){
+				this.hasShowItemList[i].removeSelf();
+				this.hasShowItemList[i].setSelected(false);
+				if(changedata)
+					this.hasShowItemList[i].techmainvo.selected=false;
+				this.allitemlist.push(this.hasShowItemList[i]);
+				this.hasShowItemList.splice(i,1);
+				i--;
+			}
+			else if(this.hasShowItemList[i].x==curposx){
+				this.hasShowItemList[i].setSelected(false);
+				if(changedata)
+					this.hasShowItemList[i].techmainvo.selected=false;
+			}
+		}
+		for(var i=0;i < this.linelist.length;i++){
+			if(this.linelist[i].x > curposx){
+				this.linelist[i].removeSelf();
+				this.linelist.splice(i,1);
+				i--;
+			}
+		}
+	}
+
+	__proto.updateSelectedTech=function(){
+		this.uiSkin.selecttech.text=PaintOrderModel.instance.curSelectMat.getTechDes();
+	}
+
+	__proto.cancelTech=function(arr){
+		if(arr){
+			for(var i=0;i < arr.length;i++){
+				arr[i].selected=false;
+				this.cancelTech(arr[i].nextMatList);
+			}
+		}
+	}
+
+	__proto.getItembox=function(){
+		if(this.allitemlist.length > 0){
+			return this.allitemlist.splice(0,1)[0];
+		}
+		else{
+			var itembox=new TechBoxItem();
+			return itembox;
+		}
+	}
+
+	__proto.onConfirmTech=function(){
+		if(PaintOrderModel.instance.curSelectOrderItem)
+			PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
+		else if(PaintOrderModel.instance.batchChangeMatItems && PaintOrderModel.instance.batchChangeMatItems.length > 0){
+			for(var i=0;i < PaintOrderModel.instance.batchChangeMatItems.length;i++)
+			PaintOrderModel.instance.batchChangeMatItems[i].changeProduct(PaintOrderModel.instance.curSelectMat);
+		}
+		EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
 		this.onCloseView();
 	}
 
@@ -36331,6 +36577,7 @@ var SelectMaterialControl=(function(_super){
 
 	__proto.onDestroy=function(){
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("SHOW_SELECT_TECH",this,this.initTechView);
 	}
 
 	return SelectMaterialControl;
@@ -42590,10 +42837,10 @@ var OrderItemUI=(function(_super){
 		this.editwidth=null;
 		this.editheight=null;
 		this.architype=null;
-		this.changearchitxt=null;
 		this.matbox=null;
 		this.mattxt=null;
 		this.changemat=null;
+		this.checkSel=null;
 		OrderItemUI.__super.call(this);
 	}
 
@@ -42604,7 +42851,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":60},"compId":26},{"type":"Image","props":{"y":4,"x":54,"width":85,"var":"fileimg","skin":"comp/image.png","height":52},"compId":4},{"type":"TextInput","props":{"y":26,"x":993,"width":46,"var":"inputnum","text":"1","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":21,"x":10,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":15,"x":151,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":911,"width":58,"var":"viprice","text":"0","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1047,"width":58,"var":"price","text":"1","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"Label","props":{"y":26,"x":1110,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":577,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":726,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":5,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12},{"type":"Text","props":{"y":31,"x":52,"var":"changearchitxt","text":"更换工艺","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":29,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":30}]}]},{"type":"Sprite","props":{"y":12,"x":360,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":113},"compId":26},{"type":"Image","props":{"y":57,"x":178,"width":100,"var":"fileimg","skin":"comp/image.png","height":100,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"TextInput","props":{"y":26,"x":1003,"width":46,"var":"inputnum","text":"1","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":21,"x":80,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":15,"x":227,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":932,"width":58,"var":"viprice","text":"0","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1058,"width":58,"var":"price","text":"1","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"Label","props":{"y":26,"x":1113,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":616,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":754,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":12,"x":415,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":23,"x":21,"var":"checkSel","skin":"comp/checkbox.png","scaleY":1.2,"scaleX":1.2},"compId":31}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab","comp/checkbox.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -42630,30 +42877,6 @@ var LoginViewUI=(function(_super){
 
 	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1800},"compId":3,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":4,"child":[{"type":"Label","props":{"x":30,"width":548,"top":20,"text":"欢迎来到 色彩飞扬-广告全产业链生态平台 联系方式：4006055998","styleSkin":"comp/label.png","height":18,"fontSize":18,"align":"left"},"compId":5},{"type":"Label","props":{"y":18,"x":1016,"width":139,"var":"txt_login","text":"登陆","mouseEnabled":true,"height":20,"fontSize":20,"align":"right"},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1166.1953125,"var":"txt_reg","text":"注册","mouseEnabled":true,"fontSize":20},"compId":10}]},{"type":"Sprite","props":{"y":63,"x":320,"texture":"mainpage/logo.png","scaleY":0.9,"scaleX":0.9},"compId":11},{"type":"Sprite","props":{"y":311,"x":320,"width":1280,"texture":"mainpage/bg.jpg"},"compId":12},{"type":"Image","props":{"y":250,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5"},"compId":38},{"type":"TextInput","props":{"y":138,"x":1000,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":13},{"type":"Button","props":{"y":138,"x":1200,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},"compId":14},{"type":"Button","props":{"y":139,"x":1301,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},"compId":15},{"type":"Button","props":{"y":139,"x":1401,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},"compId":16},{"type":"Sprite","props":{"y":991,"x":320,"texture":"mainpage/flow.jpg"},"compId":17},{"type":"Label","props":{"y":1219,"x":288,"text":"合作伙伴","fontSize":20,"font":"Arial","color":"#211e1e"},"compId":18},{"type":"HBox","props":{"y":1255,"x":320,"space":20,"align":"middle"},"compId":19,"child":[{"type":"Sprite","props":{"y":0,"x":160,"width":150,"texture":"mainpage/lenovo.png","height":100},"compId":20},{"type":"Sprite","props":{"width":150,"texture":"mainpage/pantone.png","height":100},"compId":21},{"type":"Sprite","props":{"y":0,"x":320,"width":150,"texture":"mainpage/samsung.png","height":100},"compId":22},{"type":"Sprite","props":{"x":480,"width":150,"texture":"mainpage/epson.png","height":100},"compId":23},{"type":"Sprite","props":{"x":640,"width":150,"texture":"mainpage/colorture.png","height":100},"compId":24},{"type":"Sprite","props":{"x":800,"width":150,"texture":"mainpage/express.png","height":100},"compId":25}]},{"type":"Button","props":{"y":252,"x":368,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":31},{"type":"Button","props":{"y":252,"x":548,"width":176,"var":"btnUpload","stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"上传下单","height":54},"compId":32},{"type":"Button","props":{"y":252,"x":725,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":33},{"type":"Button","props":{"y":252,"x":904,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":34}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27}],"loadList":["commers/whitebg.png","comp/label.png","mainpage/logo.png","mainpage/bg.jpg","commers/blackbg.png","comp/textinput.png","comp/button.png","mainpage/flow.jpg","mainpage/lenovo.png","mainpage/pantone.png","mainpage/samsung.png","mainpage/epson.png","mainpage/colorture.png","mainpage/express.png","commers/Createselect.png"],"loadList3D":[]};
 	return LoginViewUI;
-})(Scene)
-
-
-//class ui.order.PartsItemUI extends laya.display.Scene
-var PartsItemUI=(function(_super){
-	function PartsItemUI(){
-		this.pname=null;
-		this.psize=null;
-		this.inputnum=null;
-		this.pricetxt=null;
-		this.totaltxt=null;
-		this.btndelete=null;
-		PartsItemUI.__super.call(this);
-	}
-
-	__class(PartsItemUI,'ui.order.PartsItemUI',_super);
-	var __proto=PartsItemUI.prototype;
-	__proto.createChildren=function(){
-		_super.prototype.createChildren.call(this);
-		this.createView(PartsItemUI.uiView);
-	}
-
-	PartsItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":277,"var":"pname","text":"X展架","height":20,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":290,"width":208,"var":"psize","text":"150*180","height":20,"fontSize":20,"align":"center"},"compId":4},{"type":"TextInput","props":{"y":0,"x":579,"width":50,"var":"inputnum","text":"1","skin":"comp/textinput.png","fontSize":20,"sizeGrid":"6,15,7,14"},"compId":5},{"type":"Label","props":{"y":2,"x":692,"width":208,"var":"pricetxt","text":"89.6","height":20,"fontSize":20,"align":"center"},"compId":6},{"type":"Label","props":{"y":2,"x":935,"width":208,"var":"totaltxt","text":"458.2","height":20,"fontSize":20,"align":"center"},"compId":7},{"type":"Text","props":{"y":0,"x":1211,"width":40,"var":"btndelete","text":"删除","height":20,"fontSize":20,"color":"#198972","runtime":"laya.display.Text"},"compId":8}],"loadList":["comp/textinput.png"],"loadList3D":[]};
-	return PartsItemUI;
 })(Scene)
 
 
@@ -48643,17 +48866,20 @@ var EnterPrizeInfoPaneUI=(function(_super){
 var PaintOrderPanelUI=(function(_super){
 	function PaintOrderPanelUI(){
 		this.firstpage=null;
+		this.textDeliveryType=null;
+		this.textProductNum=null;
+		this.textTotalPrice=null;
+		this.textDiscountPrice=null;
+		this.textPayPrice=null;
 		this.panel_main=null;
 		this.myaddresstxt=null;
-		this.changemyadd=null;
-		this.factorytxt=null;
 		this.qqContact=null;
-		this.changefactory=null;
+		this.factorytxt=null;
+		this.batchChange=null;
 		this.btnaddpic=null;
+		this.selectAll=null;
 		this.mainvbox=null;
 		this.ordervbox=null;
-		this.btn_addattach=null;
-		this.partvbox=null;
 		this.deliverybtn=null;
 		this.deliverytxt=null;
 		this.commentall=null;
@@ -48957,6 +49183,15 @@ var PicOrderItem=(function(_super){
 	__proto.initItem=function(){
 		this.numindex.text=this.ordervo.indexNum.toString();
 		this.fileimg.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		if(this.ordervo.picinfo.picWidth > this.ordervo.picinfo.picHeight){
+			this.fileimg.width=100;
+			this.fileimg.height=100/this.ordervo.picinfo.picWidth *this.ordervo.picinfo.picHeight;
+		}
+		else{
+			this.fileimg.height=100;
+			this.fileimg.width=100/this.ordervo.picinfo.picHeight *this.ordervo.picinfo.picWidth;
+		}
+		this.fileimg.on("doubleclick",this,this.onShowBigImg);
 		this.editwidth.text=this.ordervo.picinfo.picPhysicWidth.toString();
 		this.editheight.text=this.ordervo.picinfo.picPhysicHeight.toString();
 		this.filename.text=this.ordervo.picinfo.directName;
@@ -48971,18 +49206,21 @@ var PicOrderItem=(function(_super){
 		this.changemat.underline=true;
 		this.changemat.underlineColor="#222222";
 		this.changemat.on("click",this,this.onShowMaterialView);
-		this.changearchitxt.on("click",this,this.onchangeTech);
 		this.inputnum.on("input",this,this.onNumChange);
-		if(this.architype.textField.textHeight > 30)
+		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
 		else
-		this.architype.height=30;
-		if(this.architype.height > 30)
+		this.architype.height=80;
+		if(this.architype.height > 80)
 			this.height=this.architype.height+35;
 		else
-		this.height=60;
+		this.height=113;
 		this.bgimg.height=this.height;
 		this.alighComponet();
+	}
+
+	__proto.onShowBigImg=function(){
+		ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.ordervo.picinfo);
 	}
 
 	__proto.onAddComment=function(){
@@ -49001,8 +49239,9 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.alighComponet=function(){
+		this.checkSel.y=(this.height-26)/2;
 		this.numindex.y=(this.height-this.numindex.height)/2;
-		this.fileimg.y=(this.height-this.fileimg.height)/2;
+		this.fileimg.y=this.height/2;
 		this.filename.y=(this.height-this.filename.height)/2;
 		this.matbox.y=(this.height-42)/2;
 		this.editbox.y=(this.height-this.editbox.height)/2;
@@ -49030,6 +49269,7 @@ var PicOrderItem=(function(_super){
 	__proto.onShowMaterialView=function(){
 		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
 		PaintOrderModel.instance.curSelectOrderItem=this;
+		PaintOrderModel.instance.batchChangeMatItems=[];
 	}
 
 	__proto.changeProduct=function(provo){
@@ -49040,14 +49280,14 @@ var PicOrderItem=(function(_super){
 		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
 		this.architype.text=provo.getTechDes();
-		if(this.architype.textField.textHeight > 30)
+		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
 		else
-		this.architype.height=30;
-		if(this.architype.height > 30)
+		this.architype.height=80;
+		if(this.architype.height > 80)
 			this.height=this.architype.height+35;
 		else
-		this.height=60;
+		this.height=113;
 		this.bgimg.height=this.height;
 		this.alighComponet();
 		EventCenter.instance.event("ADJUST_PIC_ORDER_TECH",this.height-lastheight);
@@ -49130,15 +49370,15 @@ var PicManagePanelUI=(function(_super){
 		this.flder2=null;
 		this.htmltext=null;
 		this.radiosel=null;
+		this.btnroot=null;
+		this.searchInput=null;
+		this.filetypeRadio=null;
 		this.btnorder=null;
 		this.picList=null;
 		this.boxNewFolder=null;
 		this.input_folename=null;
 		this.btnSureCreate=null;
 		this.btnCloseInput=null;
-		this.btnroot=null;
-		this.searchInput=null;
-		this.filetypeRadio=null;
 		PicManagePanelUI.__super.call(this);
 	}
 
@@ -49157,10 +49397,15 @@ var PicManagePanelUI=(function(_super){
 var SelectMaterialPanelUI=(function(_super){
 	function SelectMaterialPanelUI(){
 		this.main_panel=null;
-		this.matlist=null;
+		this.backBtn=null;
 		this.btnok=null;
 		this.btncancel=null;
+		this.box_mat=null;
+		this.matlist=null;
 		this.tablist=null;
+		this.box_tech=null;
+		this.techcontent=null;
+		this.selecttech=null;
 		SelectMaterialPanelUI.__super.call(this);
 	}
 
@@ -49241,25 +49486,6 @@ var UpLoadItemUI=(function(_super){
 	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7},{"type":"Button","props":{"y":9,"x":442,"width":65,"var":"btncancel","skin":"comp/button.png","label":"删除","height":23},"compId":9}],"loadList":["comp/progress.png","comp/button.png"],"loadList3D":[]};
 	return UpLoadItemUI;
 })(View)
-
-
-//class script.order.PartItem extends ui.order.PartsItemUI
-var PartItem=(function(_super){
-	function PartItem(partvo){
-		this.partItemvo=null;
-		this.partItemvo=partvo;
-		PartItem.__super.call(this);
-	}
-
-	__class(PartItem,'script.order.PartItem',_super);
-	var __proto=PartItem.prototype;
-	__proto.initView=function(){
-		this.pname.text=this.partItemvo.partName;
-		this.psize.text=this.partItemvo.partSize;
-	}
-
-	return PartItem;
-})(PartsItemUI)
 
 
 //class ui.PopUpDialogUI extends laya.ui.View
@@ -54034,9 +54260,9 @@ var DeliveryTypeItem=(function(_super){
 	__proto.setData=function(devo){
 		this.deliveryVo=devo;
 		this.addresstxt.text=this.deliveryVo.deliveryDesc;
-		this.ShowSelected=this.deliveryVo==PaintOrderModel.instance.selectDelivery;
 	}
 
+	//ShowSelected=deliveryVo==PaintOrderModel.instance.selectDelivery;
 	__getset(0,__proto,'ShowSelected',null,function(value){
 		if(value)
 			this.addresstxt.borderColor="#FF0000";
@@ -54090,12 +54316,12 @@ var PicInfoItem=(function(_super){
 			if(this.img.skin !="commers/fold.png")
 				Laya.loader.clearTextureRes(this.img.skin);
 			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
-			var str="长:"+this.picInfo.picPhysicWidth+";宽:"+this.picInfo.picPhysicHeight+"\n";
+			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
 			str+="dpi:"+this.picInfo.dpi;
 			this.fileinfo.text=str;
-			this.picClassTxt.text=this.picInfo.picClass;
+			this.picClassTxt.text=this.picInfo.picClass.toLocaleUpperCase();
 			this.picClassTxt.visible=true;
-			this.colorspacetxt.text=this.picInfo.colorspace;
+			this.colorspacetxt.text=this.picInfo.colorspace.toLocaleUpperCase();
 			this.colorspacetxt.visible=true;
 		}
 	}
@@ -54219,8 +54445,7 @@ var MaterialItem=(function(_super){
 		if(this.matvo.prcessCatList !=null && this.matvo.prcessCatList.length > 0){
 			this.matvo.resetData();
 			PaintOrderModel.instance.curSelectMat=this.matvo;
-			ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
-			ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
+			EventCenter.instance.event("SHOW_SELECT_TECH");
 		}
 		else{
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/processcatlist?prod_code="+this.matvo.prod_code,this,this.onGetProcessListBack,null,null);
@@ -54236,11 +54461,11 @@ var MaterialItem=(function(_super){
 			for(var i=0;i < result.length;i++){
 				PaintOrderModel.instance.curSelectMat.prcessCatList.push(new ProcessCatVo(result[i]));
 			}
-			ViewManager.instance.closeView("VIEW_SELECT_MATERIAL");
-			ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY",false);
+			EventCenter.instance.event("SHOW_SELECT_TECH");
 		}
 	}
 
+	//ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
 	__getset(0,__proto,'ShowSelected',null,function(value){
 	});
 

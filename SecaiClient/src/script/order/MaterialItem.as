@@ -1,5 +1,7 @@
 package script.order
 {
+	import eventUtil.EventCenter;
+	
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
@@ -37,10 +39,11 @@ package script.order
 			{
 				matvo.resetData();
 				PaintOrderModel.instance.curSelectMat = matvo;
+				EventCenter.instance.event(EventCenter.SHOW_SELECT_TECH);
 
-				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
+				//ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
 				
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
+				//ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
 			}
 			else
 			{
@@ -63,9 +66,10 @@ package script.order
 				{
 					PaintOrderModel.instance.curSelectMat.prcessCatList.push(new ProcessCatVo(result[i]));
 				}
-				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
+				EventCenter.instance.event(EventCenter.SHOW_SELECT_TECH);
+				//ViewManager.instance.closeView(ViewManager.VIEW_SELECT_MATERIAL);
 				
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
+				//ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY,false);
 			}
 		}
 		public function set ShowSelected(value:Boolean):void

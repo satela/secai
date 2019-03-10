@@ -6,10 +6,15 @@ package ui.order {
 
 	public class SelectMaterialPanelUI extends View {
 		public var main_panel:Panel;
-		public var matlist:List;
+		public var backBtn:Button;
 		public var btnok:Button;
 		public var btncancel:Button;
+		public var box_mat:Sprite;
+		public var matlist:List;
 		public var tablist:List;
+		public var box_tech:Sprite;
+		public var techcontent:Panel;
+		public var selecttech:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

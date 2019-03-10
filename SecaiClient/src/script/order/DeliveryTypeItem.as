@@ -17,7 +17,7 @@ package script.order
 		{
 			deliveryVo = devo as DeliveryTypeVo;
 			this.addresstxt.text = deliveryVo.deliveryDesc;
-			ShowSelected = deliveryVo == PaintOrderModel.instance.selectDelivery;
+			//ShowSelected = deliveryVo == PaintOrderModel.instance.selectDelivery;
 		}
 		public function set ShowSelected(value:Boolean):void
 		{

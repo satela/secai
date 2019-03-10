@@ -68,16 +68,17 @@ package script.order
 			uiSkin.ordervbox.size(uiSkin.ordervbox.width,totalheight - uiSkin.ordervbox.space);
 			
 			DirectoryFileModel.instance.haselectPic = {};
-			uiSkin.changemyadd.underline = true;
-			uiSkin.changemyadd.underlineColor = "#222222";
+			uiSkin.myaddresstxt.underline = true;
+			uiSkin.myaddresstxt.underlineColor = "#222222";
 			
-			uiSkin.changefactory.underline = true;
-			uiSkin.changefactory.underlineColor = "#222222";
+			uiSkin.factorytxt.underline = true;
+			uiSkin.factorytxt.underlineColor = "#222222";
 			uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
-			uiSkin.changemyadd.on(Event.CLICK,this,onShowSelectAddress);
-			uiSkin.changefactory.on(Event.CLICK,this,onShowSelectFactory);
+			uiSkin.myaddresstxt.on(Event.CLICK,this,onShowSelectAddress);
+			uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
 			uiSkin.deliverybtn.on(Event.CLICK,this,onShowSelectDelivery);
-
+			uiSkin.batchChange.on(Event.CLICK,this,onBatchChangeMaterial);
+			uiSkin.selectAll.on(Event.CLICK,this,onSelectAll);
 			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
 			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
 
@@ -89,6 +90,8 @@ package script.order
 
 			EventCenter.instance.on(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
+
 			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
 
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
@@ -101,7 +104,7 @@ package script.order
 //				}
 //				trace(data);
 //			});
-
+			resetOrderInfo();
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid,this,onGetOutPutAddress,null,null);
@@ -110,6 +113,26 @@ package script.order
 			}
 		}
 		
+		private function resetOrderInfo():void
+		{
+			if(PaintOrderModel.instance.selectDelivery == null)
+				uiSkin.textDeliveryType.text = "送货方式：无";
+			else
+				uiSkin.textDeliveryType.text = "送货方式：" + PaintOrderModel.instance.selectDelivery.delivery_name;
+			
+			uiSkin.textProductNum.text = "商品总数：" + orderlist.length + "";
+			var total:Number = 0;
+			for(var i:int=0;i < orderlist.length;i++)
+			{
+				total += Number(orderlist[i].total.text);
+			}
+			
+			uiSkin.textTotalPrice.text = "订单总额：" + total.toString();
+			
+			uiSkin.textDiscountPrice.text = "折后总额：" + total.toString();
+			uiSkin.textPayPrice.text = "应付金额：" + total.toString();
+			
+		}
 		private function onGetOutPutAddress(data:*):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -119,7 +142,7 @@ package script.order
 				if(PaintOrderModel.instance.outPutAddr.length > 0)
 				{
 					PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
-					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
+					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name + " " + PaintOrderModel.instance.selectFactoryAddress.addr;
 					
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid ,this,onGetProductBack,null,null);
 				}
@@ -161,7 +184,7 @@ package script.order
 		private function onSelectedAddress():void
 		{
 			if(PaintOrderModel.instance.selectFactoryAddress)
-			this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.addr;
+			this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name +  " " +  PaintOrderModel.instance.selectFactoryAddress.addr;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetProductBack,null,null);
 
@@ -208,6 +231,32 @@ package script.order
 			
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_DELIVERY_TYPE,false,orderitem.ordervo.manufacturer_code);
 		}
+		
+		private function onSelectAll():void
+		{
+			for(var i:int=0;i < orderlist.length;i++)
+			{
+				orderlist[i].checkSel.selected = uiSkin.selectAll.selected;				
+			}
+		}
+		private function onBatchChangeMaterial():void
+		{			
+			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
+			for(var i:int=0;i < orderlist.length;i++)
+			{
+				if(orderlist[i].checkSel.selected)
+				{
+					PaintOrderModel.instance.batchChangeMatItems.push(orderlist[i]);
+				}
+			}
+			if(PaintOrderModel.instance.batchChangeMatItems.length <= 0)
+			{
+				ViewManager.showAlert("请至少选择一个需要更换的产品");
+				return;
+			}
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
+			PaintOrderModel.instance.curSelectOrderItem = null;
+		}
 		private function onUpdateOrderPic():void
 		{
 			var curindex:int = uiSkin.ordervbox.numChildren;
@@ -241,6 +290,8 @@ package script.order
 			}
 			uiSkin.ordervbox.refresh();
 			DirectoryFileModel.instance.haselectPic = {};
+			resetOrderInfo();
+
 		}
 		
 		private function onDeletePicOrder(orderitem:PicOrderItem):void
@@ -266,22 +317,18 @@ package script.order
 				uiSkin.ordervbox.height = 0;
 			uiSkin.ordervbox.size(uiSkin.ordervbox.width,0);
 			uiSkin.ordervbox.refresh();
-
+			resetOrderInfo();
 		}
 		
 		private function updateDeliveryType():void
 		{
 			if(PaintOrderModel.instance.selectDelivery != null)
 				uiSkin.deliverytxt.text = PaintOrderModel.instance.selectDelivery.deliveryDesc;
+			resetOrderInfo();
 		}
 		private function onAdjustHeight(changeht:int):void
 		{
 			this.uiSkin.ordervbox.height += changeht;
-		}
-		private function onAddPart():void
-		{
-			uiSkin.partvbox.addChild(new PartItem(new PartItemVo()));
-			
 		}
 		
 		private function onOrderPaint():void
@@ -373,6 +420,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
 						
 			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
+			EventCenter.instance.off(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 
 		}
 		private function onClosePanel():void

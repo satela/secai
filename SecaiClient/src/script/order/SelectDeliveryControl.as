@@ -4,6 +4,7 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Box;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
@@ -19,6 +20,8 @@ package script.order
 		private var uiSkin:SelectDeliveryPanelUI;
 		
 		public var param:Object;
+		
+		public var tempSelect:DeliveryTypeVo;
 		public function SelectDeliveryControl()
 		{
 			super();
@@ -60,9 +63,23 @@ package script.order
 				PaintOrderModel.instance.deliveryList = [];
 				for(var i:int=0;i < result.length;i++)
 				{
-					PaintOrderModel.instance.deliveryList.push(new DeliveryTypeVo(result[i]));
+					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
+					if(tempdevo.delivery_name == "送货上门")
+						tempSelect = tempdevo;
+					PaintOrderModel.instance.deliveryList.push(tempdevo);
 				}
+				if(tempSelect == null && PaintOrderModel.instance.deliveryList.length > 0)
+					tempSelect = PaintOrderModel.instance.deliveryList[0];
+					
 				uiSkin.list_delivery.array = PaintOrderModel.instance.deliveryList;
+				Laya.timer.once(10,null,function()
+				{
+				var cells:Vector.<Box> = uiSkin.list_delivery.cells;
+				for(var i:int=0;i < cells.length;i++)
+				{
+					(cells[i] as DeliveryTypeItem).ShowSelected = (cells[i] as DeliveryTypeItem).deliveryVo == tempSelect;
+				}
+				});
 			}
 		}
 		
@@ -73,7 +90,7 @@ package script.order
 			{
 				item.ShowSelected = item.deliveryVo == uiSkin.list_delivery.array[index];
 			}
-			PaintOrderModel.instance.selectDelivery = uiSkin.list_delivery.array[index];
+			tempSelect = uiSkin.list_delivery.array[index];
 		}
 		
 		private function updateAddressItem(cell:SelAddressItem):void
@@ -84,8 +101,11 @@ package script.order
 		private function onConfirmSelectAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
-			if(PaintOrderModel.instance.selectDelivery != null)
+			if(tempSelect != null)
+			{
+				PaintOrderModel.instance.selectDelivery = tempSelect;
 				EventCenter.instance.event(EventCenter.SELECT_DELIVERY_TYPE);
+			}
 			onCloseView();
 		}
 		

@@ -8,17 +8,20 @@ package ui {
 
 	public class PaintOrderPanelUI extends View {
 		public var firstpage:Text;
+		public var textDeliveryType:Label;
+		public var textProductNum:Label;
+		public var textTotalPrice:Label;
+		public var textDiscountPrice:Label;
+		public var textPayPrice:Label;
 		public var panel_main:Panel;
-		public var myaddresstxt:Label;
-		public var changemyadd:Text;
-		public var factorytxt:Label;
+		public var myaddresstxt:Text;
 		public var qqContact:Button;
-		public var changefactory:Text;
+		public var factorytxt:Text;
+		public var batchChange:Text;
 		public var btnaddpic:Button;
+		public var selectAll:CheckBox;
 		public var mainvbox:VBox;
 		public var ordervbox:VBox;
-		public var btn_addattach:Button;
-		public var partvbox:VBox;
 		public var deliverybtn:Text;
 		public var deliverytxt:Label;
 		public var commentall:TextInput;

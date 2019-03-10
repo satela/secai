@@ -29,6 +29,21 @@ package script.order
 			
 			this.fileimg.skin = HttpRequestUtil.smallerrPicUrl + ordervo.picinfo.fid + ".jpg";
 			
+			
+			
+			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
+			{
+				this.fileimg.width = 100;					
+				this.fileimg.height = 100/ordervo.picinfo.picWidth * ordervo.picinfo.picHeight;
+				
+			}
+			else
+			{
+				this.fileimg.height = 100;
+				this.fileimg.width = 100/ordervo.picinfo.picHeight * ordervo.picinfo.picWidth;
+				
+			}
+			this.fileimg.on(Event.DOUBLE_CLICK,this,onShowBigImg);
 			this.editwidth.text = ordervo.picinfo.picPhysicWidth.toString();
 			this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
 			this.filename.text = ordervo.picinfo.directName;
@@ -47,24 +62,29 @@ package script.order
 			this.changemat.underline = true;
 			this.changemat.underlineColor = "#222222";
 			this.changemat.on(Event.CLICK,this,onShowMaterialView);
-			this.changearchitxt.on(Event.CLICK,this,onchangeTech);
+			//this.changearchitxt.on(Event.CLICK,this,onchangeTech);
 			this.inputnum.on(Event.INPUT,this,onNumChange);
 
-			if(this.architype.textField.textHeight > 30)
+			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
 			else
-				this.architype.height = 30;
+				this.architype.height = 80;
 			
 			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
 			
-			if(this.architype.height > 30)
+			if(this.architype.height > 80)
 				this.height = this.architype.height + 35;
 			else
-				this.height = 60;
+				this.height = 113;
 			this.bgimg.height = this.height;
 			alighComponet();
 		}
 		
+		private function onShowBigImg():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,this.ordervo.picinfo);
+
+		}
 		private function onAddComment():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_ADD_MESSAGE,false,{msg:this.ordervo.comment,caller:this,callback:onAddMsgBack});
@@ -84,9 +104,11 @@ package script.order
 		}
 		private function alighComponet():void
 		{
+			this.checkSel.y = (this.height - 26)/2;
+			
 			this.numindex.y = (this.height - this.numindex.height)/2;
 			
-			this.fileimg.y = (this.height - this.fileimg.height)/2;
+			this.fileimg.y = this.height/2;
 			
 			this.filename.y = (this.height - this.filename.height)/2;
 			this.matbox.y = (this.height - 42)/2;
@@ -120,6 +142,7 @@ package script.order
 			// TODO Auto Generated method stub
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
 			PaintOrderModel.instance.curSelectOrderItem = this;
+			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
 		}
 		
 		public function changeProduct(provo:ProductVo):void
@@ -137,17 +160,17 @@ package script.order
 
 			this.architype.text = provo.getTechDes();
 			
-			if(this.architype.textField.textHeight > 30)
+			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
 			else
-				this.architype.height = 30;
+				this.architype.height = 80;
 			
 			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
 			
-			if(this.architype.height > 30)
+			if(this.architype.height > 80)
 				this.height = this.architype.height + 35;
 			else
-				this.height = 60;
+				this.height = 113;
 			this.bgimg.height = this.height;
 			alighComponet();
 			

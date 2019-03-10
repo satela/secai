@@ -2,8 +2,8 @@ package model.orderModel
 {
 	public class DeliveryTypeVo
 	{
-		public var delivery_Code:String = "";//  配送方式编码
-		public var delivery_Name: String = "";// 配送方式名称
+		public var delivery_code:String = "";//  配送方式编码
+		public var delivery_name: String = "";// 配送方式名称
 		public var start_weight: Number = 0;//  首重(kg)
 		public var post_weight:  Number = 0;//  续重(kg)
 		public var first_volume:  Number = 0;//  首体积(立方)
@@ -28,7 +28,7 @@ package model.orderModel
 		
 		public function get deliveryDesc():String
 		{
-			return deliverynet_name + "，首重:" + start_weight + "kg," + "续重" + post_weight + "kg，" + "首重价格:" + firstweight_price + "元/kg，" + "续重价格:" + addedweight_price + "元/kg。";
+			return deliverynet_name + "，首重:" + start_weight + "kg," + "续重" + post_weight + "kg，" + "首重价格:" + firstweight_price + "元/kg，" + "续重价格:" + addedweight_price + "元/kg。" + delivery_name;
 		}
 	}
 }

@@ -248,6 +248,11 @@ package script.order
 		{
 			if(PaintOrderModel.instance.curSelectOrderItem)
 				PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
+			else if(PaintOrderModel.instance.batchChangeMatItems && PaintOrderModel.instance.batchChangeMatItems.length > 0)
+			{
+				for(var i:int=0;i < PaintOrderModel.instance.batchChangeMatItems.length;i++)
+					PaintOrderModel.instance.batchChangeMatItems[i].changeProduct(PaintOrderModel.instance.curSelectMat);
+			}
 			onCloseView();
 		}
 		private function onCloseView():void

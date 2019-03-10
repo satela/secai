@@ -71,15 +71,15 @@ package script.picUpload
 
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
 				
-				var str:String = "长:" + picInfo.picPhysicWidth + ";宽:" +  picInfo.picPhysicHeight + "\n";
+				var str:String = "宽:" + picInfo.picPhysicWidth + ";高:" +  picInfo.picPhysicHeight + "\n";
 				
 				str += "dpi:" + picInfo.dpi;
 				this.fileinfo.text = str;
 				
-				this.picClassTxt.text = picInfo.picClass;
+				this.picClassTxt.text = picInfo.picClass.toLocaleUpperCase();
 				this.picClassTxt.visible = true;
 				
-				this.colorspacetxt.text = picInfo.colorspace;
+				this.colorspacetxt.text = picInfo.colorspace.toLocaleUpperCase();
 				this.colorspacetxt.visible = true;
 				
 				//this.fileinfo.text = picInfo.directName;

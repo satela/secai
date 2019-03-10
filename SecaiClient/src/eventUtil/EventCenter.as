@@ -26,6 +26,9 @@ package eventUtil
 		public static const ADD_PIC_FOR_ORDER:String = "ADD_PIC_FOR_ORDER";//新增图片下单
 		public static const DELETE_PIC_ORDER:String = "DELETE_PIC_ORDER";//删除订单图片
 
+		public static const SHOW_SELECT_TECH:String = "SHOW_SELECT_TECH";//打开选择工艺界面
+		public static const UPDATE_ORDER_ITEM_TECH:String = "UPDATE_ORDER_ITEM_TECH";//选择工艺结束
+
 		public static const ADJUST_PIC_ORDER_TECH:String = "ADJUST_PIC_ORDER_TECH";//自适应下单工艺修改
 
 		

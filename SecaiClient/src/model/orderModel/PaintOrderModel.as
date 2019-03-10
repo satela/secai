@@ -39,6 +39,9 @@ package model.orderModel
 		public var selectDelivery:DeliveryTypeVo;//选择的配送方式
 
 		public var curSelectProcList:Array;
+		
+		public var batchChangeMatItems:Vector.<PicOrderItem>;
+
 		public function PaintOrderModel()
 		{
 		}

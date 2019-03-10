@@ -15,15 +15,15 @@ package ui {
 		public var flder2:Label;
 		public var htmltext:HTMLDivElement;
 		public var radiosel:CheckBox;
+		public var btnroot:Label;
+		public var searchInput:TextInput;
+		public var filetypeRadio:RadioGroup;
 		public var btnorder:Button;
 		public var picList:List;
 		public var boxNewFolder:Box;
 		public var input_folename:TextInput;
 		public var btnSureCreate:Button;
 		public var btnCloseInput:Button;
-		public var btnroot:Label;
-		public var searchInput:TextInput;
-		public var filetypeRadio:RadioGroup;
 
 		override protected function createChildren():void {
 			super.createChildren();

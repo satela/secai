@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":4,
+    "selectedBox":4,
+    "selecteID":58,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#fff9f9","height":1080},
     "nodeParent":-1,
@@ -227,6 +227,48 @@
                 },
                 {
                     "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,btnroot",
+                    "props":{"y":90,"x":754,"width":63,"var":"btnroot","text":"根目录>","overflow":"scroll","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},
+                    "nodeParent":4,
+                    "label":"btnroot",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":58,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"TextInput",
+                    "searchKey":"TextInput,searchInput",
+                    "props":{"y":92,"x":320,"width":152,"var":"searchInput","skin":"comp/textinput.png","prompt":"输入文件名搜索","height":32,"fontSize":18},
+                    "nodeParent":4,
+                    "label":"searchInput",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":59,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"RadioGroup",
+                    "searchKey":"RadioGroup,filetypeRadio",
+                    "props":{"y":141,"x":328,"width":143,"var":"filetypeRadio","space":10,"skin":"comp/radiogroup.png","selectedIndex":1,"labels":"全部,图片,切割文件","labelSize":18,"height":86,"direction":"vertical"},
+                    "nodeParent":4,
+                    "label":"filetypeRadio",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":60,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnorder",
                     "props":{"y":82,"x":1501,"width":115,"var":"btnorder","skin":"comp/button.png","labelSize":20,"label":"喷印下单","height":40},
@@ -347,48 +389,6 @@
                                 }]
                         }],
                     "$HIDDEN":true
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,btnroot",
-                    "props":{"y":90,"x":754,"width":63,"var":"btnroot","text":"根目录>","overflow":"scroll","mouseEnabled":true,"height":24,"fontSize":18,"color":"#252121","align":"left"},
-                    "nodeParent":4,
-                    "label":"btnroot",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":58,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"TextInput",
-                    "searchKey":"TextInput,searchInput",
-                    "props":{"y":92,"x":320,"width":152,"var":"searchInput","skin":"comp/textinput.png","prompt":"输入文件名搜索","height":32,"fontSize":18},
-                    "nodeParent":4,
-                    "label":"searchInput",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":59,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"RadioGroup",
-                    "searchKey":"RadioGroup,filetypeRadio",
-                    "props":{"y":141,"x":328,"width":143,"var":"filetypeRadio","space":10,"skin":"comp/radiogroup.png","selectedIndex":1,"labels":"全部,图片,切割文件","labelSize":18,"height":86,"direction":"vertical"},
-                    "nodeParent":4,
-                    "label":"filetypeRadio",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":60,
-                    "child":[
-                        ]
                 }],
             "$HIDDEN":false
         },
