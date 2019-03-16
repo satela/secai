@@ -3,6 +3,7 @@ package ui.login {
 	import laya.ui.*;
 	import laya.display.*;
 	import laya.display.Text;
+	import script.prefabScript.LinkTextControl;
 	import script.login.RegisterCntrol;
 
 	public class RegisterPanelUI extends View {

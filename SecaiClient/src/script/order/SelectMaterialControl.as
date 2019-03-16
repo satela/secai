@@ -163,7 +163,7 @@ package script.order
 			{
 				uiSkin.box_mat.visible = true;
 				uiSkin.box_tech.visible = false;
-				uiSkin.backBtn.label = "true";
+				uiSkin.backBtn.label = "工艺";
 			}
 		}
 		//选择工艺---------------------------------------------

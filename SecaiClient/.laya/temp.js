@@ -1206,18 +1206,18 @@ var GameConfig=(function(){
 		reg("utils.LoadingPrgControl",LoadingPrgControl);
 		reg("script.login.LogPanelControl",LogPanelControl);
 		reg("laya.display.Text",Text);
+		reg("script.prefabScript.LinkTextControl",LinkTextControl);
 		reg("script.login.RegisterCntrol",RegisterCntrol);
 		reg("script.login.ResetPwdControl",ResetPwdControl);
 		reg("script.MainPageControl",MainPageControl);
 		reg("utils.AddMsgControl",AddMsgControl);
-		reg("script.prefabScript.LinkTextControl",LinkTextControl);
 		reg("script.order.SelectAddressControl",SelectAddressControl);
 		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
 		reg("script.order.SelectFactoryControl",SelectFactoryControl);
 		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 		reg("script.order.SelectPicControl",SelectPicControl);
-		reg("script.order.SelectTechControl",SelectTechControl);
+		reg("script.prefabScript.TopBannerControl",TopBannerControl);
 		reg("script.order.PaintOrderControl",PaintOrderControl);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
@@ -1549,7 +1549,6 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_FACTORY"]=SelectFactoryPanelUI;
 		this.viewDict["VIEW_SELECT_PIC_TO_ORDER"]=SelectPicPanelUI;
 		this.viewDict["VIEW_SELECT_MATERIAL"]=SelectMaterialPanelUI;
-		this.viewDict["VIEW_SELECT_TECHNORLOGY"]=SelectTechPanelUI;
 		this.viewDict["VIEW_SELECT_DELIVERY_TYPE"]=SelectDeliveryPanelUI;
 		this.viewDict["VIEW_ADD_MESSAGE"]=AddCommentPanelUI;
 		this.viewDict["VIEW_ADD_NEW_ADDRESS"]=NewAddressPanelUI;
@@ -1612,7 +1611,6 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_FACTORY="VIEW_SELECT_FACTORY";
 	ViewManager.VIEW_SELECT_PIC_TO_ORDER="VIEW_SELECT_PIC_TO_ORDER";
 	ViewManager.VIEW_SELECT_MATERIAL="VIEW_SELECT_MATERIAL";
-	ViewManager.VIEW_SELECT_TECHNORLOGY="VIEW_SELECT_TECHNORLOGY";
 	ViewManager.VIEW_ADD_MESSAGE="VIEW_ADD_MESSAGE";
 	ViewManager.VIEW_SELECT_DELIVERY_TYPE="VIEW_SELECT_DELIVERY_TYPE";
 	ViewManager.VIEW_LOADING_PRO="VIEW_LOADING_PRO";
@@ -2146,8 +2144,24 @@ var Main=(function(){
 
 	__class(Main,'Main');
 	var __proto=Main.prototype;
+	__proto.startInit=function(){
+		if (window["Laya3D"])window["Laya3D"].init(1920,1080);
+		else Laya.init(1920,1080,Laya["WebGL"]);
+		Laya.stage.scaleMode="noscale";
+		Laya.stage.screenMode=GameConfig.screenMode;
+		Laya.stage.alignV=GameConfig.alignV;
+		Laya.stage.alignH="center";
+		URL.exportSceneToJson=GameConfig.exportSceneToJson;
+		if (GameConfig.debug || Utils.getQueryString("debug")=="true")Laya.enableDebugPanel();
+		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"])Laya["PhysicsDebugDraw"].enable();
+		if (GameConfig.stat)Stat.show();
+		Laya.alertGlobalError=true;
+		ResourceVersion.enable("version.json",Handler.create(this,this.onVersionLoaded),2);
+		Laya.stage.on("resize",this,this.onResizeBrower);
+	}
+
 	__proto.onVersionLoaded=function(){
-		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
+		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas",type:"atlas"},{url:"res/atlas/upload.atlas",type:"atlas"},{url:"res/atlas/mainpage.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
 	__proto.onLoadedComp=function(){
@@ -34243,12 +34257,12 @@ var MainPageControl=(function(_super){
 		btnUserCenter.on("click",this,this.onShowUserCenter);
 		EventCenter.instance.on("LOGIN_SUCESS",this,this.onSucessLogin);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
-		(this.owner ["panel_main"]).height=Browser.clientHeight-20;
+		(this.owner ["panel_main"]).height=Browser.clientHeight;
 		if(!Userdata.instance.isLogin)
 			this.loginAccount();
 		else{
 			this.txtLogin.text=Userdata.instance.userAccount;
-			this.txtReg.text="退出";
+			this.txtReg.text="[退出]";
 		}
 	}
 
@@ -34268,7 +34282,7 @@ var MainPageControl=(function(_super){
 			Userdata.instance.userAccount=account;
 			Userdata.instance.isLogin=true;
 			this.txtLogin.text=account;
-			this.txtReg.text="退出";
+			this.txtReg.text="[退出]";
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
 		}
 	}
@@ -34283,7 +34297,7 @@ var MainPageControl=(function(_super){
 
 	__proto.onResizeBrower=function(){
 		console.log("height:"+Browser.clientHeight);
-		(this.owner ["panel_main"]).height=Browser.clientHeight-20;
+		(this.owner ["panel_main"]).height=Browser.clientHeight;
 	}
 
 	__proto.onShowUpload=function(){
@@ -34317,8 +34331,8 @@ var MainPageControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.isLogin=false;
-			this.txtLogin.text="登录";
-			this.txtReg.text="注册";
+			this.txtLogin.text="[登录]";
+			this.txtReg.text="[注册]";
 			UtilTool.setLocalVar("useraccount","");
 			UtilTool.setLocalVar("userpwd","");
 		}
@@ -34326,7 +34340,7 @@ var MainPageControl=(function(_super){
 
 	__proto.onSucessLogin=function(e){
 		this.txtLogin.text=e;
-		this.txtReg.text="退出";
+		this.txtReg.text="[退出]";
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
 	}
 
@@ -34631,7 +34645,7 @@ var LogPanelControl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSKin=this.owner;
 		this.owner["closebtn"].on("click",this,this.onCloseScene);
-		this.owner["bgimg"].alpha=0.5;
+		this.owner["bgimg"].alpha=0.95;
 		this.uiSKin.input_account.maxChars=11;
 		this.uiSKin.input_account.restrict="0-9";
 		this.uiSKin.input_pwd.maxChars=20;
@@ -34694,6 +34708,10 @@ var LinkTextControl=(function(_super){
 		this.txt=null;
 		/**@prop {name:undercolor,tips:"下划线颜色",type:String}*/
 		this.undercolor="#222222";
+		/**@prop {name:txttype,tips:"类型",type:int}*/
+		this.txttype=0;
+		//0 有下划线 1 无下划线
+		this.ypos=NaN;
 		LinkTextControl.__super.call(this);
 	}
 
@@ -34701,21 +34719,90 @@ var LinkTextControl=(function(_super){
 	var __proto=LinkTextControl.prototype;
 	__proto.onStart=function(){
 		this.txt=this.owner;
-		this.txt.underline=true;
-		this.txt.underlineColor=this.undercolor;
+		if(this.txttype==0){
+			this.txt.underline=true;
+			this.txt.underlineColor=this.undercolor;
+		}
+		this.ypos=this.txt.y;
 		this.txt.on("mouseover",this,this.onMouseOverHandler);
 		this.txt.on("mouseout",this,this.onMouseOutHandler);
+		this.txt.on("mousedown",this,this.onMouseDownHandler);
+		this.txt.on("click",this,this.onMouseClickHandler);
+	}
+
+	__proto.onMouseClickHandler=function(){
+		Mouse.cursor="auto";
+	}
+
+	__proto.onMouseDownHandler=function(){
+		if(this.txttype==1){
+			this.txt.color="#74F79B";
+		}
 	}
 
 	__proto.onMouseOutHandler=function(){
 		Mouse.cursor="auto";
+		if(this.txttype==1){
+			this.txt.y=this.ypos;
+			this.txt.color="#EDFFEC";
+		}
 	}
 
 	__proto.onMouseOverHandler=function(){
 		Mouse.cursor="hand";
+		if(this.txttype==1){
+			this.txt.y=this.ypos-1;
+			this.txt.color="#FFFFFF";
+		}
+	}
+
+	__proto.onDestroy=function(){
+		Mouse.cursor="auto";
 	}
 
 	return LinkTextControl;
+})(Script)
+
+
+//class script.prefabScript.TopBannerControl extends laya.components.Script
+var TopBannerControl=(function(_super){
+	function TopBannerControl(){
+		this.uiSkin=null;
+		TopBannerControl.__super.call(this);
+	}
+
+	__class(TopBannerControl,'script.prefabScript.TopBannerControl',_super);
+	var __proto=TopBannerControl.prototype;
+	__proto.onEnable=function(){
+		this.uiSkin=this.owner;
+		var firstPage=this.uiSkin.getChildByName("firstPage");
+		var username=this.uiSkin.getChildByName("userName");
+		var logout=this.uiSkin.getChildByName("logout");
+		username.text=Userdata.instance.userAccount;
+		firstPage.on("click",this,this.showFirstPage);
+		logout.on("click",this,this.showLogOut);
+	}
+
+	__proto.onStart=function(){}
+	__proto.showFirstPage=function(){
+		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+	}
+
+	__proto.showLogOut=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"account/logout?",this,this.onLoginOutBack,"","post");
+	}
+
+	__proto.onLoginOutBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			UtilTool.setLocalVar("useraccount","");
+			UtilTool.setLocalVar("userpwd","");
+			Userdata.instance.isLogin=false;
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
+	return TopBannerControl;
 })(Script)
 
 
@@ -34772,13 +34859,11 @@ var PicManagerControl=(function(_super){
 	__proto.onStart=function(){
 		this.directTree=[];
 		this.uiSkin=this.owner;
+		this.uiSkin.main_panel.vScrollBarSkin="";
 		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
 		this.uiSkin.btnorder.on("click",this,this.onshowOrder);
 		this.createbox=this.uiSkin.boxNewFolder;
 		this.createbox.visible=false;
-		this.uiSkin.firstpage.underline=true;
-		this.uiSkin.firstpage.underlineColor="#121212";
-		this.uiSkin.firstpage.on("click",this,this.onBackToMain);
 		this.uiSkin.input_folename.maxChars=10;
 		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
 		this.uiSkin.picList.itemRender=PicInfoItem;
@@ -34802,9 +34887,15 @@ var PicManagerControl=(function(_super){
 		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		DirectoryFileModel.instance.haselectPic={};
 		this.uiSkin.searchInput.on("input",this,this.onSearchInput);
 		this.uiSkin.on("removed",this,this.onRemovedFromStage);
+		this.uiSkin.main_panel.height=Browser.clientHeight;
+	}
+
+	__proto.onResizeBrower=function(){
+		this.uiSkin.main_panel.height=Browser.clientHeight;
 	}
 
 	__proto.initFileOpen=function(){
@@ -34890,6 +34981,7 @@ var PicManagerControl=(function(_super){
 		EventCenter.instance.off("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		Browser.document.body.removeChild(this.file);
 	}
 
@@ -34971,6 +35063,9 @@ var PicManagerControl=(function(_super){
 			if(i < 3){
 				this.uiSkin["flder"+i].text=this.directTree[i].directName+">";
 				this.uiSkin["flder"+i].visible=true;
+				if(i > 0){
+					this.uiSkin["flder"+i].x=this.uiSkin["flder"+(i-1)].x+(this.uiSkin ["flder"+(i-1)]).textField.textWidth+2;
+				}
 			}
 		}
 	}
@@ -35016,12 +35111,12 @@ var PictureCheckControl=(function(_super){
 		if(this.param !=null){
 			this.uiSkin.img.skin="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+(this.param).fid+".jpg";
 			if(this.param.picWidth > this.param.picHeight){
-				this.uiSkin.img.width=1000;
-				this.uiSkin.img.height=1000/this.param.picWidth *this.param.picHeight;
+				this.uiSkin.img.width=750;
+				this.uiSkin.img.height=750/this.param.picWidth *this.param.picHeight;
 			}
 			else{
-				this.uiSkin.img.height=1000;
-				this.uiSkin.img.width=1000/this.param.picHeight *this.param.picWidth;
+				this.uiSkin.img.height=750;
+				this.uiSkin.img.width=750/this.param.picHeight *this.param.picWidth;
 			}
 		}
 	}
@@ -35122,7 +35217,6 @@ var PaintOrderControl=(function(_super){
 	var __proto=PaintOrderControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
-		this.uiSkin.firstpage.on("click",this,this.onClosePanel);
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.mainvbox.autoSize=true;
 		this.uiSkin.btnaddpic.on("click",this,this.onShowSelectPic);
@@ -35161,7 +35255,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		EventCenter.instance.on("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
-		(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
+		(this.uiSkin.panel_main).height=(Browser.clientHeight-292);
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
 		this.resetOrderInfo();
 		if(Userdata.instance.getDefaultAddress()!=null){
@@ -35181,9 +35275,9 @@ var PaintOrderControl=(function(_super){
 		for(var i=0;i < this.orderlist.length;i++){
 			total+=Number(this.orderlist[i].total.text);
 		}
-		this.uiSkin.textTotalPrice.text="订单总额："+total.toString();
-		this.uiSkin.textDiscountPrice.text="折后总额："+total.toString();
-		this.uiSkin.textPayPrice.text="应付金额："+total.toString();
+		this.uiSkin.textTotalPrice.text="订单总额："+total.toFixed(2);
+		this.uiSkin.textDiscountPrice.text="折后总额："+total.toFixed(2);
+		this.uiSkin.textPayPrice.text="应付金额："+total.toFixed(2);
 	}
 
 	__proto.onGetOutPutAddress=function(data){
@@ -35204,8 +35298,8 @@ var PaintOrderControl=(function(_super){
 	}
 
 	__proto.onResizeBrower=function(){
-		if(Browser.clientHeight-160 > 0)
-			(this.uiSkin.panel_main).height=(Browser.clientHeight-160);
+		if(Browser.clientHeight-292 > 0)
+			(this.uiSkin.panel_main).height=(Browser.clientHeight-292);
 	}
 
 	__proto.onShowSelectPic=function(){
@@ -35640,192 +35734,6 @@ var EnterPrizeInfoControl=(function(_super){
 })(Script)
 
 
-//class script.order.SelectTechControl extends laya.components.Script
-var SelectTechControl=(function(_super){
-	function SelectTechControl(){
-		this.uiSKin=null;
-		this.startposx=10;
-		this.param=null;
-		this.itemheight=30;
-		this.itemspaceH=50;
-		this.itemspaceV=20;
-		this.allitemlist=null;
-		this.hasShowItemList=null;
-		this.firstTechlist=null;
-		this.linelist=null;
-		SelectTechControl.__super.call(this);
-	}
-
-	__class(SelectTechControl,'script.order.SelectTechControl',_super);
-	var __proto=SelectTechControl.prototype;
-	__proto.onStart=function(){
-		this.uiSKin=this.owner;
-		var list=[];
-		this.hasShowItemList=[];
-		this.linelist=[];
-		this.firstTechlist=[];
-		this.uiSKin.techcontent.vScrollBarSkin="";
-		this.uiSKin.main_panel.vScrollBarSkin="";
-		var arr=PaintOrderModel.instance.curSelectMat.prcessCatList;
-		var startpos=(this.uiSKin.techcontent.height-arr.length*this.itemheight-this.itemspaceV *(arr.length-1))/2;
-		for(var i=0;i < arr.length;i++){
-			var itembox=new TechBoxItem();
-			itembox.setProcessData(arr[i]);
-			itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
-			itembox.x=this.startposx;
-			itembox.y=startpos;
-			startpos+=itembox.height+this.itemspaceV;
-			this.uiSKin.techcontent.addChild(itembox);
-			this.firstTechlist.push(itembox);
-		}
-		this.uiSKin.btnok.on("click",this,this.onConfirmTech);
-		this.uiSKin.btncancel.on("click",this,this.onCloseView);
-		this.allitemlist=[];
-		(this.uiSKin.main_panel).height=Browser.clientHeight;
-		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
-	}
-
-	__proto.onResizeBrower=function(){
-		console.log("panel heig:"+this.uiSKin.main_panel.height);
-		this.uiSKin.main_panel.height=Browser.clientHeight;
-	}
-
-	__proto.drawCurves=function(a,b){
-		var sp=new Sprite();
-		this.uiSKin.techcontent.addChild(sp);
-		var endy=b.y-a.y;
-		sp.graphics.drawCurves(0,a.y+0.5 *this.itemheight,[0,0,0.4*this.itemspaceH,0.8 *endy,this.itemspaceH,endy],"#ff0000",1);
-		sp.x=a.x+a.width;
-		this.linelist.push(sp);
-	}
-
-	__proto.onGetProFlowt=function(parentitem,processCatvo){
-		var _$this=this;
-		var manufacturecode=PaintOrderModel.instance.curSelectMat.manufacturer_code;
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/procflowlist?manufacturer_code="+manufacturecode+"&procCat_name="+processCatvo.procCat_Name,this,function(data){
-			var result=JSON.parse(data);
-			if(!result.hasOwnProperty("status")){
-				PaintOrderModel.instance.curSelectProcList=result;
-				processCatvo.initProcFlow(result);
-				_$this.onClickMat(parentitem,processCatvo);
-			}
-		},null,null);
-	}
-
-	__proto.onClickMat=function(parentitem,matvo){
-		if(matvo.nextMatList==null && (matvo instanceof model.orderModel.ProcessCatVo )){
-			this.onGetProFlowt(parentitem,matvo);
-			return;
-		}
-		if(parentitem.isSelected)
-			this.hideItems(parentitem.x,true);
-		else if(this.firstTechlist.indexOf(parentitem)>=0)
-		this.hideItems(parentitem.x,false);
-		else
-		this.hideItems(parentitem.x,true);
-		if(parentitem.isSelected){
-			parentitem.setSelected(false);
-			parentitem.setTechSelected(false);
-			if(this.firstTechlist.indexOf(parentitem)>=0)
-				this.cancelTech(parentitem.processCatVo.nextMatList);
-			this.updateSelectedTech();
-			return;
-		}
-		parentitem.setSelected(true);
-		parentitem.setTechSelected(true);
-		if(matvo.nextMatList && matvo.nextMatList.length > 0){
-			var arr=matvo.nextMatList;
-			var startpos=parentitem.y+0.5 *this.itemheight-(arr.length*this.itemheight+this.itemspaceV *(arr.length-1))/2;
-			var starpox=parentitem.x+parentitem.width+this.itemspaceH;
-			for(var i=0;i < arr.length;i++){
-				var itembox=this.getItembox();
-				itembox.setData(arr[i]);
-				this.hasShowItemList.push(itembox);
-				itembox.on("click",this,this.onClickMat,[itembox,arr[i]]);
-				itembox.x=starpox;
-				itembox.y=startpos;
-				this.drawCurves(parentitem,itembox);
-				startpos+=itembox.height+this.itemspaceV;
-				this.uiSKin.techcontent.addChild(itembox);
-			}
-		}
-		else{
-			this.hideItems(this.firstTechlist[0].x,false);
-		}
-		this.updateSelectedTech();
-	}
-
-	__proto.hideItems=function(curposx,changedata){
-		for(var i=0;i < this.hasShowItemList.length;i++){
-			if(this.hasShowItemList[i].x > curposx){
-				this.hasShowItemList[i].removeSelf();
-				this.hasShowItemList[i].setSelected(false);
-				if(changedata)
-					this.hasShowItemList[i].techmainvo.selected=false;
-				this.allitemlist.push(this.hasShowItemList[i]);
-				this.hasShowItemList.splice(i,1);
-				i--;
-			}
-			else if(this.hasShowItemList[i].x==curposx){
-				this.hasShowItemList[i].setSelected(false);
-				if(changedata)
-					this.hasShowItemList[i].techmainvo.selected=false;
-			}
-		}
-		for(var i=0;i < this.linelist.length;i++){
-			if(this.linelist[i].x > curposx){
-				this.linelist[i].removeSelf();
-				this.linelist.splice(i,1);
-				i--;
-			}
-		}
-	}
-
-	__proto.updateSelectedTech=function(){
-		this.uiSKin.selecttech.text=PaintOrderModel.instance.curSelectMat.getTechDes();
-	}
-
-	__proto.cancelTech=function(arr){
-		if(arr){
-			for(var i=0;i < arr.length;i++){
-				arr[i].selected=false;
-				this.cancelTech(arr[i].nextMatList);
-			}
-		}
-	}
-
-	__proto.getItembox=function(){
-		if(this.allitemlist.length > 0){
-			return this.allitemlist.splice(0,1)[0];
-		}
-		else{
-			var itembox=new TechBoxItem();
-			return itembox;
-		}
-	}
-
-	__proto.onConfirmTech=function(){
-		if(PaintOrderModel.instance.curSelectOrderItem)
-			PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
-		else if(PaintOrderModel.instance.batchChangeMatItems && PaintOrderModel.instance.batchChangeMatItems.length > 0){
-			for(var i=0;i < PaintOrderModel.instance.batchChangeMatItems.length;i++)
-			PaintOrderModel.instance.batchChangeMatItems[i].changeProduct(PaintOrderModel.instance.curSelectMat);
-		}
-		this.onCloseView();
-	}
-
-	__proto.onCloseView=function(){
-		ViewManager.instance.closeView("VIEW_SELECT_TECHNORLOGY");
-	}
-
-	__proto.onDestroy=function(){
-		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
-	}
-
-	return SelectTechControl;
-})(Script)
-
-
 //class script.login.ResetPwdControl extends laya.components.Script
 var ResetPwdControl=(function(_super){
 	function ResetPwdControl(){
@@ -36085,13 +35993,11 @@ var RegisterCntrol=(function(_super){
 		this.uiSkin.inputCode.maxChars=8;
 		this.uiSkin.btnGetCode.on("click",this,this.onGetPhoneCode);
 		this.uiSkin.btnClose.on("click",this,this.onCloseScene);
-		this.uiSkin.txtRefresh.underline=true;
-		this.uiSkin.txtRefresh.underlineColor="#121212";
 		this.uiSkin.txtRefresh.on("click",this,this.onRefreshVerify);
 		this.uiSkin.btnReg.on("click",this,this.onRegister);
 		this.verifycode=Browser.document.createElement("div");
 		this.verifycode.id="v_container";
-		this.verifycode.style="width: 200px;height: 50px;left:950px;top:295"
+		this.verifycode.style="width: 200px;height: 50px;left:950px;top:521";
 		this.verifycode.style.position="absolute";
 		this.verifycode.style.zIndex=999;
 		Browser.document.body.appendChild(this.verifycode);
@@ -36182,7 +36088,6 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.uiSkin.btnClose.on("click",this,this.onCloseScene);
 		this.uiSkin.btnBegin.on("click",this,this.onClickBegin);
 		this.uiSkin.btnOpenFile.on("click",this,this.onClickOpenFile);
-		this.uiSkin.bgimg.alpha=0.7;
 		this.uiSkin.fileList.itemRender=FileUpLoadItem;
 		this.uiSkin.fileList.vScrollBarSkin="";
 		this.uiSkin.fileList.selectEnable=false;
@@ -36244,10 +36149,10 @@ var UpLoadAndOrderContrl=(function(_super){
 		}
 		else{
 			this.isUploading=false;
-			Laya.timer.once(5000,this,this.onCloseScene);
 		}
 	}
 
+	//Laya.timer.once(5000,this,onCloseScene);
 	__proto.onCompleteUpload=function(e){
 		if(this.fileListData[this.curUploadIndex])
 			this.fileListData[this.curUploadIndex].progress=100;
@@ -36411,7 +36316,7 @@ var SelectMaterialControl=(function(_super){
 		else{
 			this.uiSkin.box_mat.visible=true;
 			this.uiSkin.box_tech.visible=false;
-			this.uiSkin.backBtn.label="true";
+			this.uiSkin.backBtn.label="工艺";
 		}
 	}
 
@@ -42824,10 +42729,8 @@ var OrderItemUI=(function(_super){
 	function OrderItemUI(){
 		this.bgimg=null;
 		this.fileimg=null;
-		this.inputnum=null;
 		this.numindex=null;
 		this.filename=null;
-		this.viprice=null;
 		this.price=null;
 		this.total=null;
 		this.operatebox=null;
@@ -42841,6 +42744,8 @@ var OrderItemUI=(function(_super){
 		this.mattxt=null;
 		this.changemat=null;
 		this.checkSel=null;
+		this.numbox=null;
+		this.inputnum=null;
 		OrderItemUI.__super.call(this);
 	}
 
@@ -42851,7 +42756,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1281,"var":"bgimg","skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":113},"compId":26},{"type":"Image","props":{"y":57,"x":178,"width":100,"var":"fileimg","skin":"comp/image.png","height":100,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"TextInput","props":{"y":26,"x":1003,"width":46,"var":"inputnum","text":"1","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":16},{"type":"Label","props":{"y":21,"x":80,"width":30,"var":"numindex","text":"1","height":21,"fontSize":20,"align":"center"},"compId":3},{"type":"Label","props":{"y":15,"x":227,"wordWrap":true,"width":182,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","height":38,"fontSize":18,"align":"center"},"compId":5},{"type":"Label","props":{"y":26,"x":932,"width":58,"var":"viprice","text":"0","height":21,"fontSize":18,"align":"center"},"compId":14},{"type":"Label","props":{"y":26,"x":1058,"width":58,"var":"price","text":"1","height":21,"fontSize":18,"align":"center"},"compId":15},{"type":"Label","props":{"y":26,"x":1113,"width":77,"var":"total","text":"7776.8","height":21,"fontSize":18,"align":"center"},"compId":17},{"type":"Box","props":{"y":10,"x":1203,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":26,"var":"deleteorder","text":"删除订单","fontSize":18,"color":"#094f28","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":10,"x":616,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":18,"align":"center"},"compId":8},{"type":"Label","props":{"y":25,"width":58,"text":"高(cm)","height":21,"fontSize":18,"align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":10},{"type":"TextInput","props":{"y":26,"x":58,"width":74,"var":"editheight","text":"20","skin":"comp/textinput.png","height":22,"fontSize":18,"sizeGrid":"6,15,7,14"},"compId":11}]},{"type":"VBox","props":{"y":10,"x":754,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":18,"align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":12,"x":415,"var":"matbox"},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","height":21,"fontSize":18,"align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":60,"var":"changemat","text":"更换材料","presetID":1,"fontSize":18,"color":"#094f28","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":23,"x":21,"var":"checkSel","skin":"comp/checkbox.png","scaleY":1.2,"scaleX":1.2},"compId":31}],"loadList":["commers/sel.png","comp/image.png","comp/textinput.png","prefabs/LinksText.prefab","comp/checkbox.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/输入框.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":143,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":35,"x":53,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":17,"x":195,"wordWrap":true,"width":118,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":39.5,"x":816,"width":58,"var":"price","text":"175.2","height":21,"fontSize":14,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1074,"var":"total","text":"12680","height":21,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":17},{"type":"Box","props":{"y":17,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":30,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19}]},{"type":"Box","props":{"y":12,"x":488,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimSun","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/输入框.png","sizeGrid":"5,5,5,5","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11}]},{"type":"VBox","props":{"y":29.5,"x":620,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":320,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/复选框.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":950,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"skin":"order/加.png"},"compId":33},{"type":"Button","props":{"skin":"order/减.png"},"compId":34}]}],"loadList":["commers/输入框.png","comp/image.png","prefabs/LinksText.prefab","commers/复选框.png","order/加.png","order/减.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -42860,11 +42765,10 @@ var OrderItemUI=(function(_super){
 var LoginViewUI=(function(_super){
 	function LoginViewUI(){
 		this.panel_main=null;
+		this.btnUpload=null;
+		this.btnUserCenter=null;
 		this.txt_login=null;
 		this.txt_reg=null;
-		this.btnUserCenter=null;
-		this.btnBuyCar=null;
-		this.btnUpload=null;
 		LoginViewUI.__super.call(this);
 	}
 
@@ -42875,7 +42779,7 @@ var LoginViewUI=(function(_super){
 		this.createView(LoginViewUI.uiView);
 	}
 
-	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1800},"compId":3,"child":[{"type":"Image","props":{"y":0,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":4,"child":[{"type":"Label","props":{"x":30,"width":548,"top":20,"text":"欢迎来到 色彩飞扬-广告全产业链生态平台 联系方式：4006055998","styleSkin":"comp/label.png","height":18,"fontSize":18,"align":"left"},"compId":5},{"type":"Label","props":{"y":18,"x":1016,"width":139,"var":"txt_login","text":"登陆","mouseEnabled":true,"height":20,"fontSize":20,"align":"right"},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1166.1953125,"var":"txt_reg","text":"注册","mouseEnabled":true,"fontSize":20},"compId":10}]},{"type":"Sprite","props":{"y":63,"x":320,"texture":"mainpage/logo.png","scaleY":0.9,"scaleX":0.9},"compId":11},{"type":"Sprite","props":{"y":311,"x":320,"width":1280,"texture":"mainpage/bg.jpg"},"compId":12},{"type":"Image","props":{"y":250,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5"},"compId":38},{"type":"TextInput","props":{"y":138,"x":1000,"width":200,"skin":"comp/textinput.png","prompt":"输入搜索内容","height":50,"fontSize":24,"sizeGrid":"6,15,7,14"},"compId":13},{"type":"Button","props":{"y":138,"x":1200,"skin":"comp/button.png","labelSize":20,"label":"搜索","height":50},"compId":14},{"type":"Button","props":{"y":139,"x":1301,"width":100,"var":"btnUserCenter","skin":"comp/button.png","labelSize":20,"label":"用户中心","height":50},"compId":15},{"type":"Button","props":{"y":139,"x":1401,"width":100,"var":"btnBuyCar","skin":"comp/button.png","labelSize":20,"label":"购物车","height":50},"compId":16},{"type":"Sprite","props":{"y":991,"x":320,"texture":"mainpage/flow.jpg"},"compId":17},{"type":"Label","props":{"y":1219,"x":288,"text":"合作伙伴","fontSize":20,"font":"Arial","color":"#211e1e"},"compId":18},{"type":"HBox","props":{"y":1255,"x":320,"space":20,"align":"middle"},"compId":19,"child":[{"type":"Sprite","props":{"y":0,"x":160,"width":150,"texture":"mainpage/lenovo.png","height":100},"compId":20},{"type":"Sprite","props":{"width":150,"texture":"mainpage/pantone.png","height":100},"compId":21},{"type":"Sprite","props":{"y":0,"x":320,"width":150,"texture":"mainpage/samsung.png","height":100},"compId":22},{"type":"Sprite","props":{"x":480,"width":150,"texture":"mainpage/epson.png","height":100},"compId":23},{"type":"Sprite","props":{"x":640,"width":150,"texture":"mainpage/colorture.png","height":100},"compId":24},{"type":"Sprite","props":{"x":800,"width":150,"texture":"mainpage/express.png","height":100},"compId":25}]},{"type":"Button","props":{"y":252,"x":368,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":31},{"type":"Button","props":{"y":252,"x":548,"width":176,"var":"btnUpload","stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"上传下单","height":54},"compId":32},{"type":"Button","props":{"y":252,"x":725,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":33},{"type":"Button","props":{"y":252,"x":904,"width":176,"stateNum":2,"skin":"commers/Createselect.png","labelStrokeColor":"#0f100f","labelSize":24,"labelColors":"#FFFFFF,#8e7e4e","label":"全部分类","height":54},"compId":34}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27}],"loadList":["commers/whitebg.png","comp/label.png","mainpage/logo.png","mainpage/bg.jpg","commers/blackbg.png","comp/textinput.png","comp/button.png","mainpage/flow.jpg","mainpage/lenovo.png","mainpage/pantone.png","mainpage/samsung.png","mainpage/epson.png","mainpage/colorture.png","mainpage/express.png","commers/Createselect.png"],"loadList3D":[]};
+	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1800},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"x":320,"width":1280,"texture":"mainpage/主页底.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers/logo带文字.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":661,"width":92,"text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":781,"width":92,"text":"字牌下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":44,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":45}]},{"type":"Text","props":{"y":34,"x":901,"width":92,"text":"印刷下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":46,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":47}]},{"type":"Text","props":{"y":34,"x":1020,"width":92,"text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":1140,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1260,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1365,"width":128,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1497,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27}],"loadList":["mainpage/主页底.jpg","commers/logo带文字.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return LoginViewUI;
 })(Scene)
 
@@ -42894,7 +42798,7 @@ var WaitRespondPanelUI=(function(_super){
 		this.createView(WaitRespondPanelUI.uiView);
 	}
 
-	WaitRespondPanelUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/blackbg.png","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.9,"sizeGrid":"22,17,16,17"},"compId":3},{"type":"Image","props":{"y":540,"x":960,"var":"zhuanq","skin":"commers/circlebg.png","anchorY":0.5,"anchorX":0.5,"alpha":0.9},"compId":4}],"loadList":["commers/blackbg.png","commers/circlebg.png"],"loadList3D":[]};
+	WaitRespondPanelUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.9},"compId":3},{"type":"Image","props":{"y":540,"x":960,"var":"zhuanq","skin":"commers/circlebg.png","anchorY":0.5,"anchorX":0.5,"alpha":0.9},"compId":4}],"loadList":["commers/grayback.jpg","commers/circlebg.png"],"loadList3D":[]};
 	return WaitRespondPanelUI;
 })(Scene)
 
@@ -48804,6 +48708,28 @@ var TabChooseBtnUI=(function(_super){
 })(View)
 
 
+//class ui.TopBannerUI extends laya.ui.View
+var TopBannerUI=(function(_super){
+	function TopBannerUI(){
+		this.firstPage=null;
+		this.myorder=null;
+		this.userName=null;
+		this.logout=null;
+		TopBannerUI.__super.call(this);
+	}
+
+	__class(TopBannerUI,'ui.TopBannerUI',_super);
+	var __proto=TopBannerUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TopBannerUI.uiView);
+	}
+
+	TopBannerUI.uiView={"type":"View","props":{"width":1920},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"texture":"commers/底.jpg"},"compId":3},{"type":"Sprite","props":{"y":18,"x":320,"texture":"commers/logo带文字.png"},"compId":4},{"type":"Label","props":{"y":28,"x":512,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#fdf9f9"},"compId":5},{"type":"Text","props":{"y":28,"x":528,"width":40,"var":"firstPage","text":"首页","rotation":0,"presetID":1,"height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#f8f0ef","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"y":28,"x":998,"var":"myorder","text":"我的订单","presetID":1,"fontSize":20,"font":"Microsoft YaHei","color":"#f8f0ef","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":28,"x":1095,"width":121,"var":"userName","text":"13800000000","presetID":1,"overflow":"hidden","fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"y":28,"x":1223,"width":73,"var":"logout","text":"[退出]","presetID":1,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"y":28,"x":1083,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#fdf9f9"},"compId":14},{"type":"Script","props":{"runtime":"script.prefabScript.TopBannerControl"},"compId":15}],"loadList":["commers/底.jpg","commers/logo带文字.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	return TopBannerUI;
+})(View)
+
+
 //class ui.order.OrderAddressItemUI extends laya.ui.View
 var OrderAddressItemUI=(function(_super){
 	function OrderAddressItemUI(){
@@ -48865,19 +48791,22 @@ var EnterPrizeInfoPaneUI=(function(_super){
 //class ui.PaintOrderPanelUI extends laya.ui.View
 var PaintOrderPanelUI=(function(_super){
 	function PaintOrderPanelUI(){
-		this.firstpage=null;
+		this.firstPage=null;
+		this.myorder=null;
+		this.userName=null;
+		this.logout=null;
 		this.textDeliveryType=null;
 		this.textProductNum=null;
 		this.textTotalPrice=null;
 		this.textDiscountPrice=null;
 		this.textPayPrice=null;
-		this.panel_main=null;
 		this.myaddresstxt=null;
 		this.qqContact=null;
 		this.factorytxt=null;
-		this.batchChange=null;
-		this.btnaddpic=null;
 		this.selectAll=null;
+		this.btnaddpic=null;
+		this.batchChange=null;
+		this.panel_main=null;
 		this.mainvbox=null;
 		this.ordervbox=null;
 		this.deliverybtn=null;
@@ -48944,8 +48873,8 @@ var LogPanelUI=(function(_super){
 		this.input_pwd=null;
 		this.btn_login=null;
 		this.closebtn=null;
-		this.txt_reg=null;
 		this.txt_forget=null;
+		this.txt_reg=null;
 		LogPanelUI.__super.call(this);
 	}
 
@@ -49116,13 +49045,13 @@ var SelectDeliveryPanelUI=(function(_super){
 //class ui.picManager.PicShortItemUI extends laya.ui.View
 var PicShortItemUI=(function(_super){
 	function PicShortItemUI(){
-		this.sel=null;
 		this.img=null;
 		this.filename=null;
 		this.btndelete=null;
 		this.fileinfo=null;
 		this.picClassTxt=null;
 		this.colorspacetxt=null;
+		this.sel=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -49133,7 +49062,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"colorspacetxt","valign":"middle","text":"jpeg","right":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"right"},"compId":11}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":138,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":18,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"width":20,"var":"btndelete","stateNum":1,"skin":"upload/删除.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":160,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":53,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":true,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":107,"wordWrap":true,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/图片选中.png"},"compId":12}],"loadList":["upload/fold.png","upload/删除.png","upload/图片选中.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -49166,6 +49095,25 @@ var UserMainPanelUI=(function(_super){
 
 	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"var":"panel_main","right":0,"left":0,"height":1080},"compId":4,"child":[{"type":"Label","props":{"y":101,"x":320,"width":236,"valign":"middle","text":"用户中心","height":48,"fontSize":24,"color":"#f8f0ef","bgColor":"#f60f0b","align":"center"},"compId":14},{"type":"Image","props":{"y":147,"x":320,"width":236,"skin":"commers/sel.png","sizeGrid":"5,5,5,5","height":639},"compId":52},{"type":"VBox","props":{"y":148,"x":321,"space":2},"compId":5,"child":[{"type":"Box","props":{"y":50,"x":2,"width":232,"height":127},"compId":20,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"企业设置","fontSize":24,"color":"#272524","bold":true},"compId":17,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":16}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":26,"child":[{"type":"Label","props":{"var":"btntxt0","text":"企业资料","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":43,"var":"btntxt1","text":"收货地址","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":19}]}]},{"type":"Box","props":{"y":182,"x":2,"width":232,"height":171},"compId":21,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"订单管理","fontSize":24,"color":"#272524","bold":true},"compId":22,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":23}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":27,"child":[{"type":"Label","props":{"y":0,"var":"btntxt2","text":"购物车","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":24},{"type":"Label","props":{"y":44,"var":"btntxt3","text":"我的订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":25},{"type":"Label","props":{"y":88,"var":"btntxt4","text":"委托订单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":28}]}]},{"type":"Box","props":{"y":353,"x":2,"width":232,"height":127},"compId":29,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"财务管理","fontSize":24,"color":"#272524","bold":true},"compId":30,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":31}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":32,"child":[{"type":"Label","props":{"y":0,"var":"btntxt5","text":"账户充值","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":33},{"type":"Label","props":{"y":44,"var":"btntxt6","text":"我的账单","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":34}]}]},{"type":"Box","props":{"y":508,"x":2,"width":232,"height":117},"compId":36,"child":[{"type":"Label","props":{"y":12,"x":68.5,"text":"个人管理","fontSize":24,"color":"#272524","bold":true},"compId":37,"child":[{"type":"Rect","props":{"y":-12,"x":-69,"width":231,"lineWidth":1,"height":48,"fillColor":"#a19595"},"compId":38}]},{"type":"VBox","props":{"y":53,"x":0,"width":230,"space":20},"compId":39,"child":[{"type":"Label","props":{"y":0,"var":"btntxt7","text":"修改密码","right":10,"left":10,"height":24,"fontSize":24,"color":"#272524","align":"center"},"compId":40},{"type":"Label","props":{"y":33,"var":"btntxt8","text":"我的图库","right":10,"left":10,"fontSize":24,"color":"#272524","align":"center"},"compId":41}]}]}]},{"type":"Image","props":{"y":1,"x":320,"width":1280,"skin":"commers/whitebg.png","height":60},"compId":6,"child":[{"type":"Label","props":{"x":30,"top":20,"text":"欢迎来到用户中心！","styleSkin":"comp/label.png","fontSize":20},"compId":7},{"type":"Label","props":{"y":18,"x":1070,"text":"我的订单","mouseEnabled":true,"fontSize":20},"compId":8},{"type":"Label","props":{"y":17,"text":"|","right":117,"fontSize":20},"compId":9},{"type":"Label","props":{"y":18,"x":1168.1953125,"text":"退出","mouseEnabled":true,"fontSize":20},"compId":10},{"type":"Text","props":{"y":19,"x":210,"var":"firstpage","text":"首页","mouseEnabled":true,"fontSize":20,"runtime":"laya.display.Text"},"compId":11}]},{"type":"Label","props":{"y":108,"x":603,"var":"toptitle","text":"企业资料","fontSize":24,"color":"#c3221f"},"compId":49},{"type":"Sprite","props":{"y":150,"x":600,"width":900,"var":"sp_container","height":800},"compId":50}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/whitebg.png","commers/sel.png","comp/label.png"],"loadList3D":[]};
 	return UserMainPanelUI;
+})(View)
+
+
+//class ui.order.MaterialNameItemUI extends laya.ui.View
+var MaterialNameItemUI=(function(_super){
+	function MaterialNameItemUI(){
+		this.matname=null;
+		MaterialNameItemUI.__super.call(this);
+	}
+
+	__class(MaterialNameItemUI,'ui.order.MaterialNameItemUI',_super);
+	var __proto=MaterialNameItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(MaterialNameItemUI.uiView);
+	}
+
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+	return MaterialNameItemUI;
 })(View)
 
 
@@ -49233,11 +49181,6 @@ var PicOrderItem=(function(_super){
 			this.ordervo.orderData.comments=this.ordervo.comment;
 	}
 
-	__proto.onchangeTech=function(){
-		return;
-		ViewManager.instance.openView("VIEW_SELECT_TECHNORLOGY");
-	}
-
 	__proto.alighComponet=function(){
 		this.checkSel.y=(this.height-26)/2;
 		this.numindex.y=(this.height-this.numindex.height)/2;
@@ -49245,7 +49188,6 @@ var PicOrderItem=(function(_super){
 		this.filename.y=(this.height-this.filename.height)/2;
 		this.matbox.y=(this.height-42)/2;
 		this.editbox.y=(this.height-this.editbox.height)/2;
-		this.viprice.y=(this.height-this.viprice.height)/2;
 		this.inputnum.y=(this.height-this.inputnum.height)/2;
 		this.price.y=(this.height-this.price.height)/2;
 		this.total.y=(this.height-this.total.height)/2;
@@ -49321,25 +49263,6 @@ var PicOrderItem=(function(_super){
 })(OrderItemUI)
 
 
-//class ui.order.MaterialNameItemUI extends laya.ui.View
-var MaterialNameItemUI=(function(_super){
-	function MaterialNameItemUI(){
-		this.matname=null;
-		MaterialNameItemUI.__super.call(this);
-	}
-
-	__class(MaterialNameItemUI,'ui.order.MaterialNameItemUI',_super);
-	var __proto=MaterialNameItemUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(MaterialNameItemUI.uiView);
-	}
-
-	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
-	return MaterialNameItemUI;
-})(View)
-
-
 //class ui.order.TechBoxItemUI extends laya.ui.View
 var TechBoxItemUI=(function(_super){
 	function TechBoxItemUI(){
@@ -49362,19 +49285,23 @@ var TechBoxItemUI=(function(_super){
 //class ui.PicManagePanelUI extends laya.ui.View
 var PicManagePanelUI=(function(_super){
 	function PicManagePanelUI(){
-		this.firstpage=null;
+		this.main_panel=null;
+		this.firstPage=null;
+		this.myorder=null;
+		this.userName=null;
+		this.logout=null;
 		this.btnUploadPic=null;
 		this.btnNewFolder=null;
 		this.flder0=null;
-		this.flder1=null;
-		this.flder2=null;
 		this.htmltext=null;
 		this.radiosel=null;
-		this.btnroot=null;
 		this.searchInput=null;
 		this.filetypeRadio=null;
 		this.btnorder=null;
 		this.picList=null;
+		this.btnroot=null;
+		this.flder1=null;
+		this.flder2=null;
 		this.boxNewFolder=null;
 		this.input_folename=null;
 		this.btnSureCreate=null;
@@ -49468,11 +49395,12 @@ var UpLoadPanelUI=(function(_super){
 //class ui.uploadpic.UpLoadItemUI extends laya.ui.View
 var UpLoadItemUI=(function(_super){
 	function UpLoadItemUI(){
-		this.filename=null;
 		this.prgbar=null;
+		this.filename=null;
 		this.prog=null;
 		this.filesize=null;
 		this.btncancel=null;
+		this.finishimg=null;
 		UpLoadItemUI.__super.call(this);
 	}
 
@@ -49483,7 +49411,7 @@ var UpLoadItemUI=(function(_super){
 		this.createView(UpLoadItemUI.uiView);
 	}
 
-	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":9,"x":12,"width":115,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":20,"color":"#f3ecec","align":"right"},"compId":3},{"type":"ProgressBar","props":{"y":13,"x":211,"width":152,"var":"prgbar","value":0.5,"skin":"comp/progress.png","height":14},"compId":5},{"type":"Label","props":{"y":10,"x":374,"width":45,"var":"prog","text":"10%","height":18,"fontSize":20,"color":"#f1e7e7"},"compId":6},{"type":"Label","props":{"y":9,"x":138,"width":61,"var":"filesize","text":"12k","height":21,"fontSize":20,"color":"#f1e2e2","align":"right"},"compId":7},{"type":"Button","props":{"y":9,"x":442,"width":65,"var":"btncancel","skin":"comp/button.png","label":"删除","height":23},"compId":9}],"loadList":["comp/progress.png","comp/button.png"],"loadList3D":[]};
+	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":12},{"type":"Sprite","props":{"y":1,"x":0,"width":800,"var":"prgbar","texture":"upload/prgbg.png","height":76,"sizeGrid":"2,2,2,2"},"compId":14},{"type":"Label","props":{"y":30.5,"x":92.5,"width":445,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":3},{"type":"Label","props":{"y":30.5,"x":776.5,"width":70,"var":"prog","text":"10%","height":18,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":6},{"type":"Label","props":{"y":30.5,"x":674.5,"width":78,"var":"filesize","text":"12k","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"right"},"compId":7},{"type":"Button","props":{"y":32.5,"x":1020.5,"var":"btncancel","stateNum":1,"skin":"upload/关闭.png"},"compId":9},{"type":"Sprite","props":{"y":20,"x":32,"texture":"upload/图icon.png"},"compId":11},{"type":"Sprite","props":{"y":76,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":13},{"type":"Sprite","props":{"y":28.5,"x":776.5,"var":"finishimg","texture":"upload/完成.png"},"compId":15}],"loadList":["commers/分割线.png","upload/prgbg.png","upload/关闭.png","upload/图icon.png","upload/完成.png"],"loadList3D":[]};
 	return UpLoadItemUI;
 })(View)
 
@@ -49506,28 +49434,6 @@ var PopUpDialogUI=(function(_super){
 	}
 
 	return PopUpDialogUI;
-})(View)
-
-
-//class ui.order.SelectTechPanelUI extends laya.ui.View
-var SelectTechPanelUI=(function(_super){
-	function SelectTechPanelUI(){
-		this.main_panel=null;
-		this.techcontent=null;
-		this.btnok=null;
-		this.btncancel=null;
-		this.selecttech=null;
-		SelectTechPanelUI.__super.call(this);
-	}
-
-	__class(SelectTechPanelUI,'ui.order.SelectTechPanelUI',_super);
-	var __proto=SelectTechPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("order/SelectTechPanel");
-	}
-
-	return SelectTechPanelUI;
 })(View)
 
 
@@ -54148,6 +54054,24 @@ var CompanyAddressItem=(function(_super){
 })(AddressItemUI)
 
 
+//class script.login.CityAreaItem extends ui.login.CityAreaItemUI
+var CityAreaItem=(function(_super){
+	function CityAreaItem(){
+		this.areaVo=null;
+		CityAreaItem.__super.call(this);
+	}
+
+	__class(CityAreaItem,'script.login.CityAreaItem',_super);
+	var __proto=CityAreaItem.prototype;
+	__proto.setData=function(areavo){
+		this.areaVo=areavo;
+		this.productname.text=this.areaVo.areaName;
+	}
+
+	return CityAreaItem;
+})(CityAreaItemUI)
+
+
 //class script.order.TechBoxItem extends ui.order.TechorItemUI
 var TechBoxItem=(function(_super){
 	function TechBoxItem(){
@@ -54202,24 +54126,6 @@ var TechBoxItem=(function(_super){
 	__proto.onClickTech=function(index){}
 	return TechBoxItem;
 })(TechorItemUI)
-
-
-//class script.login.CityAreaItem extends ui.login.CityAreaItemUI
-var CityAreaItem=(function(_super){
-	function CityAreaItem(){
-		this.areaVo=null;
-		CityAreaItem.__super.call(this);
-	}
-
-	__class(CityAreaItem,'script.login.CityAreaItem',_super);
-	var __proto=CityAreaItem.prototype;
-	__proto.setData=function(areavo){
-		this.areaVo=areavo;
-		this.productname.text=this.areaVo.areaName;
-	}
-
-	return CityAreaItem;
-})(CityAreaItemUI)
 
 
 //class script.order.SelFactoryItem extends ui.order.OrderAddressItemUI
@@ -54294,26 +54200,26 @@ var PicInfoItem=(function(_super){
 		this.btndelete.on("click",this,this.onDeleteHandler);
 		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid);
 		if(this.picInfo.picType==0){
-			this.img.skin="commers/fold.png";
-			this.fileinfo.text=this.picInfo.directName;
-			this.filename.visible=false;
+			this.img.skin="upload/fold.png";
+			this.filename.text=this.picInfo.directName;
+			this.fileinfo.visible=false;
 			this.picClassTxt.visible=false;
 			this.colorspacetxt.visible=false;
-			this.img.width=150;
-			this.img.height=150;
+			this.img.width=108;
+			this.img.height=101;
 		}
 		else{
-			this.filename.visible=true;
+			this.fileinfo.visible=true;
 			this.filename.text=this.picInfo.directName;
 			if(this.picInfo.picWidth > this.picInfo.picHeight){
-				this.img.width=150;
-				this.img.height=150/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.img.width=128;
+				this.img.height=128/this.picInfo.picWidth *this.picInfo.picHeight;
 			}
 			else{
-				this.img.height=150;
-				this.img.width=150/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.img.height=128;
+				this.img.width=128/this.picInfo.picHeight *this.picInfo.picWidth;
 			}
-			if(this.img.skin !="commers/fold.png")
+			if(this.img.skin !="upload/fold.png")
 				Laya.loader.clearTextureRes(this.img.skin);
 			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
 			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
@@ -54365,6 +54271,7 @@ var PicInfoItem=(function(_super){
 	__proto.onClickHandler=function(){
 		if(this.picInfo.picType==1){
 			this.sel.visible=!this.sel.visible;
+			this.sel.selected=this.sel.visible;
 			EventCenter.instance.event("SELECT_PIC_ORDER",this.picInfo);
 		}
 	}
@@ -54486,13 +54393,13 @@ var FileUpLoadItem=(function(_super){
 		this.fileobj=filedata;
 		this.filename.text=filedata.name;
 		this.prog.text="0%";
+		this.finishimg.visible=false;
 		var mm=Math.floor(filedata.size/(1024*1024));
 		var sizestr="";
 		if(mm > 0)
 			sizestr=(filedata.size/(1024*1024)).toFixed(2).toString()+"m";
 		else
 		sizestr=((filedata.size/1024).toFixed(2)).toString()+"k";
-		this.prgbar.value=0;
 		this.filesize.text=sizestr;
 		this.btncancel.on("click",this,this.onCancelUpload);
 		this.updateProgress();
@@ -54504,9 +54411,14 @@ var FileUpLoadItem=(function(_super){
 
 	__proto.updateProgress=function(){
 		var pp=Number(this.fileobj.progress);
-		if(pp > 100)
+		if(pp >=100){
 			pp=100;
-		this.prgbar.value=pp/100;
+			this.finishimg.visible=true;
+			this.prog.visible=false;
+		}
+		else
+		this.prog.visible=true;
+		this.prgbar.width=pp/100 *1084;
 		this.prog.text=pp+"%";
 	}
 
@@ -55041,7 +54953,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,View,CallLater,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
+	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
 	/**LayaGameStart**/
 	new Main();
 

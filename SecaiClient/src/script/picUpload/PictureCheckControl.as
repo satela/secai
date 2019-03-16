@@ -33,15 +33,15 @@ package script.picUpload
 				
 				if(param.picWidth > param.picHeight)
 				{
-					this.uiSkin.img.width = 1000;
+					this.uiSkin.img.width = 750;
 					
-					this.uiSkin.img.height = 1000/param.picWidth * param.picHeight;
+					this.uiSkin.img.height = 750/param.picWidth * param.picHeight;
 					
 				}
 				else
 				{
-					this.uiSkin.img.height = 1000;
-					this.uiSkin.img.width = 1000/param.picHeight * param.picWidth;
+					this.uiSkin.img.height = 750;
+					this.uiSkin.img.width = 750/param.picHeight * param.picWidth;
 					
 				}
 			}

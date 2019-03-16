@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":14,
-    "selecteID":9,
+    "selectedBox":2,
+    "selecteID":25,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":21,
+    "maxID":26,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,bgimg",
-            "props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},
+            "props":{"y":0,"x":0,"var":"bgimg","top":0,"skin":"commers/grayback.jpg","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"bgimg",
             "isDirectory":false,
@@ -45,7 +45,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"x":320,"width":1280,"top":0,"skin":"commers/blackbg.png","bottom":0},
+                    "props":{"y":50,"x":418,"width":1084,"skin":"commers/通用弹框底.png","sizeGrid":"3,3,3,3","height":758},
                     "nodeParent":14,
                     "label":"Image",
                     "isDirectory":false,
@@ -53,13 +53,14 @@
                     "hasChild":false,
                     "compId":20,
                     "child":[
-                        ]
+                        ],
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":11,"x":359,"text":"您选择的文件：","fontSize":24,"color":"#f3e6e6"},
+                    "props":{"y":81,"x":444,"text":"正在上传(2/32)","fontSize":22,"font":"SimHei","color":"#354052"},
                     "nodeParent":14,
                     "label":"Label",
                     "isOpen":true,
@@ -68,13 +69,15 @@
                     "hasChild":false,
                     "compId":5,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnClose",
-                    "props":{"y":11,"x":1538,"width":50,"var":"btnClose","skin":"comp/button.png","label":"X","height":30},
+                    "props":{"y":82,"x":1453,"var":"btnClose","skin":"commers/关闭.png"},
                     "nodeParent":14,
                     "label":"btnClose",
                     "isDirectory":false,
@@ -82,27 +85,45 @@
                     "hasChild":false,
                     "compId":6,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnOpenFile",
-                    "props":{"y":48,"x":395,"width":98,"var":"btnOpenFile","skin":"comp/button.png","labelSize":20,"label":"选择文件","height":33},
+                    "props":{"y":133,"x":447,"width":144,"var":"btnOpenFile","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"  选择文件","height":40},
                     "nodeParent":14,
                     "label":"btnOpenFile",
-                    "isDirectory":false,
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
+                    "hasChild":true,
                     "compId":7,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Button",
+                            "searchKey":"Button",
+                            "props":{"y":12,"x":20,"skin":"upload/文件夹.png","mouseEnabled":false},
+                            "nodeParent":7,
+                            "label":"Button",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":22,
+                            "child":[
+                                ]
+                        }],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnBegin",
-                    "props":{"y":48,"x":509,"width":98,"var":"btnBegin","skin":"comp/button.png","labelSize":20,"label":"开始上传","height":33},
+                    "props":{"y":133,"x":610,"width":144,"var":"btnBegin","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"开始上传","height":40},
                     "nodeParent":14,
                     "label":"btnBegin",
                     "isDirectory":false,
@@ -110,13 +131,15 @@
                     "hasChild":false,
                     "compId":8,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"List",
                     "searchKey":"List,fileList",
-                    "props":{"y":97,"x":358,"width":1218,"var":"fileList","repeatX":1,"height":330},
+                    "props":{"y":197,"x":418,"width":1084,"var":"fileList","repeatX":1,"height":610},
                     "nodeParent":14,
                     "label":"fileList",
                     "isDirectory":false,
@@ -124,7 +147,9 @@
                     "hasChild":false,
                     "compId":9,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
                 }]
         },
         {

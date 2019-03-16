@@ -4,6 +4,7 @@ package ui.login {
 	import laya.display.*;
 	import script.login.LogPanelControl;
 	import laya.display.Text;
+	import script.prefabScript.LinkTextControl;
 
 	public class LogPanelUI extends View {
 		public var bgimg:Image;
@@ -11,8 +12,8 @@ package ui.login {
 		public var input_pwd:TextInput;
 		public var btn_login:Button;
 		public var closebtn:Button;
-		public var txt_reg:Text;
 		public var txt_forget:Text;
+		public var txt_reg:Text;
 
 		override protected function createChildren():void {
 			super.createChildren();

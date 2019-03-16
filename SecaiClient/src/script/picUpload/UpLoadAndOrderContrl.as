@@ -39,7 +39,7 @@ package script.picUpload
 			uiSkin.btnBegin.on(Event.CLICK,this,onClickBegin);
 			uiSkin.btnOpenFile.on(Event.CLICK,this,onClickOpenFile);
 
-			uiSkin.bgimg.alpha = 0.7;
+			//uiSkin.bgimg.alpha = 0.7;
 			uiSkin.fileList.itemRender = FileUpLoadItem;
 			uiSkin.fileList.vScrollBarSkin = "";
 			uiSkin.fileList.selectEnable = false;
@@ -132,7 +132,7 @@ package script.picUpload
 			else
 			{
 				isUploading = false;
-				Laya.timer.once(5000,this,onCloseScene);
+				//Laya.timer.once(5000,this,onCloseScene);
 			}
 		}
 		

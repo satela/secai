@@ -38,7 +38,7 @@ package script.order
 		override public function onStart():void
 		{
 			uiSkin = this.owner as PaintOrderPanelUI;
-			uiSkin.firstpage.on(Event.CLICK,this,onClosePanel);
+			//uiSkin.firstpage.on(Event.CLICK,this,onClosePanel);
 			uiSkin.panel_main.vScrollBarSkin = "";
 			uiSkin.mainvbox.autoSize = true;
 			//uiSkin.btn_addattach.on(Event.CLICK,this,onAddPart);
@@ -92,7 +92,7 @@ package script.order
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 
-			(uiSkin.panel_main).height = (Browser.clientHeight - 160);
+			(uiSkin.panel_main).height = (Browser.clientHeight - 292);
 
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
@@ -127,10 +127,10 @@ package script.order
 				total += Number(orderlist[i].total.text);
 			}
 			
-			uiSkin.textTotalPrice.text = "订单总额：" + total.toString();
+			uiSkin.textTotalPrice.text = "订单总额：" + total.toFixed(2);
 			
-			uiSkin.textDiscountPrice.text = "折后总额：" + total.toString();
-			uiSkin.textPayPrice.text = "应付金额：" + total.toString();
+			uiSkin.textDiscountPrice.text = "折后总额：" + total.toFixed(2);
+			uiSkin.textPayPrice.text = "应付金额：" + total.toFixed(2);
 			
 		}
 		private function onGetOutPutAddress(data:*):void
@@ -157,8 +157,8 @@ package script.order
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			if(Browser.clientHeight - 160 > 0)
-				(uiSkin.panel_main).height = (Browser.clientHeight - 160);
+			if(Browser.clientHeight - 292 > 0)
+				(uiSkin.panel_main).height = (Browser.clientHeight - 292);
 		}
 		private function onShowSelectPic():void
 		{

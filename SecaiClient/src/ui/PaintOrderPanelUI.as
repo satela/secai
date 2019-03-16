@@ -4,22 +4,26 @@ package ui {
 	import laya.display.*;
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
+	import script.prefabScript.TopBannerControl;
 	import script.order.PaintOrderControl;
 
 	public class PaintOrderPanelUI extends View {
-		public var firstpage:Text;
+		public var firstPage:Text;
+		public var myorder:Text;
+		public var userName:Text;
+		public var logout:Text;
 		public var textDeliveryType:Label;
 		public var textProductNum:Label;
 		public var textTotalPrice:Label;
 		public var textDiscountPrice:Label;
 		public var textPayPrice:Label;
-		public var panel_main:Panel;
 		public var myaddresstxt:Text;
 		public var qqContact:Button;
 		public var factorytxt:Text;
-		public var batchChange:Text;
-		public var btnaddpic:Button;
 		public var selectAll:CheckBox;
+		public var btnaddpic:Button;
+		public var batchChange:Button;
+		public var panel_main:Panel;
 		public var mainvbox:VBox;
 		public var ordervbox:VBox;
 		public var deliverybtn:Text;

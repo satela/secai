@@ -4,15 +4,15 @@ package ui.picManager {
 	import laya.display.*;
 
 	public class PicShortItemUI extends View {
-		public var sel:Image;
 		public var img:Image;
 		public var filename:Label;
 		public var btndelete:Button;
 		public var fileinfo:Label;
 		public var picClassTxt:Label;
 		public var colorspacetxt:Label;
+		public var sel:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":156,"height":220},"compId":2,"child":[{"type":"Image","props":{"y":0,"width":156,"var":"sel","top":0,"skin":"commers/sel.png","sizeGrid":"10,10,10,10","left":0,"height":156},"compId":6},{"type":"Image","props":{"y":78,"x":78,"width":150,"var":"img","height":150,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":154,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":16,"color":"#2a2525","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":129.5,"width":20,"var":"btndelete","skin":"comp/button.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":175,"wordWrap":true,"width":152,"var":"fileinfo","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"scroll","left":2,"height":45,"fontSize":16,"color":"#2a2525","align":"center"},"compId":8},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"picClassTxt","valign":"middle","text":"jpeg","left":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"left"},"compId":9},{"type":"Label","props":{"y":129,"wordWrap":true,"width":50,"var":"colorspacetxt","valign":"middle","text":"jpeg","right":6,"height":21,"fontSize":18,"color":"#d9c5c5","bgColor":"#3b3131","align":"right"},"compId":11}],"loadList":["commers/sel.png","comp/button.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":138,"wordWrap":false,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256","right":2,"overflow":"hidden","left":2,"height":21,"fontSize":18,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"width":20,"var":"btndelete","stateNum":1,"skin":"upload/删除.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":160,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":53,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":true,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":107,"wordWrap":true,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/图片选中.png"},"compId":12}],"loadList":["upload/fold.png","upload/删除.png","upload/图片选中.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

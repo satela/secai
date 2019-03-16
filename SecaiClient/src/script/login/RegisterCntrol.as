@@ -110,15 +110,15 @@ package script.login
 //			uiSkin.citybox.visible = false;
 //			uiSkin.townbox.visible = false;
 			
-			uiSkin.txtRefresh.underline = true;
-			uiSkin.txtRefresh.underlineColor = "#121212";
+			//uiSkin.txtRefresh.underline = true;
+			//uiSkin.txtRefresh.underlineColor = "#121212";
 			uiSkin.txtRefresh.on(Event.CLICK,this,onRefreshVerify);
 
 			uiSkin.btnReg.on(Event.CLICK,this,onRegister);
 
 			verifycode = Browser.document.createElement("div");
 			verifycode.id = "v_container";
-			verifycode.style="width: 200px;height: 50px;left:950px;top:295"
+			verifycode.style="width: 200px;height: 50px;left:950px;top:521";
 							
 			
 			verifycode.style.position ="absolute";

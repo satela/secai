@@ -5,6 +5,7 @@ package script.picUpload
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.Box;
+	import laya.ui.Label;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
@@ -43,16 +44,16 @@ package script.picUpload
 			directTree = [];
 			uiSkin = this.owner as PicManagePanelUI; 
 			//uiSkin.btnNewDir.on(Event.CLICK,this,onCreateNewDirect);
-			
+			uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
 			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
 
 			createbox = uiSkin.boxNewFolder;
 			createbox.visible = false;
-			uiSkin.firstpage.underline = true;
-			uiSkin.firstpage.underlineColor = "#121212";
+			//uiSkin.firstpage.underline = true;
+			//uiSkin.firstpage.underlineColor = "#121212";
 			
-			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
+			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
 			uiSkin.input_folename.maxChars = 10;
 			uiSkin.btnCloseInput.on(Event.CLICK,this,onCloseCreateFolder);
@@ -97,10 +98,19 @@ package script.picUpload
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			DirectoryFileModel.instance.haselectPic = {};
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
+			uiSkin.main_panel.height = Browser.clientHeight;
 		}
+		private function onResizeBrower():void
+		{
+			// TODO Auto Generated method stub
+			uiSkin.main_panel.height = Browser.clientHeight;
+		}
+		
 		
 		private function initFileOpen():void
 		{
@@ -230,6 +240,8 @@ package script.picUpload
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			Browser.document.body.removeChild(file);//添加到舞台
 
 		}
@@ -363,6 +375,10 @@ package script.picUpload
 				{
 					this.uiSkin["flder" + i].text = directTree[i].directName + ">";
 					this.uiSkin["flder" + i].visible = true;
+					if(i > 0)
+					{
+						this.uiSkin["flder" + i].x = this.uiSkin["flder" + (i - 1)].x + (this.uiSkin["flder" + (i - 1)] as Label).textField.textWidth + 2;
+					}
 				}
 			}
 			

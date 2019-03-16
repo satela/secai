@@ -31,7 +31,7 @@ package script.login
 		{
 			uiSKin = this.owner as LogPanelUI;
 			this.owner["closebtn"].on(Event.CLICK,this,onCloseScene);
-			this.owner["bgimg"].alpha = 0.5;
+			this.owner["bgimg"].alpha = 0.95;
 			
 			uiSKin.input_account.maxChars = 11;
 			uiSKin.input_account.restrict = "0-9";

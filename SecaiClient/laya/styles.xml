@@ -4,4 +4,7 @@
    <item name="comp/textinput.png" type="TextInput" compress="0" pack="0" quality="80" props="sizeGrid=6,15,7,14" picType="0" scale="0"/>
    <item name="commers/blackbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,17,16,17" picType="0" scale="0"/>
    <item name="mainpage/lenovo.png" type="Sprite" compress="0" pack="2" quality="80" props="" picType="0" scale="0"/>
+   <item name="mainpage/通用资源_03.png" type="Image" compress="0" pack="0" quality="80" props="sizeGrid=63,130,8,6" picType="0" scale="0"/>
+   <item name="commers/通用弹框底.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=3,5,3,3" picType="0" scale="0"/>
+   <item name="upload/prgbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=2,2,2,2" picType="0" scale="0"/>
 </res>

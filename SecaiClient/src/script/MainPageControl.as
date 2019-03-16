@@ -60,15 +60,15 @@ package script {
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
-			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
+			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
 			
 			
 			if(!Userdata.instance.isLogin)
 				loginAccount();
 			else
 			{
-				txtLogin.text =Userdata.instance.userAccount;
-				txtReg.text = "退出";
+				txtLogin.text = Userdata.instance.userAccount;
+				txtReg.text = "[退出]";
 			}
 		}
 		
@@ -92,8 +92,8 @@ package script {
 				var account:String = UtilTool.getLocalVar("useraccount","");
 				Userdata.instance.userAccount = account;
 				Userdata.instance.isLogin = true;
-				txtLogin.text = account;
-				txtReg.text = "退出";
+				txtLogin.text =  account;
+				txtReg.text = "[退出]";
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 
 			}
@@ -114,7 +114,7 @@ package script {
 			console.log("height:" + Browser.clientHeight);
 			//EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
 
-			(this.owner["panel_main"] as Panel).height = Browser.clientHeight - 20;
+			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
 		}
 		
 		private function onShowUpload():void
@@ -158,8 +158,8 @@ package script {
 			if(result.status == 0)
 			{
 				Userdata.instance.isLogin = false;
-				txtLogin.text = "登录";
-				txtReg.text = "注册";
+				txtLogin.text = "[登录]";
+				txtReg.text = "[注册]";
 				
 				UtilTool.setLocalVar("useraccount","");
 				UtilTool.setLocalVar("userpwd","");
@@ -169,7 +169,7 @@ package script {
 		private function onSucessLogin(e:Object):void
 		{
 			txtLogin.text = e as String;
-			txtReg.text = "退出";
+			txtReg.text = "[退出]";
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 
 		}

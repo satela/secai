@@ -96,12 +96,7 @@ package script.order
 			if(this.ordervo.orderData)
 				this.ordervo.orderData.comments = this.ordervo.comment;
 		}
-		private function onchangeTech():void
-		{
-			return;
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_TECHNORLOGY);
-			
-		}
+		
 		private function alighComponet():void
 		{
 			this.checkSel.y = (this.height - 26)/2;
@@ -113,7 +108,7 @@ package script.order
 			this.filename.y = (this.height - this.filename.height)/2;
 			this.matbox.y = (this.height - 42)/2;
 			this.editbox.y = (this.height - this.editbox.height)/2;
-			this.viprice.y = (this.height - this.viprice.height)/2;
+			//this.viprice.y = (this.height - this.viprice.height)/2;
 			this.inputnum.y = (this.height - this.inputnum.height)/2;
 			this.price.y = (this.height - this.price.height)/2;
 			this.total.y = (this.height - this.total.height)/2;

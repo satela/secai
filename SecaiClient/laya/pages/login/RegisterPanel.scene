@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":3,
-    "selecteID":3,
+    "selecteID":45,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":84,
+    "maxID":96,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -18,21 +18,37 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,bgimg",
-            "props":{"var":"bgimg","top":0,"skin":"commers/whitebg.png","right":0,"left":0,"bottom":0},
+            "props":{"var":"bgimg","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"bgimg",
-            "isDirectory":false,
+            "isOpen":true,
+            "isDirectory":true,
             "isAniNode":true,
-            "hasChild":false,
+            "hasChild":true,
             "compId":70,
             "child":[
-                ]
+                {
+                    "x":30,
+                    "type":"Rect",
+                    "searchKey":"Rect",
+                    "props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f9f8f8"},
+                    "nodeParent":70,
+                    "label":"Rect",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":84,
+                    "child":[
+                        ],
+                    "$LOCKED":true
+                }],
+            "$LOCKED":true
         },
         {
             "x":15,
             "type":"Panel",
             "searchKey":"Panel",
-            "props":{"width":1920,"top":0,"bottom":100},
+            "props":{"y":0,"width":1920,"top":0,"height":1080},
             "nodeParent":2,
             "label":"Panel",
             "isOpen":true,
@@ -43,15 +59,76 @@
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":12,"x":930,"text":"注册","fontSize":30,"font":"SimSun"},
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":0,"x":320,"width":1280,"skin":"mainpage/注册底花纹右对齐.jpg","height":1080},
                     "nodeParent":3,
-                    "label":"Label",
+                    "label":"Image",
+                    "isOpen":true,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
-                    "compId":4,
+                    "compId":85,
+                    "child":[
+                        ],
+                    "$LOCKED":false,
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":102,"x":467,"width":986,"skin":"commers/通用弹框底.png","height":790},
+                    "nodeParent":3,
+                    "label":"Image",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":95,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":100,"x":467,"width":986,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":791},
+                    "nodeParent":3,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":93,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":46,"x":905,"skin":"mainpage/半圆.png"},
+                    "nodeParent":3,
+                    "label":"Image",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":91,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":71,"x":929,"skin":"mainpage/矢量智能对象.png"},
+                    "nodeParent":3,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":92,
                     "child":[
                         ]
                 },
@@ -59,20 +136,19 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":70,"x":660},
+                    "props":{"y":184,"x":570},
                     "nodeParent":3,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":9,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":13,"text":"手机号码","fontSize":20,"font":"Arial"},
+                            "props":{"y":10,"x":13,"width":88,"text":"手机号码","height":32,"fontSize":22,"font":"Microsoft YaHei","color":"#262B2E"},
                             "nodeParent":9,
                             "label":"Label",
                             "isDirectory":false,
@@ -83,10 +159,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_phone",
-                            "props":{"x":126,"width":250,"var":"input_phone","skin":"comp/textinput.png","height":40,"fontSize":20},
+                            "props":{"x":160,"width":384,"var":"input_phone","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":9,
                             "label":"input_phone",
                             "isDirectory":false,
@@ -97,10 +172,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":398,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#5f5353"},
+                            "props":{"y":66,"x":160,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#878988"},
                             "nodeParent":9,
                             "label":"Label",
                             "isDirectory":false,
@@ -111,7 +185,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},
@@ -129,20 +202,19 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":147,"x":660},
+                    "props":{"y":306,"x":570},
                     "nodeParent":3,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":10,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":13,"text":"密码","fontSize":20,"font":"Arial","align":"right"},
+                            "props":{"y":10,"x":13,"text":"密码","fontSize":22,"font":"Microsoft YaHei","align":"right"},
                             "nodeParent":10,
                             "label":"Label",
                             "isDirectory":false,
@@ -153,10 +225,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_pwd",
-                            "props":{"x":126,"width":250,"var":"input_pwd","skin":"comp/textinput.png","height":40,"fontSize":20},
+                            "props":{"x":160,"width":384,"var":"input_pwd","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":10,
                             "label":"input_pwd",
                             "isDirectory":false,
@@ -167,10 +238,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":398,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#5f5353"},
+                            "props":{"y":66,"x":157,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#878988"},
                             "nodeParent":10,
                             "label":"Label",
                             "isDirectory":false,
@@ -181,7 +251,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},
@@ -199,20 +268,19 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":224,"x":660},
+                    "props":{"y":428,"x":570},
                     "nodeParent":3,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":15,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":13,"text":"确认密码","fontSize":20,"font":"Arial"},
+                            "props":{"y":10,"x":13,"text":"确认密码","fontSize":22,"font":"Microsoft YaHei"},
                             "nodeParent":15,
                             "label":"Label",
                             "isDirectory":false,
@@ -223,10 +291,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_conpwd",
-                            "props":{"x":126,"width":250,"var":"input_conpwd","skin":"comp/textinput.png","height":40,"fontSize":20},
+                            "props":{"x":160,"width":384,"var":"input_conpwd","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":15,
                             "label":"input_conpwd",
                             "isDirectory":false,
@@ -237,10 +304,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":398,"text":"确认密码","fontSize":20,"font":"Arial","color":"#5f5353"},
+                            "props":{"y":66,"x":160,"text":"请再次输入密码","fontSize":20,"font":"Arial","color":"#5f5353"},
                             "nodeParent":15,
                             "label":"Label",
                             "isDirectory":false,
@@ -251,7 +317,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},
@@ -269,20 +334,19 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":300,"x":660},
+                    "props":{"y":549,"x":570},
                     "nodeParent":3,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":40,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":13,"text":"图片验证码","fontSize":20,"font":"Arial"},
+                            "props":{"y":10,"x":13,"text":"图片验证码","fontSize":22,"font":"Microsoft YaHei"},
                             "nodeParent":40,
                             "label":"Label",
                             "isDirectory":false,
@@ -293,10 +357,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,inputCode",
-                            "props":{"y":0,"x":126,"width":154,"var":"inputCode","skin":"comp/textinput.png","height":40,"fontSize":20},
+                            "props":{"y":0,"x":160,"width":215,"var":"inputCode","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":40,
                             "label":"inputCode",
                             "isDirectory":false,
@@ -307,10 +370,9 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":500,"text":"看不清？","fontSize":20,"font":"Arial","color":"#121212"},
+                            "props":{"y":10,"x":619,"text":"看不清？","fontSize":20,"font":"Arial","color":"#121212"},
                             "nodeParent":40,
                             "label":"Label",
                             "isDirectory":false,
@@ -321,7 +383,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":8,"text":"*","fontSize":20,"color":"#ef0d09"},
@@ -335,25 +396,51 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Text",
+                            "selectedBox":3,
                             "searchKey":"Text,txtRefresh",
-                            "props":{"y":10,"x":588,"var":"txtRefresh","text":"换一张","mouseEnabled":true,"fontSize":20,"color":"#1a1c1c"},
+                            "props":{"y":9,"x":700,"width":80,"var":"txtRefresh","text":"换一张","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":20,"fontSize":20},
                             "nodeParent":40,
+                            "maxID":5,
                             "label":"txtRefresh",
-                            "isDirectory":false,
+                            "isOpen":null,
+                            "isDirectory":true,
                             "isAniNode":true,
-                            "hasChild":false,
-                            "compId":78,
+                            "hasChild":true,
+                            "compId":88,
                             "child":[
-                                ]
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "nodeParent":88,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":89,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
                         }]
                 },
                 {
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":371,"x":660},
+                    "props":{"y":635,"x":570},
                     "nodeParent":3,
                     "label":"Box",
                     "isOpen":true,
@@ -366,7 +453,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":10,"x":13,"text":"手机验证码","fontSize":20,"font":"Arial"},
+                            "props":{"y":10,"x":13,"text":"手机验证码","fontSize":22,"font":"Microsoft YaHei"},
                             "nodeParent":45,
                             "label":"Label",
                             "isDirectory":false,
@@ -380,7 +467,7 @@
                             "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_phonecode",
-                            "props":{"x":126,"width":250,"var":"input_phonecode","skin":"comp/textinput.png","height":40,"fontSize":20},
+                            "props":{"x":160,"width":384,"var":"input_phonecode","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":45,
                             "label":"input_phonecode",
                             "isDirectory":false,
@@ -408,7 +495,7 @@
                             "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnGetCode",
-                            "props":{"y":-1.5,"x":402,"width":150,"var":"btnGetCode","skin":"comp/button.png","label":"获取验证码","height":40},
+                            "props":{"y":3.5,"x":568,"width":150,"var":"btnGetCode","skin":"commers/按钮2.png","sizeGrid":"4,4,4,4","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"获取验证码","height":40},
                             "nodeParent":45,
                             "label":"btnGetCode",
                             "isDirectory":false,
@@ -423,7 +510,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnClose",
-                    "props":{"y":20,"x":1453,"width":100,"var":"btnClose","skin":"comp/button.png","label":"X","height":50},
+                    "props":{"y":123,"x":1413,"var":"btnClose","stateNum":"3","skin":"commers/关闭.png"},
                     "nodeParent":3,
                     "label":"btnClose",
                     "isDirectory":false,
@@ -437,7 +524,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnReg",
-                    "props":{"y":431.5,"x":861,"width":150,"var":"btnReg","skin":"comp/button.png","labelSize":24,"label":"注册","height":40},
+                    "props":{"y":734,"x":880,"width":160,"var":"btnReg","skin":"commers/按钮2.png","sizeGrid":"4,4,4,4","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"注册","height":48},
                     "nodeParent":3,
                     "label":"btnReg",
                     "isDirectory":false,
@@ -447,6 +534,7 @@
                     "child":[
                         ]
                 }],
+            "$LOCKED":false,
             "$HIDDEN":false
         },
         {

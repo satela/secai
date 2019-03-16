@@ -1,13 +1,28 @@
 D .
 D commers
-P 88DCB116 blackbg.png
+P BDAA973E blackbg.png
 P 338437A7 circlebg.png
-P C57A2229 combxbtn.png
-P 6479F037 Createselect.png
-P DF840E10 fold.png
-P BFB40AC3 inputbg.png
-P A72E1D10 sel.png
-P A9F7A2D2 whitebg.png
+R 4075FA8A grayback.jpg
+P F409E238 logo带文字.png
+P 2E021B1B 上翻.png
+P 6B2ABBE9 下翻.png
+P A9B32C11 关闭.png
+P 9860FA80 分割线.png
+P 23B950D4 单选框.png
+P B22AD533 复选框.png
+R 7A07816D 底.jpg
+P 8A5CF1A3 按钮.png
+P D6A50AD8 按钮2.png
+P 5E595B33 按钮3.png
+P F289E402 按钮4带图标.png
+P 4853EC6E 搜索.png
+P 613060AD 滚动条底.png
+P 335F37EA 输入框.png
+P D5258EF7 输入框_选中.png
+P FE61B92C 输入框_错误.png
+P 840D0183 选择弹框底.png
+P B68D1CF1 通用弹框底.png
+P CAC67BAF 首页icon.png
 D comp
 P 9401CC40 blank.png
 P B03390E5 btn_close.png
@@ -43,16 +58,47 @@ P 7E990267 vscroll.png
 P E466EB1C vslider$bar.png
 P 2BFF7046 vslider.png
 D mainpage
-R 5F2EA134 bg.jpg
-R 1D8DADA8 colorture.png
-R 96CD92EF epson.png
-R CFBAD2DA express.png
-R 488071B5 flow.jpg
-R 177FDD35 lenovo.png
-R C86CB33D logo.png
-R 488071B5 make.jpg
-R 488071B5 order.jpg
-R 55762772 pantone.png
-R 775A638D samsung.png
-R 488071B5 send.jpg
-R 488071B5 upload.jpg
+R D7F10EB9 主页底.jpg
+P 7EE54FFB 半圆.png
+R 181AC885 注册底花纹右对齐.jpg
+P 574932B4 登录_密码icon.png
+P 31BEA07C 登录_账号icon.png
+P 6D9214DA 矢量智能对象.png
+D order
+P 8CF86666 vip底.png
+R A2D710DD 下单界面.jpg
+P 7CC30604 修改材料.png
+P E6BD083E 减.png
+P 8B67FA86 加.png
+P 65152D5C 确认地址底.png
+P 50C4F835 选中状态.png
+P 245C366E 选项.png
+D upload
+P DD063440 fold.png
+P 5FA6E498 prgbg.png
+P A9F10A6A 上传.png
+P BB801AE3 关闭.png
+P 26E9800F 删除.png
+P 2D32FABB 取消.png
+P E9A6C86C 喷印下单.png
+P 85D1652B 图icon.png
+P F58F91BD 图片选中.png
+P 1BC80107 完成.png
+P 8EE9890C 左.png
+P 63A8E768 开始.png
+P 29C001FB 文件夹.png
+P 630F7EEA 新建.png
+P E9632F02 新建底.png
+P 9203327A 暂停.png
+P AAACBDC2 滑条.png
+P ED93210D 确定.png
+P D5CCDF71 重新.png
+D usercenter
+P 18A669F1 个人管理.png
+P 2BDDDBFD 滚动上.png
+P 57CAC0BF 滚动下.png
+P 53A9BC11 滚动条.png
+P E7450350 用户中心底.jpg
+P 63CE03FF 订单管理.png
+P FC488F8F 设置.png
+P 4F03AD22 账户管理.png

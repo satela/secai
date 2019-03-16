@@ -19,7 +19,6 @@ package script
 	import ui.order.SelectFactoryPanelUI;
 	import ui.order.SelectMaterialPanelUI;
 	import ui.order.SelectPicPanelUI;
-	import ui.order.SelectTechPanelUI;
 	import ui.picManager.PicCheckPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.NewAddressPanelUI;
@@ -55,7 +54,6 @@ package script
 		public static const VIEW_SELECT_PIC_TO_ORDER:String = "VIEW_SELECT_PIC_TO_ORDER";//添加喷印图片界面
 
 		public static const VIEW_SELECT_MATERIAL:String = "VIEW_SELECT_MATERIAL";//选择材料界面
-		public static const VIEW_SELECT_TECHNORLOGY:String = "VIEW_SELECT_TECHNORLOGY";//选选择工艺界面
 		public static const VIEW_ADD_MESSAGE:String = "VIEW_ADD_MESSAGE";//添加备注
 		public static const VIEW_SELECT_DELIVERY_TYPE:String = "VIEW_SELECT_DELIVERY_TYPE";//选择配送方式 快递
 
@@ -100,7 +98,6 @@ package script
 			viewDict[VIEW_SELECT_FACTORY] = SelectFactoryPanelUI;
 			viewDict[VIEW_SELECT_PIC_TO_ORDER] = SelectPicPanelUI;
 			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
-			viewDict[VIEW_SELECT_TECHNORLOGY] = SelectTechPanelUI;
 			viewDict[VIEW_SELECT_DELIVERY_TYPE] = SelectDeliveryPanelUI;
 
 			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;

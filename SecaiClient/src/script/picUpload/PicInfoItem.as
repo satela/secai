@@ -39,34 +39,34 @@ package script.picUpload
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
 			if(picInfo.picType == 0)
 			{
-				this.img.skin = "commers/fold.png";
-				this.fileinfo.text = picInfo.directName;
-				this.filename.visible = false;
+				this.img.skin = "upload/fold.png";
+				this.filename.text = picInfo.directName;
+				this.fileinfo.visible = false;
 				this.picClassTxt.visible = false;
 				this.colorspacetxt.visible = false;
 
-				this.img.width = 150;
-				this.img.height = 150;
+				this.img.width = 108;
+				this.img.height = 101;
 			}
 			else
 			{
-				this.filename.visible = true;
+				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
 				
 				if(picInfo.picWidth > picInfo.picHeight)
 				{
-					this.img.width = 150;					
-					this.img.height = 150/picInfo.picWidth * picInfo.picHeight;
+					this.img.width = 128;					
+					this.img.height = 128/picInfo.picWidth * picInfo.picHeight;
 					
 				}
 				else
 				{
-					this.img.height = 150;
-					this.img.width = 150/picInfo.picHeight * picInfo.picWidth;
+					this.img.height = 128;
+					this.img.width = 128/picInfo.picHeight * picInfo.picWidth;
 
 				}
 				
-				if(this.img.skin != "commers/fold.png")
+				if(this.img.skin != "upload/fold.png")
 					Laya.loader.clearTextureRes(this.img.skin);
 
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
@@ -143,6 +143,7 @@ package script.picUpload
 			if(this.picInfo.picType == 1)
 			{
 				this.sel.visible = !this.sel.visible;
+				this.sel.selected = this.sel.visible;
 				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo);
 
 			}

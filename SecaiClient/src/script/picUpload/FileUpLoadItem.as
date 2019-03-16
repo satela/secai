@@ -19,7 +19,7 @@ package script.picUpload
 			fileobj = filedata;
 			this.filename.text = filedata.name;
 			this.prog.text = "0%";
-			
+			this.finishimg.visible = false;
 			var mm:int =  Math.floor(filedata.size/(1024*1024));
 			//var kk:Number = (filedata.size%(1024*1024))/1024;
 			//var bytes:
@@ -28,7 +28,7 @@ package script.picUpload
 				sizestr = (filedata.size/(1024*1024)).toFixed(2).toString() + "m";
 			else
 				sizestr = ((filedata.size/1024).toFixed(2)).toString() + "k";
-			this.prgbar.value = 0;
+			//this.prgbar.width = 0;
 			this.filesize.text = sizestr;
 			this.btncancel.on(Event.CLICK,this,onCancelUpload);
 			updateProgress();
@@ -41,9 +41,15 @@ package script.picUpload
 		public function updateProgress():void
 		{
 			var pp:Number = Number(fileobj.progress);
-			if(pp > 100)
+			if(pp >= 100)
+			{
 				pp = 100;
-			this.prgbar.value = pp/100;
+				this.finishimg.visible = true;
+				this.prog.visible = false;
+			}
+			else
+				this.prog.visible = true;
+			this.prgbar.width = pp/100 * 1084;
 			this.prog.text = pp + "%";
 		}
 	}
