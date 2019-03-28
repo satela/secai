@@ -26,6 +26,7 @@ package script.picUpload
 			uiSkin = this.owner as PicCheckPanelUI;
 			
 			uiSkin.closeBtn.on(Event.CLICK,this,onClosePanel);
+			uiSkin.mainpanel.on(Event.CLICK,this,onClosePanel);
 			uiSkin.mainpanel.vScrollBarSkin = "";
 			if(param != null)
 			{

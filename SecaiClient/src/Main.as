@@ -56,7 +56,14 @@
 			//激活资源版本控制，版本文件由发布功能生成
 			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
-
+//			var screenHeight:int = window.screen.height;
+//			var screenWidth:int = window.screen.width;
+//			
+//			if(screenHeight < 1080)
+//				Laya.stage.scaleY = screenHeight/1080;
+//			
+//			if(screenWidth < 1920)
+//				Laya.stage.scaleX = screenWidth/1920;
 		}
 		
 		public function startInit():void
@@ -65,7 +72,7 @@
 			else Laya.init(1920, 1080, Laya["WebGL"]);
 			//Laya["Physics"] && Laya["Physics"].enable();
 			//Laya["DebugPanel"] && Laya["DebugPanel"].enable();
-			Laya.stage.scaleMode = Stage.SCALE_NOSCALE; // "noscale";//GameConfig.scaleMode;
+			Laya.stage.scaleMode = Stage.SCALE_NOSCALE;//// Stage.SCALE_NOSCALE; // "noscale";//GameConfig.scaleMode;
 			Laya.stage.screenMode = GameConfig.screenMode;
 			Laya.stage.alignV = GameConfig.alignV;
 			Laya.stage.alignH = "center";//GameConfig.alignH;
@@ -84,11 +91,12 @@
 			//激活资源版本控制，版本文件由发布功能生成
 			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
-
+			
+			
 		}
 		private function onVersionLoaded():void {
 			//激活大小图映射，加载小图的时候，如果发现小图在大图合集里面，则优先加载大图合集，而不是小图
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas",type:Loader.ATLAS},{url:"res/atlas/order.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}
 		

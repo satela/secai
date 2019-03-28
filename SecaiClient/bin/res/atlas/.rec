@@ -2,7 +2,7 @@ D .
 D commers
 P BDAA973E blackbg.png
 P 338437A7 circlebg.png
-R 4075FA8A grayback.jpg
+P 94585C3E grayback.jpg
 P F409E238 logo带文字.png
 P 2E021B1B 上翻.png
 P 6B2ABBE9 下翻.png
@@ -70,6 +70,7 @@ R A2D710DD 下单界面.jpg
 P 7CC30604 修改材料.png
 P E6BD083E 减.png
 P 8B67FA86 加.png
+P CB095B76 地址选择底.png
 P 65152D5C 确认地址底.png
 P 50C4F835 选中状态.png
 P 245C366E 选项.png
@@ -77,6 +78,7 @@ D upload
 P DD063440 fold.png
 P 5FA6E498 prgbg.png
 P A9F10A6A 上传.png
+P 16C8659E 上传下单_ highlight.png
 P BB801AE3 关闭.png
 P 26E9800F 删除.png
 P 2D32FABB 取消.png
@@ -98,6 +100,8 @@ P 18A669F1 个人管理.png
 P 2BDDDBFD 滚动上.png
 P 57CAC0BF 滚动下.png
 P 53A9BC11 滚动条.png
+S 69D36F67 用户中心--企业资料界面改.jpg
+R FC434C70 用户中心_收货地址.jpg
 P E7450350 用户中心底.jpg
 P 63CE03FF 订单管理.png
 P FC488F8F 设置.png

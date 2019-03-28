@@ -35,21 +35,18 @@ package script.order
 		{
 			techmainvo = null;
 			processCatVo = pvo;
-			this.txt.text = pvo.procCat_Name;
+			this.techBtn.label = pvo.procCat_Name;
 			setSelected(false);
 		}
 		
 		private function initView():void
 		{
-			this.txt.text = techmainvo.preProc_Name;
+			this.techBtn.label = techmainvo.preProc_Name;
 		}
 		
 		public function setSelected(sel:Boolean):void
 		{
-			if(!sel)
-				this.txt.borderColor = "#222222";
-			else
-				this.txt.borderColor = "#FF0000";
+			this.techBtn.selected = sel;;
 			isSelected = sel;
 			
 		}

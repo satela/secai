@@ -5,6 +5,7 @@ package ui.picManager {
 	import script.picUpload.PictureCheckControl;
 
 	public class PicCheckPanelUI extends View {
+		public var imgbg:Image;
 		public var mainpanel:Panel;
 		public var img:Image;
 		public var closeBtn:Button;

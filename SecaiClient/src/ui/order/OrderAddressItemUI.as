@@ -4,9 +4,11 @@ package ui.order {
 	import laya.display.*;
 
 	public class OrderAddressItemUI extends View {
+		public var btnsel:Button;
+		public var selCheck:Radio;
 		public var addresstxt:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":2,"x":3,"width":1034,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},"compId":3}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":1090,"var":"btnsel","skin":"order/地址选择底.png","sizeGrid":"3,3,3,3","height":50},"compId":6},{"type":"Radio","props":{"y":17,"x":22,"var":"selCheck","skin":"commers/单选框.png","mouseEnabled":false},"compId":7},{"type":"Label","props":{"y":17,"x":60,"var":"addresstxt","text":"浙江省 金华市 义乌市 抽成街道","mouseEnabled":false,"height":18,"fontSize":18,"font":"SimHei","color":"#262B2E"},"compId":8}],"loadList":["order/地址选择底.png","commers/单选框.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

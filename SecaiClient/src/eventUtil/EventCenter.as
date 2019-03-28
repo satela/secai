@@ -41,6 +41,8 @@ package eventUtil
 
 		public static const BROWER_WINDOW_RESIZE:String = "BROWER_WINDOW_RESIZE";//浏览器窗口大小改变
 
+		public static const BATCH_CHANGE_PRODUCT_NUM:String = "BATCH_CHANGE_PRODUCT_NUM";//批量修改数量
+
 		private static var _eventCenter:EventCenter;
 		
 	

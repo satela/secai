@@ -5,6 +5,7 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Box;
 	import laya.utils.Handler;
 	
 	import model.orderModel.PaintOrderModel;
@@ -18,6 +19,8 @@ package script.order
 	{
 		private var uiSkin:SelectFactoryPanelUI;
 		
+		private var tempaddress:FactoryInfoVo;
+
 		public function SelectFactoryControl()
 		{
 			super();
@@ -35,14 +38,18 @@ package script.order
 			
 			uiSkin.list_address.selectHandler = new Handler(this,onSlecteAddress);
 			
-//			var temparr:Array = [];
-//			var addrs:Array = ["130921100","210905002","371323"];
-//			for(var i:int=0;i < 3;i++)
-//			{
-//				var fvo:FactoryInfoVo = new FactoryInfoVo({addr:addrs[i],name:"测试地址1"});
-//				temparr.push(fvo);
-//			}
 			uiSkin.list_address.array = PaintOrderModel.instance.outPutAddr;
+			tempaddress = PaintOrderModel.instance.selectFactoryAddress;
+			Laya.timer.once(10,null,function()
+			{
+				var cells:Vector.<Box> = uiSkin.list_address.cells;
+				for(var i:int=0;i < cells.length;i++)
+				{
+					(cells[i] as SelFactoryItem).ShowSelected = (cells[i] as SelFactoryItem).factoryvo == PaintOrderModel.instance.selectFactoryAddress;
+					
+					//uiSkin.list_address.selectedIndex = i;
+				}
+			});
 			
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCloseView);
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmSelectAddress);
@@ -51,11 +58,13 @@ package script.order
 		private function onSlecteAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
+			if(uiSkin.list_address.array[index] == tempaddress)
+				return;
 			for each(var item:SelAddressItem in uiSkin.list_address.cells)
 			{
 				item.ShowSelected = item.address == uiSkin.list_address.array[index];
 			}
-			PaintOrderModel.instance.selectFactoryAddress = uiSkin.list_address.array[index];
+			tempaddress = uiSkin.list_address.array[index];
 		}
 		
 		private function updateAddressItem(cell:SelAddressItem):void
@@ -66,8 +75,11 @@ package script.order
 		private function onConfirmSelectAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
-			if(PaintOrderModel.instance.selectFactoryAddress != null)
+			if(tempaddress != null)
+			{
+				PaintOrderModel.instance.selectFactoryAddress = tempaddress;
 				EventCenter.instance.event(EventCenter.SELECT_OUT_ADDRESS);
+			}
 			onCloseView();
 		}
 		

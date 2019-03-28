@@ -4,9 +4,9 @@ package ui.order {
 	import laya.display.*;
 
 	public class TechBoxItemUI extends View {
-		public var techname:Label;
+		public var techbtn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},"compId":3}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Button","props":{"width":190,"var":"techbtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},"compId":6}],"loadList":["order/选项.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

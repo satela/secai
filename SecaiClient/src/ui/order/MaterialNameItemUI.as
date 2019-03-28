@@ -4,9 +4,9 @@ package ui.order {
 	import laya.display.*;
 
 	public class MaterialNameItemUI extends View {
-		public var matname:Label;
+		public var matbtn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Label","props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},"compId":4}],"loadList":[],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"matbtn","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"材料名称","height":40},"compId":8}],"loadList":["commers/按钮2.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

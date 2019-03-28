@@ -29,8 +29,9 @@ package script.order
 			
 			this.fileimg.skin = HttpRequestUtil.smallerrPicUrl + ordervo.picinfo.fid + ".jpg";
 			
-			
-			
+			this.subtn.on(Event.CLICK,this,onSubItemNum);
+			this.addbtn.on(Event.CLICK,this,onAddItemNum);
+			this.hascomment.visible = false;
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 100;					
@@ -51,14 +52,16 @@ package script.order
 			this.total.text = "0";
 			this.deleteorder.underline = true;
 			this.deleteorder.underlineColor = "#222222";
-			
+			this.inputnum.text = "1";
+			this.inputnum.restrict = "0-9";
 			this.deleteorder.on(Event.CLICK,this,onDeleteOrder);
 			
 			this.addmsg.underline = true;
 			this.addmsg.underlineColor = "#222222";
-			
+			this.price.text = "0";
 			this.addmsg.on(Event.CLICK,this,onAddComment);
 			
+			this.mattxt.text = "";
 			this.changemat.underline = true;
 			this.changemat.underlineColor = "#222222";
 			this.changemat.on(Event.CLICK,this,onShowMaterialView);
@@ -80,6 +83,22 @@ package script.order
 			alighComponet();
 		}
 		
+		private function onSubItemNum():void
+		{
+			var num:int = parseInt(this.inputnum.text);
+			if(num > 1)
+				num--;
+			this.inputnum.text = num.toString();
+			onNumChange();
+		}
+		private function onAddItemNum():void
+		{
+			var num:int = parseInt(this.inputnum.text);
+			num++;
+			this.inputnum.text = num.toString();
+			onNumChange();
+		}
+		
 		private function onShowBigImg():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,this.ordervo.picinfo);
@@ -93,8 +112,12 @@ package script.order
 		private function onAddMsgBack(msg:String):void
 		{
 			this.ordervo.comment = msg;
+			this.hascomment.visible = this.ordervo.comment != "";
+
 			if(this.ordervo.orderData)
+			{
 				this.ordervo.orderData.comments = this.ordervo.comment;
+			}
 		}
 		
 		private function alighComponet():void
@@ -109,7 +132,7 @@ package script.order
 			this.matbox.y = (this.height - 42)/2;
 			this.editbox.y = (this.height - this.editbox.height)/2;
 			//this.viprice.y = (this.height - this.viprice.height)/2;
-			this.inputnum.y = (this.height - this.inputnum.height)/2;
+			this.numbox.y = (this.height)/2 - 12;
 			this.price.y = (this.height - this.price.height)/2;
 			this.total.y = (this.height - this.total.height)/2;
 			this.operatebox.y = (this.height - this.operatebox.height)/2;

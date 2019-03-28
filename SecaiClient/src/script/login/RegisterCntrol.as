@@ -1,5 +1,7 @@
 package script.login
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.display.Input;
 	import laya.events.Event;
@@ -118,16 +120,18 @@ package script.login
 
 			verifycode = Browser.document.createElement("div");
 			verifycode.id = "v_container";
-			verifycode.style="width: 200px;height: 50px;left:950px;top:521";
+			verifycode.style="width: 200px;height: 50px;left:950px;top:548";
 							
-			
+			verifycode.style.left = 950 - (1920 - Browser.clientWidth)/2 + "px";
+
 			verifycode.style.position ="absolute";
 			verifycode.style.zIndex = 999;
 			Browser.document.body.appendChild(verifycode);//添加到舞台
 			
 			//uiSkin.on(Event.CLICK,this,hideAddressPanel);
 			Browser.window.loadVerifyCode();
-			
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 //			if(!ChinaAreaModel.hasInit)
 //			{
 //				WaitingRespond.instance.showWaitingView(500000);
@@ -143,6 +147,10 @@ package script.login
 //			selectProvince(0);
 //			uiSkin.provList.refresh();
 //		}
+		private function onResizeBrower():void
+		{
+			verifycode.style.left = 950 - (1920 - Browser.clientWidth)/2 + "px";
+		}
 		private function onGetPhoneCode():void
 		{
 			// TODO Auto Generated method stub
@@ -173,6 +181,9 @@ package script.login
 			Browser.document.body.removeChild(verifycode);//添加到舞台
 			
 			ViewManager.instance.closeView(ViewManager.VIEW_REGPANEL);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			//this.owner.removeSelf();
 		}		
 		
@@ -269,6 +280,7 @@ package script.login
 			{
 				Browser.window.alert("注册成功！");
 				Browser.document.body.removeChild(verifycode);//添加到舞台
+				EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 

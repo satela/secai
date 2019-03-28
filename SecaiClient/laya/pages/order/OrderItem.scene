@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":2,
-    "selecteID":21,
+    "selectedBox":21,
+    "selecteID":36,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff"},
     "nodeParent":-1,
-    "maxID":36,
+    "maxID":37,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -77,7 +77,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,price",
-            "props":{"y":39.5,"x":816,"width":58,"var":"price","text":"175.2","height":21,"fontSize":14,"font":"SimHei","color":"#152326","bold":true,"align":"center"},
+            "props":{"y":38.5,"x":816,"width":58,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},
             "nodeParent":2,
             "label":"price",
             "isDirectory":false,
@@ -91,7 +91,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,total",
-            "props":{"y":34,"x":1074,"var":"total","text":"12680","height":21,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},
+            "props":{"y":34,"x":1083,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},
             "nodeParent":2,
             "label":"total",
             "isDirectory":false,
@@ -141,6 +141,20 @@
                     "compId":19,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,hascomment",
+                    "props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},
+                    "nodeParent":21,
+                    "label":"hascomment",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":36,
+                    "child":[
+                        ]
                 }]
         },
         {
@@ -150,14 +164,13 @@
             "props":{"y":12,"x":488,"var":"editbox"},
             "nodeParent":2,
             "label":"editbox",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":22,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -171,10 +184,9 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimSun","color":"#262B2E","align":"center"},
+                    "props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                     "nodeParent":22,
                     "label":"Label",
                     "isDirectory":false,
@@ -185,7 +197,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editwidth",
                     "props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/输入框.png","sizeGrid":"5,5,5,5","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
@@ -199,7 +210,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editheight",
                     "props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
@@ -217,17 +227,16 @@
             "x":15,
             "type":"VBox",
             "searchKey":"VBox",
-            "props":{"y":29.5,"x":620,"space":0},
+            "props":{"y":29.5,"x":635,"space":0},
             "nodeParent":2,
             "label":"VBox",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":24,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,architype",
                     "props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -239,7 +248,8 @@
                     "compId":12,
                     "child":[
                         ]
-                }]
+                }],
+            "$HIDDEN":true
         },
         {
             "x":15,
@@ -331,13 +341,14 @@
             "props":{"y":30,"x":950,"var":"numbox"},
             "nodeParent":2,
             "label":"numbox",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":35,
             "child":[
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,inputnum",
                     "props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -351,11 +362,12 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"x":60,"skin":"order/加.png"},
+                    "searchKey":"Button,addbtn",
+                    "props":{"x":60,"var":"addbtn","skin":"order/加.png"},
                     "nodeParent":35,
-                    "label":"Button",
+                    "label":"addbtn",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -364,11 +376,12 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"skin":"order/减.png"},
+                    "searchKey":"Button,subtn",
+                    "props":{"var":"subtn","skin":"order/减.png"},
                     "nodeParent":35,
-                    "label":"Button",
+                    "label":"subtn",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,

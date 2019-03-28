@@ -19,15 +19,13 @@ package script.order
 		{
 			factoryvo = data as FactoryInfoVo;
 			this.addresstxt.text = factoryvo.name + "(" + factoryvo.addr+ ")";
-			ShowSelected =PaintOrderModel.instance.selectFactoryAddress == factoryvo;
+			//ShowSelected =PaintOrderModel.instance.selectFactoryAddress == factoryvo;
 		}
 		
 		public function set ShowSelected(value:Boolean):void
 		{
-			if(value)
-				this.addresstxt.borderColor = "#FF0000";
-			else
-				this.addresstxt.borderColor = "#222222";
+			this.btnsel.selected = value;
+			this.selCheck.selected = value;
 			
 		}
 	}

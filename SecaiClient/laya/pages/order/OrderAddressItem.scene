@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":3,
+    "selecteID":6,
     "searchKey":"View",
     "props":{"sceneColor":"#ffffff"},
     "nodeParent":-1,
-    "maxID":5,
+    "maxID":9,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -16,15 +16,44 @@
     "child":[
         {
             "x":15,
+            "type":"Button",
+            "searchKey":"Button,btnsel",
+            "props":{"y":0,"x":0,"width":1090,"var":"btnsel","skin":"order/地址选择底.png","sizeGrid":"3,3,3,3","height":50},
+            "nodeParent":2,
+            "label":"btnsel",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":6,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Radio",
+            "searchKey":"Radio,selCheck",
+            "props":{"y":17,"x":22,"var":"selCheck","skin":"commers/单选框.png","mouseEnabled":false},
+            "nodeParent":2,
+            "label":"selCheck",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":7,
+            "child":[
+                ],
+            "$HIDDEN":false
+        },
+        {
+            "x":15,
             "type":"Label",
             "searchKey":"Label,addresstxt",
-            "props":{"y":2,"x":3,"width":1034,"var":"addresstxt","valign":"middle","text":"label","height":30,"fontSize":24,"borderColor":"#f30a06","bold":false},
+            "props":{"y":17,"x":60,"var":"addresstxt","text":"浙江省 金华市 义乌市 抽成街道","mouseEnabled":false,"height":18,"fontSize":18,"font":"SimHei","color":"#262B2E"},
             "nodeParent":2,
             "label":"addresstxt",
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
-            "compId":3,
+            "compId":8,
             "child":[
                 ]
         }],

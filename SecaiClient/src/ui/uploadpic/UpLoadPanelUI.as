@@ -6,9 +6,9 @@ package ui.uploadpic {
 
 	public class UpLoadPanelUI extends View {
 		public var bgimg:Image;
+		public var uploadinfo:Label;
 		public var btnClose:Button;
 		public var btnOpenFile:Button;
-		public var btnBegin:Button;
 		public var fileList:List;
 
 		override protected function createChildren():void {

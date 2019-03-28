@@ -48,6 +48,8 @@ package script.usercenter
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 			else
 				uiSkin.addlist.array = Userdata.instance.addressList;
+			
+			uiSkin.numAddress.text = "已经保存" + Userdata.instance.addressList.length + "条地址";
 
 			EventCenter.instance.on(EventCenter.UPDATE_MYADDRESS_LIST,this,updateList);
 
@@ -55,6 +57,7 @@ package script.usercenter
 		private function updateList():void
 		{
 			uiSkin.addlist.array = Userdata.instance.addressList;
+			uiSkin.numAddress.text = "已经保存" + Userdata.instance.addressList.length + "条地址";
 
 		}
 		private function getMyAddressBack(data:Object):void

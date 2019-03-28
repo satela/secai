@@ -37,7 +37,7 @@ package script.usercenter
 			
 			uiSkin.panel_main.vScrollBarSkin = "";
 			//uiSkin.sp_container.autoSize = true;
-			uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
+			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			
 			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
 			
@@ -79,17 +79,18 @@ package script.usercenter
 		
 		private function onShowEditView(index:int):void
 		{
-			if(index == 7)
+			if(index == 8)
 			{
 				ViewManager.instance.openView(ViewManager.VIEW_CHANGEPWD);
 				return;
 			}
-			if(index == 8)
+			if(index == 7)
 			{
 				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
 				return;
 			}
 			uiSkin.toptitle.text = titleTxt[index];
+			uiSkin.bannertitile.text= "/ " + titleTxt[index];
 			while(uiSkin.sp_container.numChildren > 0)
 			{
 				(uiSkin.sp_container.getChildAt(0)).destroy(true);
@@ -98,10 +99,12 @@ package script.usercenter
 			}
 			for(var i:int=0;i < btntxtArr.length;i++)
 			{
-				(btntxtArr[i] as Label).color = "#272524";
+				(btntxtArr[i] as Label).color = "#262B2E";
+				(btntxtArr[i] as Label).alpha = 0.8;
 			}
-			btntxtArr[index].color = "#FF00000";
-			
+			btntxtArr[index].color = "#52B232";
+			btntxtArr[index].alpha = 1;
+
 			if(viewArr[index])
 			{
 				curView = new viewArr[index]();

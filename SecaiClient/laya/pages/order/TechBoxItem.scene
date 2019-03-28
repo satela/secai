@@ -2,10 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
+    "selecteID":6,
     "searchKey":"View",
     "props":{"width":1240,"sceneColor":"#ffffff"},
     "nodeParent":-1,
-    "maxID":6,
+    "maxID":7,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -15,15 +16,15 @@
     "child":[
         {
             "x":15,
-            "type":"Label",
-            "searchKey":"Label,techname",
-            "props":{"y":0,"x":0,"width":110,"var":"techname","valign":"middle","text":"喷印设备：","height":30,"fontSize":24,"align":"right"},
+            "type":"Button",
+            "searchKey":"Button,techbtn",
+            "props":{"width":190,"var":"techbtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},
             "nodeParent":2,
-            "label":"techname",
+            "label":"techbtn",
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
-            "compId":3,
+            "compId":6,
             "child":[
                 ]
         }],

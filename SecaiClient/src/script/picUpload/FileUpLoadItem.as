@@ -40,6 +40,9 @@ package script.picUpload
 		}
 		public function updateProgress():void
 		{
+			if(fileobj == null)
+				return;
+			
 			var pp:Number = Number(fileobj.progress);
 			if(pp >= 100)
 			{

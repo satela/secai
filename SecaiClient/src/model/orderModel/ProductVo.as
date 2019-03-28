@@ -35,16 +35,16 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					techstr += prcessCatList[i].procCat_Name;
+					//techstr += prcessCatList[i].procCat_Name;
 					var childtech:String = getTechStr(prcessCatList[i].nextMatList);
 					if(childtech != "")
-						techstr +=  "(" + childtech.substr(0,childtech.length - 1) + ")";
-					techstr += ",";
+						techstr +=  childtech.substr(0,childtech.length - 1);
+					techstr += "-";
 				}
 				
 				//techstr += ",";
 			}
-			return techstr;
+			return techstr.substring(0,techstr.length - 1);
 		}
 		
 		private function getTechStr(arr:Vector.<MaterialItemVo>):String

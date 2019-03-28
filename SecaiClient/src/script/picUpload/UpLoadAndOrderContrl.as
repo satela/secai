@@ -36,7 +36,7 @@ package script.picUpload
 			
 			uiSkin = this.owner as UpLoadPanelUI; 
 			uiSkin.btnClose.on(Event.CLICK,this,onCloseScene);
-			uiSkin.btnBegin.on(Event.CLICK,this,onClickBegin);
+			//uiSkin.btnBegin.on(Event.CLICK,this,onClickBegin);
 			uiSkin.btnOpenFile.on(Event.CLICK,this,onClickOpenFile);
 
 			//uiSkin.bgimg.alpha = 0.7;
@@ -46,12 +46,14 @@ package script.picUpload
 			uiSkin.fileList.spaceY = 4;
 			uiSkin.fileList.renderHandler = new Handler(this, updateFileItem);
 			initFileOpen();
+			uiSkin.uploadinfo.visible = false;
 			
 			Browser.window.uploadApp = this;
 			if(param != null && (param as Array) != null)
 			{
 				uiSkin.fileList.array = param as Array;
 				fileListData = param as Array;
+				onClickBegin();
 			}
 			else
 				uiSkin.fileList.array = [];
@@ -86,6 +88,8 @@ package script.picUpload
 			Browser.document.body.appendChild(file);//添加到舞台
 			file.onchange = function(e):void
 			{
+				uiSkin.uploadinfo.visible = false;
+				
 				if(isUploading)
 					return;
 				if(file.files.length <= 0)
@@ -102,6 +106,7 @@ package script.picUpload
 				}
 				
 				uiSkin.fileList.array = fileListData;
+				onClickBegin();
 			};
 //			var fileReader:Object = new  Browser.window.FileReader();
 //			fileReader.onload = function(evt):void
@@ -121,6 +126,11 @@ package script.picUpload
 				return;
 			isUploading = true;
 			onBeginUpload();
+			if(fileListData.length > 0)
+			{
+				uiSkin.uploadinfo.visible = true;
+				uiSkin.uploadinfo.text = "正在上传" + "(" + curUploadIndex + "/" + fileListData.length + ")";
+			}
 		}
 		private function onBeginUpload():void
 		{
@@ -132,7 +142,9 @@ package script.picUpload
 			else
 			{
 				isUploading = false;
-				//Laya.timer.once(5000,this,onCloseScene);
+				uiSkin.uploadinfo.text = "上传完成，共上传文件" + fileListData.length;
+
+				Laya.timer.once(5000,this,onCloseScene);
 			}
 		}
 		
@@ -142,7 +154,10 @@ package script.picUpload
 			fileListData[curUploadIndex].progress = 100;
 			updateProgress();
 			curUploadIndex++;
+			uiSkin.uploadinfo.text = "正在上传" + "(" + curUploadIndex + "/" + fileListData.length + ")";
+
 			onBeginUpload();
+
 		}
 		
 		private function onProgressHandler(e:Object):void

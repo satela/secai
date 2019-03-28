@@ -1,7 +1,7 @@
 package script.picUpload
 {
 	import eventUtil.EventCenter;
-	
+		
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.Box;
@@ -44,7 +44,7 @@ package script.picUpload
 			directTree = [];
 			uiSkin = this.owner as PicManagePanelUI; 
 			//uiSkin.btnNewDir.on(Event.CLICK,this,onCreateNewDirect);
-			uiSkin.main_panel.vScrollBarSkin = "";
+			//uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
 			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
 
@@ -77,6 +77,8 @@ package script.picUpload
 			for(var i=0;i < 3;i++)
 			uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 
+			uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
+			
 			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
 			uiSkin.btnUploadPic.on(Event.CLICK,this,onShowUploadView);
 			
@@ -104,11 +106,14 @@ package script.picUpload
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
 			uiSkin.main_panel.height = Browser.clientHeight;
+			uiSkin.picList.height =  Browser.clientHeight - 365;
+
 		}
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
 			uiSkin.main_panel.height = Browser.clientHeight;
+			uiSkin.picList.height =  Browser.clientHeight - 365;
 		}
 		
 		
@@ -352,6 +357,22 @@ package script.picUpload
 			directTree = [];
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
 			updateCurDirectLabel();
+		}
+		
+		private function onClickParentFolder():void
+		{
+			if(directTree.length > 1)
+			{
+				DirectoryFileModel.instance.curSelectDir = directTree[directTree.length - 1];
+				directTree.splice(directTree.length - 1,1);
+				updateCurDirectLabel();
+				getFileList();
+			}
+			else
+			{
+				backToRootDir();
+				
+			}
 		}
 		private function onClickTopDirectLbl(index:int):void
 		{

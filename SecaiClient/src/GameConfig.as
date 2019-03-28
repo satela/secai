@@ -15,8 +15,8 @@ package {
 	import script.order.SelectMaterialControl;
 	import script.order.SelectDeliveryControl;
 	import script.order.SelectFactoryControl;
-	import laya.html.dom.HTMLDivElement;
 	import script.order.SelectPicControl;
+	import laya.html.dom.HTMLDivElement;
 	import script.prefabScript.TopBannerControl;
 	import script.order.PaintOrderControl;
 	import script.picUpload.PicManagerControl;
@@ -38,7 +38,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "PaintOrderPanel.scene";
+		public static var startScene:* = "picManager/PicShortItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -60,8 +60,8 @@ package {
 			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
 			reg("script.order.SelectFactoryControl",SelectFactoryControl);
-			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.order.SelectPicControl",SelectPicControl);
+			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
 			reg("script.prefabScript.TopBannerControl",TopBannerControl);
 			reg("script.order.PaintOrderControl",PaintOrderControl);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);

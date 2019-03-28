@@ -37,7 +37,7 @@ package script.picUpload
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
-			if(picInfo.picType == 0)
+			if(picInfo.picType == 0 || picInfo.picClass.toLocaleUpperCase() == "PLAIN")
 			{
 				this.img.skin = "upload/fold.png";
 				this.filename.text = picInfo.directName;
@@ -76,9 +76,10 @@ package script.picUpload
 				str += "dpi:" + picInfo.dpi;
 				this.fileinfo.text = str;
 				
+				
 				this.picClassTxt.text = picInfo.picClass.toLocaleUpperCase();
 				this.picClassTxt.visible = true;
-				
+				//if(this.picInfo.colorspace)
 				this.colorspacetxt.text = picInfo.colorspace.toLocaleUpperCase();
 				this.colorspacetxt.visible = true;
 				

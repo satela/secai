@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":17,
+    "selectedBox":17,
+    "selecteID":38,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f9f8f8","height":1080},
     "nodeParent":-1,
-    "maxID":38,
+    "maxID":39,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -21,13 +21,29 @@
             "props":{"var":"bgimg","top":0,"skin":"commers/通用弹框底.png","sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"bgimg",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":17,
             "child":[
                 {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":0,"skin":"mainpage/注册底花纹右对齐.jpg","right":0},
+                    "nodeParent":17,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":38,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":102,"x":713,"width":494,"skin":"commers/通用弹框底.png","height":432},
@@ -42,6 +58,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":100,"x":713,"width":494,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":432},
@@ -55,6 +72,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":46,"x":905,"skin":"mainpage/半圆.png"},
@@ -69,6 +87,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":71,"x":929,"skin":"mainpage/矢量智能对象.png"},

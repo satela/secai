@@ -30,6 +30,7 @@ package ui {
 		public var input_folename:TextInput;
 		public var btnSureCreate:Button;
 		public var btnCloseInput:Button;
+		public var btnprevfolder:Text;
 
 		override protected function createChildren():void {
 			super.createChildren();

@@ -25,8 +25,7 @@ package script.order
 		public function setData(product:Object):void
 		{
 			matvo = product as ProductVo;
-			this.matname.text = matvo.prod_name;
-			this.matname.borderColor = "#222222";
+			this.matbtn.label = matvo.prod_name;
 			this.on(Event.CLICK,this,onClickMat);
 			//this.blackrect.visible = false;
 			//this.redrect.visible = false;

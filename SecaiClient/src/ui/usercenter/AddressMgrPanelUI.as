@@ -7,6 +7,7 @@ package ui.usercenter {
 	public class AddressMgrPanelUI extends View {
 		public var btnaddAddress:Button;
 		public var addlist:List;
+		public var numAddress:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

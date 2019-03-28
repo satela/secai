@@ -54,6 +54,10 @@ package script {
 			var uploadbtn:Button = this.owner["btnUpload"];
 			uploadbtn.on(Event.CLICK,this,onShowUpload);
 
+			var paintOrderBtn:Button = this.owner["paintOrderBtn"];
+			paintOrderBtn.on(Event.CLICK,this,onShowPaintOrder);
+
+			
 			var btnUserCenter:Button = this.owner["btnUserCenter"];
 			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
 			
@@ -111,9 +115,9 @@ package script {
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			console.log("height:" + Browser.clientHeight);
+			console.log("height:" + Browser.clientHeight + "," + window.screen.availHeight + "," + window.screen.availWidth);
 			//EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
-
+			
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
 		}
 		
@@ -126,6 +130,13 @@ package script {
 			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
 		}
 		
+		private function onShowPaintOrder():void
+		{
+			if(Userdata.instance.isLogin)
+				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			else
+				ViewManager.showAlert("请先登录");
+		}
 		private function onShowUserCenter():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
@@ -141,7 +152,7 @@ package script {
 		private function onShowReg(e:Event):void
 		{
 			if(!Userdata.instance.isLogin)
-				ViewManager.instance.openView(ViewManager.VIEW_REGPANEL);
+				ViewManager.instance.openView(ViewManager.VIEW_REGPANEL,true);
 			else
 			{
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.loginOutUrl,this,onLoginOutBack,"","post");

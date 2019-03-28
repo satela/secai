@@ -21,10 +21,9 @@ package script.order
 		}
 		public function set ShowSelected(value:Boolean):void
 		{
-			if(value)
-				this.addresstxt.borderColor = "#FF0000";
-			else
-				this.addresstxt.borderColor = "#222222";
+			
+			this.btnsel.selected = value;
+			this.selCheck.selected = value;
 			
 		}
 	}

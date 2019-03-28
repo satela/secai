@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":138,
+    "selectedBox":170,
+    "selecteID":63,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
-    "maxID":157,
+    "maxID":176,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -14,21 +14,6 @@
     "hasChild":true,
     "compId":2,
     "child":[
-        {
-            "x":15,
-            "type":"Sprite",
-            "searchKey":"Sprite",
-            "props":{"texture":"order/下单界面.jpg"},
-            "nodeParent":2,
-            "label":"Sprite",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":117,
-            "child":[
-                ],
-            "$HIDDEN":true
-        },
         {
             "x":15,
             "type":"Image",
@@ -39,407 +24,344 @@
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
-            "compId":3,
+            "compId":169,
             "child":[
-                ],
-            "$HIDDEN":true
+                ]
         },
         {
             "x":15,
-            "type":"Box",
-            "selectedBox":16,
-            "selecteID":15,
-            "searchKey":"Box",
-            "props":{"y":0,"x":0,"presetID":1,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+            "type":"Panel",
+            "searchKey":"Panel,panelout",
+            "props":{"width":1920,"var":"panelout","top":0,"right":0,"left":0,"bottom":128},
             "nodeParent":2,
-            "maxID":17,
-            "label":"Box(TopBanner)",
-            "isOpen":false,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":136,
-            "child":[
-                {
-                    "type":"Sprite",
-                    "searchKey":"Sprite",
-                    "props":{"presetID":2,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "label":"Sprite(TopBanner)",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":137,
-                    "child":[
-                        ],
-                    "$LOCKED":true
-                },
-                {
-                    "type":"Sprite",
-                    "searchKey":"Sprite",
-                    "props":{"presetID":3,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "label":"Sprite(TopBanner)",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":4,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"presetID":4,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "label":"Label(TopBanner)",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":5,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"presetID":5,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "maxID":5,
-                    "label":"firstPage",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":6,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"presetID":6,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                            "nodeParent":6,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":7,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"presetID":7,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "maxID":5,
-                    "label":"myorder",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":8,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"presetID":8,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                            "nodeParent":8,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":9,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"presetID":9,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "maxID":5,
-                    "label":"userName",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":10,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"presetID":10,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                            "nodeParent":10,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":12,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"presetID":11,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "maxID":5,
-                    "label":"logout",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":11,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"presetID":12,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                            "nodeParent":11,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":13,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"presetID":13,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "label":"Label(TopBanner)",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":14,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Script",
-                    "switchAble":true,
-                    "source":"src/script/prefabScript/TopBannerControl.as",
-                    "searchKey":"Script,TopBannerControl",
-                    "removeAble":true,
-                    "props":{"presetID":14,"preset":"laya/pages/prefabs/TopBanner.prefab"},
-                    "nodeParent":136,
-                    "label":"TopBannerControl",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":15,
-                    "child":[
-                        ]
-                }],
-            "animations":[
-                {
-                    "nodes":[
-                        ],
-                    "name":"ani1",
-                    "id":1,
-                    "frameRate":24,
-                    "action":0
-                }],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Image",
-            "searchKey":"Image",
-            "props":{"y":220,"x":320,"width":1280,"skin":"commers/分割线.png","height":1,"alpha":1},
-            "nodeParent":2,
-            "label":"Image",
+            "label":"panelout",
             "isOpen":true,
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":130,
-            "child":[
-                ],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Sprite",
-            "searchKey":"Sprite",
-            "props":{"y":129,"x":320},
-            "nodeParent":2,
-            "label":"Sprite",
-            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":20,
+            "compId":170,
             "child":[
                 {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":17,"width":300,"text":"会员等级：黄金VIP","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"Label",
+                    "x":30,
+                    "type":"Box",
+                    "selectedBox":16,
+                    "selecteID":15,
+                    "searchKey":"Box",
+                    "props":{"y":0,"x":0,"presetID":1,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                    "nodeParent":170,
+                    "maxID":17,
+                    "label":"Box(TopBanner)",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":136,
+                    "child":[
+                        {
+                            "type":"Sprite",
+                            "searchKey":"Sprite",
+                            "props":{"presetID":2,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "label":"Sprite(TopBanner)",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":137,
+                            "child":[
+                                ],
+                            "$LOCKED":true
+                        },
+                        {
+                            "type":"Sprite",
+                            "searchKey":"Sprite",
+                            "props":{"presetID":3,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "label":"Sprite(TopBanner)",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":4,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"presetID":4,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "label":"Label(TopBanner)",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":5,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"presetID":5,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "maxID":5,
+                            "label":"firstPage",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":6,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":6,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                                    "nodeParent":6,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":7,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
+                        },
+                        {
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"presetID":7,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "maxID":5,
+                            "label":"myorder",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":8,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":8,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                                    "nodeParent":8,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":9,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
+                        },
+                        {
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"presetID":9,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "maxID":5,
+                            "label":"userName",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":10,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":10,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                                    "nodeParent":10,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":12,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
+                        },
+                        {
+                            "type":"Text",
+                            "selectedBox":3,
+                            "searchKey":"Text",
+                            "props":{"presetID":11,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "maxID":5,
+                            "label":"logout",
+                            "isOpen":null,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":11,
+                            "child":[
+                                {
+                                    "type":"Script",
+                                    "switchAble":true,
+                                    "source":"src/script/prefabScript/LinkTextControl.as",
+                                    "searchKey":"Script,LinkTextControl",
+                                    "removeAble":true,
+                                    "props":{"presetID":12,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                                    "nodeParent":11,
+                                    "label":"LinkTextControl",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":13,
+                                    "child":[
+                                        ]
+                                }],
+                            "animations":[
+                                {
+                                    "nodes":[
+                                        ],
+                                    "name":"ani1",
+                                    "id":1,
+                                    "frameRate":24,
+                                    "action":0
+                                }]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"presetID":13,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "label":"Label(TopBanner)",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":14,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Script",
+                            "switchAble":true,
+                            "source":"src/script/prefabScript/TopBannerControl.as",
+                            "searchKey":"Script,TopBannerControl",
+                            "removeAble":true,
+                            "props":{"presetID":14,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                            "nodeParent":136,
+                            "label":"TopBannerControl",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":15,
+                            "child":[
+                                ]
+                        }],
+                    "animations":[
+                        {
+                            "nodes":[
+                                ],
+                            "name":"ani1",
+                            "id":1,
+                            "frameRate":24,
+                            "action":0
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":284,"x":320,"width":1280,"skin":"commers/分割线.png","height":1,"alpha":1},
+                    "nodeParent":170,
+                    "label":"Image",
+                    "isOpen":true,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
-                    "compId":131,
+                    "compId":130,
                     "child":[
-                        ]
+                        ],
+                    "$HIDDEN":false
                 },
                 {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":17,"x":326,"width":300,"text":"折扣：无","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"Label",
-                    "isDirectory":false,
+                    "x":30,
+                    "type":"Sprite",
+                    "searchKey":"Sprite",
+                    "props":{"y":100,"x":336,"texture":"commers/首页icon.png"},
+                    "nodeParent":170,
+                    "label":"Sprite",
+                    "isOpen":false,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":132,
+                    "hasChild":true,
+                    "compId":126,
                     "child":[
-                        ]
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":3,"x":36,"text":"/  喷印下单 ","fontSize":14,"font":"SimHei","color":"#39B25A"},
+                            "nodeParent":126,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":127,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":3,"x":120,"text":"/  订单确认","fontSize":14,"font":"SimHei","color":"#BDB8DD"},
+                            "nodeParent":126,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":160,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
                 },
                 {
-                    "type":"Label",
-                    "searchKey":"Label,textDeliveryType",
-                    "props":{"y":17,"x":652,"width":300,"var":"textDeliveryType","text":"配送方式：送货上门","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"textDeliveryType",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":133,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":17,"x":978,"width":300,"text":"运费：0.00","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":134,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label,textProductNum",
-                    "props":{"y":61,"width":300,"var":"textProductNum","text":"商品总数；3","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"textProductNum",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":16,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label,textTotalPrice",
-                    "props":{"y":61,"x":326,"width":300,"var":"textTotalPrice","text":"订单总额：10.00","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"textTotalPrice",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":17,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label,textDiscountPrice",
-                    "props":{"y":61,"x":652,"width":300,"var":"textDiscountPrice","text":"折后总额：10.00","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"textDiscountPrice",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":18,
-                    "child":[
-                        ]
-                },
-                {
-                    "type":"Label",
-                    "searchKey":"Label,textPayPrice",
-                    "props":{"y":61,"x":978,"width":300,"var":"textPayPrice","text":"应付金额：10.00","mouseEnabled":true,"fontSize":20,"font":"SimHei","color":"#262B2E","align":"left"},
-                    "nodeParent":20,
-                    "label":"textPayPrice",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":19,
-                    "child":[
-                        ]
-                },
-                {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":101,"x":0},
-                    "nodeParent":20,
+                    "props":{"y":165,"x":338},
+                    "nodeParent":170,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
@@ -478,7 +400,7 @@
                                     "source":"src/script/prefabScript/LinkTextControl.as",
                                     "searchKey":"Script,LinkTextControl",
                                     "removeAble":true,
-                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "props":{"txttype":2,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
                                     "nodeParent":98,
                                     "label":"LinkTextControl",
                                     "isDirectory":false,
@@ -500,10 +422,11 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":138,"x":0},
-                    "nodeParent":20,
+                    "props":{"y":217,"x":338},
+                    "nodeParent":170,
                     "label":"Box",
                     "isOpen":true,
                     "isDirectory":true,
@@ -512,6 +435,7 @@
                     "compId":26,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":5,"text":"输出中心","fontSize":22,"font":"SimHei","color":"#262B2E"},
@@ -525,6 +449,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,qqContact",
                             "props":{"y":0,"x":700,"width":128,"var":"qqContact","skin":"commers/按钮.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"qq交谈","height":40},
@@ -538,6 +463,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text,factorytxt",
@@ -557,7 +483,7 @@
                                     "source":"src/script/prefabScript/LinkTextControl.as",
                                     "searchKey":"Script,LinkTextControl",
                                     "removeAble":true,
-                                    "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                    "props":{"txttype":2,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
                                     "nodeParent":100,
                                     "label":"LinkTextControl",
                                     "isDirectory":false,
@@ -577,265 +503,323 @@
                                     "action":0
                                 }]
                         }]
-                }],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Sprite",
-            "searchKey":"Sprite",
-            "props":{"y":100,"x":336,"texture":"commers/首页icon.png"},
-            "nodeParent":2,
-            "label":"Sprite",
-            "isOpen":false,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":126,
-            "child":[
-                {
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":3,"x":36,"text":"/  喷印下单","fontSize":14,"font":"SimHei"},
-                    "nodeParent":126,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":127,
-                    "child":[
-                        ]
-                }],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Box",
-            "searchKey":"Box",
-            "props":{"y":313,"x":320},
-            "nodeParent":2,
-            "label":"Box",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":138,
-            "child":[
-                {
-                    "x":30,
-                    "type":"Image",
-                    "searchKey":"Image",
-                    "props":{"y":0,"x":0,"width":1280,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":44,"alpha":1},
-                    "nodeParent":138,
-                    "label":"Image",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":139,
-                    "child":[
-                        ],
-                    "$LOCKED":false
                 },
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":64,"text":"序号","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
+                    "type":"Box",
+                    "searchKey":"Box,floatpt",
+                    "props":{"y":296,"x":320,"var":"floatpt"},
+                    "nodeParent":170,
+                    "label":"floatpt",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":140,
+                    "hasChild":true,
+                    "compId":173,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box,floatdocker",
+                            "props":{"var":"floatdocker"},
+                            "nodeParent":173,
+                            "label":"floatdocker",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":138,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image",
+                                    "props":{"y":50,"x":0,"width":1280,"skin":"commers/grayback.jpg","height":44},
+                                    "nodeParent":138,
+                                    "label":"Image",
+                                    "isOpen":true,
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":171,
+                                    "child":[
+                                        ],
+                                    "$HIDDEN":false
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image",
+                                    "props":{"y":50,"x":0,"width":1280,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":44,"alpha":1},
+                                    "nodeParent":138,
+                                    "label":"Image",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":139,
+                                    "child":[
+                                        ],
+                                    "$LOCKED":false
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":64,"text":"序号","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":140,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":228,"text":"稿件名","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":141,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":366,"text":"材料","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":142,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":488,"text":"图片编辑","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":143,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":662,"text":"工艺","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":144,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":950,"text":"数量","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":146,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":821,"text":"单价","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":147,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":1068,"text":"总价","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":148,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"CheckBox",
+                                    "searchKey":"CheckBox,selectAll",
+                                    "props":{"y":65,"x":14,"var":"selectAll","skin":"commers/复选框.png","scaleY":1,"scaleX":1,"labelSize":20},
+                                    "nodeParent":138,
+                                    "label":"selectAll",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":149,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":33,"text":"全选","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":150,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":99,"text":"稿件","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":162,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":66,"x":1189,"text":"操作","fontSize":14,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":163,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image",
+                                    "props":{"y":0,"x":0,"width":1280,"skin":"commers/通用弹框底.png","sizeGrid":"3,3,3,3","height":50},
+                                    "nodeParent":138,
+                                    "label":"Image",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":175,
+                                    "child":[
+                                        ],
+                                    "$HIDDEN":false
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"y":10,"x":18,"text":"产品清单","fontSize":22,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":161,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label,productNum",
+                                    "props":{"y":10,"x":114,"var":"productNum","text":"10","fontSize":22,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":138,
+                                    "label":"productNum",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":174,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Button",
+                                    "searchKey":"Button,btnaddpic",
+                                    "props":{"y":0,"x":1000,"width":128,"var":"btnaddpic","skin":"commers/按钮3.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"添加产品","height":42},
+                                    "nodeParent":138,
+                                    "label":"btnaddpic",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":151,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Button",
+                                    "searchKey":"Button,batchChange",
+                                    "props":{"y":0,"x":1152,"width":128,"var":"batchChange","skin":"commers/按钮3.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"批量操作","height":42},
+                                    "nodeParent":138,
+                                    "label":"batchChange",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":156,
+                                    "child":[
+                                        ]
+                                }],
+                            "$HIDDEN":false
+                        }]
                 },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":228,"text":"稿件名","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":141,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":365,"text":"材料","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":142,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":489,"text":"图片编辑","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":143,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":661,"text":"工艺","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":144,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":947,"text":"数量","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":146,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":818,"text":"单价","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":147,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":1068,"text":"总价","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":148,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"CheckBox",
-                    "searchKey":"CheckBox,selectAll",
-                    "props":{"y":13,"x":14,"var":"selectAll","skin":"commers/复选框.png","scaleY":1,"scaleX":1,"labelSize":20},
-                    "nodeParent":138,
-                    "label":"selectAll",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":149,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":14,"x":33,"text":"全选","fontSize":14,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":138,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":150,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,btnaddpic",
-                    "props":{"y":7,"x":94,"width":100,"var":"btnaddpic","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"添加产品","height":30},
-                    "nodeParent":138,
-                    "label":"btnaddpic",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":151,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,batchChange",
-                    "props":{"y":7,"x":1167,"width":100,"var":"batchChange","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"批量操作","height":30},
-                    "nodeParent":138,
-                    "label":"batchChange",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":156,
-                    "child":[
-                        ]
-                }]
-        },
-        {
-            "x":15,
-            "type":"Panel",
-            "searchKey":"Panel,panel_main",
-            "props":{"width":1920,"var":"panel_main","top":358,"right":0,"left":0,"height":783},
-            "nodeParent":2,
-            "label":"panel_main",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":135,
-            "child":[
                 {
                     "x":30,
                     "type":"VBox",
                     "searchKey":"VBox,mainvbox",
-                    "props":{"y":0,"x":320,"width":1280,"var":"mainvbox","space":10},
-                    "nodeParent":135,
+                    "props":{"y":390,"x":320,"width":1280,"var":"mainvbox","space":10},
+                    "nodeParent":170,
                     "label":"mainvbox",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":63,
                     "child":[
                         {
-                            "x":45,
                             "type":"VBox",
                             "searchKey":"VBox,ordervbox",
-                            "props":{"var":"ordervbox","space":20,"right":0,"left":0,"height":20},
+                            "props":{"var":"ordervbox","space":2,"right":0,"left":0,"height":20},
                             "nodeParent":63,
                             "label":"ordervbox",
                             "isOpen":true,
@@ -848,10 +832,9 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
-                            "props":{"y":120,"x":0},
+                            "props":{"y":120,"x":0,"width":1280,"height":95},
                             "nodeParent":63,
                             "label":"Box",
                             "isOpen":true,
@@ -861,14 +844,13 @@
                             "compId":84,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Text",
                                     "selectedBox":3,
-                                    "searchKey":"Text,deliverybtn",
-                                    "props":{"y":10,"x":136,"var":"deliverybtn","text":"选择配送方式","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"color":"#0f2288"},
+                                    "searchKey":"Text,deliverytxt",
+                                    "props":{"y":15,"x":110,"var":"deliverytxt","text":"选择配送方式","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":22,"font":"SimHei","color":"#39B25A"},
                                     "nodeParent":84,
                                     "maxID":5,
-                                    "label":"deliverybtn",
+                                    "label":"deliverytxt",
                                     "isOpen":null,
                                     "isDirectory":true,
                                     "isAniNode":true,
@@ -881,7 +863,7 @@
                                             "source":"src/script/prefabScript/LinkTextControl.as",
                                             "searchKey":"Script,LinkTextControl",
                                             "removeAble":true,
-                                            "props":{"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                                            "props":{"txttype":2,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
                                             "nodeParent":106,
                                             "label":"LinkTextControl",
                                             "isDirectory":false,
@@ -902,10 +884,9 @@
                                         }]
                                 },
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
-                                    "props":{"text":"配送方式","fontSize":30},
+                                    "props":{"y":15,"text":"配送方式","fontSize":22,"font":"SimHei","color":"#262B2E"},
                                     "nodeParent":84,
                                     "label":"Label",
                                     "isDirectory":false,
@@ -916,38 +897,35 @@
                                         ]
                                 },
                                 {
-                                    "x":60,
-                                    "type":"Label",
-                                    "searchKey":"Label,deliverytxt",
-                                    "props":{"y":42,"x":0,"width":425,"var":"deliverytxt","text":"请选择配送方式","height":30,"fontSize":24},
+                                    "type":"Image",
+                                    "searchKey":"Image",
+                                    "props":{"y":75,"width":1280,"skin":"commers/分割线.png","height":1},
                                     "nodeParent":84,
-                                    "label":"deliverytxt",
+                                    "label":"Image",
                                     "isDirectory":false,
                                     "isAniNode":true,
                                     "hasChild":false,
-                                    "compId":87,
+                                    "compId":158,
                                     "child":[
                                         ]
                                 }]
                         },
                         {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
-                            "props":{"y":201,"x":0},
+                            "props":{"y":201,"x":0,"width":1006,"height":47},
                             "nodeParent":63,
                             "label":"Box",
-                            "isOpen":true,
+                            "isOpen":false,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":91,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
-                                    "props":{"text":"添加批量备注","fontSize":30},
+                                    "props":{"text":"添加批量备注","fontSize":22,"font":"SimHei","color":"#262B2E"},
                                     "nodeParent":91,
                                     "label":"Label",
                                     "isDirectory":false,
@@ -958,10 +936,9 @@
                                         ]
                                 },
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
-                                    "props":{"y":4,"x":213,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":20,"color":"#fb1006"},
+                                    "props":{"y":0,"x":149,"width":857,"text":"注：备注以每个产品后面的“添加备注”优先，“添加备注”没有内容才会显示“添加批量备注”内容。","height":30,"fontSize":22,"font":"SimHei","color":"#E40020"},
                                     "nodeParent":91,
                                     "label":"Label",
                                     "isDirectory":false,
@@ -973,11 +950,103 @@
                                 }]
                         },
                         {
-                            "x":45,
+                            "type":"TextInput",
+                            "searchKey":"TextInput,commentall",
+                            "props":{"y":261,"x":0,"width":1280,"var":"commentall","valign":"top","skin":"commers/输入框.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请添加备注","height":165,"fontSize":20,"font":"SimHei","color":"#262B2E"},
+                            "nodeParent":63,
+                            "label":"commentall",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":92,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
+                }]
+        },
+        {
+            "x":15,
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"x":1,"bottom":116},
+            "nodeParent":2,
+            "label":"Box",
+            "isOpen":null,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":172,
+            "child":[
+                {
+                    "type":"Sprite",
+                    "searchKey":"Sprite",
+                    "props":{"x":329,"texture":"commers/分割线.png"},
+                    "nodeParent":172,
+                    "label":"Sprite",
+                    "isOpen":false,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":20,
+                    "child":[
+                        {
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"y":50,"x":-329,"width":1920,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","height":71,"alpha":1},
+                            "nodeParent":20,
+                            "label":"Image",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":164,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"HTMLDivElement",
+                            "searchKey":"HTMLDivElement,textTotalPrice",
+                            "props":{"y":79,"x":0,"width":300,"var":"textTotalPrice","innerHTML":"htmlText","height":100},
+                            "nodeParent":20,
+                            "label":"textTotalPrice",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":166,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"HTMLDivElement",
+                            "searchKey":"HTMLDivElement,textDeliveryType",
+                            "props":{"y":79,"x":269,"width":300,"var":"textDeliveryType","innerHTML":"htmlText","height":100},
+                            "nodeParent":20,
+                            "label":"textDeliveryType",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":167,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"HTMLDivElement",
+                            "searchKey":"HTMLDivElement,textPayPrice",
+                            "props":{"y":79,"x":538,"width":300,"var":"textPayPrice","innerHTML":"htmlText","height":100},
+                            "nodeParent":20,
+                            "label":"textPayPrice",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":168,
+                            "child":[
+                                ]
+                        },
+                        {
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":344,"x":789,"width":490,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":20,"color":"#fb1006"},
-                            "nodeParent":63,
+                            "props":{"y":14,"x":641,"width":609,"text":"结算前请务必要核对确认 材料 尺寸 工艺 数量 等信息！","height":30,"fontSize":24,"font":"SimHei","color":"#E40020"},
+                            "nodeParent":20,
                             "label":"Label",
                             "isDirectory":false,
                             "isAniNode":true,
@@ -987,37 +1056,21 @@
                                 ]
                         },
                         {
-                            "x":45,
-                            "type":"TextInput",
-                            "searchKey":"TextInput,commentall",
-                            "props":{"y":242,"x":0,"width":1280,"var":"commentall","valign":"top","skin":"comp/textinput.png","prompt":"请添加备注","height":93,"fontSize":20},
-                            "nodeParent":63,
-                            "label":"commentall",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":92,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
-                            "props":{"y":392,"x":959},
-                            "nodeParent":63,
+                            "props":{"y":63,"x":877,"width":371,"height":48},
+                            "nodeParent":20,
                             "label":"Box",
-                            "isOpen":true,
+                            "isOpen":false,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":96,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button",
-                                    "props":{"width":120,"skin":"comp/button.png","labelSize":20,"label":"保存订单","height":40},
+                                    "props":{"y":0,"x":0,"width":160,"skin":"commers/按钮3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"保存订单","height":48},
                                     "nodeParent":96,
                                     "label":"Button",
                                     "isDirectory":false,
@@ -1028,10 +1081,9 @@
                                         ]
                                 },
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button,btnordernow",
-                                    "props":{"x":159,"width":120,"var":"btnordernow","skin":"comp/button.png","labelSize":20,"label":"去结算","height":40},
+                                    "props":{"y":-2,"x":208,"width":160,"var":"btnordernow","skin":"commers/按钮.png","sizeGrid":"2,2,2,2","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"去结算","height":48},
                                     "nodeParent":96,
                                     "label":"btnordernow",
                                     "isDirectory":false,
@@ -1043,8 +1095,7 @@
                                 }]
                         }],
                     "$HIDDEN":false
-                }],
-            "$HIDDEN":false
+                }]
         },
         {
             "x":15,

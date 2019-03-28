@@ -19,16 +19,14 @@ package script.order
 		{
 			address = data as AddressVo;
 			this.addresstxt.text = address.addressDetail;
-			ShowSelected = address == PaintOrderModel.instance.selectAddress;
+			//ShowSelected = address == PaintOrderModel.instance.selectAddress;
 		}
 		
 		public function set ShowSelected(value:Boolean):void
 		{
-			if(value)
-				this.addresstxt.borderColor = "#FF0000";
-			else
-				this.addresstxt.borderColor = "#222222";
-			
+			this.btnsel.selected = value;
+			this.selCheck.selected = value;
+					
 		}
 	}
 }

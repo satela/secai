@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":4,
+    "selecteID":8,
     "searchKey":"View",
     "props":{"sceneColor":"#ffffff"},
     "nodeParent":-1,
-    "maxID":8,
+    "maxID":9,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -16,19 +16,17 @@
     "child":[
         {
             "x":15,
-            "type":"Label",
-            "searchKey":"Label,matname",
-            "props":{"y":0,"x":0,"width":198,"var":"matname","valign":"middle","text":"90宽激光单色","height":35,"fontSize":18,"borderColor":"#ef1916","bgColor":"#9a8a8a","align":"center"},
+            "type":"Button",
+            "searchKey":"Button,matbtn",
+            "props":{"y":0,"x":0,"width":140,"var":"matbtn","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"材料名称","height":40},
             "nodeParent":2,
-            "label":"matname",
+            "label":"matbtn",
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
-            "compId":4,
+            "compId":8,
             "child":[
-                ],
-            "$LOCKED":false,
-            "$HIDDEN":false
+                ]
         }],
     "animations":[
         {

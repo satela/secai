@@ -4,7 +4,9 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.maths.Point;
 	import laya.net.HttpRequest;
+	import laya.ui.Panel;
 	import laya.utils.Browser;
 	import laya.utils.Utils;
 	
@@ -39,7 +41,7 @@ package script.order
 		{
 			uiSkin = this.owner as PaintOrderPanelUI;
 			//uiSkin.firstpage.on(Event.CLICK,this,onClosePanel);
-			uiSkin.panel_main.vScrollBarSkin = "";
+			//uiSkin.panel_main.vScrollBarSkin = "";
 			uiSkin.mainvbox.autoSize = true;
 			//uiSkin.btn_addattach.on(Event.CLICK,this,onAddPart);
 			uiSkin.btnaddpic.on(Event.CLICK,this,onShowSelectPic);
@@ -62,21 +64,33 @@ package script.order
 				num++;
 			}
 			
+			uiSkin.productNum.text = orderlist.length.toString();
+			
+			uiSkin.textTotalPrice.style.fontSize = 22;
+			uiSkin.textTotalPrice.style.font = "SimHei";
+			
+			uiSkin.textDeliveryType.style.fontSize = 22;
+			uiSkin.textDeliveryType.style.font = "SimHei";
+			
+			uiSkin.textPayPrice.style.fontSize = 22;
+			uiSkin.textPayPrice.style.font = "SimHei";
+			
 			//if(uiSkin.ordervbox.height > 10)
 			//	uiSkin.ordervbox.height -= uiSkin.ordervbox.space;
 			
 			uiSkin.ordervbox.size(uiSkin.ordervbox.width,totalheight - uiSkin.ordervbox.space);
-			
+			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
+
 			DirectoryFileModel.instance.haselectPic = {};
-			uiSkin.myaddresstxt.underline = true;
-			uiSkin.myaddresstxt.underlineColor = "#222222";
+			//uiSkin.myaddresstxt.underline = true;
+			//uiSkin.myaddresstxt.underlineColor = "#222222";
 			
-			uiSkin.factorytxt.underline = true;
-			uiSkin.factorytxt.underlineColor = "#222222";
+			//uiSkin.factorytxt.underline = true;
+			//uiSkin.factorytxt.underlineColor = "#222222";
 			uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 			uiSkin.myaddresstxt.on(Event.CLICK,this,onShowSelectAddress);
 			uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
-			uiSkin.deliverybtn.on(Event.CLICK,this,onShowSelectDelivery);
+			uiSkin.deliverytxt.on(Event.CLICK,this,onShowSelectDelivery);
 			uiSkin.batchChange.on(Event.CLICK,this,onBatchChangeMaterial);
 			uiSkin.selectAll.on(Event.CLICK,this,onSelectAll);
 			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
@@ -91,10 +105,15 @@ package script.order
 			EventCenter.instance.on(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
+			EventCenter.instance.on(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 
-			(uiSkin.panel_main).height = (Browser.clientHeight - 292);
+			uiSkin.panelout.vScrollBarSkin = "";
+			//(uiSkin.panel_main).bottom = 298 + (Browser.clientHeight - 1080);
+			//(uiSkin.panelout).height = (Browser.clientHeight - 80);
 
+			this.uiSkin.height = Browser.clientHeight;
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
+			this.uiSkin.panelout.on(Event.DRAG_MOVE,this,onDragMove);
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
 //				
 //				var result:Object = JSON.parse(data as String);
@@ -111,26 +130,48 @@ package script.order
 				uiSkin.myaddresstxt.text = Userdata.instance.getDefaultAddress().addressDetail;
 				PaintOrderModel.instance.selectAddress = Userdata.instance.getDefaultAddress();
 			}
+			Laya.timer.frameLoop(5,this,onDragMove);
 		}
 		
+		private function onDragMove():void
+		{
+			//if(uiSkin.panelout.hScrollBar)
+			//trace("panel out:" + uiSkin.panelout.y + "," + uiSkin.panelout.hScrollBar.value);  
+			if(uiSkin.floatpt.localToGlobal(new Point(uiSkin.floatpt.x,uiSkin.floatpt.y),false).y - 294 <= 0)
+			{
+				if(uiSkin.floatdocker.parent != uiSkin)
+				{
+					uiSkin.addChild(uiSkin.floatdocker);
+					uiSkin.floatdocker.y = 0;
+					uiSkin.floatdocker.x = 320;
+				}
+			}
+			else if(uiSkin.floatdocker.parent != uiSkin.floatpt)
+			{
+				uiSkin.floatpt.addChild(uiSkin.floatdocker);
+				uiSkin.floatdocker.y = 0;
+				uiSkin.floatdocker.x = 0;
+
+			}
+		}
 		private function resetOrderInfo():void
 		{
-			if(PaintOrderModel.instance.selectDelivery == null)
-				uiSkin.textDeliveryType.text = "送货方式：无";
-			else
-				uiSkin.textDeliveryType.text = "送货方式：" + PaintOrderModel.instance.selectDelivery.delivery_name;
+//			if(PaintOrderModel.instance.selectDelivery == null)
+//				uiSkin.textDeliveryType.text = "送货方式：无";
+//			else
+//				uiSkin.textDeliveryType.text = "送货方式：" + PaintOrderModel.instance.selectDelivery.delivery_name;
 			
-			uiSkin.textProductNum.text = "商品总数：" + orderlist.length + "";
+			//uiSkin.textProductNum.text = "商品总数：" + orderlist.length + "";
 			var total:Number = 0;
 			for(var i:int=0;i < orderlist.length;i++)
 			{
 				total += Number(orderlist[i].total.text);
 			}
 			
-			uiSkin.textTotalPrice.text = "订单总额：" + total.toFixed(2);
-			
-			uiSkin.textDiscountPrice.text = "折后总额：" + total.toFixed(2);
-			uiSkin.textPayPrice.text = "应付金额：" + total.toFixed(2);
+			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+
+			uiSkin.textPayPrice.innerHTML = "<span color='#262B2E' size='20'>应付总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			
 		}
 		private function onGetOutPutAddress(data:*):void
@@ -157,8 +198,13 @@ package script.order
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			if(Browser.clientHeight - 292 > 0)
-				(uiSkin.panel_main).height = (Browser.clientHeight - 292);
+			//if(Browser.clientHeight - 350 > 0)
+			//	(uiSkin.panel_main).height = (Browser.clientHeight - 350);
+			//(uiSkin.panel_main).bottom = 298 + (Browser.clientHeight - 1080);
+
+			//(uiSkin.panelout).height = (Browser.clientHeight - 80);
+			this.uiSkin.height = Browser.clientHeight;
+
 		}
 		private function onShowSelectPic():void
 		{
@@ -198,10 +244,15 @@ package script.order
 				var product:Array = result as Array;
 				PaintOrderModel.instance.productList = [];
 
+				var hasMatName:Array = [];
 				for(var i:int=0;i < product.length;i++)
 				{
-					var matvo:MatetialClassVo = new MatetialClassVo(product[i].prodCat_name);
-					PaintOrderModel.instance.productList.push(matvo);
+					if(hasMatName.indexOf(product[i].prodCat_name) < 0)
+					{
+						var matvo:MatetialClassVo = new MatetialClassVo(product[i].prodCat_name);
+						PaintOrderModel.instance.productList.push(matvo);
+						hasMatName.push(product[i].prodCat_name);
+					}
 				}
 			}
 		}
@@ -257,6 +308,16 @@ package script.order
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
 			PaintOrderModel.instance.curSelectOrderItem = null;
 		}
+		private function changeProductNum(numstr:String):void
+		{
+			for(var i:int=0;i < orderlist.length;i++)
+			{
+				if(orderlist[i].checkSel.selected)
+				{
+					orderlist[i].inputnum.text = numstr;
+				}
+			}
+		}
 		private function onUpdateOrderPic():void
 		{
 			var curindex:int = uiSkin.ordervbox.numChildren;
@@ -291,6 +352,8 @@ package script.order
 			uiSkin.ordervbox.refresh();
 			DirectoryFileModel.instance.haselectPic = {};
 			resetOrderInfo();
+			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
+			uiSkin.productNum.text = orderlist.length.toString();
 
 		}
 		
@@ -318,6 +381,9 @@ package script.order
 			uiSkin.ordervbox.size(uiSkin.ordervbox.width,0);
 			uiSkin.ordervbox.refresh();
 			resetOrderInfo();
+			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
+			uiSkin.productNum.text = orderlist.length.toString();
+
 		}
 		
 		private function updateDeliveryType():void
@@ -329,6 +395,7 @@ package script.order
 		private function onAdjustHeight(changeht:int):void
 		{
 			this.uiSkin.ordervbox.height += changeht;
+			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
 		}
 		
 		private function onOrderPaint():void
@@ -421,6 +488,9 @@ package script.order
 						
 			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
 			EventCenter.instance.off(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
+			EventCenter.instance.off(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
+
+			Laya.timer.clear(this,onDragMove);
 
 		}
 		private function onClosePanel():void

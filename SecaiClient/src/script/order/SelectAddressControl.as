@@ -4,6 +4,7 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Box;
 	import laya.utils.Handler;
 	
 	import model.Userdata;
@@ -41,6 +42,16 @@ package script.order
 			
 
 			uiSkin.list_address.array = Userdata.instance.addressList;
+			
+			Laya.timer.once(10,null,function()
+			{
+				var cells:Vector.<Box> = uiSkin.list_address.cells;
+				for(var i:int=0;i < cells.length;i++)
+				{
+					(cells[i] as SelAddressItem).ShowSelected = (cells[i] as SelAddressItem).address == PaintOrderModel.instance.selectAddress;
+				}
+			});
+			
 			//PaintOrderModel.instance.selectAddress = null;
 		}
 		
@@ -51,7 +62,7 @@ package script.order
 			{
 				item.ShowSelected = item.address == uiSkin.list_address.array[index];
 			}
-			(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
+			//(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
 			tempaddress = uiSkin.list_address.array[index];;
 		}
 		

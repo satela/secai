@@ -28,7 +28,7 @@ package script.order
 		
 		public var param:MaterialItemVo;
 		
-		private var itemheight:int = 30;
+		private var itemheight:int = 40;
 		
 		private var itemspaceH:int = 50;
 		private var itemspaceV:int = 20;
@@ -64,17 +64,21 @@ package script.order
 			uiSkin.matlist.selectEnable = true;
 			uiSkin.matlist.spaceY = 10;
 			uiSkin.matlist.renderHandler = new Handler(this, updateMatNameItem);
-			
+			this.uiSkin.selecttech.text = "无";
 			//uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
-			
+			uiSkin.hasSelMat.text = "无";
 			uiSkin.matlist.array = [];
 			
 			uiSkin.tablist.array = PaintOrderModel.instance.productList;
 			
 			this.uiSkin.techcontent.vScrollBarSkin = "";
 			this.uiSkin.main_panel.vScrollBarSkin = "";
-			
-			
+			uiSkin.subtn.on(Event.CLICK,this,onSubItemNum);
+			uiSkin.addbtn.on(Event.CLICK,this,onAddItemNum);
+			uiSkin.numinput.on(Event.INPUT,this,onNumChange);
+			uiSkin.numinput.text = "1";
+			uiSkin.numinput.restrict = "0-9";
+
 			if(PaintOrderModel.instance.productList && PaintOrderModel.instance.productList.length > 0)
 			{
 				uiSkin.tablist.selectedIndex = 0;
@@ -94,6 +98,27 @@ package script.order
 
 			uiSkin.main_panel.height = Browser.clientHeight
 		}
+		
+		private function onSubItemNum():void
+		{
+			var num:int = parseInt(uiSkin.numinput.text);
+			if(num > 1)
+				num--;
+			uiSkin.numinput.text = num.toString();
+			onNumChange();
+		}
+		private function onAddItemNum():void
+		{
+			var num:int = parseInt(uiSkin.numinput.text);
+			num++;
+			uiSkin.numinput.text = num.toString();
+			onNumChange();
+		}
+		private function onNumChange():void
+		{
+			EventCenter.instance.event(EventCenter.BATCH_CHANGE_PRODUCT_NUM,uiSkin.numinput.text);
+		}
+
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
@@ -176,6 +201,8 @@ package script.order
 		}
 		private function initTechView():void
 		{
+			uiSkin.hasSelMat.text =  PaintOrderModel.instance.curSelectMat.prod_name;
+			
 			showTechView();
 			
 			var list:Array = [];
@@ -220,7 +247,14 @@ package script.order
 			
 			var endy = b.y - a.y;
 			
-			sp.graphics.drawCurves(0, a.y + 0.5 * itemheight, [0, 0, 0.4*itemspaceH, 0.8 * endy,itemspaceH,endy], "#ff0000", 1);
+			sp.graphics.drawLine(0, a.y + 0.5 * itemheight, itemspaceH*0.5, a.y + 0.5 * itemheight,"#ff4400", 1);
+			
+			sp.graphics.drawLine( itemspaceH*0.5, a.y + 0.5 * itemheight, itemspaceH*0.5, b.y + 0.5 * itemheight,"#ff4400", 1);
+			
+			sp.graphics.drawLine( itemspaceH*0.5, b.y + 0.5 * itemheight,itemspaceH, b.y + 0.5 * itemheight,"#ff4400", 1);
+
+
+			//sp.graphics.drawCurves(0, a.y + 0.5 * itemheight, [0, 0, 0.4*itemspaceH, 0.8 * endy,itemspaceH,endy], "#ff4400", 1);
 			sp.x =a.x + a.width;
 			
 			linelist.push(sp);
@@ -330,6 +364,7 @@ package script.order
 			{
 				if(linelist[i].x > curposx)
 				{
+					linelist[i].graphics.clear(true);
 					linelist[i].removeSelf();				
 					linelist.splice(i,1);
 					i--;
