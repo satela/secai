@@ -4,7 +4,7 @@ package model.orderModel
 	{
 		public var preProc_Code:String = "";// 前置工艺编码
 		public var preProc_Name:String= "";// 前置工艺名称
-		public var preProc_AttachmentType:String = "";//  前置工艺附件类型
+		public var preProc_AttachmentTypeList:String = "";//  前置工艺附件类型
 		public var preProc_Price: Number = 0;//  前置工艺价格
 
 		public var is_mandatory:int = 0;// 是否必选工艺
@@ -41,7 +41,7 @@ package model.orderModel
 						{
 							var matvo:MaterialItemVo = new MaterialItemVo({});
 							matvo.is_mandatory = 0;
-							matvo.preProc_AttachmentType = nextpro[i].postProc_attachmentType;
+							matvo.preProc_AttachmentTypeList = nextpro[i].PostProc_AttachmentTypeList;
 							matvo.preProc_Code =  nextpro[i].postProc_code;
 							matvo.preProc_Name = nextpro[i].postProc_name;
 							matvo.procLvl = 2;

@@ -36,7 +36,8 @@ package model
 		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 		
-		
+		public static const originPicPicUrl:String = "http://n-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+
 		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
 
 		public static const getOuputAddr:String = "business/manufacturers?client_code=SCFY001&";//addr_id=120106";获取输出工厂地址

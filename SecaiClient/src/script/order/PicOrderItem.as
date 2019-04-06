@@ -220,7 +220,10 @@ package script.order
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
 			orderitemdata.item_status = "1";
 			orderitemdata.comments = this.ordervo.comment;
-			orderitemdata.imagefile_path = this.ordervo.picinfo.fid;
+			orderitemdata.imagefile_path = HttpRequestUtil.originPicPicUrl + this.ordervo.picinfo.fid + "." + this.ordervo.picinfo.picClass;
+			orderitemdata.previewImage_path = HttpRequestUtil.biggerPicUrl + this.ordervo.picinfo.fid + ".jpg";
+			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";
+
 			
 			orderitemdata.procInfoList = productVo.getProInfoList();
 			

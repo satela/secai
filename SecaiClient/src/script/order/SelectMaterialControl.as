@@ -82,7 +82,7 @@ package script.order
 			if(PaintOrderModel.instance.productList && PaintOrderModel.instance.productList.length > 0)
 			{
 				uiSkin.tablist.selectedIndex = 0;
-				onSlecteMatClass(0);
+				//onSlecteMatClass(0);
 				(uiSkin.tablist.cells[0] as MaterialClassBtn).ShowSelected = true;
 			}
 			

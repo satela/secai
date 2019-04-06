@@ -1340,7 +1340,7 @@ var MaterialItemVo=(function(){
 		// 前置工艺编码
 		this.preProc_Name="";
 		// 前置工艺名称
-		this.preProc_AttachmentType="";
+		this.preProc_AttachmentTypeList="";
 		// 前置工艺附件类型
 		this.preProc_Price=0;
 		// 前置工艺价格
@@ -1366,7 +1366,7 @@ var MaterialItemVo=(function(){
 					else{
 						var matvo=new MaterialItemVo({});
 						matvo.is_mandatory=0;
-						matvo.preProc_AttachmentType=nextpro[i].postProc_attachmentType;
+						matvo.preProc_AttachmentTypeList=nextpro[i].PostProc_AttachmentTypeList;
 						matvo.preProc_Code=nextpro[i].postProc_code;
 						matvo.preProc_Name=nextpro[i].postProc_name;
 						matvo.procLvl=2;
@@ -1680,7 +1680,8 @@ var UtilTool=(function(){
 		LocalStorage.removeItem(key);
 	}
 
-	UtilTool.formatFullDateTime=function(date){
+	UtilTool.formatFullDateTime=function(date,isFull){
+		(isFull===void 0)&& (isFull=true);
 		var datestr="";
 		datestr+=date.getFullYear()+"-";
 		if((date.getMonth()+1)>=10)
@@ -1691,6 +1692,8 @@ var UtilTool=(function(){
 			datestr+=date.getDate()+"-";
 		else
 		datestr+="0"+date.getDate();
+		if(isFull==false)
+			return datestr;
 		datestr+=" ";
 		if(date.getHours()>=10)
 			datestr+=date.getHours()+":";
@@ -1923,7 +1926,7 @@ var ProductVo=(function(){
 			return [];
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				prolist.push({proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
+				prolist.push({proc_Code:arr[i].preProc_Code,proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
 				prolist=prolist.concat(this.getMaterialProInfoList(arr[i].nextMatList));
 			}
 		}
@@ -1934,7 +1937,6 @@ var ProductVo=(function(){
 		var arr=[];
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
-				arr.push({proc_description:this.prcessCatList[i].procCat_Name,proc_attachpath:""});
 				arr=arr.concat(this.getMaterialProInfoList(this.prcessCatList[i].nextMatList));
 			}
 		}
@@ -2126,6 +2128,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.addressManageUrl="group/opt-group-express?";
 	HttpRequestUtil.biggerPicUrl="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.smallerrPicUrl="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+	HttpRequestUtil.originPicPicUrl="http://n-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.addCompanyInfo="group/create?";
 	HttpRequestUtil.getOuputAddr="business/manufacturers?client_code=SCFY001&";
 	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=SCFY001&";
@@ -35527,6 +35530,7 @@ var PaintOrderControl=(function(_super){
 		orderdata.money_paidStr="0";
 		orderdata.discountStr="0";
 		orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
+		orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
 		orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
 		orderdata.manufacturer_name=orderitem.ordervo.manufacturer_name;
 		var totalMoney=0;
@@ -35540,6 +35544,7 @@ var PaintOrderControl=(function(_super){
 				totalMoney+=this.orderlist[i].getPrice();
 				if(this.orderlist[i].ordervo.orderData.comments=="")
 					this.orderlist[i].ordervo.orderData.comments=this.uiSkin.commentall.text;
+				this.orderlist[i].ordervo.orderData.item_seq=i+1;
 				orderdata.orderItemList.push(this.orderlist[i].ordervo.orderData);
 			}
 			else{
@@ -36366,7 +36371,6 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.numinput.restrict="0-9";
 		if(PaintOrderModel.instance.productList && PaintOrderModel.instance.productList.length > 0){
 			this.uiSkin.tablist.selectedIndex=0;
-			this.onSlecteMatClass(0);
 			(this.uiSkin.tablist.cells [0]).ShowSelected=true;
 		}
 		this.uiSkin.box_tech.visible=false;
@@ -49433,7 +49437,9 @@ var PicOrderItem=(function(_super){
 		orderitemdata.item_priceStr=this.ordervo.orderPrice.toString();
 		orderitemdata.item_status="1";
 		orderitemdata.comments=this.ordervo.comment;
-		orderitemdata.imagefile_path=this.ordervo.picinfo.fid;
+		orderitemdata.imagefile_path="http://n-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+"."+this.ordervo.picinfo.picClass;
+		orderitemdata.previewImage_path="http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		orderitemdata.thumbnails_path="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
 		orderitemdata.procInfoList=productVo.getProInfoList();
 		this.ordervo.orderData=orderitemdata;
 	}
@@ -54298,7 +54304,7 @@ var TechBoxItem=(function(_super){
 	__proto.setTechSelected=function(sel){
 		if(this.techmainvo !=null){
 			this.techmainvo.selected=sel;
-			if(sel && this.techmainvo.preProc_AttachmentType !=null && this.techmainvo.preProc_AttachmentType !="" && this.techmainvo.preProc_AttachmentType !="无工艺附件"){
+			if(sel && this.techmainvo.preProc_AttachmentTypeList !=null && this.techmainvo.preProc_AttachmentTypeList !="" && this.techmainvo.preProc_AttachmentTypeList !="无工艺附件"){
 				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
 			}
 			else{

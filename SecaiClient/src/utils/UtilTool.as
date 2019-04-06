@@ -54,7 +54,7 @@ package utils
 			LocalStorage.removeItem(key);
 		}
 		
-		public static function formatFullDateTime(date:Date):String  
+		public static function formatFullDateTime(date:Date,isFull:Boolean = true):String  
 		{  
 			var datestr:String = "";
 			datestr += date.getFullYear() + "-" ;
@@ -67,7 +67,11 @@ package utils
 				datestr += date.getDate() + "-";
 			else
 				datestr += "0" + date.getDate();
+			if(isFull == false)
+				return datestr;
+			
 			datestr += " ";
+			
 			
 			if(date.getHours() >= 10)
 				datestr += date.getHours() + ":";

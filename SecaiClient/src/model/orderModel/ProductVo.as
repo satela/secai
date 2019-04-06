@@ -105,7 +105,7 @@ package model.orderModel
 				if(arr[i].selected)
 				{
 					
-					prolist.push({proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
+					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
 					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList));
 					
 				}
@@ -122,7 +122,7 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					arr.push({proc_description:prcessCatList[i].procCat_Name,proc_attachpath:""});
+					//arr.push({proc_Code:prcessCatList[i].procCat_Name,proc_description:prcessCatList[i].procCat_Name,proc_attachpath:""});
 					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList));
 				}
 			}

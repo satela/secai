@@ -427,6 +427,8 @@ package script.order
 			orderdata.money_paidStr = "0";
 			orderdata.discountStr = "0";
 			orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
+			orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
+
 			orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
 			orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
 			
@@ -447,6 +449,7 @@ package script.order
 
 					if(orderlist[i].ordervo.orderData.comments == "")
 						orderlist[i].ordervo.orderData.comments = uiSkin.commentall.text;
+					orderlist[i].ordervo.orderData.item_seq = i+1;
 					orderdata.orderItemList.push(orderlist[i].ordervo.orderData);
 				}
 				else
