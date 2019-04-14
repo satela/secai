@@ -1247,7 +1247,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="picManager/PicShortItem.scene";
+	GameConfig.startScene="uploadpic/UpLoadItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -2106,7 +2106,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//取消订单
+	//上传前通知服务器 path,fname
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2138,6 +2138,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=";
 	HttpRequestUtil.placeOrder="business/placeorder?";
 	HttpRequestUtil.cancelOrder="business/cancelorder?";
+	HttpRequestUtil.authorUploadUrl="file/authinfo";
+	HttpRequestUtil.noticeServerPreUpload="file/preupload?";
 	return HttpRequestUtil;
 })()
 
@@ -26628,6 +26630,7 @@ var EventCenter=(function(_super){
 	EventCenter.UPDATE_LOADING_PROGRESS="UPDATE_LOADING_PROGRESS";
 	EventCenter.UPDATE_MYADDRESS_LIST="UPDATE_MYADDRESS_LIST";
 	EventCenter.CANCAEL_UPLOAD_ITEM="CANCAEL_UPLOAD_ITEM";
+	EventCenter.RE_UPLOAD_FILE="RE_UPLOAD_FILE";
 	EventCenter.BROWER_WINDOW_RESIZE="BROWER_WINDOW_RESIZE";
 	EventCenter.BATCH_CHANGE_PRODUCT_NUM="BATCH_CHANGE_PRODUCT_NUM";
 	EventCenter._eventCenter=null;
@@ -36187,6 +36190,11 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.file=null;
 		this.param=null;
 		this.isUploading=false;
+		this.clientParam=null;
+		this.checkpoint=0;
+		this.callbackparam=null;
+		//服务器回调参数
+		this.ossFileName=null;
 		UpLoadAndOrderContrl.__super.call(this);
 	}
 
@@ -36203,6 +36211,7 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.uiSkin.fileList.renderHandler=new Handler(this,this.updateFileItem);
 		this.initFileOpen();
 		this.uiSkin.uploadinfo.visible=false;
+		this.uiSkin.errortxt.visible=false;
 		Browser.window.uploadApp=this;
 		if(this.param !=null && (this.param)!=null){
 			this.uiSkin.fileList.array=this.param;
@@ -36212,6 +36221,12 @@ var UpLoadAndOrderContrl=(function(_super){
 		else
 		this.uiSkin.fileList.array=[];
 		EventCenter.instance.on("CANCAEL_UPLOAD_ITEM",this,this.onDeleteItem);
+		EventCenter.instance.on("RE_UPLOAD_FILE",this,this.reUploadFile);
+	}
+
+	__proto.reUploadFile=function(){
+		this.uiSkin.errortxt.visible=false;
+		this.onClickBegin();
 	}
 
 	__proto.onClickOpenFile=function(){
@@ -36248,9 +36263,28 @@ var UpLoadAndOrderContrl=(function(_super){
 	}
 
 	// }
+	__proto.getSendRequest=function(){
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/authinfo",this,this.onGetAuthor,null,"get");
+	}
+
+	__proto.onGetAuthor=function(data){
+		var authordata=JSON.parse(data);
+		this.clientParam={};
+		this.clientParam.accessKeyId=authordata.Credentials.AccessKeyId;
+		this.clientParam.accessKeySecret=authordata.Credentials.AccessKeySecret;
+		this.clientParam.stsToken=authordata.Credentials.SecurityToken;
+		this.clientParam.endpoint="oss-cn-shanghai.aliyuncs.com";
+		this.clientParam.bucket="n-scfy-763";
+		this.onClickBegin();
+	}
+
 	__proto.onClickBegin=function(){
 		if(this.isUploading)
 			return;
+		if(this.clientParam==null){
+			this.getSendRequest();
+			return;
+		}
 		this.isUploading=true;
 		this.onBeginUpload();
 		if(this.fileListData.length > 0){
@@ -36260,13 +36294,33 @@ var UpLoadAndOrderContrl=(function(_super){
 	}
 
 	__proto.onBeginUpload=function(){
+		if(this.callbackparam==null && this.fileListData && this.fileListData.length > this.curUploadIndex)
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/preupload?",this,this.onReadyToUpload,"path="+DirectoryFileModel.instance.curSelectDir.dpath+"&fname="+this.fileListData[this.curUploadIndex].name ,"get");
+		else
+		this.uploadFileImmediate();
+	}
+
+	__proto.uploadFileImmediate=function(){
 		if(this.fileListData && this.fileListData.length > this.curUploadIndex){
-			Browser.window.uploadPic({urlpath:"http://47.101.178.87/"+"file/add",path:DirectoryFileModel.instance.curSelectDir.dpath,file:this.fileListData[this.curUploadIndex]});
+			Browser.window.ossUpload({clientpm:this.clientParam,file:this.fileListData[this.curUploadIndex]},this.checkpoint,this.callbackparam,this.ossFileName);
 		}
 		else{
 			this.isUploading=false;
 			this.uiSkin.uploadinfo.text="上传完成，共上传文件"+this.fileListData.length;
 			Laya.timer.once(5000,this,this.onCloseScene);
+		}
+	}
+
+	__proto.onReadyToUpload=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.callbackparam={};
+			this.callbackparam.url=result.CallbackUrl;
+			this.callbackparam.body=result.CallbackBody;
+			this.callbackparam.contentType='application/x-www-form-urlencoded';
+			var arr=(this.fileListData[this.curUploadIndex] .name).split(".");
+			this.ossFileName=result.ObjectName+"."+(arr[1]==null ?"jpg":arr[1]);
+			this.uploadFileImmediate();
 		}
 	}
 
@@ -36276,18 +36330,36 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.updateProgress();
 		this.curUploadIndex++;
 		this.uiSkin.uploadinfo.text="正在上传"+"("+this.curUploadIndex+"/"+this.fileListData.length+")";
+		this.checkpoint=0;
+		this.callbackparam=null;
+		this.ossFileName="";
 		this.onBeginUpload();
 	}
 
-	__proto.onProgressHandler=function(e){
-		if(Number(e)>=100)
-			e="99";
+	__proto.onProgressHandler=function(e,pro){
+		this.checkpoint=e;
+		if(Number(pro)>=100)
+			pro="99";
 		if(this.fileListData[this.curUploadIndex])
-			this.fileListData[this.curUploadIndex].progress=Number(e);
+			this.fileListData[this.curUploadIndex].progress=Number(pro);
 		this.updateProgress();
 	}
 
 	//trace("up progress"+JSON.stringify(e));
+	__proto.onUploadError=function(err){
+		this.uiSkin.errortxt.visible=true;
+		this.uiSkin.errortxt.text=this.getErrorMsg(err);
+		this.isUploading=false;
+		this.clientParam=null;
+		var cells=this.uiSkin.fileList.cells;
+		for(var i=0;i < cells.length;i++){
+			if(cells [i] !=null && (cells [i]).fileobj==this.fileListData[this.curUploadIndex]){
+				(cells [i]).showReUploadbtn();
+				break ;
+			}
+		}
+	}
+
 	__proto.updateProgress=function(){
 		var cells=this.uiSkin.fileList.cells;
 		for(var i=0;i < cells.length;i++){
@@ -36314,10 +36386,60 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.uiSkin.fileList.deleteItem(index);
 	}
 
+	__proto.getErrorMsg=function(err){
+		switch (err.status){
+			case 0:
+				if (err.name=="cancel"){
+					return "主动删除";
+				}
+				break ;
+			case-1:
+				return "自动重新上传";
+				return;
+			case 203:
+				return "前端自己给后台回调";
+				return;
+			case 400:
+			switch (err.code){
+				case 'FilePartInterity':
+				case 'FilePartNotExist':
+				case 'FilePartState':
+				case 'InvalidPart':
+				case 'InvalidPartOrder':
+				case 'InvalidArgument':
+					return "清空断点,重新上传;";
+				case 'InvalidBucketName':
+				case 'InvalidDigest':
+				case 'InvalidEncryptionAlgorithmError':
+				case 'InvalidObjectName':
+				case 'InvalidPolicyDocument':
+				case 'InvalidTargetBucketForLogging':
+				case 'MalformedXML':
+				case 'RequestIsNotMultiPartContent':
+					return "重新授权;继续上传;"
+				case 'RequestTimeout':
+					return "请求超时，请重新上传";
+				}
+			break ;
+			case 403:
+			return "授权无效，重新授权";
+			case 411:return "缺少参数"
+			case 404:
+			return "重新授权;继续上传;"
+			case 500:
+			return "OSS内部发生错误,重新上传;"
+			return;
+			default :return "未知错误，请重新上传";
+			break ;
+		}
+		return "";
+	}
+
 	__proto.onCloseScene=function(){
 		Browser.window.uploadApp=null;
 		EventCenter.instance.event("UPDATE_FILE_LIST");
 		EventCenter.instance.off("CANCAEL_UPLOAD_ITEM",this,this.onDeleteItem);
+		EventCenter.instance.off("RE_UPLOAD_FILE",this,this.reUploadFile);
 		ViewManager.instance.closeView("VIEW_MYPICPANEL");
 		Browser.document.body.removeChild(this.file);
 	}
@@ -49561,6 +49683,7 @@ var UpLoadPanelUI=(function(_super){
 		this.bgimg=null;
 		this.uploadinfo=null;
 		this.btnClose=null;
+		this.errortxt=null;
 		this.btnOpenFile=null;
 		this.fileList=null;
 		UpLoadPanelUI.__super.call(this);
@@ -49586,6 +49709,7 @@ var UpLoadItemUI=(function(_super){
 		this.filesize=null;
 		this.btncancel=null;
 		this.finishimg=null;
+		this.reUploadBtn=null;
 		UpLoadItemUI.__super.call(this);
 	}
 
@@ -49596,7 +49720,7 @@ var UpLoadItemUI=(function(_super){
 		this.createView(UpLoadItemUI.uiView);
 	}
 
-	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":12},{"type":"Sprite","props":{"y":1,"x":0,"width":800,"var":"prgbar","texture":"upload/prgbg.png","height":76,"sizeGrid":"2,2,2,2"},"compId":14},{"type":"Label","props":{"y":30.5,"x":92.5,"width":445,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":3},{"type":"Label","props":{"y":30.5,"x":776.5,"width":70,"var":"prog","text":"10%","height":18,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":6},{"type":"Label","props":{"y":30.5,"x":674.5,"width":78,"var":"filesize","text":"12k","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"right"},"compId":7},{"type":"Button","props":{"y":32.5,"x":1020.5,"var":"btncancel","stateNum":1,"skin":"upload/关闭.png"},"compId":9},{"type":"Sprite","props":{"y":20,"x":32,"texture":"upload/图icon.png"},"compId":11},{"type":"Sprite","props":{"y":76,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":13},{"type":"Sprite","props":{"y":28.5,"x":776.5,"var":"finishimg","texture":"upload/完成.png"},"compId":15}],"loadList":["commers/分割线.png","upload/prgbg.png","upload/关闭.png","upload/图icon.png","upload/完成.png"],"loadList3D":[]};
+	UpLoadItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Sprite","props":{"y":0,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":12},{"type":"Sprite","props":{"y":1,"x":0,"width":800,"var":"prgbar","texture":"upload/prgbg.png","height":76,"sizeGrid":"2,2,2,2"},"compId":14},{"type":"Label","props":{"y":30.5,"x":92.5,"width":445,"var":"filename","text":"文件名","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":3},{"type":"Label","props":{"y":30.5,"x":776.5,"width":70,"var":"prog","text":"10%","height":18,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":6},{"type":"Label","props":{"y":30.5,"x":674.5,"width":78,"var":"filesize","text":"12k","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"right"},"compId":7},{"type":"Button","props":{"y":32.5,"x":1020.5,"var":"btncancel","stateNum":1,"skin":"upload/关闭.png"},"compId":9},{"type":"Sprite","props":{"y":20,"x":32,"texture":"upload/图icon.png"},"compId":11},{"type":"Sprite","props":{"y":76,"x":0,"width":1084,"texture":"commers/分割线.png","height":1},"compId":13},{"type":"Sprite","props":{"y":28.5,"x":776.5,"var":"finishimg","texture":"upload/完成.png"},"compId":15},{"type":"Button","props":{"y":32,"x":855,"var":"reUploadBtn","stateNum":1,"skin":"upload/开始.png"},"compId":16}],"loadList":["commers/分割线.png","upload/prgbg.png","upload/关闭.png","upload/图icon.png","upload/完成.png","upload/开始.png"],"loadList3D":[]};
 	return UpLoadItemUI;
 })(View)
 
@@ -54587,9 +54711,19 @@ var FileUpLoadItem=(function(_super){
 			sizestr=(filedata.size/(1024*1024)).toFixed(2).toString()+"m";
 		else
 		sizestr=((filedata.size/1024).toFixed(2)).toString()+"k";
+		this.reUploadBtn.visible=false;
 		this.filesize.text=sizestr;
 		this.btncancel.on("click",this,this.onCancelUpload);
+		this.reUploadBtn.on("click",this,this.onReUpload);
 		this.updateProgress();
+	}
+
+	__proto.showReUploadbtn=function(){
+		this.reUploadBtn.visible=true;
+	}
+
+	__proto.onReUpload=function(){
+		EventCenter.instance.event("RE_UPLOAD_FILE",this);
 	}
 
 	__proto.onCancelUpload=function(){

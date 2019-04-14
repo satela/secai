@@ -130,6 +130,7 @@ package script {
 			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
 		}
 		
+		
 		private function onShowPaintOrder():void
 		{
 			if(Userdata.instance.isLogin)

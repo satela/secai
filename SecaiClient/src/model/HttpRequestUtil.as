@@ -54,6 +54,9 @@ package model
 		public static const placeOrder:String = "business/placeorder?";//下单接口
 
 		public static const cancelOrder:String = "business/cancelorder?";//取消订单
+		
+		public static const authorUploadUrl:String = "file/authinfo";//上传请求凭证
+		public static const noticeServerPreUpload:String = "file/preupload?";//上传前通知服务器 path,fname 
 
 		public static function get instance():HttpRequestUtil
 		{

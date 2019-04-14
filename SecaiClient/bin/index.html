@@ -148,18 +148,41 @@
 			   uploadApp.onSaveCompnayBack(data);
             }
 					
-
-		   
-
-
-			//req.addEventListener("load", transferComplete, false); req.addEventListener("error", transferFailed, false); req.addEventListener("abort", transferCanceled, false); 
 			
             xhr.send(formData);
         }
+		//var point = 0;
+		function ossUpload(filedata,point,callbackparam,filename)
+		{
+			var client = new OSS(filedata.clientpm);
+			client.multipartUpload(filename, filedata.file, {
+				parallel: 5, //并行上传的分片个数
+				partSize:  1024000, //分片大小不能小于1024*100
+				checkpoint: point,
+				progress: async function(p, checkpoint, res) {
+					point = checkpoint;
+					if(uploadApp != null)
+						uploadApp.onProgressHandler(point,(p*100).toFixed(2));
+					console.log("checkpoint"+point);
+				},
+				mime: 'image/jpeg', //文件格式
+				meta:  null, //标识
+				callback: callbackparam
+			}).then(function(result) {//上传成功
+				console.log(result);
+				 if(uploadApp != null)
+					uploadApp.onCompleteUpload(result);
+			}).catch(function(err) {//上传失败或者回调失败
+				console.log(err);
+				if(uploadApp != null)
+			   uploadApp.onUploadError(err);
+			});
+		}
+		
 		
     </script>
 	<script type="text/javascript" src="GVerify.js"></script>
-
+	<script type="text/javascript" src="http://gosspublic.alicdn.com/aliyun-oss-sdk-6.0.2.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
 	
 </body>

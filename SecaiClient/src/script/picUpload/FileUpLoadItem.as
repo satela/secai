@@ -28,12 +28,26 @@ package script.picUpload
 				sizestr = (filedata.size/(1024*1024)).toFixed(2).toString() + "m";
 			else
 				sizestr = ((filedata.size/1024).toFixed(2)).toString() + "k";
+			this.reUploadBtn.visible = false;
+
 			//this.prgbar.width = 0;
 			this.filesize.text = sizestr;
 			this.btncancel.on(Event.CLICK,this,onCancelUpload);
+			this.reUploadBtn.on(Event.CLICK,this,onReUpload);
+
 			updateProgress();
 		}
 		
+		public function showReUploadbtn():void
+		{
+			this.reUploadBtn.visible = true;
+		}
+		
+		private function onReUpload():void
+		{
+			EventCenter.instance.event(EventCenter.RE_UPLOAD_FILE,this);
+
+		}
 		private function onCancelUpload():void
 		{
 			EventCenter.instance.event(EventCenter.CANCAEL_UPLOAD_ITEM,this);

@@ -26,6 +26,11 @@ package script.picUpload
 		public var param:Object;
 
 		public var isUploading:Boolean = false;
+		
+		private var clientParam:Object;
+		private var checkpoint:Object = 0;
+		private var callbackparam:Object; //服务器回调参数
+		private var ossFileName:String;//服务器指定的文件名
 		public function UpLoadAndOrderContrl()
 		{
 			super();
@@ -47,6 +52,7 @@ package script.picUpload
 			uiSkin.fileList.renderHandler = new Handler(this, updateFileItem);
 			initFileOpen();
 			uiSkin.uploadinfo.visible = false;
+			uiSkin.errortxt.visible = false;
 			
 			Browser.window.uploadApp = this;
 			if(param != null && (param as Array) != null)
@@ -60,10 +66,15 @@ package script.picUpload
 
 			
 			EventCenter.instance.on(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
-
+			EventCenter.instance.on(EventCenter.RE_UPLOAD_FILE,this,reUploadFile);
 
 		}
 		
+		private function reUploadFile():void
+		{
+			uiSkin.errortxt.visible = false;
+			onClickBegin();
+		}
 		private function onClickOpenFile():void
 		{
 			Laya.timer.clearAll(this);
@@ -120,10 +131,31 @@ package script.picUpload
 //			}
 		}
 		
+		private function getSendRequest():void
+		{
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.authorUploadUrl,this,onGetAuthor,null,"get");
+		}
+		private function onGetAuthor(data:Object):void
+		{
+			var authordata:Object = JSON.parse(data as String);
+			clientParam = {};
+			clientParam.accessKeyId = authordata.Credentials.AccessKeyId;
+			clientParam.accessKeySecret = authordata.Credentials.AccessKeySecret;
+			clientParam.stsToken = authordata.Credentials.SecurityToken;
+			clientParam.endpoint = "oss-cn-shanghai.aliyuncs.com";			
+			clientParam.bucket = "n-scfy-763";
+			onClickBegin();
+		}
+		
 		private function onClickBegin():void
 		{
 			if(isUploading)
 				return;
+			if(clientParam == null)
+			{
+				getSendRequest();
+				return;
+			}
 			isUploading = true;
 			onBeginUpload();
 			if(fileListData.length > 0)
@@ -134,20 +166,47 @@ package script.picUpload
 		}
 		private function onBeginUpload():void
 		{
+			if(callbackparam == null && fileListData && fileListData.length > curUploadIndex)
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.noticeServerPreUpload,this,onReadyToUpload,"path=" + DirectoryFileModel.instance.curSelectDir.dpath + "&fname=" + fileListData[curUploadIndex].name ,"get");
+			else
+				uploadFileImmediate();
+			
+		}
+		
+		private function uploadFileImmediate():void
+		{
 			if(fileListData && fileListData.length > curUploadIndex)
 			{
-				Browser.window.uploadPic({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic, path:DirectoryFileModel.instance.curSelectDir.dpath,file:fileListData[curUploadIndex]});
+				Browser.window.ossUpload({clientpm:clientParam,file:fileListData[curUploadIndex]},checkpoint,callbackparam,ossFileName);
+				
+				//Browser.window.uploadPic({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic, path:DirectoryFileModel.instance.curSelectDir.dpath,file:fileListData[curUploadIndex]});
 				//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic,this,onCompleteUpload,{path:"0|11|",file:file.files[0]},"post",onProgressHandler);
 			}
 			else
 			{
 				isUploading = false;
 				uiSkin.uploadinfo.text = "上传完成，共上传文件" + fileListData.length;
-
+				
 				Laya.timer.once(5000,this,onCloseScene);
 			}
 		}
-		
+		private function onReadyToUpload(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				callbackparam = {};
+				
+				callbackparam.url = result.CallbackUrl;
+				callbackparam.body = result.CallbackBody;
+				callbackparam.contentType = 'application/x-www-form-urlencoded';
+				
+				var arr:Array = (fileListData[curUploadIndex].name as String).split(".");
+				
+				ossFileName = result.ObjectName + "." + (arr[1] == null ?"jpg":arr[1]);
+				uploadFileImmediate();
+			}
+		}
 		private function onCompleteUpload(e:Object):void
 		{
 			if(fileListData[curUploadIndex])
@@ -155,20 +214,45 @@ package script.picUpload
 			updateProgress();
 			curUploadIndex++;
 			uiSkin.uploadinfo.text = "正在上传" + "(" + curUploadIndex + "/" + fileListData.length + ")";
-
+			checkpoint = 0;
+			callbackparam = null;
+			ossFileName = "";
 			onBeginUpload();
 
 		}
 		
-		private function onProgressHandler(e:Object):void
+		private function onProgressHandler(e:Object,pro:Object):void
 		{
-			if(Number(e) >= 100)
-				e = "99";
+			checkpoint = e;
+			if(Number(pro) >= 100)
+				pro = "99";
 			if(fileListData[curUploadIndex])
-			fileListData[curUploadIndex].progress = Number(e);
+			fileListData[curUploadIndex].progress = Number(pro);
 			updateProgress();
 			//(this.uiSkin.fileList.cells[curUploadIndex] as FileUpLoadItem).updateProgress(e.toString());
 			//trace("up progress" + JSON.stringify(e));
+		}
+		
+		private function onUploadError(err:Object):void
+		{
+			uiSkin.errortxt.visible = true;
+			uiSkin.errortxt.text = getErrorMsg(err);
+			
+			isUploading = false;
+			clientParam = null;
+			//callbackparam = null;
+			//ossFileName = "";
+			
+			var cells:Vector.<Box> = uiSkin.fileList.cells;
+			for(var i:int=0;i < cells.length;i++)
+			{
+				if(cells[i] as FileUpLoadItem != null && (cells[i] as FileUpLoadItem).fileobj == fileListData[curUploadIndex])
+				{
+					(cells[i] as FileUpLoadItem).showReUploadbtn();
+					break;
+				}
+			}
+			
 		}
 		private function updateProgress():void
 		{
@@ -203,6 +287,58 @@ package script.picUpload
 			
 			
 		}
+		private function getErrorMsg(err:Object):String
+		{
+			switch (err.status) {
+				case 0:
+					if (err.name == "cancel") { //手动点击暂停上传
+						return "主动删除";
+					}
+					break;
+				case -1: //请求错误，自动重新上传
+					return "自动重新上传";
+					return;
+				case 203: //回调失败
+					return "前端自己给后台回调";
+					return;
+				case 400:
+					switch (err.code) {
+						case 'FilePartInterity': //文件Part已改变
+						case 'FilePartNotExist': //文件Part不存在
+						case 'FilePartState': //文件Part过时
+						case 'InvalidPart': //无效的Part
+						case 'InvalidPartOrder': //无效的part顺序
+						case 'InvalidArgument': //参数格式错误
+							return "清空断点,重新上传;";
+							
+						case 'InvalidBucketName': //无效的Bucket名字
+						case 'InvalidDigest': //无效的摘要
+						case 'InvalidEncryptionAlgorithmError': //指定的熵编码加密算法错误
+						case 'InvalidObjectName': //无效的Object名字
+						case 'InvalidPolicyDocument': //无效的Policy文档
+						case 'InvalidTargetBucketForLogging': //Logging操作中有无效的目标bucket
+						case 'MalformedXML': //XML格式非法
+						case 'RequestIsNotMultiPartContent': //Post请求content-type非法
+							return "重新授权;继续上传;"
+							
+						case 'RequestTimeout'://请求超时
+							return "请求超时，请重新上传";
+					}
+					break;
+				case 403: 
+					return "授权无效，重新授权";
+				case 411: return "缺少参数"
+				case 404: //Bucket/Object/Multipart Upload ID 不存在
+					return "重新授权;继续上传;"
+					
+				case 500: //OSS内部发生错误
+					return "OSS内部发生错误,重新上传;"
+					return;
+				default:return "未知错误，请重新上传";
+					break;
+			}
+			return "";
+		}
 		private function onCloseScene():void
 		{
 			// TODO Auto Generated method stub
@@ -210,6 +346,7 @@ package script.picUpload
 
 			EventCenter.instance.event(EventCenter.UPDATE_FILE_LIST);
 			EventCenter.instance.off(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
+			EventCenter.instance.off(EventCenter.RE_UPLOAD_FILE,this,reUploadFile);
 
 			ViewManager.instance.closeView(ViewManager.VIEW_MYPICPANEL);
 			

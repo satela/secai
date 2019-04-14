@@ -37,6 +37,7 @@ package eventUtil
 		public static const UPDATE_MYADDRESS_LIST:String = "UPDATE_MYADDRESS_LIST";//刷新我的地址列表
 
 		public static const CANCAEL_UPLOAD_ITEM:String = "CANCAEL_UPLOAD_ITEM";//删除一个上传文件
+		public static const RE_UPLOAD_FILE:String = "RE_UPLOAD_FILE";//重新上传文件
 
 
 		public static const BROWER_WINDOW_RESIZE:String = "BROWER_WINDOW_RESIZE";//浏览器窗口大小改变
