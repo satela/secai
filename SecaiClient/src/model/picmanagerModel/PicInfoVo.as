@@ -24,7 +24,7 @@ package model.picmanagerModel
 		
 		public var picClass:String = "";
 		public var dpi:Number;
-		
+		public var isProcessing:Boolean = false;
 		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
@@ -41,8 +41,8 @@ package model.picmanagerModel
 				try
 				{
 					var fattr:Object = JSON.parse(fileinfo.fattr);
-					picWidth = fattr.width;
-					picHeight = fattr.height;
+					picWidth = Number(fattr.width);
+					picHeight = Number(fattr.height);
 					colorspace = fattr.colorspace;
 					dpi = UtilTool.oneCutNineAdd(fattr.dpi);
 					picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
@@ -50,7 +50,7 @@ package model.picmanagerModel
 				}
 				catch(err:Error)
 				{
-					
+					isProcessing = true;
 				}
 
 				picClass = fileinfo.ftype;

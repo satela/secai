@@ -1247,7 +1247,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="uploadpic/UpLoadItem.scene";
+	GameConfig.startScene="order/MaterialNameItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1398,75 +1398,6 @@ var MaterialItemVo=(function(){
 var ChinaAreaModel=(function(){
 	function ChinaAreaModel(){}
 	__class(ChinaAreaModel,'model.ChinaAreaModel');
-	var __proto=ChinaAreaModel.prototype;
-	//console.log("地址 配置 解析完毕"+(times1-times));
-	__proto.getAllProvince=function(){
-		return ChinaAreaModel.areadict["0"];
-	}
-
-	__proto.getAllCity=function(proid){
-		return ChinaAreaModel.areadict[proid];
-	}
-
-	__proto.getAllArea=function(cityid){
-		return ChinaAreaModel.areadict[cityid];
-	}
-
-	__proto.getAreaName=function(cityid){
-		if(ChinaAreaModel.allAreaDict.hasOwnProperty(cityid))
-			return ChinaAreaModel.allAreaDict[cityid].areaName;
-		return "";
-	}
-
-	__proto.getParentId=function(cityid){
-		return ChinaAreaModel.allAreaDict[cityid].parentid;
-	}
-
-	__proto.getFullAddressByid=function(cityid){
-		if(ChinaAreaModel.allAreaDict.hasOwnProperty(cityid)){
-			var address=this.getFullAddressByid(ChinaAreaModel.allAreaDict[cityid].parentid)+" "+ChinaAreaModel.allAreaDict[cityid].areaName;
-			return address;
-		}
-		return "";
-	}
-
-	__getset(1,ChinaAreaModel,'instance',function(){
-		if(ChinaAreaModel._instance==null){
-			ChinaAreaModel._instance=new ChinaAreaModel();
-			ChinaAreaModel.initData();
-		}
-		return ChinaAreaModel._instance;
-	});
-
-	ChinaAreaModel.initData=function(){
-		ChinaAreaModel.hasInit=true;
-		var xmlstr=Laya.loader.getRes("res/xml/addr.xml");
-		var rootNode=xmlstr.firstChild;
-		var nodes=rootNode.childNodes;
-		ChinaAreaModel.areadict={};
-		ChinaAreaModel.allAreaDict={};
-		for(var i=0;i < nodes.length;i++){
-			var node=nodes[i];
-			var arrtibute=node.attributes;
-			var cityvo=new CityAreaVo();
-			cityvo.areaName=node.getAttribute('name');
-			cityvo.id=node.getAttribute('id');
-			cityvo.parentid=node.getAttribute('parentid');
-			ChinaAreaModel.allAreaDict[cityvo.id]=cityvo;
-			if(ChinaAreaModel.areadict.hasOwnProperty(cityvo.parentid))
-				ChinaAreaModel.areadict[cityvo.parentid].push(cityvo);
-			else{
-				ChinaAreaModel.areadict[cityvo.parentid]=[];
-				ChinaAreaModel.areadict[cityvo.parentid].push(cityvo);
-			}
-		}
-		WaitingRespond.instance.hideWaitingView();
-	}
-
-	ChinaAreaModel.areadict=null;
-	ChinaAreaModel.allAreaDict=null;
-	ChinaAreaModel._instance=null;
-	ChinaAreaModel.hasInit=false;
 	return ChinaAreaModel;
 })()
 
@@ -1661,8 +1592,12 @@ var UtilTool=(function(){
 			return v;
 		}
 		if(defaultValue!=null)if(Math.floor(defaultValue)==defaultValue){
+			if(v=="")
+				v="0"
 			return parseInt(v);
 			}else if (parseFloat(defaultValue+"")==defaultValue){
+			if(v=="")
+				v="0"
 			return parseFloat(v);
 		}
 		return v;
@@ -1750,6 +1685,7 @@ var PicInfoVo=(function(){
 		this.colorspace="";
 		this.picClass="";
 		this.dpi=NaN;
+		this.isProcessing=false;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1760,14 +1696,15 @@ var PicInfoVo=(function(){
 			this.fid=fileinfo.fid;
 			try{
 				var fattr=JSON.parse(fileinfo.fattr);
-				this.picWidth=fattr.width;
-				this.picHeight=fattr.height;
+				this.picWidth=Number(fattr.width);
+				this.picHeight=Number(fattr.height);
 				this.colorspace=fattr.colorspace;
 				this.dpi=UtilTool.oneCutNineAdd(fattr.dpi);
 				this.picPhysicWidth=UtilTool.oneCutNineAdd(this.picWidth/this.dpi*2.54);
 				this.picPhysicHeight=UtilTool.oneCutNineAdd(this.picHeight/this.dpi*2.54);
 			}
 			catch(err){
+				this.isProcessing=true;
 			}
 			this.picClass=fileinfo.ftype;
 			this.directName=fileinfo.fname;
@@ -2087,6 +2024,18 @@ var HttpRequestUtil=(function(){
 
 	__proto.onRequestCompete=function(caller,complete,request,data){
 		WaitingRespond.instance.hideWaitingView();
+		try{
+			var result=JSON.parse(data);
+			if(result && result.hasOwnProperty("status")){
+				if(result.status !=0){
+					if(ErrorCode.ErrorTips.hasOwnProperty(result.status)){
+						ViewManager.showAlert(ErrorCode.ErrorTips[result.status]);
+					}
+				}
+			}
+		}
+		catch(err){
+		}
 		Laya.timer.clearAll(request);
 		if(caller&&complete)complete.call(caller,data);
 		request.offAll();
@@ -2106,7 +2055,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//上传前通知服务器 path,fname
+	//主动终止上传
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2130,9 +2079,9 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.smallerrPicUrl="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.originPicPicUrl="http://n-scfy-763.oss-cn-shanghai.aliyuncs.com/";
 	HttpRequestUtil.addCompanyInfo="group/create?";
-	HttpRequestUtil.getOuputAddr="business/manufacturers?client_code=SCFY001&";
-	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=SCFY001&";
-	HttpRequestUtil.getProdList="business/prodlist?client_code=SCFY001&addr_id=";
+	HttpRequestUtil.getOuputAddr="business/manufacturers?client_code=CL10200&";
+	HttpRequestUtil.getProdCategory="business/prodcategory?client_code=CL10200&";
+	HttpRequestUtil.getProdList="business/prodlist?client_code=CL10200&addr_id=";
 	HttpRequestUtil.getProcessCatList="business/processcatlist?prod_code=";
 	HttpRequestUtil.getProcessFlow="business/procflowlist?manufacturer_code=";
 	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=";
@@ -2140,6 +2089,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.cancelOrder="business/cancelorder?";
 	HttpRequestUtil.authorUploadUrl="file/authinfo";
 	HttpRequestUtil.noticeServerPreUpload="file/preupload?";
+	HttpRequestUtil.getAddressFromServer="group/get-addr-list?";
+	HttpRequestUtil.abortUpload="file/abortadd?";
 	return HttpRequestUtil;
 })()
 
@@ -2281,6 +2232,47 @@ var CityAreaVo=(function(){
 
 	__class(CityAreaVo,'model.users.CityAreaVo');
 	return CityAreaVo;
+})()
+
+
+//class model.ErrorCode
+var ErrorCode=(function(){
+	function ErrorCode(){}
+	__class(ErrorCode,'model.ErrorCode');
+	__static(ErrorCode,
+	['ErrorTips',function(){return this.ErrorTips={
+			0:"操作成功",
+			100:"内部错误",
+			101:"验证码空",
+			102:"验证码超时",
+			103:"验证码异常",
+			104:"参数错误",
+			201:"用户已存在",
+			202:"用户不存在",
+			203:"未登录",
+			204:"登录失败",
+			205:"用户已加入公司",
+			206:"邀请用户不存在",
+			207:"被邀请用户已加入公司",
+			208:"邀请已发送",
+			301:"上传失败",
+			302:"目录已存在",
+			303:"文件不存在",
+			304:"文件已存在",
+			401:"您已加入公司",
+			402:"公司已存在",
+			403:"已发送创建公司请求",
+			404:"您尚未加入公司",
+			405:"您不是公司创立者",
+			501:"参数非法",
+			601:"权限错误",
+			666:"数据异常",
+			667:"数据异常",
+			701:"设置默认地址失败"
+	};}
+
+	]);
+	return ErrorCode;
 })()
 
 
@@ -10648,7 +10640,10 @@ var DrawTextureCmdNative=(function(){
 			return;
 		}
 		this._texture=value;
-		this._paramData._int32Data[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=this._texture.bitmap._glTexture.id;
+		if(this.texture.bitmap._glTexture !=null)
+			this._paramData._int32Data[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=this._texture.bitmap._glTexture.id;
+		else
+		this._paramData._int32Data[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=0;
 		var _fb=this._paramData._float32Data;
 		var uv=this.texture.uv;
 		_fb[DrawTextureCmdNative._PARAM_VB_POS_+2]=uv[0];_fb[DrawTextureCmdNative._PARAM_VB_POS_+3]=uv[1];
@@ -10755,7 +10750,10 @@ var DrawTextureCmdNative=(function(){
 			var _i32b=cmd._paramData._int32Data;
 			_i32b[DrawTextureCmdNative._PARAM_UNIFORM_LOCATION_POS_]=3;
 			_i32b[DrawTextureCmdNative._PARAM_TEX_LOCATION_POS_]=0x84C0;
-			_i32b[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=texture.bitmap._glTexture.id;
+			if(texture.bitmap._glTexture !=null)
+				_i32b[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=texture.bitmap._glTexture.id;
+			else
+			_i32b[DrawTextureCmdNative._PARAM_TEXTURE_POS_]=0;
 			_i32b[DrawTextureCmdNative._PARAM_RECT_NUM_POS_]=1;
 			_i32b[DrawTextureCmdNative._PARAM_VB_SIZE_POS_]=24 *4;
 			if (blendMode){
@@ -26633,6 +26631,7 @@ var EventCenter=(function(_super){
 	EventCenter.RE_UPLOAD_FILE="RE_UPLOAD_FILE";
 	EventCenter.BROWER_WINDOW_RESIZE="BROWER_WINDOW_RESIZE";
 	EventCenter.BATCH_CHANGE_PRODUCT_NUM="BATCH_CHANGE_PRODUCT_NUM";
+	EventCenter.PAUSE_SCROLL_VIEW="PAUSE_SCROLL_VIEW";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -34293,9 +34292,9 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.loginAccount=function(){
-		var account=UtilTool.getLocalVar("useraccount","");
-		var pwd=UtilTool.getLocalVar("userpwd","");
-		if(account !="" && pwd !=""){
+		var account=UtilTool.getLocalVar("useraccount","0");
+		var pwd=UtilTool.getLocalVar("userpwd","0");
+		if(account !="0" && pwd !="0"){
 			var param="phone="+account+"&pwd="+pwd+"&mode=0";
 			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"account/login?",this,this.onLoginBack,param,"post");
 		}
@@ -34330,7 +34329,7 @@ var MainPageControl=(function(_super){
 		if(Userdata.instance.isLogin)
 			ViewManager.instance.openView("VIEW_PICMANAGER",true);
 		else
-		ViewManager.showAlert("请先登录");
+		ViewManager.showAlert("请先登录 亲");
 	}
 
 	//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
@@ -34439,6 +34438,7 @@ var UserMainControl=(function(_super){
 		this.onShowEditView(0);
 		(this.uiSkin.panel_main).height=Browser.clientHeight-20;
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.on("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
 	}
 
 	__proto.onResizeBrower=function(){
@@ -34451,6 +34451,13 @@ var UserMainControl=(function(_super){
 
 	__proto.onMouseOverHandler=function(){
 		Mouse.cursor="hand";
+	}
+
+	__proto.onPauseScroll=function(scoll){
+		if(scoll)
+			this.uiSkin.panel_main.vScrollBar.target=this.uiSkin.panel_main;
+		else
+		this.uiSkin.panel_main.vScrollBar.target=null;
 	}
 
 	__proto.onShowEditView=function(index){
@@ -34499,6 +34506,7 @@ var UserMainControl=(function(_super){
 
 	__proto.onDestroy=function(){
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
 	}
 
 	return UserMainControl;
@@ -35314,7 +35322,7 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.panelout.on("dragmove",this,this.onDragMove);
 		this.resetOrderInfo();
 		if(Userdata.instance.getDefaultAddress()!=null){
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid,this,this.onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=CL10200&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid,this,this.onGetOutPutAddress,null,null);
 			this.uiSkin.myaddresstxt.text=Userdata.instance.getDefaultAddress().addressDetail;
 			PaintOrderModel.instance.selectAddress=Userdata.instance.getDefaultAddress();
 		}
@@ -35353,7 +35361,7 @@ var PaintOrderControl=(function(_super){
 			if(PaintOrderModel.instance.outPutAddr.length > 0){
 				PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr[0];
 				this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.name+" "+PaintOrderModel.instance.selectFactoryAddress.addr;
-				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid ,this,this.onGetProductBack,null,null);
+				HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid ,this,this.onGetProductBack,null,null);
 			}
 			else{
 				PaintOrderModel.instance.selectFactoryAddress=null;
@@ -35378,14 +35386,14 @@ var PaintOrderControl=(function(_super){
 	__proto.onSelectedSelfAddress=function(){
 		if(PaintOrderModel.instance.selectAddress){
 			this.uiSkin.myaddresstxt.text=PaintOrderModel.instance.selectAddress.addressDetail;
-			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/manufacturers?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetOutPutAddress,null,null);
 		}
 	}
 
 	__proto.onSelectedAddress=function(){
 		if(PaintOrderModel.instance.selectFactoryAddress)
 			this.uiSkin.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress.name+" "+PaintOrderModel.instance.selectFactoryAddress.addr;
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=SCFY001&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetProductBack,null,null);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodcategory?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetProductBack,null,null);
 	}
 
 	__proto.onGetProductBack=function(data){
@@ -35524,7 +35532,7 @@ var PaintOrderControl=(function(_super){
 		};
 		var orderdata={};
 		orderdata.order_sn=PaintOrderModel.getOrderSn();
-		orderdata.client_code="SCFY001";
+		orderdata.client_code="CL10200";
 		orderdata.consignee=PaintOrderModel.instance.selectAddress.receiverName
 		orderdata.tel=PaintOrderModel.instance.selectAddress.phone;
 		orderdata.address=PaintOrderModel.instance.selectAddress.proCityArea;
@@ -35598,8 +35606,7 @@ var EnterPrizeInfoControl=(function(_super){
 	function EnterPrizeInfoControl(){
 		this.uiSkin=null;
 		this.province=null;
-		this.cityname=null;
-		this.areaname=null;
+		//private var areaname:CityAreaVo;
 		this.file=null;
 		this.companyareaId=null;
 		this.curYyzzFile=null;
@@ -35611,7 +35618,6 @@ var EnterPrizeInfoControl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
 		this.uiSkin.provList.itemRender=CityAreaItem;
-		this.uiSkin.provList.vScrollBarSkin="";
 		this.uiSkin.provList.repeatX=1;
 		this.uiSkin.provList.spaceY=2;
 		this.uiSkin.provList.renderHandler=new Handler(this,this.updateCityList);
@@ -35619,21 +35625,18 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.provList.selectHandler=new Handler(this,this.selectProvince);
 		this.uiSkin.provList.refresh();
 		this.uiSkin.cityList.itemRender=CityAreaItem;
-		this.uiSkin.cityList.vScrollBarSkin="";
 		this.uiSkin.cityList.repeatX=1;
 		this.uiSkin.cityList.spaceY=2;
 		this.uiSkin.cityList.selectEnable=true;
 		this.uiSkin.cityList.renderHandler=new Handler(this,this.updateCityList);
 		this.uiSkin.cityList.selectHandler=new Handler(this,this.selectCity);
 		this.uiSkin.areaList.itemRender=CityAreaItem;
-		this.uiSkin.areaList.vScrollBarSkin="";
 		this.uiSkin.areaList.selectEnable=true;
 		this.uiSkin.areaList.repeatX=1;
 		this.uiSkin.areaList.spaceY=2;
 		this.uiSkin.areaList.renderHandler=new Handler(this,this.updateCityList);
 		this.uiSkin.areaList.selectHandler=new Handler(this,this.selectArea);
 		this.uiSkin.townList.itemRender=CityAreaItem;
-		this.uiSkin.townList.vScrollBarSkin="";
 		this.uiSkin.townList.selectEnable=true;
 		this.uiSkin.townList.repeatX=1;
 		this.uiSkin.townList.spaceY=2;
@@ -35653,17 +35656,12 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.btn_uplicense.on("click",this,this.onUploadlicense);
 		Browser.window.uploadApp=this;
 		this.initFileOpen();
-		if(!ChinaAreaModel.hasInit){
-			WaitingRespond.instance.showWaitingView(500000);
-			Laya.loader.load([{url:"res/xml/addr.xml",type:"xml"}],Handler.create(this,this.initView),null,"atlas");
-		}
-		else
-		this.initView();
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,this.initView,"parentid=0","post");
 	}
 
-	__proto.initView=function(){
-		WaitingRespond.instance.hideWaitingView();
-		this.uiSkin.provList.array=ChinaAreaModel.instance.getAllProvince();
+	__proto.initView=function(data){
+		var result=JSON.parse(data);
+		this.uiSkin.provList.array=result.status;
 		this.selectProvince(0);
 	}
 
@@ -35723,6 +35721,7 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.areabox.visible=false;
 		this.uiSkin.townbox.visible=false;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
 	__proto.onShowProvince=function(e){
@@ -35730,6 +35729,7 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.areabox.visible=false;
 		this.uiSkin.townbox.visible=false;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
 		e.stopPropagation();
 	}
 
@@ -35738,6 +35738,7 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.citybox.visible=true;
 		this.uiSkin.areabox.visible=false;
 		this.uiSkin.townbox.visible=false;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
 		e.stopPropagation();
 	}
 
@@ -35746,6 +35747,7 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.areabox.visible=true;
 		this.uiSkin.townbox.visible=false;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
 		e.stopPropagation();
 	}
 
@@ -35754,6 +35756,7 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.areabox.visible=false;
 		this.uiSkin.townbox.visible=true;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
 		e.stopPropagation();
 	}
 
@@ -35762,55 +35765,62 @@ var EnterPrizeInfoControl=(function(_super){
 	}
 
 	__proto.selectProvince=function(index){
+		var _$this=this;
 		this.province=this.uiSkin.provList.array[index];
-		console.log(this.province);
 		this.uiSkin.provbox.visible=false;
-		this.uiSkin.cityList.array=ChinaAreaModel.instance.getAllCity(this.province.id);
-		this.uiSkin.cityList.refresh();
-		this.uiSkin.province.text=this.province.areaName;
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[0].areaName;
-		this.uiSkin.cityList.selectedIndex=0;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[0].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-		this.companyareaId=this.uiSkin.townList.array[0].id;
+		this.uiSkin.province.text=this.province.areaname;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.cityList.array=result.status;
+			_$this.uiSkin.cityList.refresh();
+			_$this.uiSkin.citytxt.text=_$this.uiSkin.cityList.array[0].areaname;
+			_$this.uiSkin.cityList.selectedIndex=0;
+			_$this.selectCity(0);
+		},"parentid="+this.province.id,"post");
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectCity=function(index){
+		var _$this=this;
 		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[index].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[index].areaName;
-		this.uiSkin.areatxt.text="";
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-		this.companyareaId=this.uiSkin.townList.array[0].id;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.areaList.array=result.status;
+			_$this.uiSkin.areaList.refresh();
+			_$this.uiSkin.areatxt.text=_$this.uiSkin.areaList.array[0].areaname;
+			_$this.uiSkin.areaList.selectedIndex=0;
+			_$this.selectArea(0);
+		},"parentid="+this.uiSkin.cityList.array[index].id,"post");
+		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[index].areaname;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectArea=function(index){
+		var _$this=this;
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 		if(index==-1)
 			return;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.townList.array=result.status;
+			_$this.uiSkin.townList.refresh();
+			_$this.uiSkin.towntxt.text=_$this.uiSkin.townList.array[0].areaname;
+			_$this.uiSkin.townList.selectedIndex=0;
+			_$this.companyareaId=_$this.uiSkin.townList.array[0].id;
+		},"parentid="+this.uiSkin.areaList.array[index].id,"post");
+		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[index].areaname;
 		this.uiSkin.areabox.visible=false;
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[index].areaName;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[index].id);
-		this.uiSkin.townList.refresh();
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.uiSkin.townList.selectedIndex=-1;
-		this.companyareaId=this.uiSkin.townList.array[0].id;
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectTown=function(index){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 		if(index==-1)
 			return;
 		this.uiSkin.townbox.visible=false;
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaName;
+		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaname;
 		this.companyareaId=this.uiSkin.townList.array[index].id;
 	}
 
@@ -36167,7 +36177,8 @@ var RegisterCntrol=(function(_super){
 
 	//Browser.window.loadVerifyCode();
 	__proto.onRegisterBack=function(data){
-		var result=JSON.parse(data);{
+		var result=JSON.parse(data);
+		if(result.status==0){
 			Browser.window.alert("注册成功！");
 			Browser.document.body.removeChild(this.verifycode);
 			EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
@@ -36275,6 +36286,7 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.clientParam.stsToken=authordata.Credentials.SecurityToken;
 		this.clientParam.endpoint="oss-cn-shanghai.aliyuncs.com";
 		this.clientParam.bucket="n-scfy-763";
+		Browser.window.createossClient(this.clientParam);
 		this.onClickBegin();
 	}
 
@@ -36302,7 +36314,7 @@ var UpLoadAndOrderContrl=(function(_super){
 
 	__proto.uploadFileImmediate=function(){
 		if(this.fileListData && this.fileListData.length > this.curUploadIndex){
-			Browser.window.ossUpload({clientpm:this.clientParam,file:this.fileListData[this.curUploadIndex]},this.checkpoint,this.callbackparam,this.ossFileName);
+			Browser.window.ossUpload({file:this.fileListData[this.curUploadIndex]},this.checkpoint,this.callbackparam,this.ossFileName);
 		}
 		else{
 			this.isUploading=false;
@@ -36319,7 +36331,7 @@ var UpLoadAndOrderContrl=(function(_super){
 			this.callbackparam.body=result.CallbackBody;
 			this.callbackparam.contentType='application/x-www-form-urlencoded';
 			var arr=(this.fileListData[this.curUploadIndex] .name).split(".");
-			this.ossFileName=result.ObjectName+"."+(arr[1]==null ?"jpg":arr[1]);
+			this.ossFileName=result.ObjectName+"."+(arr[arr.length-1]==null ?"jpg":arr[arr.length-1]);
 			this.uploadFileImmediate();
 		}
 	}
@@ -36375,15 +36387,23 @@ var UpLoadAndOrderContrl=(function(_super){
 	}
 
 	__proto.onDeleteItem=function(delitem){
+		var _$this=this;
 		if(delitem.fileobj.progress >=99)
 			return;
 		var index=this.fileListData.indexOf(delitem.fileobj);
 		if(index==this.curUploadIndex){
 			Browser.window.cancelUpload();
-			if(this.isUploading)
-				this.onBeginUpload();
 		}
 		this.uiSkin.fileList.deleteItem(index);
+		this.callbackparam=null;
+		this.checkpoint=0;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"file/abortadd?",this,function(data){
+			var result=JSON.parse(data);
+			if(result.status==0){
+				if(_$this.isUploading)
+					_$this.onBeginUpload();
+			}
+		},null ,"post");
 	}
 
 	__proto.getErrorMsg=function(err){
@@ -36395,10 +36415,8 @@ var UpLoadAndOrderContrl=(function(_super){
 				break ;
 			case-1:
 				return "自动重新上传";
-				return;
 			case 203:
 				return "前端自己给后台回调";
-				return;
 			case 400:
 			switch (err.code){
 				case 'FilePartInterity':
@@ -36428,7 +36446,6 @@ var UpLoadAndOrderContrl=(function(_super){
 			return "重新授权;继续上传;"
 			case 500:
 			return "OSS内部发生错误,重新上传;"
-			return;
 			default :return "未知错误，请重新上传";
 			break ;
 		}
@@ -36542,7 +36559,7 @@ var SelectMaterialControl=(function(_super){
 		if(matvo.childMatList !=null)
 			this.uiSkin.matlist.array=(this.uiSkin.tablist.array [index]).childMatList;
 		else
-		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodlist?client_code=SCFY001&addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid+"&prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"business/prodlist?client_code=CL10200&addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid+"&prodCat_name="+matvo.matclassname,this,this.onGetProductListBack,null,null);
 	}
 
 	__proto.onGetProductListBack=function(data){
@@ -36822,8 +36839,11 @@ var AddressEditControl=(function(_super){
 		this.uiSkin=null;
 		this.province=null;
 		this.zoneid=null;
+		this.areaid=null;
 		this.param=null;
 		this.isAddOrEdit=true;
+		//true add false edit
+		this.hasinit=false;
 		AddressEditControl.__super.call(this);
 	}
 
@@ -36844,8 +36864,6 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.provList.renderHandler=new Handler(this,this.updateCityList);
 		this.uiSkin.provList.selectEnable=true;
 		this.uiSkin.provList.selectHandler=new Handler(this,this.selectProvince);
-		this.uiSkin.provList.array=ChinaAreaModel.instance.getAllProvince();
-		this.uiSkin.provList.refresh();
 		this.uiSkin.cityList.itemRender=CityAreaItem;
 		this.uiSkin.cityList.vScrollBarSkin="";
 		this.uiSkin.cityList.repeatX=1;
@@ -36876,13 +36894,14 @@ var AddressEditControl=(function(_super){
 		this.uiSkin.citybox.visible=false;
 		this.uiSkin.townbox.visible=false;
 		if(this.isAddOrEdit==false){
-			this.initAddr();
+			this.uiSkin.input_username.text=(this.param).receiverName;
+			this.uiSkin.input_phone.text=(this.param).phone;
+			this.uiSkin.input_address.text=(this.param).address;
 		}
-		else
-		this.selectProvince(0);
 		this.uiSkin.on("click",this,this.hideAddressPanel);
 		this.uiSkin.btnok.on("click",this,this.onSubmitAdd);
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,this.initAddr,"parentid=0","post");
 	}
 
 	__proto.hideAddressPanel=function(e){
@@ -36930,76 +36949,121 @@ var AddressEditControl=(function(_super){
 		cell.setData(cell.dataSource);
 	}
 
-	__proto.initAddr=function(){
-		var addvo=this.param;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(addvo.searchZoneid);
-		this.uiSkin.towntxt.text=ChinaAreaModel.instance.getAreaName(addvo.zoneid);
-		var cityid=ChinaAreaModel.instance.getParentId(addvo.searchZoneid);
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(cityid);
-		this.uiSkin.areatxt.text=ChinaAreaModel.instance.getAreaName(addvo.searchZoneid);
-		this.uiSkin.citytxt.text=ChinaAreaModel.instance.getAreaName(cityid);
-		cityid=ChinaAreaModel.instance.getParentId(cityid);
-		this.uiSkin.cityList.array=ChinaAreaModel.instance.getAllArea(cityid);
-		this.uiSkin.province.text=ChinaAreaModel.instance.getAreaName(cityid);
-		this.uiSkin.input_username.text=addvo.receiverName;
-		this.uiSkin.input_phone.text=addvo.phone;
-		this.uiSkin.input_address.text=addvo.address;
-		this.zoneid=addvo.zoneid;
+	__proto.initAddr=function(data){
+		var result=JSON.parse(data);
+		this.uiSkin.provList.array=result.status;
+		var selpro=0;
+		if(this.isAddOrEdit==false){
+			var curprov=(this.param).preAddName.split(" ");
+			if(curprov[0] !=null){
+				for(var i=0;i < this.uiSkin.provList.array.length;i++){
+					if(this.uiSkin.provList.array[i].areaname==curprov[0]){
+						selpro=i;
+						break ;
+					}
+				}
+			}
+		}
+		this.selectProvince(selpro);
 	}
 
+	///zoneid=uiSkin.provList.array[0].id;
 	__proto.selectProvince=function(index){
+		var _$this=this;
 		this.province=this.uiSkin.provList.array[index];
-		console.log(this.province);
 		this.uiSkin.provbox.visible=false;
-		this.uiSkin.cityList.array=ChinaAreaModel.instance.getAllCity(this.province.id);
-		this.uiSkin.cityList.refresh();
-		this.uiSkin.province.text=this.province.areaName;
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[0].areaName;
-		this.uiSkin.cityList.selectedIndex=0;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[0].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.zoneid=this.uiSkin.townList.array[0].id;
-		this.uiSkin.townList.selectedIndex=-1;
+		this.uiSkin.province.text=this.province.areaname;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.cityList.array=result.status;
+			_$this.uiSkin.cityList.refresh();
+			var cityindex=0;
+			if(_$this.isAddOrEdit==false && _$this.hasinit==false){
+				var curprov=(_$this.param).preAddName.split(" ");
+				if(curprov[1] !=null){
+					for(var i=0;i < _$this.uiSkin.cityList.array.length;i++){
+						if(_$this.uiSkin.cityList.array[i].areaname==curprov[1]){
+							cityindex=i;
+							break ;
+						}
+					}
+				}
+			}
+			_$this.uiSkin.citytxt.text=_$this.uiSkin.cityList.array[cityindex].areaname;
+			_$this.uiSkin.cityList.selectedIndex=cityindex;
+			_$this.selectCity(cityindex);
+		},"parentid="+this.province.id,"post");
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectCity=function(index){
+		var _$this=this;
 		this.uiSkin.citybox.visible=false;
-		this.uiSkin.areaList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.cityList.array[index].id);
-		this.uiSkin.areaList.refresh();
-		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[index].areaName;
-		this.uiSkin.areatxt.text="";
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[0].areaName;
-		this.uiSkin.areaList.selectedIndex=-1;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[0].id);
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.zoneid=this.uiSkin.townList.array[0].id;
-		this.uiSkin.townList.selectedIndex=-1;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.areaList.array=result.status;
+			_$this.uiSkin.areaList.refresh();
+			var cityindex=0;
+			if(_$this.isAddOrEdit==false && _$this.hasinit==false){
+				var curprov=(_$this.param).preAddName.split(" ");
+				if(curprov[2] !=null){
+					for(var i=0;i < _$this.uiSkin.areaList.array.length;i++){
+						if(_$this.uiSkin.areaList.array[i].areaname==curprov[2]){
+							cityindex=i;
+							break ;
+						}
+					}
+				}
+			}
+			_$this.uiSkin.areatxt.text=_$this.uiSkin.areaList.array[cityindex].areaname;
+			_$this.uiSkin.areaList.selectedIndex=cityindex;
+			_$this.selectArea(cityindex);
+			_$this.areaid=_$this.uiSkin.areaList.array[cityindex].id;
+		},"parentid="+this.uiSkin.cityList.array[index].id,"post");
+		this.uiSkin.citytxt.text=this.uiSkin.cityList.array[index].areaname;
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectArea=function(index){
+		var _$this=this;
 		if(index==-1)
 			return;
+		this.areaid=this.uiSkin.areaList.array[index].id;
+		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/get-addr-list?" ,this,function(data){
+			var result=JSON.parse(data);
+			_$this.uiSkin.townList.array=result.status;
+			_$this.uiSkin.townList.refresh();
+			var cityindex=0;
+			if(_$this.isAddOrEdit==false && _$this.hasinit==false){
+				var curprov=(_$this.param).preAddName.split(" ");
+				if(curprov[3] !=null){
+					for(var i=0;i < _$this.uiSkin.townList.array.length;i++){
+						if(_$this.uiSkin.townList.array[i].areaname==curprov[3]){
+							cityindex=i;
+							break ;
+						}
+					}
+				}
+			}
+			_$this.hasinit=true;
+			_$this.uiSkin.towntxt.text=_$this.uiSkin.townList.array[cityindex].areaname;
+			_$this.uiSkin.townList.selectedIndex=cityindex;
+			_$this.zoneid=_$this.uiSkin.townList.array[cityindex].id;
+		},"parentid="+this.uiSkin.areaList.array[index].id,"post");
+		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[index].areaname;
 		this.uiSkin.areabox.visible=false;
-		this.uiSkin.areatxt.text=this.uiSkin.areaList.array[index].areaName;
-		this.uiSkin.townList.array=ChinaAreaModel.instance.getAllArea(this.uiSkin.areaList.array[index].id);
-		this.uiSkin.townList.refresh();
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[0].areaName;
-		this.zoneid=this.uiSkin.townList.array[0].id;
-		this.uiSkin.townList.selectedIndex=-1;
 	}
 
+	// companyareaId=uiSkin.townList.array[0].id;
 	__proto.selectTown=function(index){
 		if(index==-1)
 			return;
 		this.uiSkin.townbox.visible=false;
-		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaName;
-		this.zoneid=this.uiSkin.townList.array[index].id;
+		this.uiSkin.towntxt.text=this.uiSkin.townList.array[index].areaname;
+		this.zoneid=this.uiSkin.townList.array[0].id;
 	}
 
+	//companyareaId=uiSkin.townList.array[index].id;
 	__proto.onSubmitAdd=function(){
 		if(this.uiSkin.input_username.text==""){
 			ViewManager.showAlert("请填写收货人姓名");
@@ -37013,9 +37077,10 @@ var AddressEditControl=(function(_super){
 			ViewManager.showAlert("请填写具体的地址");
 			return;
 		};
-		var thirdid=ChinaAreaModel.instance.getParentId(this.zoneid);
+		var thirdid=this.areaid;
+		var fullcityname=this.uiSkin.province.text+" "+this.uiSkin.citytxt.text+" "+this.uiSkin.areatxt.text+" "+this.uiSkin.towntxt.text;
 		var requestStr="opt="+(this.isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE)+"&cnee="+this.uiSkin.input_username.text+"&pn="+this.uiSkin.input_phone.text+"&zone="+this.zoneid+"|"+thirdid+
-		"&addr="+this.uiSkin.input_address.text+"&zonename="+ChinaAreaModel.instance.getFullAddressByid(this.zoneid);
+		"&addr="+this.uiSkin.input_address.text+"&zonename="+fullcityname;
 		if(this.isAddOrEdit==false)
 			requestStr+="&id="+this.param.id;
 		HttpRequestUtil.instance.Request("http://47.101.178.87/"+"group/opt-group-express?",this,this.addAddressback,requestStr,"post");
@@ -48979,7 +49044,7 @@ var TabChooseBtnUI=(function(_super){
 		this.createView(TabChooseBtnUI.uiView);
 	}
 
-	TabChooseBtnUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"selbtn","stateNum":3,"skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#463B4E,#262B2E","label":"条幅旗帜","height":42},"compId":3}],"loadList":["order/选项.png"],"loadList3D":[]};
+	TabChooseBtnUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":194,"var":"selbtn","stateNum":3,"skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#463B4E,#262B2E","label":"户内PP背胶（户内写真）","height":42},"compId":3}],"loadList":["order/选项.png"],"loadList3D":[]};
 	return TabChooseBtnUI;
 })(View)
 
@@ -49139,7 +49204,7 @@ var TechorItemUI=(function(_super){
 		this.createView(TechorItemUI.uiView);
 	}
 
-	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":190,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},"compId":9}],"loadList":["order/选项.png"],"loadList3D":[]};
+	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":166,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},"compId":9}],"loadList":["order/选项.png"],"loadList3D":[]};
 	return TechorItemUI;
 })(View)
 
@@ -49339,7 +49404,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":130,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"width":20,"var":"btndelete","stateNum":1,"skin":"upload/删除.png","label":"X","height":20},"compId":7},{"type":"Label","props":{"y":162,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":52,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":true,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":107,"wordWrap":true,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/图片选中.png"},"compId":12}],"loadList":["upload/fold.png","upload/删除.png","upload/图片选中.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":130,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"var":"btndelete","stateNum":1,"skin":"upload/删除.png","label":"X"},"compId":7},{"type":"Label","props":{"y":162,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":52,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":true,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":107,"wordWrap":true,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/图片选中.png"},"compId":12}],"loadList":["upload/fold.png","upload/删除.png","upload/图片选中.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -49393,7 +49458,7 @@ var MaterialNameItemUI=(function(_super){
 		this.createView(MaterialNameItemUI.uiView);
 	}
 
-	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"matbtn","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"材料名称","height":40},"compId":8}],"loadList":["commers/按钮2.png"],"loadList3D":[]};
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":179,"var":"matbtn","skin":"commers/按钮2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"户内PP背胶（户内写真）","height":40},"compId":8}],"loadList":["commers/按钮2.png"],"loadList3D":[]};
 	return MaterialNameItemUI;
 })(View)
 
@@ -49568,25 +49633,6 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
-
-
-//class ui.order.TechBoxItemUI extends laya.ui.View
-var TechBoxItemUI=(function(_super){
-	function TechBoxItemUI(){
-		this.techbtn=null;
-		TechBoxItemUI.__super.call(this);
-	}
-
-	__class(TechBoxItemUI,'ui.order.TechBoxItemUI',_super);
-	var __proto=TechBoxItemUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.createView(TechBoxItemUI.uiView);
-	}
-
-	TechBoxItemUI.uiView={"type":"View","props":{"width":1240},"compId":2,"child":[{"type":"Button","props":{"width":190,"var":"techbtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},"compId":6}],"loadList":["order/选项.png"],"loadList3D":[]};
-	return TechBoxItemUI;
-})(View)
 
 
 //class ui.PicManagePanelUI extends laya.ui.View
@@ -54384,7 +54430,7 @@ var CityAreaItem=(function(_super){
 
 	__proto.setData=function(areavo){
 		this.areaVo=areavo;
-		this.productname.text=this.areaVo.areaName;
+		this.productname.text=this.areaVo.areaname;
 	}
 
 	return CityAreaItem;
@@ -54412,7 +54458,7 @@ var TechBoxItem=(function(_super){
 	__proto.setProcessData=function(pvo){
 		this.techmainvo=null;
 		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
 		this.setSelected(false);
 	}
 
@@ -54511,7 +54557,7 @@ var PicInfoItem=(function(_super){
 		this.btndelete.visible=false;
 		this.btndelete.on("click",this,this.onDeleteHandler);
 		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid);
-		if(this.picInfo.picType==0 || this.picInfo.picClass.toLocaleUpperCase()=="PLAIN"){
+		if(this.picInfo.picType==0 ||(this.picInfo.picClass.toLocaleUpperCase()!="JPEG" && this.picInfo.picClass.toLocaleUpperCase()!="PNG")){
 			this.img.skin="upload/fold.png";
 			this.filename.text=this.picInfo.directName;
 			this.fileinfo.visible=false;
@@ -54523,6 +54569,15 @@ var PicInfoItem=(function(_super){
 		else{
 			this.fileinfo.visible=true;
 			this.filename.text=this.picInfo.directName;
+			if(this.picInfo.isProcessing){
+				this.fileinfo.text="处理中...";
+				this.img.skin="upload/fold.png";
+				this.picClassTxt.visible=false;
+				this.colorspacetxt.visible=false;
+				this.img.width=108;
+				this.img.height=101;
+				return;
+			}
 			if(this.picInfo.picWidth > this.picInfo.picHeight){
 				this.img.width=128;
 				this.img.height=128/this.picInfo.picWidth *this.picInfo.picHeight;
@@ -54531,8 +54586,6 @@ var PicInfoItem=(function(_super){
 				this.img.height=128;
 				this.img.width=128/this.picInfo.picHeight *this.picInfo.picWidth;
 			}
-			if(this.img.skin !="upload/fold.png")
-				Laya.loader.clearTextureRes(this.img.skin);
 			this.img.skin="http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/"+this.picInfo.fid+".jpg";
 			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
 			str+="dpi:"+this.picInfo.dpi;

@@ -78,9 +78,9 @@ package script {
 		
 		private function loginAccount():void
 		{
-			var account:String = UtilTool.getLocalVar("useraccount","");
-			var pwd:String = UtilTool.getLocalVar("userpwd","");
-			if(account != "" && pwd != "")
+			var account:String = UtilTool.getLocalVar("useraccount","0");
+			var pwd:String = UtilTool.getLocalVar("userpwd","0");
+			if(account != "0" && pwd != "0")
 			{
 				var param:String = "phone=" + account + "&pwd=" + pwd + "&mode=0";
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.loginInUrl,this,onLoginBack,param,"post");
@@ -126,7 +126,7 @@ package script {
 			if(Userdata.instance.isLogin)
 				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
 			else
-				ViewManager.showAlert("请先登录");
+				ViewManager.showAlert("请先登录 亲");
 			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
 		}
 		

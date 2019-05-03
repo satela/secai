@@ -18,7 +18,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,selbtn",
-            "props":{"y":0,"x":0,"width":140,"var":"selbtn","stateNum":"3","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#463B4E,#262B2E","label":"条幅旗帜","height":42},
+            "props":{"y":0,"x":0,"width":194,"var":"selbtn","stateNum":"3","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#463B4E,#262B2E","label":"户内PP背胶（户内写真）","height":42},
             "nodeParent":2,
             "label":"selbtn",
             "isDirectory":false,

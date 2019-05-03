@@ -144,6 +144,7 @@ package script.picUpload
 			clientParam.stsToken = authordata.Credentials.SecurityToken;
 			clientParam.endpoint = "oss-cn-shanghai.aliyuncs.com";			
 			clientParam.bucket = "n-scfy-763";
+			Browser.window.createossClient(clientParam);
 			onClickBegin();
 		}
 		
@@ -177,7 +178,7 @@ package script.picUpload
 		{
 			if(fileListData && fileListData.length > curUploadIndex)
 			{
-				Browser.window.ossUpload({clientpm:clientParam,file:fileListData[curUploadIndex]},checkpoint,callbackparam,ossFileName);
+				Browser.window.ossUpload({file:fileListData[curUploadIndex]},checkpoint,callbackparam,ossFileName);
 				
 				//Browser.window.uploadPic({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic, path:DirectoryFileModel.instance.curSelectDir.dpath,file:fileListData[curUploadIndex]});
 				//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.uploadPic,this,onCompleteUpload,{path:"0|11|",file:file.files[0]},"post",onProgressHandler);
@@ -203,7 +204,7 @@ package script.picUpload
 				
 				var arr:Array = (fileListData[curUploadIndex].name as String).split(".");
 				
-				ossFileName = result.ObjectName + "." + (arr[1] == null ?"jpg":arr[1]);
+				ossFileName = result.ObjectName + "." + (arr[arr.length - 1] == null ?"jpg":arr[arr.length - 1]);
 				uploadFileImmediate();
 			}
 		}
@@ -280,11 +281,22 @@ package script.picUpload
 			if(index == curUploadIndex)
 			{
 				Browser.window.cancelUpload();
-				if(isUploading)
-					onBeginUpload();
+				
 			}
 			uiSkin.fileList.deleteItem(index);
-			
+			callbackparam = null;
+			checkpoint = 0;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.abortUpload,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				if(result.status == 0)
+				{
+					if(isUploading)
+						onBeginUpload();
+				}
+				
+			},null ,"post");
+
 			
 		}
 		private function getErrorMsg(err:Object):String
@@ -297,10 +309,8 @@ package script.picUpload
 					break;
 				case -1: //请求错误，自动重新上传
 					return "自动重新上传";
-					return;
 				case 203: //回调失败
 					return "前端自己给后台回调";
-					return;
 				case 400:
 					switch (err.code) {
 						case 'FilePartInterity': //文件Part已改变
@@ -333,7 +343,6 @@ package script.picUpload
 					
 				case 500: //OSS内部发生错误
 					return "OSS内部发生错误,重新上传;"
-					return;
 				default:return "未知错误，请重新上传";
 					break;
 			}

@@ -418,7 +418,7 @@ package script.order
 			
 			var orderdata:Object = {};
 			orderdata.order_sn = PaintOrderModel.getOrderSn();
-			orderdata.client_code = "SCFY001";
+			orderdata.client_code = "CL10200";
 			orderdata.consignee = PaintOrderModel.instance.selectAddress.receiverName
 			orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
 			orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;

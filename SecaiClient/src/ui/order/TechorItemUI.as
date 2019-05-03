@@ -6,7 +6,7 @@ package ui.order {
 	public class TechorItemUI extends View {
 		public var techBtn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":190,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},"compId":9}],"loadList":["order/选项.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":166,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},"compId":9}],"loadList":["order/选项.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

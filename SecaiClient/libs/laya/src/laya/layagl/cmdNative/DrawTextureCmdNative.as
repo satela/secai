@@ -111,7 +111,11 @@ package laya.layagl.cmdNative
 				var _i32b:Int32Array = cmd._paramData._int32Data;
 				_i32b[_PARAM_UNIFORM_LOCATION_POS_] = 3;
 				_i32b[_PARAM_TEX_LOCATION_POS_] = WebGLContext.TEXTURE0;
-				_i32b[_PARAM_TEXTURE_POS_] = texture.bitmap._glTexture.id;
+				if(texture.bitmap._glTexture != null)
+					_i32b[_PARAM_TEXTURE_POS_] = texture.bitmap._glTexture.id;
+				else
+					_i32b[_PARAM_TEXTURE_POS_] = 0;
+				
 				_i32b[_PARAM_RECT_NUM_POS_] = 1;
 				_i32b[_PARAM_VB_SIZE_POS_] = 24 * 4;
 				
@@ -180,7 +184,11 @@ package laya.layagl.cmdNative
 				return;
 			}
 			_texture = value;
-			_paramData._int32Data[_PARAM_TEXTURE_POS_] = _texture.bitmap._glTexture.id;
+			if(texture.bitmap._glTexture != null)
+				_paramData._int32Data[_PARAM_TEXTURE_POS_] = _texture.bitmap._glTexture.id;
+			else
+				_paramData._int32Data[_PARAM_TEXTURE_POS_] = 0;
+			
 			var _fb:Float32Array = _paramData._float32Data;
 			var uv:Array = texture.uv;
 			_fb[_PARAM_VB_POS_+2] = uv[0]; 	_fb[_PARAM_VB_POS_+3] = uv[1];

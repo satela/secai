@@ -276,7 +276,7 @@ package script.login
 		{
 			// TODO Auto Generated method stub
 			var result:Object = JSON.parse(data);
-			//if(result.status == 0)
+			if(result.status == 0)
 			{
 				Browser.window.alert("注册成功！");
 				Browser.document.body.removeChild(verifycode);//添加到舞台

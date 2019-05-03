@@ -1,5 +1,7 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.events.Event;
@@ -24,9 +26,9 @@ package script.usercenter
 	public class EnterPrizeInfoControl extends Script
 	{
 		private var uiSkin:EnterPrizeInfoPaneUI;
-		private var province:CityAreaVo;
-		private var cityname:CityAreaVo;
-		private var areaname:CityAreaVo;
+		private var province:Object;
+		//private var cityname:CityAreaVo;
+		//private var areaname:CityAreaVo;
 		
 		private var file:Object; 
 		
@@ -42,7 +44,7 @@ package script.usercenter
 		{
 			uiSkin = this.owner as EnterPrizeInfoPaneUI;
 			uiSkin.provList.itemRender = CityAreaItem;
-			uiSkin.provList.vScrollBarSkin = "";
+			//uiSkin.provList.vScrollBarSkin = "";
 			uiSkin.provList.repeatX = 1;
 			uiSkin.provList.spaceY = 2;
 			
@@ -51,7 +53,7 @@ package script.usercenter
 			uiSkin.provList.selectHandler = new Handler(this, selectProvince);
 			uiSkin.provList.refresh();
 			uiSkin.cityList.itemRender = CityAreaItem;
-			uiSkin.cityList.vScrollBarSkin = "";
+			//uiSkin.cityList.vScrollBarSkin = "";
 			uiSkin.cityList.repeatX = 1;
 			uiSkin.cityList.spaceY = 2;
 			
@@ -62,7 +64,7 @@ package script.usercenter
 			
 			
 			uiSkin.areaList.itemRender = CityAreaItem;
-			uiSkin.areaList.vScrollBarSkin = "";
+			//uiSkin.areaList.vScrollBarSkin = "";
 			uiSkin.areaList.selectEnable = true;
 			uiSkin.areaList.repeatX = 1;
 			uiSkin.areaList.spaceY = 2;
@@ -71,7 +73,7 @@ package script.usercenter
 			uiSkin.areaList.selectHandler = new Handler(this, selectArea);
 			
 			uiSkin.townList.itemRender = CityAreaItem;
-			uiSkin.townList.vScrollBarSkin = "";
+			//uiSkin.townList.vScrollBarSkin = "";
 			uiSkin.townList.selectEnable = true;
 			uiSkin.townList.repeatX = 1;
 			uiSkin.townList.spaceY = 2;
@@ -99,20 +101,24 @@ package script.usercenter
 			initFileOpen();
 			
 			
-			if(!ChinaAreaModel.hasInit)
-			{
-				WaitingRespond.instance.showWaitingView(500000);
-				Laya.loader.load([{url:"res/xml/addr.xml",type:Loader.XML}], Handler.create(this, initView), null, Loader.ATLAS);
-			}
-			else
-				initView();
+//			if(!ChinaAreaModel.hasInit)
+//			{
+//				WaitingRespond.instance.showWaitingView(500000);
+//				Laya.loader.load([{url:"res/xml/addr.xml",type:Loader.XML}], Handler.create(this, initView), null, Loader.ATLAS);
+//			}
+//			else
+//				initView();
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
+
 
 		}
 		
-		private function initView():void
+		private function initView(data:Object):void
 		{
-			WaitingRespond.instance.hideWaitingView();
-			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
+			//WaitingRespond.instance.hideWaitingView();
+			var result:Object = JSON.parse(data as String);
+			
+			uiSkin.provList.array = result.status as Array;//ChinaAreaModel.instance.getAllProvince();
 			selectProvince(0);
 		}
 		
@@ -188,7 +194,8 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = false;
 			uiSkin.townbox.visible = false;
-			
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+
 		}
 		private function onShowProvince(e:Event):void
 		{
@@ -196,7 +203,7 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = false;
 			uiSkin.townbox.visible = false;
-			
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
 			e.stopPropagation();
 		}
 		private function onShowCity(e:Event):void
@@ -205,7 +212,8 @@ package script.usercenter
 			uiSkin.citybox.visible = true;
 			uiSkin.areabox.visible = false;
 			uiSkin.townbox.visible = false;
-			
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
+
 			e.stopPropagation();
 		}
 		private function onShowArea(e:Event):void
@@ -214,6 +222,8 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = true;
 			uiSkin.townbox.visible = false;
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
+
 			e.stopPropagation();
 		}
 		
@@ -223,6 +233,8 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.areabox.visible = false;
 			uiSkin.townbox.visible = true;
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
+
 			e.stopPropagation();
 		}
 		
@@ -233,73 +245,121 @@ package script.usercenter
 		private function selectProvince(index:int):void
 		{
 			province = uiSkin.provList.array[index];
-			trace(province);
 			uiSkin.provbox.visible = false;
+			uiSkin.province.text = province.areaname;
+
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.cityList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.cityList.refresh();
+				
+				uiSkin.citytxt.text = uiSkin.cityList.array[0].areaname;
+				uiSkin.cityList.selectedIndex = 0;
+				selectCity(0);
+				
+			},"parentid=" + province.id,"post");
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+
+			//trace(province);
 			//province = uiSkin.provList.cells[index].cityname;
-			uiSkin.cityList.array = ChinaAreaModel.instance.getAllCity(province.id);
-			uiSkin.cityList.refresh();
-			uiSkin.province.text = province.areaName;
-			
-			uiSkin.citytxt.text = uiSkin.cityList.array[0].areaName;
-			uiSkin.cityList.selectedIndex = 0;
-			
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[0].id);
-			uiSkin.areaList.refresh();
-			
-			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
-			uiSkin.areaList.selectedIndex = -1;
-			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
 			
 			
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			uiSkin.townList.selectedIndex = -1;
-			companyareaId = uiSkin.townList.array[0].id;
+//			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[0].id);
+//			uiSkin.areaList.refresh();
+//			
+//			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
+//			uiSkin.areaList.selectedIndex = -1;
+//			
+//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
+//			
+//			
+//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+//			uiSkin.townList.selectedIndex = -1;
+//			companyareaId = uiSkin.townList.array[0].id;
 
 		}
 		
 		private function selectCity(index:int):void
 		{
 			uiSkin.citybox.visible = false;
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[index].id);
-			uiSkin.areaList.refresh();
-			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaName;
-			uiSkin.areatxt.text = "";
-			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
-			uiSkin.areaList.selectedIndex = -1;
 			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
-			
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			uiSkin.townList.selectedIndex = -1;
-			
-			companyareaId = uiSkin.townList.array[0].id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.areaList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.areaList.refresh();
+				
+				uiSkin.areatxt.text = uiSkin.areaList.array[0].areaname;
+				uiSkin.areaList.selectedIndex = 0;
+				selectArea(0);
+
+				
+			},"parentid=" + uiSkin.cityList.array[index].id,"post");
+			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaname;
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+
+//			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[index].id);
+//			uiSkin.areaList.refresh();
+//			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaName;
+//			uiSkin.areatxt.text = "";
+//			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
+//			uiSkin.areaList.selectedIndex = -1;
+//			
+//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
+//			
+//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+//			uiSkin.townList.selectedIndex = -1;
+//			
+//			companyareaId = uiSkin.townList.array[0].id;
 
 			
 		}
 		
 		private function selectArea(index:int):void
 		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+
 			if( index == -1 )
 				return;
-			uiSkin.areabox.visible = false;
-			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaName;
 			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
-			uiSkin.townList.refresh();
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			uiSkin.townList.selectedIndex = -1;
-			companyareaId = uiSkin.townList.array[0].id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.townList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.townList.refresh();
+				
+				uiSkin.towntxt.text = uiSkin.townList.array[0].areaname;
+				uiSkin.townList.selectedIndex = 0;
+				companyareaId = uiSkin.townList.array[0].id;
+				
+			},"parentid=" + uiSkin.areaList.array[index].id,"post");
+			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaname;
+
+			uiSkin.areabox.visible = false;
+
+//			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaName;
+//			
+//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
+//			uiSkin.townList.refresh();
+//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+//			uiSkin.townList.selectedIndex = -1;
+//			companyareaId = uiSkin.townList.array[0].id;
 
 			
 		}
 		
 		private function selectTown(index:int):void
 		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+
 			if( index == -1 )
 				return;
 			uiSkin.townbox.visible = false;
-			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
+			uiSkin.towntxt.text = uiSkin.townList.array[index].areaname;
 			companyareaId = uiSkin.townList.array[index].id;
 
 		}

@@ -37,7 +37,7 @@ package script.picUpload
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
-			if(picInfo.picType == 0 || picInfo.picClass.toLocaleUpperCase() == "PLAIN")
+			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "PNG"))
 			{
 				this.img.skin = "upload/fold.png";
 				this.filename.text = picInfo.directName;
@@ -53,6 +53,17 @@ package script.picUpload
 				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
 				
+				if( picInfo.isProcessing)
+				{
+					this.fileinfo.text = "处理中...";
+					this.img.skin = "upload/fold.png";
+					this.picClassTxt.visible = false;
+					this.colorspacetxt.visible = false;
+					
+					this.img.width = 108;
+					this.img.height = 101;
+					return;
+				}
 				if(picInfo.picWidth > picInfo.picHeight)
 				{
 					this.img.width = 128;					
@@ -66,8 +77,8 @@ package script.picUpload
 
 				}
 				
-				if(this.img.skin != "upload/fold.png")
-					Laya.loader.clearTextureRes(this.img.skin);
+				//if(this.img.skin != "upload/fold.png")
+				//	Laya.loader.clearTextureRes(this.img.skin);
 
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
 				

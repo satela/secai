@@ -112,9 +112,9 @@
         }
 		function cancelUpload()
 		{
-			if(xhr != null)
+			if(clientOss != null)
 			{
-				xhr.abort();
+				clientOss.cancel();
 			}
 		
 		}
@@ -152,10 +152,16 @@
             xhr.send(formData);
         }
 		//var point = 0;
+		var clientOss;
+		function createossClient(clientparam)
+		{
+			clientOss = new OSS(clientparam);
+
+		}
 		function ossUpload(filedata,point,callbackparam,filename)
 		{
-			var client = new OSS(filedata.clientpm);
-			client.multipartUpload(filename, filedata.file, {
+		
+			clientOss.multipartUpload(filename, filedata.file, {
 				parallel: 5, //并行上传的分片个数
 				partSize:  1024000, //分片大小不能小于1024*100
 				checkpoint: point,
@@ -165,7 +171,7 @@
 						uploadApp.onProgressHandler(point,(p*100).toFixed(2));
 					console.log("checkpoint"+point);
 				},
-				mime: 'image/jpeg', //文件格式
+				mime: filedata.file.type, //文件格式
 				meta:  null, //标识
 				callback: callbackparam
 			}).then(function(result) {//上传成功

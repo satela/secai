@@ -3,6 +3,8 @@ package model
 	import laya.events.Event;
 	import laya.net.HttpRequest;
 	
+	import script.ViewManager;
+	
 	import utils.WaitingRespond;
 
 	public class HttpRequestUtil
@@ -40,10 +42,10 @@ package model
 
 		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
 
-		public static const getOuputAddr:String = "business/manufacturers?client_code=SCFY001&";//addr_id=120106";获取输出工厂地址
-		public static const getProdCategory:String = "business/prodcategory?client_code=SCFY001&";//addr_id=120106";获取工厂材料列表
+		public static const getOuputAddr:String = "business/manufacturers?client_code=CL10200&";//addr_id=120106";获取输出工厂地址
+		public static const getProdCategory:String = "business/prodcategory?client_code=CL10200&";//addr_id=120106";获取工厂材料列表 SCFY001
 
-		public static const getProdList:String = "business/prodlist?client_code=SCFY001&addr_id=";//addr_id,prodCat_name=纸&;获取工厂材料列表
+		public static const getProdList:String = "business/prodlist?client_code=CL10200&addr_id=";//addr_id,prodCat_name=纸&;获取工厂材料列表
 
 		public static const getProcessCatList:String = "business/processcatlist?prod_code=";//
 
@@ -57,6 +59,11 @@ package model
 		
 		public static const authorUploadUrl:String = "file/authinfo";//上传请求凭证
 		public static const noticeServerPreUpload:String = "file/preupload?";//上传前通知服务器 path,fname 
+		
+		public static const getAddressFromServer:String = "group/get-addr-list?";//查询地址 parentid
+		
+		public static const abortUpload:String = "file/abortadd?";//主动终止上传
+
 
 		public static function get instance():HttpRequestUtil
 		{
@@ -122,6 +129,24 @@ package model
 		{
 			WaitingRespond.instance.hideWaitingView();
 
+			try
+			{
+				var result:Object = JSON.parse(data as String);
+				if(result && result.hasOwnProperty("status"))
+				{
+					if(result.status != 0)
+					{
+						if(ErrorCode.ErrorTips.hasOwnProperty(result.status))
+						{
+							ViewManager.showAlert(ErrorCode.ErrorTips[result.status]);
+						}
+					}
+				}
+			}
+			catch(err:Error)
+			{
+				
+			}
 			Laya.timer.clearAll(request);
 			// TODO Auto Generated method stub
 			if(caller&&complete)complete.call(caller,data);

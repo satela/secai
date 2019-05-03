@@ -38,7 +38,6 @@ package script.usercenter
 			uiSkin.panel_main.vScrollBarSkin = "";
 			//uiSkin.sp_container.autoSize = true;
 			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
-			
 			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
 			
 			
@@ -57,6 +56,7 @@ package script.usercenter
 			(uiSkin.panel_main).height = Browser.clientHeight - 20;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
 
 		}
 		private function onResizeBrower():void
@@ -75,6 +75,14 @@ package script.usercenter
 			// TODO Auto Generated method stub
 			Mouse.cursor = "hand";
 
+		}
+		
+		private function onPauseScroll(scoll:Boolean):void
+		{
+			if(scoll)
+				uiSkin.panel_main.vScrollBar.target = uiSkin.panel_main;
+			else
+				uiSkin.panel_main.vScrollBar.target = null;
 		}
 		
 		private function onShowEditView(index:int):void
@@ -137,6 +145,8 @@ package script.usercenter
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			EventCenter.instance.off(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
+
 		}
 	}
 }

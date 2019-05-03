@@ -8,7 +8,7 @@ package script.login
 	
 	public class CityAreaItem extends CityAreaItemUI
 	{
-		public var areaVo:CityAreaVo;
+		public var areaVo:Object;
 		public function CityAreaItem()
 		{
 			super();
@@ -26,10 +26,10 @@ package script.login
 		{
 			bg.visible = false;
 		}
-		public function setData(areavo:CityAreaVo):void
+		public function setData(areavo:Object):void
 		{
 			areaVo = areavo;
-			productname.text = areaVo.areaName;
+			productname.text = areaVo.areaname;
 		}
 	}
 }

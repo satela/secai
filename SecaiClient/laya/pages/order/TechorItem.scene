@@ -18,7 +18,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,techBtn",
-            "props":{"y":0,"x":0,"width":190,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"表面油画布","height":40},
+            "props":{"y":0,"x":0,"width":166,"var":"techBtn","skin":"order/选项.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},
             "nodeParent":2,
             "label":"techBtn",
             "isDirectory":false,

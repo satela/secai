@@ -23,12 +23,14 @@ package script.usercenter
 	{
 		private var uiSkin:NewAddressPanelUI;
 		
-		private var province:CityAreaVo;
+		private var province:Object;
 		
 		private var zoneid:String;
+		private var areaid:String;
 		
 		private var param:Object;
 		private var isAddOrEdit:Boolean = true;//true add false edit
+		private var hasinit:Boolean = false;
 		public function AddressEditControl()
 		{
 			super();
@@ -54,8 +56,8 @@ package script.usercenter
 			uiSkin.provList.renderHandler = new Handler(this, updateCityList);
 			uiSkin.provList.selectEnable = true;
 			uiSkin.provList.selectHandler = new Handler(this, selectProvince);
-			uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
-			uiSkin.provList.refresh();
+			//uiSkin.provList.array = ChinaAreaModel.instance.getAllProvince();
+			//uiSkin.provList.refresh();
 			uiSkin.cityList.itemRender = CityAreaItem;
 			uiSkin.cityList.vScrollBarSkin = "";
 			uiSkin.cityList.repeatX = 1;
@@ -96,17 +98,21 @@ package script.usercenter
 			uiSkin.citybox.visible = false;
 			uiSkin.townbox.visible = false;
 
+			
+
 			if(isAddOrEdit == false)
 			{
-				initAddr();
+				uiSkin.input_username.text = (param as AddressVo).receiverName;
+				uiSkin.input_phone.text = (param as AddressVo).phone;
+				uiSkin.input_address.text = (param as AddressVo).address;
 			}
-			else
-				selectProvince(0);
-
 			uiSkin.on(Event.CLICK,this,hideAddressPanel);
 
 			this.uiSkin.btnok.on(Event.CLICK,this,onSubmitAdd);
 			this.uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initAddr,"parentid=0","post");
+
 		}
 		
 		private function hideAddressPanel(e:Event):void
@@ -159,74 +165,160 @@ package script.usercenter
 		{
 			cell.setData(cell.dataSource);
 		}
-		private function initAddr():void
+		private function initAddr(data:String):void
 		{
-			var addvo:AddressVo = param as AddressVo;
+			var result:Object = JSON.parse(data as String);
 			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(addvo.searchZoneid);
-			
-			uiSkin.towntxt.text =  ChinaAreaModel.instance.getAreaName(addvo.zoneid);
-			
-			var cityid:String = ChinaAreaModel.instance.getParentId(addvo.searchZoneid);
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(cityid);
-			
-			uiSkin.areatxt.text =  ChinaAreaModel.instance.getAreaName(addvo.searchZoneid);
-			
-			uiSkin.citytxt.text =  ChinaAreaModel.instance.getAreaName(cityid);
-
-			 cityid = ChinaAreaModel.instance.getParentId(cityid);
-			uiSkin.cityList.array = ChinaAreaModel.instance.getAllArea(cityid);			
-			
-			uiSkin.province.text = ChinaAreaModel.instance.getAreaName(cityid);
-			uiSkin.input_username.text = addvo.receiverName;
-			uiSkin.input_phone.text = addvo.phone;
-			uiSkin.input_address.text = addvo.address;
-			zoneid = addvo.zoneid;
+			uiSkin.provList.array = result.status as Array;//ChinaAreaModel.instance.getAllProvince();
+			var selpro:int = 0;
+			if(isAddOrEdit == false)
+			{
+				var curprov:Array = (param as AddressVo).preAddName.split(" ");
+				if(curprov[0] != null)
+				{
+					for(var i:int=0;i < uiSkin.provList.array.length;i++)
+					{
+						if(uiSkin.provList.array[i].areaname == curprov[0])
+						{
+							selpro = i;
+							break;
+						}
+					}
+				}
+			}
+			selectProvince(selpro);
+//			var addvo:AddressVo = param as AddressVo;
+//			
+//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(addvo.searchZoneid);
+//			
+//			uiSkin.towntxt.text =  ChinaAreaModel.instance.getAreaName(addvo.zoneid);
+//			
+//			var cityid:String = ChinaAreaModel.instance.getParentId(addvo.searchZoneid);
+//			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(cityid);
+//			
+//			uiSkin.areatxt.text =  ChinaAreaModel.instance.getAreaName(addvo.searchZoneid);
+//			
+//			uiSkin.citytxt.text =  ChinaAreaModel.instance.getAreaName(cityid);
+//
+//			 cityid = ChinaAreaModel.instance.getParentId(cityid);
+//			uiSkin.cityList.array = ChinaAreaModel.instance.getAllArea(cityid);			
+//			
+//			uiSkin.province.text = ChinaAreaModel.instance.getAreaName(cityid);
+//			uiSkin.input_username.text = addvo.receiverName;
+//			uiSkin.input_phone.text = addvo.phone;
+//			uiSkin.input_address.text = addvo.address;
+			///zoneid = uiSkin.provList.array[0].id;
 			
 		}
 		private function selectProvince(index:int):void
 		{
 			province = uiSkin.provList.array[index];
-			trace(province);
 			uiSkin.provbox.visible = false;
+			uiSkin.province.text = province.areaname;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.cityList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.cityList.refresh();
+				
+				var cityindex:int = 0;
+				if(isAddOrEdit == false && hasinit == false)
+				{
+					var curprov:Array = (param as AddressVo).preAddName.split(" ");
+					if(curprov[1] != null)
+					{
+						for(var i:int=0;i < uiSkin.cityList.array.length;i++)
+						{
+							if(uiSkin.cityList.array[i].areaname == curprov[1])
+							{
+								cityindex = i;
+								break;
+							}
+						}
+					}
+				}
+				
+				uiSkin.citytxt.text = uiSkin.cityList.array[cityindex].areaname;
+				uiSkin.cityList.selectedIndex = cityindex;
+				selectCity(cityindex);
+				//zoneid = uiSkin.cityList.array[0].id;
+				
+			},"parentid=" + province.id,"post");
+			
+			//trace(province);
 			//province = uiSkin.provList.cells[index].cityname;
-			uiSkin.cityList.array = ChinaAreaModel.instance.getAllCity(province.id);
-			uiSkin.cityList.refresh();
-			uiSkin.province.text = province.areaName;
 			
-			uiSkin.citytxt.text = uiSkin.cityList.array[0].areaName;
-			uiSkin.cityList.selectedIndex = 0;
 			
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[0].id);
-			uiSkin.areaList.refresh();
-			
-			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
-			uiSkin.areaList.selectedIndex = -1;
-			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
-			
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			zoneid =  uiSkin.townList.array[0].id;
-			uiSkin.townList.selectedIndex = -1;
+			//			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[0].id);
+			//			uiSkin.areaList.refresh();
+			//			
+			//			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
+			//			uiSkin.areaList.selectedIndex = -1;
+			//			
+			//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
+			//			
+			//			
+			//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			//			uiSkin.townList.selectedIndex = -1;
+			//			companyareaId = uiSkin.townList.array[0].id;
 			
 		}
 		
 		private function selectCity(index:int):void
 		{
 			uiSkin.citybox.visible = false;
-			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[index].id);
-			uiSkin.areaList.refresh();
-			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaName;
-			uiSkin.areatxt.text = "";
-			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
-			uiSkin.areaList.selectedIndex = -1;
 			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
-			
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			zoneid =  uiSkin.townList.array[0].id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.areaList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.areaList.refresh();
+				
+				var cityindex:int = 0;
+				if(isAddOrEdit == false && hasinit == false)
+				{
+					var curprov:Array = (param as AddressVo).preAddName.split(" ");
+					if(curprov[2] != null)
+					{
+						for(var i:int=0;i < uiSkin.areaList.array.length;i++)
+						{
+							if(uiSkin.areaList.array[i].areaname == curprov[2])
+							{
+								cityindex = i;
+								break;
+							}
+						}
+					}
+				}
+				
+				uiSkin.areatxt.text = uiSkin.areaList.array[cityindex].areaname;
+				uiSkin.areaList.selectedIndex = cityindex;
+				selectArea(cityindex);
+				
+				areaid = uiSkin.areaList.array[cityindex].id;
 
-			uiSkin.townList.selectedIndex = -1;
+				
+			},"parentid=" + uiSkin.cityList.array[index].id,"post");
+			
+			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaname;
+			
+			//			uiSkin.areaList.array = ChinaAreaModel.instance.getAllArea(uiSkin.cityList.array[index].id);
+			//			uiSkin.areaList.refresh();
+			//			uiSkin.citytxt.text = uiSkin.cityList.array[index].areaName;
+			//			uiSkin.areatxt.text = "";
+			//			uiSkin.areatxt.text = uiSkin.areaList.array[0].areaName;
+			//			uiSkin.areaList.selectedIndex = -1;
+			//			
+			//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[0].id);
+			//			
+			//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			//			uiSkin.townList.selectedIndex = -1;
+			//			
+			//			companyareaId = uiSkin.townList.array[0].id;
+			
 			
 		}
 		
@@ -234,15 +326,51 @@ package script.usercenter
 		{
 			if( index == -1 )
 				return;
-			uiSkin.areabox.visible = false;
-			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaName;
 			
-			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
-			uiSkin.townList.refresh();
-			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
-			zoneid =  uiSkin.townList.array[0].id;
+			areaid  = uiSkin.areaList.array[index].id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
+			{
+				var result:Object = JSON.parse(data as String);
+				
+				uiSkin.townList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
+				uiSkin.townList.refresh();
+				
+				var cityindex:int = 0;
+				if(isAddOrEdit == false && hasinit == false)
+				{
+					var curprov:Array = (param as AddressVo).preAddName.split(" ");
+					if(curprov[3] != null)
+					{
+						for(var i:int=0;i < uiSkin.townList.array.length;i++)
+						{
+							if(uiSkin.townList.array[i].areaname == curprov[3])
+							{
+								cityindex = i;
+								break;
+							}
+						}
+					}
+				}
+				hasinit = true;
 
-			uiSkin.townList.selectedIndex = -1;
+				uiSkin.towntxt.text = uiSkin.townList.array[cityindex].areaname;
+				uiSkin.townList.selectedIndex = cityindex;
+				zoneid = uiSkin.townList.array[cityindex].id;
+
+				//companyareaId = uiSkin.townList.array[0].id;
+				
+			},"parentid=" + uiSkin.areaList.array[index].id,"post");
+			
+			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaname;
+
+			uiSkin.areabox.visible = false;
+			//			uiSkin.areatxt.text = uiSkin.areaList.array[index].areaName;
+			//			
+			//			uiSkin.townList.array = ChinaAreaModel.instance.getAllArea(uiSkin.areaList.array[index].id);
+			//			uiSkin.townList.refresh();
+			//			uiSkin.towntxt.text = uiSkin.townList.array[0].areaName;
+			//			uiSkin.townList.selectedIndex = -1;
+			//			companyareaId = uiSkin.townList.array[0].id;
 			
 			
 		}
@@ -252,9 +380,11 @@ package script.usercenter
 			if( index == -1 )
 				return;
 			uiSkin.townbox.visible = false;
-			uiSkin.towntxt.text = uiSkin.townList.array[index].areaName;
-			zoneid =  uiSkin.townList.array[index].id;
+			uiSkin.towntxt.text = uiSkin.townList.array[index].areaname;
+			zoneid = uiSkin.townList.array[0].id;
 
+			//companyareaId = uiSkin.townList.array[index].id;
+			
 		}
 		
 		private function onSubmitAdd():void
@@ -275,9 +405,10 @@ package script.usercenter
 				ViewManager.showAlert("请填写具体的地址");
 				return;
 			}
-			var thirdid:String = ChinaAreaModel.instance.getParentId(zoneid);
+			var thirdid:String = areaid;
+			var fullcityname:String = uiSkin.province.text + " " + uiSkin.citytxt.text + " " + uiSkin.areatxt.text + " " + uiSkin.towntxt.text;
 			var requestStr:String = "opt=" + (isAddOrEdit?AddressVo.ADDRESS_INSERT:AddressVo.ADDRESS_UPDATE) + "&cnee=" + uiSkin.input_username.text + "&pn=" + uiSkin.input_phone.text + "&zone=" + zoneid + "|" + thirdid +
-				"&addr=" + uiSkin.input_address.text + "&zonename=" + ChinaAreaModel.instance.getFullAddressByid(zoneid);
+				"&addr=" + uiSkin.input_address.text + "&zonename=" + fullcityname;
 			if(isAddOrEdit == false)
 				requestStr += "&id=" + param.id;
 			

@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":135,
+    "selectedBox":104,
+    "selecteID":105,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":900},
     "nodeParent":-1,
@@ -587,13 +587,14 @@
             "props":{"y":464,"x":200.23046875,"width":172,"var":"provbox","skin":"commers/通用弹框底.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
             "nodeParent":2,
             "label":"provbox",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":35,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
@@ -607,9 +608,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"List",
                     "searchKey":"List,provList",
-                    "props":{"var":"provList","top":0,"right":0,"left":0,"bottom":0},
+                    "props":{"var":"provList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
                     "nodeParent":35,
                     "label":"provList",
                     "isDirectory":false,
@@ -620,7 +622,7 @@
                         ],
                     "$HIDDEN":false
                 }],
-            "$HIDDEN":true
+            "$HIDDEN":false
         },
         {
             "x":15,
@@ -629,13 +631,14 @@
             "props":{"y":464,"x":393,"width":172,"var":"citybox","skin":"commers/通用弹框底.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
             "nodeParent":2,
             "label":"citybox",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":36,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
@@ -650,9 +653,10 @@
                     "$HIDDEN":true
                 },
                 {
+                    "x":30,
                     "type":"List",
                     "searchKey":"List,cityList",
-                    "props":{"var":"cityList","top":0,"right":0,"left":0,"bottom":0},
+                    "props":{"var":"cityList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
                     "nodeParent":36,
                     "label":"cityList",
                     "isDirectory":false,
@@ -672,13 +676,14 @@
             "props":{"y":464,"x":581,"width":172,"var":"areabox","skin":"commers/通用弹框底.png","sizeGrid":"3,3,3,3","height":278,"alpha":0.8},
             "nodeParent":2,
             "label":"areabox",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":37,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":0,"x":0,"top":0,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
@@ -692,9 +697,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"List",
                     "searchKey":"List,areaList",
-                    "props":{"var":"areaList","top":0,"right":0,"left":0,"bottom":0},
+                    "props":{"var":"areaList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
                     "nodeParent":37,
                     "label":"areaList",
                     "isDirectory":false,
@@ -813,7 +819,7 @@
                     "x":30,
                     "type":"List",
                     "searchKey":"List,townList",
-                    "props":{"var":"townList","top":0,"right":0,"left":0,"bottom":0},
+                    "props":{"var":"townList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
                     "nodeParent":104,
                     "label":"townList",
                     "isDirectory":false,

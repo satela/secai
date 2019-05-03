@@ -7,7 +7,6 @@ package script.order
 	
 	import script.ViewManager;
 	
-	import ui.order.TechBoxItemUI;
 	import ui.order.TechorItemUI;
 	
 	public class TechBoxItem extends TechorItemUI
@@ -35,7 +34,7 @@ package script.order
 		{
 			techmainvo = null;
 			processCatVo = pvo;
-			this.techBtn.label = pvo.procCat_Name;
+			this.techBtn.label = pvo.procCat_Name.split("-")[0];
 			setSelected(false);
 		}
 		
