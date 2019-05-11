@@ -142,8 +142,8 @@ package script.picUpload
 			clientParam.accessKeyId = authordata.Credentials.AccessKeyId;
 			clientParam.accessKeySecret = authordata.Credentials.AccessKeySecret;
 			clientParam.stsToken = authordata.Credentials.SecurityToken;
-			clientParam.endpoint = "oss-cn-shanghai.aliyuncs.com";			
-			clientParam.bucket = "n-scfy-763";
+			clientParam.endpoint = "oss-cn-hangzhou.aliyuncs.com";			
+			clientParam.bucket = "original-image";
 			Browser.window.createossClient(clientParam);
 			onClickBegin();
 		}

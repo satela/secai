@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":6,
+    "selectedBox":26,
+    "selecteID":22,
     "searchKey":"View",
     "props":{"width":1920,"top":0,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -186,16 +186,17 @@
                     "props":{"y":139,"x":320,"width":1278,"var":"box_tech","height":663},
                     "nodeParent":6,
                     "label":"box_tech",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":26,
                     "child":[
                         {
+                            "x":45,
                             "type":"Panel",
                             "searchKey":"Panel,techcontent",
-                            "props":{"x":7,"width":1256,"var":"techcontent","top":71,"height":498,"bottom":94},
+                            "props":{"x":7,"width":1256,"var":"techcontent","vScrollBarSkin":"comp/vscroll.png","top":71,"height":498,"hScrollBarSkin":"comp/hscroll.png","bottom":94},
                             "nodeParent":26,
                             "label":"techcontent",
                             "isOpen":true,
@@ -208,6 +209,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":590,"x":11,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","fontSize":20,"font":"SimHei","color":"#EB5767"},
@@ -221,6 +223,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"y":650,"x":89,"width":1100,"skin":"commers/分割线.png"},
@@ -234,6 +237,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":124,"width":123,"valign":"middle","text":"已选工艺：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
@@ -247,6 +251,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,selecttech",
                             "props":{"y":0,"x":247,"wordWrap":true,"width":1003,"var":"selecttech","valign":"middle","text":"已选工艺：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
@@ -259,7 +264,7 @@
                             "child":[
                                 ]
                         }],
-                    "$HIDDEN":true
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,

@@ -154,6 +154,8 @@ package script.order
 			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(2).toString();
 			if(this.ordervo.orderData)
 			this.ordervo.orderData.item_number = parseInt(this.inputnum.text);
+			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+
 		}
 		private function onShowMaterialView():void
 		{
@@ -168,10 +170,11 @@ package script.order
 			//this.ordervo.orderData = provo;
 			updateOrderData(provo);
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
+			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
 			
-			this.price.text = provo.getTotalPrice(area).toString();
+			this.price.text = provo.getTotalPrice(area,perimeter).toString();
 			
-			this.total.text = parseInt(this.inputnum.text) *provo.getTotalPrice(area) + "";
+			this.total.text = parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -203,8 +206,9 @@ package script.order
 		{
 			
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
-			
-			this.ordervo.orderPrice = productVo.getTotalPrice(area);
+			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
+
+			this.ordervo.orderPrice = productVo.getTotalPrice(area,perimeter);
 			ordervo.manufacturer_code = productVo.manufacturer_code;
 			ordervo.manufacturer_name = productVo.manufacturer_name;
 			

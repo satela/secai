@@ -1,5 +1,9 @@
 package script.order
 {
+	import eventUtil.EventCenter;
+	
+	import laya.events.Event;
+	
 	import model.orderModel.AttchCatVo;
 	
 	import ui.order.TabChooseBtnUI;
@@ -15,12 +19,15 @@ package script.order
 		public function setData(matName:Object):void
 		{
 			attachCatVo = matName as AttchCatVo;
-			this.selbtn.label = attachCatVo.accessoryCat_Name;
+			this.selbtn.label = attachCatVo.accessory_name;
+			this.selbtn.selected = false;
+			this.selbtn.on(Event.CLICK,this,ShowSelected);
 		}
 		
-		public function set ShowSelected(value:Boolean):void
+		public function ShowSelected():void
 		{
-			this.selbtn.selected = value;
+			this.selbtn.selected = !this.selbtn.selected;
+			EventCenter.instance.event(EventCenter.ADD_TECH_ATTACH,attachCatVo);
 			
 		}
 	}

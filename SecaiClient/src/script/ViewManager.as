@@ -15,6 +15,7 @@ package script
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.AddCommentPanelUI;
 	import ui.order.SelectAddressPanelUI;
+	import ui.order.SelectAttchPanelUI;
 	import ui.order.SelectDeliveryPanelUI;
 	import ui.order.SelectFactoryPanelUI;
 	import ui.order.SelectMaterialPanelUI;
@@ -56,6 +57,7 @@ package script
 		public static const VIEW_SELECT_MATERIAL:String = "VIEW_SELECT_MATERIAL";//选择材料界面
 		public static const VIEW_ADD_MESSAGE:String = "VIEW_ADD_MESSAGE";//添加备注
 		public static const VIEW_SELECT_DELIVERY_TYPE:String = "VIEW_SELECT_DELIVERY_TYPE";//选择配送方式 快递
+		public static const VIEW_SELECT_ATTACH:String = "VIEW_SELECT_ATTACH";//选择配件界面
 
 		
 		public static const VIEW_LOADING_PRO:String = "VIEW_LOADING_PRO";//加载界面
@@ -112,6 +114,7 @@ package script
 			viewDict[VIEW_SELECT_PIC_TO_ORDER] = SelectPicPanelUI;
 			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
 			viewDict[VIEW_SELECT_DELIVERY_TYPE] = SelectDeliveryPanelUI;
+			viewDict[VIEW_SELECT_ATTACH] = SelectAttchPanelUI;
 
 			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;
 			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;

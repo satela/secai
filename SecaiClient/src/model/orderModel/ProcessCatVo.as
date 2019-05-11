@@ -1,5 +1,7 @@
 package model.orderModel
 {
+	import model.HttpRequestUtil;
+
 	//工艺类vo
 	public class ProcessCatVo
 	{
@@ -15,6 +17,19 @@ package model.orderModel
 				if(this.hasOwnProperty(key))
 				this[key] = data[key];
 			}
+			
+			var manufacturecode = PaintOrderModel.instance.curSelectMat.manufacturer_code;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + manufacturecode + "&procCat_name=" + procCat_Name,this,function(data:Object):void{
+				
+				var result:Object = JSON.parse(data as String);
+				if(!result.hasOwnProperty("status"))
+				{
+					PaintOrderModel.instance.curSelectProcList = result as Array;
+					initProcFlow(result);
+					//onClickMat(parentitem,processCatvo);
+				}
+				
+			},null,null);
 		}
 		
 		public function initProcFlow(flowdata:Object):void
@@ -23,13 +38,33 @@ package model.orderModel
 			nextMatList = new Vector.<MaterialItemVo>();
 			for(var i:int=0;i < proclist.length;i++)
 			{
-				if(proclist[i].procLvl  == 1)
+				//if(proclist[i].procLvl  == 1)
 				{
-					nextMatList.push(new MaterialItemVo(proclist[i]));
+					if(proclist[i].is_mandatory == 1)
+						nextMatList.push(new MaterialItemVo(proclist[i]));
 				}
 			}
+//			for(var i:int=0;i < nextMatList.length;i++)
+//			{
+//				if(nextMatList[i].is_mandatory == 1)
+//				{
+//					nextMatList[i].selected = true;
+//					break;
+//				}
+//			}
 		}
 		
+		public function get isMandatory():Boolean
+		{
+			if(nextMatList == null)
+				return false;
+			for(var i:int=0;i < nextMatList.length;i++)
+			{
+				if(nextMatList[i].is_mandatory == 1)
+					return true;
+			}
+			return false;
+		}
 		public function resetData():void
 		{
 			selected = false;

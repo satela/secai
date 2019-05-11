@@ -428,6 +428,7 @@ package script.usercenter
 					Userdata.instance.updateAddress(result);
 				EventCenter.instance.event(EventCenter.UPDATE_MYADDRESS_LIST);
 				ViewManager.showAlert("添加地址成功");
+				onCloseView();
 			}
 		}
 		

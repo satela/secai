@@ -22,6 +22,8 @@ package model.orderModel
 		public var additional_unitFee: Number = 0;//  单位附加金额
 
 		public var prcessCatList:Vector.<ProcessCatVo>;//工艺类列表
+		
+		private var hasDoublePrint:int = 1; //如果有双面打印的工艺，这个等于2，用于主材料计算价格
 		public function ProductVo(data:Object)
 		{
 			for(var key in data)
@@ -54,32 +56,53 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					return arr[i].preProc_Name + "-" + getTechStr(arr[i].nextMatList);
+					var peijian:String = "";
+					if(arr[i].selectAttachVoList != null)
+					{
+						for(var j:int=0;j < arr[i].selectAttachVoList.length;j++)
+						{
+							peijian += arr[i].selectAttachVoList[j].accessory_name + ",";
+						}
+					}
+					if(peijian != "")
+						return arr[i].preProc_Name + "(" + peijian.substr(0,peijian.length-1) + ")" +  "-" + getTechStr(arr[i].nextMatList);
+					else 
+						return arr[i].preProc_Name +  "-" + getTechStr(arr[i].nextMatList);
+						
 				}
 			}
 			return "";
 		}
 		
-		public function getTotalPrice(area:Number):Number
+		public function getTotalPrice(area:Number,perimeter:Number):Number
 		{
-			var prices:Number = area*(unit_price + additional_unitFee);
+			if(measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+				var prices:Number = area*(unit_price + additional_unitFee);
+			else
+				prices = perimeter*(unit_price + additional_unitFee);
+			
+			hasDoublePrint = 1;
+			
 			var allprices:Array = [];
 			for(var i:int=0;i < prcessCatList.length;i++)
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter));					
 				}
 				
 			}
+			
+			prices *= hasDoublePrint;
+			
 			for(i=0;i < allprices.length;i++)
 			{
-				prices += area * allprices[i];
+				prices +=  allprices[i];
 			}
 			return parseFloat(prices.toFixed(2));
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -88,8 +111,14 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					prices.push(arr[i].preProc_Price);
-					prices = prices.concat(getTechPrice(arr[i].nextMatList));
+					if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+						prices.push(arr[i].preProc_Price * area);
+					else if(arr[i].preProc_Price > 0)
+						prices.push(arr[i].preProc_Price * perimeter);
+					if(arr[i].preProc_Price < 0)
+						hasDoublePrint = 2;
+					
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter));
 				}
 			}
 			return prices;

@@ -126,7 +126,11 @@ package script {
 			if(Userdata.instance.isLogin)
 				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
 			else
-				ViewManager.showAlert("请先登录 亲");
+			{
+				ViewManager.showAlert("请先登录");
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL);
+				
+			}
 			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);			
 		}
 		
@@ -136,7 +140,10 @@ package script {
 			if(Userdata.instance.isLogin)
 				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 			else
+			{
 				ViewManager.showAlert("请先登录");
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL);
+			}
 		}
 		private function onShowUserCenter():void
 		{

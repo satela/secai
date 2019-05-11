@@ -57,6 +57,7 @@ package script.order
 				uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 			
 			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
+			uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
 
 			//Laya.timer.once(10,this,function():void
 			//{
@@ -221,6 +222,22 @@ package script.order
 			directTree.splice(index+1,directTree.length - index -1);
 			updateCurDirectLabel();
 			getFileList();
+		}
+		
+		private function onClickParentFolder():void
+		{
+			if(directTree.length > 1)
+			{
+				DirectoryFileModel.instance.curSelectDir = directTree[directTree.length - 2];
+				directTree.splice(directTree.length - 1,1);
+				updateCurDirectLabel();
+				getFileList();
+			}
+			else
+			{
+				backToRootDir();
+				
+			}
 		}
 		
 		private function backToRootDir():void

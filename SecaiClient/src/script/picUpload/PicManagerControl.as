@@ -363,7 +363,7 @@ package script.picUpload
 		{
 			if(directTree.length > 1)
 			{
-				DirectoryFileModel.instance.curSelectDir = directTree[directTree.length - 1];
+				DirectoryFileModel.instance.curSelectDir = directTree[directTree.length - 2];
 				directTree.splice(directTree.length - 1,1);
 				updateCurDirectLabel();
 				getFileList();

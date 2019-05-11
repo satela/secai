@@ -9,6 +9,7 @@ package ui.order {
 		public var flder0:Label;
 		public var htmltext:HTMLDivElement;
 		public var btnroot:Label;
+		public var btnprevfolder:Label;
 		public var searchInput:TextInput;
 		public var btnok:Button;
 		public var picList:List;

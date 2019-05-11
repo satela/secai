@@ -11,7 +11,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static const httpUrl:String = "http://47.101.178.87/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
+		public static const httpUrl:String = "http://47.98.218.56/scfy/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		
@@ -35,10 +35,10 @@ package model
 
 		public static const addressManageUrl:String = "group/opt-group-express?";//1 delete 2 update 3 insert 4 list 5 default
 
-		public static const biggerPicUrl:String = "http://m-scfy-763.oss-cn-shanghai.aliyuncs.com/";
-		public static const smallerrPicUrl:String = "http://s-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+		public static const biggerPicUrl:String = "http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/";
+		public static const smallerrPicUrl:String = "http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/";
 		
-		public static const originPicPicUrl:String = "http://n-scfy-763.oss-cn-shanghai.aliyuncs.com/";
+		public static const originPicPicUrl:String = "http://original-image.oss-cn-hangzhou.aliyuncs.com/";
 
 		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
 
@@ -50,6 +50,10 @@ package model
 		public static const getProcessCatList:String = "business/processcatlist?prod_code=";//
 
 		public static const getProcessFlow:String = "business/procflowlist?manufacturer_code=";//procCat_name= //获取工艺流
+		
+		public static const GetAccCatlist:String = "business/acccatlist?";//prod_code=，proc_name= //获取附件类名称
+
+		public static const GetAccessorylist:String = "business/accessorylist?";//manufacturer_code=，accessoryCat_name= //获取附件类列表
 
 		public static const getDeliveryList:String = "business/deliverylist?manufacturer_code=";//=SPSC00100&addr_id=330700";//获取配送列表
 

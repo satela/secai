@@ -2,7 +2,9 @@ package script.order
 {
 	import laya.events.Event;
 	
+	import model.orderModel.AttchCatVo;
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.ProcessCatVo;
 	
 	import script.ViewManager;
@@ -17,6 +19,8 @@ package script.order
 		public var isSelected:Boolean = false;
 		
 		public var processCatVo:ProcessCatVo;
+		
+		public var attachVo:AttchCatVo;
 		public function TechBoxItem()
 		{
 			super();			
@@ -27,6 +31,19 @@ package script.order
 			processCatVo = null;
 			techmainvo = tvo;
 			initView();
+			if(tvo.selected)
+				setSelected(true);
+			else
+				setSelected(false);
+		}
+		
+		public function setAttachVo(attachvo:AttchCatVo):void
+		{
+			processCatVo = null;
+			techmainvo = null;
+			
+			attachVo = attachvo;
+			this.techBtn.label = attachVo.accessory_name;
 			setSelected(false);
 		}
 		
@@ -35,7 +52,12 @@ package script.order
 			techmainvo = null;
 			processCatVo = pvo;
 			this.techBtn.label = pvo.procCat_Name.split("-")[0];
-			setSelected(false);
+//			if(pvo.isMandatory)
+//			{
+//				setSelected(true);
+//			}
+//			else
+//				setSelected(false);
 		}
 		
 		private function initView():void
@@ -55,13 +77,14 @@ package script.order
 			if(techmainvo != null)
 			{
 				techmainvo.selected = sel;
-				if(sel && techmainvo.preProc_AttachmentTypeList != null && techmainvo.preProc_AttachmentTypeList != "" && techmainvo.preProc_AttachmentTypeList != "无工艺附件")
+				if(sel && techmainvo.preProc_attachmentTypeList != null && techmainvo.preProc_attachmentTypeList != "" && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_NO && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_PEIJIAN)
 				{
 					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,techmainvo);
 				}
 				else
 				{
 					techmainvo.attchMentFileId = "";
+					techmainvo.selectAttachVoList = null;
 				}
 			}
 			else

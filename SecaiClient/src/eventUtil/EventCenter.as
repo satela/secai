@@ -39,6 +39,7 @@ package eventUtil
 		public static const CANCAEL_UPLOAD_ITEM:String = "CANCAEL_UPLOAD_ITEM";//删除一个上传文件
 		public static const RE_UPLOAD_FILE:String = "RE_UPLOAD_FILE";//重新上传文件
 
+		public static const ADD_TECH_ATTACH:String = "ADD_TECH_ATTACH";//增加配件
 
 		public static const BROWER_WINDOW_RESIZE:String = "BROWER_WINDOW_RESIZE";//浏览器窗口大小改变
 
@@ -46,6 +47,8 @@ package eventUtil
 		
 		public static const PAUSE_SCROLL_VIEW:String = "PAUSE_SCROLL_VIEW";//暂停滚动
 
+
+		public static const CLOSE_PANEL_VIEW:String = "CLOSE_PANEL_VIEW";//关闭界面消息
 
 		private static var _eventCenter:EventCenter;
 		
