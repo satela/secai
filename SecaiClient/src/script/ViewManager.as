@@ -21,6 +21,8 @@ package script
 	import ui.order.SelectMaterialPanelUI;
 	import ui.order.SelectPicPanelUI;
 	import ui.picManager.PicCheckPanelUI;
+	import ui.product.BuyProductPanelUI;
+	import ui.product.ProductOrderPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.NewAddressPanelUI;
 	import ui.usercenter.UserMainPanelUI;
@@ -58,6 +60,10 @@ package script
 		public static const VIEW_ADD_MESSAGE:String = "VIEW_ADD_MESSAGE";//添加备注
 		public static const VIEW_SELECT_DELIVERY_TYPE:String = "VIEW_SELECT_DELIVERY_TYPE";//选择配送方式 快递
 		public static const VIEW_SELECT_ATTACH:String = "VIEW_SELECT_ATTACH";//选择配件界面
+
+		
+		public static const VIEW_PRODUCT_VIEW:String = "VIEW_PRODUCT_VIEW";//商品界面
+		public static const VIEW_BUY_PRODUCT_VIEW:String = "VIEW_BUY_PRODUCT_VIEW";//购买商品界面
 
 		
 		public static const VIEW_LOADING_PRO:String = "VIEW_LOADING_PRO";//加载界面
@@ -119,6 +125,10 @@ package script
 			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;
 			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;
 			viewDict[VIEW_LOADING_PRO] = LoadingPanelUI;
+			
+			viewDict[VIEW_PRODUCT_VIEW] = ProductOrderPanelUI;
+			viewDict[VIEW_BUY_PRODUCT_VIEW] = BuyProductPanelUI;
+
 
 		}
 		

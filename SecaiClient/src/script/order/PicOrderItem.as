@@ -5,6 +5,7 @@ package script.order
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
 	import model.orderModel.ProductVo;
@@ -172,7 +173,11 @@ package script.order
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
 			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
 			
-			this.price.text = provo.getTotalPrice(area,perimeter).toString();
+			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+				this.price.text = (provo.getTotalPrice(area,perimeter)/area).toFixed(2);
+			else
+				this.price.text = (provo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
+
 			
 			this.total.text = parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter) + "";
 			

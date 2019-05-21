@@ -23,6 +23,8 @@ package {
 	import script.picUpload.PicManagerControl;
 	import script.picUpload.PictureCheckControl;
 	import utils.PopUpWindowControl;
+	import script.product.BuyProductControl;
+	import script.product.ProductMainControl;
 	import script.picUpload.UpLoadAndOrderContrl;
 	import script.usercenter.AddressMgrControl;
 	import script.usercenter.EnterPrizeInfoControl;
@@ -39,7 +41,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/SelectMaterialPanel.scene";
+		public static var startScene:* = "login/RegisterPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -69,6 +71,8 @@ package {
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);
 			reg("utils.PopUpWindowControl",PopUpWindowControl);
+			reg("script.product.BuyProductControl",BuyProductControl);
+			reg("script.product.ProductMainControl",ProductMainControl);
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 			reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);

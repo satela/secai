@@ -110,9 +110,45 @@ package script.usercenter
 //				initView();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
 
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,getCompanyInfo,null,"post");
+
 
 		}
 		
+		private function getCompanyInfo(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				if(result[0] != null)
+				{
+					if(parseInt(result[0].result) == 1)
+					{
+						uiSkin.btnsave.disabled = true;
+						uiSkin.btnsave.label = "已审核";
+					}
+					else if(parseInt(result[0].result) == 0)
+					{
+						uiSkin.btnsave.disabled = true;
+						uiSkin.btnsave.label = "审核中";
+					}
+					else
+					{
+						uiSkin.btnsave.disabled = false;
+						uiSkin.btnsave.label = "审核失败,请重新提交";
+					}
+					if(result[0].info != null && result[0].info != "")
+					{
+						var cominfo:Object = JSON.parse(result[0].info);
+						uiSkin.input_companyname.text = cominfo.gp_name;
+						uiSkin.detail_addr.text = cominfo.gp_addr;
+						uiSkin.reditcode.text = cominfo.gp_orgcode;
+						uiSkin.txt_license.text = cominfo.gp_license;
+					}
+				}
+				trace(result);
+			}
+		}
 		private function initView(data:Object):void
 		{
 			//WaitingRespond.instance.hideWaitingView();
@@ -178,7 +214,9 @@ package script.usercenter
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				ViewManager.showAlert("保存成功");
+				ViewManager.showAlert("提交成功，请等待审核");
+				uiSkin.btnsave.disabled = true;
+				uiSkin.btnsave.label = "审核中";
 			}
 			else
 			{
@@ -244,6 +282,8 @@ package script.usercenter
 		}
 		private function selectProvince(index:int):void
 		{
+			if(uiSkin.provList.array[index] == null)
+				return;
 			province = uiSkin.provList.array[index];
 			uiSkin.provbox.visible = false;
 			uiSkin.province.text = province.areaname;

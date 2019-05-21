@@ -31,6 +31,8 @@ package script.login
 		public var param:Object;
 
 		private var phonecode:String = "";
+		
+		private var coutdown:int = 60;
 		public function RegisterCntrol()
 		{
 			super();
@@ -159,6 +161,8 @@ package script.login
 				Browser.window.alert("请填写正确的手机号");
 				return;
 			}
+			uiSkin.btnGetCode.disabled = true;
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getVerifyCode ,this,onGetPhoneCodeBack,"phone=" + uiSkin.input_phone.text,"post");
 		}
 		
@@ -168,8 +172,28 @@ package script.login
 			if(result.status == 0)
 			{
 				phonecode = result.code;
+				uiSkin.btnGetCode.label = "60秒后重试";
+				Laya.timer.loop(1000,this,countdownCode);
 			}
+			else
+				uiSkin.btnGetCode.disabled = false;
+
 			trace("pho code:" + data);
+		}
+		
+		private function countdownCode():void
+		{
+			coutdown--;
+			if(coutdown > 0)
+			{
+				uiSkin.btnGetCode.label = coutdown + "秒后重试";
+			}
+			else
+			{
+				uiSkin.btnGetCode.disabled = false;
+				uiSkin.btnGetCode.label = "获取验证码";
+				Laya.timer.clear(this,countdownCode);
+			}
 		}
 		private function onRefreshVerify(e:Event):void
 		{
@@ -179,7 +203,8 @@ package script.login
 		private function onCloseScene():void
 		{
 			Browser.document.body.removeChild(verifycode);//添加到舞台
-			
+			Laya.timer.clear(this,countdownCode);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_REGPANEL);
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
@@ -259,7 +284,7 @@ package script.login
 //					return;
 //				}
 				
-				var param:String = "phone=" + uiSkin.input_phone.text + "&pwd=" + uiSkin.input_pwd.text + "&code=" + phonecode;
+				var param:String = "phone=" + uiSkin.input_phone.text + "&pwd=" + uiSkin.input_pwd.text + "&code=" + uiSkin.input_phonecode.text;
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.registerUrl,this,onRegisterBack,param,"post");
 
 			}

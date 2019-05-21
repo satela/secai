@@ -39,9 +39,9 @@ package laya.net {
 		public static var createMap:Object = {atlas: [null, Loader.ATLAS]};
 		
 		/** 加载出错后的重试次数，默认重试一次*/
-		public var retryNum:int = 1;
+		public var retryNum:int = 4;
 		/** 延迟时间多久再进行错误重试，默认立即重试*/
-		public var retryDelay:int = 0;
+		public var retryDelay:int = 1000;
 		/** 最大下载线程，默认为5个*/
 		public var maxLoader:int = 5;
 		

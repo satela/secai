@@ -17,6 +17,7 @@ package script.picUpload
 	public class PicInfoItem extends PicShortItemUI
 	{
 		public var picInfo:PicInfoVo;
+		private var trytime:int = 0;
 		public function PicInfoItem()
 		{
 			super();
@@ -35,7 +36,7 @@ package script.picUpload
 			this.btndelete.visible = false;
 			
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
-
+			trytime = 0;
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
 			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "PNG"))
 			{
@@ -77,10 +78,12 @@ package script.picUpload
 
 				}
 				
-				//if(this.img.skin != "upload/fold.png")
-				//	Laya.loader.clearTextureRes(this.img.skin);
+				if(this.img.skin != "upload/fold.png")
+					Laya.loader.clearTextureRes(this.img.skin);
 
+				this.img.skin = null;				
 				this.img.skin = HttpRequestUtil.smallerrPicUrl + picInfo.fid + ".jpg";
+			
 				
 				var str:String = "宽:" + picInfo.picPhysicWidth + ";高:" +  picInfo.picPhysicHeight + "\n";
 				

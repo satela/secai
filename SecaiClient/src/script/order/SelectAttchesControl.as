@@ -36,11 +36,11 @@ package script.order
 			
 			uiSkin.attachList.itemRender = SelectAttachBtn;
 			uiSkin.attachList.vScrollBarSkin = "";
-			//uiSkin.attachList.selectEnable = true;
+			uiSkin.attachList.selectEnable = true;
 			uiSkin.attachList.spaceY = 2;
 			uiSkin.attachList.renderHandler = new Handler(this, updateAttachClassItem);
 			
-			//uiSkin.attachList.selectHandler = new Handler(this,onSlecteAttachCat);
+			uiSkin.attachList.selectHandler = new Handler(this,onSlecteAttachCat);
 			uiSkin.attachList.array = [];
 			matvo = param as MaterialItemVo;
 			if(matvo.attachList != null && matvo.attachList.length > 0)
@@ -104,18 +104,32 @@ package script.order
 		
 		private function onAddAttach(attchvo:AttchCatVo):void
 		{
-			if(selectAttach.indexOf(attchvo) < 0)
-				selectAttach.push(attchvo);
-			else
-			{
-				selectAttach.splice(selectAttach.indexOf(attchvo),1);
-			}
+//			if(selectAttach.indexOf(attchvo) < 0)
+//				selectAttach.push(attchvo);
+//			else
+//			{
+//				selectAttach.splice(selectAttach.indexOf(attchvo),1);
+//			}
+			matvo.selectAttachVoList = new Vector.<AttchCatVo>();
+			matvo.selectAttachVoList.push(attchvo);
+			onCloseView();
+			EventCenter.instance.event(EventCenter.CLOSE_PANEL_VIEW,ViewManager.VIEW_SELECT_ATTACH);
 		}
 		private function onSureClose(index:int):void
 		{
 			matvo.selectAttachVoList = selectAttach;
 			onCloseView();
 			EventCenter.instance.event(EventCenter.CLOSE_PANEL_VIEW,ViewManager.VIEW_SELECT_ATTACH);
+		}
+		
+		private function onSlecteAttachCat(index:int):void
+		{
+			for(var i:int=0;i < uiSkin.attachList.cells.length;i++)
+			{
+				(uiSkin.attachList.cells[i] as SelectAttachBtn).ShowSelected(i==index);
+			}
+			selectAttach = new Vector.<AttchCatVo>();
+			selectAttach.push(uiSkin.attachList.array[index]);
 		}
 		
 		private function onCloseView():void

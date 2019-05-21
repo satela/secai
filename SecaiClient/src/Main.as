@@ -15,6 +15,7 @@
 	import laya.utils.Utils;
 	
 	import model.ChinaAreaModel;
+	import model.HttpRequestUtil;
 	
 	import org.osmf.layout.ScaleMode;
 	
@@ -110,6 +111,11 @@
 			
 
 			//Laya.stage.addChild(new LoginViewUI());
+			var pageurl:String = Browser.window.location.href;
+			if(pageurl.indexOf("cmyk") >= 0)
+				HttpRequestUtil.httpUrl = "../scfy/";
+			else
+				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			//ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);

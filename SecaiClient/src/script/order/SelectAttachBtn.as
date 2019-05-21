@@ -20,14 +20,20 @@ package script.order
 		{
 			attachCatVo = matName as AttchCatVo;
 			this.selbtn.label = attachCatVo.accessory_name;
-			this.selbtn.selected = false;
-			this.selbtn.on(Event.CLICK,this,ShowSelected);
+			
+			this.selbtn.on(Event.DOUBLE_CLICK,this,onSelectSure);
+			//this.selbtn.selected = false;
+			//this.selbtn.on(Event.CLICK,this,ShowSelected);
 		}
 		
-		public function ShowSelected():void
+		private function onSelectSure():void
 		{
-			this.selbtn.selected = !this.selbtn.selected;
 			EventCenter.instance.event(EventCenter.ADD_TECH_ATTACH,attachCatVo);
+
+		}
+		public function ShowSelected(sel:Boolean):void
+		{
+			this.selbtn.selected = sel;
 			
 		}
 	}

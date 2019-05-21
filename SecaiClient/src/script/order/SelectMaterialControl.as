@@ -77,8 +77,9 @@ package script.order
 			
 			uiSkin.tablist.array = PaintOrderModel.instance.productList;
 			
-			//this.uiSkin.techcontent.vScrollBar.autoHide = true;
-			//this.uiSkin.techcontent.hScrollBar.autoHide = true;
+			this.uiSkin.techcontent.vScrollBar.hide = true;
+			this.uiSkin.techcontent.hScrollBar.hide = true;
+			
 			this.uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.subtn.on(Event.CLICK,this,onSubItemNum);
 			uiSkin.addbtn.on(Event.CLICK,this,onAddItemNum);
@@ -318,33 +319,41 @@ package script.order
 
 			if(parentitem.isSelected)
 			{
-				hideItems(parentitem.x,true);
+				//hideItems(parentitem.x,true);
+				refreshHashowItem(parentitem.x);
 				updateSelectedTech();
-				if(matvo is MaterialItemVo)
-				return;
+				//if(matvo is MaterialItemVo)
+				//return;
 			}
 //			else if(firstTechlist.indexOf(parentitem) >= 0)
 //				hideItems(parentitem.x,false);
 //			else
-				hideItems(parentitem.x,true);
+			//	hideItems(parentitem.x,true);
 			
 			
-			if(parentitem.isSelected)
+//			if(parentitem.isSelected)
+//			{
+//				parentitem.setSelected(false);
+//				parentitem.setTechSelected(false);
+//				if(firstTechlist.indexOf(parentitem) >= 0)
+//					cancelTech(parentitem.processCatVo.nextMatList);
+//				updateSelectedTech();
+//				
+//				return;
+//				
+//			}
+			
+			
+			if(!hasShowNextMaterial(matvo as MaterialItemVo))
 			{
-				parentitem.setSelected(false);
-				parentitem.setTechSelected(false);
-				if(firstTechlist.indexOf(parentitem) >= 0)
-					cancelTech(parentitem.processCatVo.nextMatList);
-				updateSelectedTech();
-				
-				return;
-				
+				hideItems(parentitem.x,true);
 			}
 			
 			parentitem.setSelected(true);
 			parentitem.setTechSelected(true);
 			
-			if(matvo.nextMatList && matvo.nextMatList.length > 0)
+			
+			if(matvo.nextMatList && matvo.nextMatList.length > 0 && !hasShowNextMaterial(matvo as MaterialItemVo))
 			{
 				var arr:Vector.<MaterialItemVo> = matvo.nextMatList;
 				var startpos:int = parentitem.y + 0.5 * itemheight - (arr.length*itemheight +  itemspaceV * (arr.length - 1))/2;
@@ -368,6 +377,17 @@ package script.order
 					startpos += itembox.height + itemspaceV;
 					this.uiSkin.techcontent.addChild(itembox);
 				}
+				
+				if(itembox != null && (itembox.x + itembox.width) > uiSkin.techcontent.width)
+				{
+					this.uiSkin.techcontent.hScrollBar.hide = false;
+					Laya.timer.frameOnce(2,this,function(){
+						this.uiSkin.techcontent.scrollTo(itembox.x + itembox.width,0);
+					});
+				}
+				else
+					this.uiSkin.techcontent.hScrollBar.visible = false;
+
 				
 			}
 //			else if(matvo.attachList != null && matvo.attachList.length > 0)
@@ -395,14 +415,31 @@ package script.order
 //			}
 			else
 			{
-				hideItems(firstTechlist[0].x,false,true);
+				//hideItems(firstTechlist[0].x,false,true);
 				hasFinishAllFlow = true;
 			}
 			
+
 			if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_ATTACH,false,matvo);
 			updateSelectedTech();
 		}
+		
+		private function hasShowNextMaterial(matvo:MaterialItemVo):Boolean
+		{
+			var nextmat:Vector.<MaterialItemVo> = matvo.nextMatList;
+			if(nextmat != null)
+			{
+				for(var i:int=0;i < hasShowItemList.length;i++)
+				{
+					if((hasShowItemList[i] as TechBoxItem).techmainvo == nextmat[0])
+						return true;
+				}
+			}
+			
+			return false;
+		}
+		
 		private function onClickAttach(parentitem:TechBoxItem,attachvo:AttchCatVo):void
 		{
 			if(parentitem.isSelected)
@@ -468,6 +505,19 @@ package script.order
 			
 		}
 		
+		private function refreshHashowItem(curposx:Number):void
+		{
+			for(var i:int=0;i < hasShowItemList.length;i++)
+			{
+				if(hasShowItemList[i].x > curposx)
+				{
+					hasShowItemList[i].setSelected(false);
+					if(hasShowItemList[i].techmainvo != null)
+						hasShowItemList[i].techmainvo.selected = false;					
+				}
+				
+			}
+		}
 		private function updateSelectedTech():void
 		{
 			

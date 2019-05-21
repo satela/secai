@@ -111,12 +111,26 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
+					var totalprice:Number = 0;
+					
 					if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-						prices.push(arr[i].preProc_Price * area);
+						totalprice = arr[i].preProc_Price * area;
 					else if(arr[i].preProc_Price > 0)
-						prices.push(arr[i].preProc_Price * perimeter);
+						totalprice = arr[i].preProc_Price * perimeter;
+					
 					if(arr[i].preProc_Price < 0)
 						hasDoublePrint = 2;
+					if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+					{
+						if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+						{
+							totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
+						}
+						else
+							totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+					}
+					
+					prices.push(totalprice);
 					
 					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter));
 				}
@@ -133,8 +147,11 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
+					var procname:String = arr[i].preProc_Name;
+					if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+						procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
 					
-					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:arr[i].preProc_Name,proc_attachpath:arr[i].attchMentFileId});
+					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList));
 					
 				}

@@ -11,7 +11,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static const httpUrl:String = "http://47.98.218.56/scfy/"; //"http://100.94.150.222:80/" ;//	"http://dhs3iy.natappfree.cc/";//
+		public static var httpUrl:String = "../scfy/";//http://www.cmyk.com.cn/scfy/" ;//	"http://47.98.218.56/scfy/"; //"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		
@@ -41,6 +41,8 @@ package model
 		public static const originPicPicUrl:String = "http://original-image.oss-cn-hangzhou.aliyuncs.com/";
 
 		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
+		
+		public static const getCompanyInfo:String = "group/get-request?";//获取企业信息
 
 		public static const getOuputAddr:String = "business/manufacturers?client_code=CL10200&";//addr_id=120106";获取输出工厂地址
 		public static const getProdCategory:String = "business/prodcategory?client_code=CL10200&";//addr_id=120106";获取工厂材料列表 SCFY001

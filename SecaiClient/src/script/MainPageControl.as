@@ -61,6 +61,9 @@ package script {
 			var btnUserCenter:Button = this.owner["btnUserCenter"];
 			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
 			
+			var btnproduct:Button = this.owner["btnproduct"];
+			btnproduct.on(Event.CLICK,this,onProductView);
+			
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
@@ -147,6 +150,12 @@ package script {
 		}
 		private function onShowUserCenter():void
 		{
+			if(!Userdata.instance.isLogin)
+			{
+				ViewManager.showAlert("请先登录");
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL);
+				return;
+			}
 			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 
 		}
@@ -221,7 +230,10 @@ package script {
 			trace("wid:" + Browser.width);
 			var scene:Scene = this.owner as Scene;
 		}
-		
+		private function onProductView():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_PRODUCT_VIEW,true);
+		}
 		public function onTipClick(e:Event):void {
 			
 		}

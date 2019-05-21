@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"top":0,"skin":"commers/通用弹框底.png","right":0,"left":0,"bottom":0},
+            "props":{"top":0,"skin":"commers/commonpopbg.png","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"Image",
             "isDirectory":false,
@@ -44,7 +44,7 @@
                 {
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":0,"skin":"mainpage/注册底花纹右对齐.jpg","right":0,"height":1080},
+                    "props":{"y":0,"skin":"mainpage/registerbg.jpg","right":0,"height":1080},
                     "nodeParent":73,
                     "label":"Image",
                     "isOpen":true,
@@ -60,7 +60,7 @@
                 {
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":102,"x":467,"width":986,"skin":"commers/通用弹框底.png","height":790},
+                    "props":{"y":102,"x":467,"width":986,"skin":"commers/commonpopbg.png","height":790},
                     "nodeParent":73,
                     "label":"Image",
                     "isOpen":true,
@@ -74,7 +74,7 @@
                 {
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":100,"x":467,"width":986,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":791},
+                    "props":{"y":100,"x":467,"width":986,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":791},
                     "nodeParent":73,
                     "label":"Image",
                     "isDirectory":false,
@@ -87,7 +87,7 @@
                 {
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":46,"x":905,"skin":"mainpage/半圆.png"},
+                    "props":{"y":46,"x":905,"skin":"mainpage/halfcirc.png"},
                     "nodeParent":73,
                     "label":"Image",
                     "isOpen":true,
@@ -101,7 +101,7 @@
                 {
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":71,"x":929,"skin":"mainpage/矢量智能对象.png"},
+                    "props":{"y":71,"x":929,"skin":"mainpage/shiliang.png"},
                     "nodeParent":73,
                     "label":"Image",
                     "isDirectory":false,
@@ -139,7 +139,7 @@
                         {
                             "type":"TextInput",
                             "searchKey":"TextInput",
-                            "props":{"x":160,"width":384,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
+                            "props":{"x":160,"width":384,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":79,
                             "label":"TextInput",
                             "isDirectory":false,
@@ -191,7 +191,7 @@
                         {
                             "type":"TextInput",
                             "searchKey":"TextInput",
-                            "props":{"x":160,"width":384,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
+                            "props":{"x":160,"width":384,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":83,
                             "label":"TextInput",
                             "isDirectory":false,
@@ -243,7 +243,7 @@
                         {
                             "type":"TextInput",
                             "searchKey":"TextInput",
-                            "props":{"x":160,"width":384,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
+                            "props":{"x":160,"width":384,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":87,
                             "label":"TextInput",
                             "isDirectory":false,
@@ -295,7 +295,7 @@
                         {
                             "type":"TextInput",
                             "searchKey":"TextInput",
-                            "props":{"x":160,"width":384,"skin":"commers/输入框.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
+                            "props":{"x":160,"width":384,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
                             "nodeParent":97,
                             "label":"TextInput",
                             "isDirectory":false,
@@ -308,7 +308,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button",
-                            "props":{"y":3.5,"x":568,"width":150,"skin":"commers/按钮2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"获取验证码","height":40},
+                            "props":{"y":3.5,"x":568,"width":150,"skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"获取验证码","height":40},
                             "nodeParent":97,
                             "label":"Button",
                             "isDirectory":false,
@@ -322,7 +322,7 @@
                 {
                     "type":"Button",
                     "searchKey":"Button,btnClose",
-                    "props":{"y":123,"x":1413,"var":"btnClose","stateNum":"3","skin":"commers/关闭.png"},
+                    "props":{"y":123,"x":1413,"var":"btnClose","stateNum":"3","skin":"commers/btnclose.png"},
                     "nodeParent":73,
                     "label":"btnClose",
                     "isDirectory":false,
@@ -335,7 +335,7 @@
                 {
                     "type":"Button",
                     "searchKey":"Button",
-                    "props":{"y":734,"x":880,"width":160,"skin":"commers/按钮2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"确认修改","height":48},
+                    "props":{"y":734,"x":880,"width":160,"skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"确认修改","height":48},
                     "nodeParent":73,
                     "label":"Button",
                     "isDirectory":false,
