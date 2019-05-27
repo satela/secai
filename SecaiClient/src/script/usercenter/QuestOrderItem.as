@@ -16,12 +16,31 @@ package script.usercenter
 		
 		public function setData(orderdata:Object):void
 		{
-			this.order_sn.text = orderdata.orderId;
+			this.itemseq.text = orderdata.item_seq;
+			this.picimg.skin = orderdata.thumbnails_path;
+			
 			//this.fileimg.skin = 
-			this.txtMaterial.text = "材料：油画布3*6，工艺：喷印方式（户内写真-4pass),外表面装裱（上光油-哑面),异性切割（附件),装裱（有狂装裱-框条（A框条)。" +
-				"快递方式（义务物语物流-上门送货）";
+			//this.txtMaterial.text = ;
+			this.matname.text = orderdata.prod_name;
+			var sizearr:Array = (orderdata.LWH as String).split("/");
+			
+			this.widthtxt.text = sizearr[0];
+			this.heighttxt.text = sizearr[1];
+			
+			this.pronum.text = orderdata.item_number + "";
+			var techstr:String =  "";
+			for(var i:int=0;i < orderdata.procInfoList.length;i++)
+				techstr += orderdata.procInfoList[i].proc_description + "-";
+			
+			this.tech.text = techstr.substr(0,techstr.length - 1);
+			
+			this.money.text = (Number(orderdata.item_priceStr) * Number(orderdata.item_number)).toFixed(2);
+			
+			//this.txtDetailInfo.text = "收货地址：" + orderdata.address;
+			
+			
 			this.detailbox.visible = false;
-			this.bgimg.height = 65;
+			this.bgimg.height = 90;
 			this.detailbtn.on(Event.CLICK,this,onClickShowDetail);
 		}
 		
@@ -29,16 +48,16 @@ package script.usercenter
 		{
 			this.detailbox.visible = !this.detailbox.visible;
 			if(this.detailbox.visible)
-				this.bgimg.height = 141;
+				this.bgimg.height = 165;
 			else
-				this.bgimg.height = 65;
+				this.bgimg.height = 90;
 			adjustHeight.call(caller);
 		}
 		
 		private function hideDetail():void
 		{
 			this.detailbox.visible = false;
-			this.bgimg.height = 65;
+			this.bgimg.height = 90;
 		}
 	}
 }

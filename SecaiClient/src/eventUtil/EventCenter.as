@@ -49,6 +49,11 @@ package eventUtil
 
 
 		public static const CLOSE_PANEL_VIEW:String = "CLOSE_PANEL_VIEW";//关闭界面消息
+		public static const SHOW_CHARGE_VIEW:String = "SHOW_CHARGE_VIEW";//充值
+		
+		public static const PAY_ORDER_SUCESS:String = "PAY_ORDER_SUCESS";//支付成功
+
+
 
 		private static var _eventCenter:EventCenter;
 		

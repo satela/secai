@@ -42,7 +42,7 @@ package model
 
 		public static const addCompanyInfo:String = "group/create?"; //name=,addr=
 		
-		public static const getCompanyInfo:String = "group/get-request?";//获取企业信息
+		public static const getAuditInfo:String = "group/get-request?";//获取企业信息
 
 		public static const getOuputAddr:String = "business/manufacturers?client_code=CL10200&";//addr_id=120106";获取输出工厂地址
 		public static const getProdCategory:String = "business/prodcategory?client_code=CL10200&";//addr_id=120106";获取工厂材料列表 SCFY001
@@ -69,6 +69,18 @@ package model
 		public static const getAddressFromServer:String = "group/get-addr-list?";//查询地址 parentid
 		
 		public static const abortUpload:String = "file/abortadd?";//主动终止上传
+		
+		//充值
+		public static const getCompanyInfo:String = "group/get-info?";//账户信息
+
+		
+		public static const chargeRequest:String = "group/recharge?";//账户充值
+		
+		public static const orderOnlinePay:String = "group/recharge?";//订单在线支付  orderid 在线支付 
+
+		public static const payOrderByMoney:String = "group/pay-order?";//余额支付orderid
+
+		public static const checkOrderList:String = "business/list-order?";//查询订单
 
 
 		public static function get instance():HttpRequestUtil

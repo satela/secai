@@ -2,14 +2,16 @@
 package ui.usercenter {
 	import laya.ui.*;
 	import laya.display.*;
-	import script.usercenter.MyOrderControl;
+	import script.order.SelectFactoryControl;
 
-	public class MyOrdersPanelUI extends Scene {
-		public var orderList:List;
+	public class OderDetailPanelUI extends View {
+		public var closebtn:Panel;
+		public var orderoanel:Panel;
+		public var orderbox:VBox;
 
 		override protected function createChildren():void {
 			super.createChildren();
-			loadScene("usercenter/MyOrdersPanel");
+			loadScene("usercenter/OderDetailPanel");
 
 		}
 

@@ -8,6 +8,7 @@ package script.prefabScript
 	import model.Userdata;
 	
 	import script.ViewManager;
+	import script.usercenter.UserMainControl;
 	
 	import ui.TopBannerUI;
 	
@@ -28,16 +29,30 @@ package script.prefabScript
 			var username:Text = uiSkin.getChildByName("userName") as Text;
 			var logout:Text = uiSkin.getChildByName("logout") as Text;
 
-			username.text = Userdata.instance.userAccount;
+			var myorder:Text = uiSkin.getChildByName("myorder") as Text;
+
+			
+			if(Userdata.instance.isLogin) 
+				username.text = Userdata.instance.userAccount;
+			else
+				username.text = "未登录";
 			
 			firstPage.on(Event.CLICK,this,showFirstPage);
 			logout.on(Event.CLICK,this,showLogOut);
+			
+			myorder.on(Event.CLICK,this,showOrderList);
+
 		}
 		
 		override public function onStart():void
 		{
 			
 
+		}
+		
+		private function showOrderList():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,UserMainControl.MY_ORDER);
 		}
 		
 		private function showFirstPage():void

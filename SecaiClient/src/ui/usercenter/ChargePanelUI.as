@@ -2,8 +2,14 @@
 package ui.usercenter {
 	import laya.ui.*;
 	import laya.display.*;
+	import script.usercenter.ChargeControl;
 
 	public class ChargePanelUI extends View {
+		public var accout:Label;
+		public var moneytxt:Label;
+		public var chargeinput:TextInput;
+		public var tyepgrp:RadioGroup;
+		public var confirmcharge:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

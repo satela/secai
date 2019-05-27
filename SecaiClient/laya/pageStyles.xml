@@ -47,4 +47,8 @@
    <item name="product/ProductOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="product/ProductItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/BuyProductPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/OrderListItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/OderDetailPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/OrderDetailPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/ConfirmOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
 </page>

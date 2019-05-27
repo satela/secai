@@ -21,6 +21,7 @@ package script.order
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
+	import script.usercenter.UserMainControl;
 	
 	import ui.PaintOrderPanelUI;
 	
@@ -460,7 +461,7 @@ package script.order
 					
 			}
 			orderdata.order_amountStr = totalMoney.toString();
-			orderdata.money_paidStr =  totalMoney.toString();
+			orderdata.money_paidStr =  "0.01";//totalMoney.toString();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
 
 		}
@@ -468,12 +469,25 @@ package script.order
 		private function onPlaceOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
-			if(!result.hasOwnProperty("code"))
+			if(result.status == 0)
 			{
-				ViewManager.showAlert("下单成功");
+				//ViewManager.showAlert("下单成功");
+				
+				var orderdata:Object = JSON.parse(result.data);
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(orderdata.money_paidStr),orderid:result.orderid});
+				
+				//Browser.window.open("about:blank","alipay").location.href = HttpRequestUtil.httpUrl + HttpRequestUtil.chargeRequest + "amount=0&orderid=" + result.orderid;
+				//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
+
 			}
 		}
 		
+		private function confirmSucess(result:Boolean):void
+		{
+			//if(result)
+			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,UserMainControl.MY_ORDER);
+
+		}
 		private function onClickOpenQQ():void
 		{
 			window.open('tencent://message/?uin=10987654321');

@@ -77,7 +77,10 @@ package script {
 				txtLogin.text = Userdata.instance.userAccount;
 				txtReg.text = "[退出]";
 			}
+			
+
 		}
+		
 		
 		private function loginAccount():void
 		{
@@ -232,6 +235,12 @@ package script {
 		}
 		private function onProductView():void
 		{
+			if(!Userdata.instance.isLogin)
+			{
+				ViewManager.showAlert("请先登录");
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL);
+				return;
+			}
 			ViewManager.instance.openView(ViewManager.VIEW_PRODUCT_VIEW,true);
 		}
 		public function onTipClick(e:Event):void {

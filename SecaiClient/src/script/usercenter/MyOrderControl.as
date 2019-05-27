@@ -1,6 +1,11 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
+	import laya.utils.Handler;
+	
+	import model.HttpRequestUtil;
 	
 	import ui.usercenter.MyOrdersPanelUI;
 	
@@ -16,23 +21,41 @@ package script.usercenter
 		{
 			uiSkin = this.owner as MyOrdersPanelUI;
 			
-			for(var i:int=18965898;i < 18965905;i++)
-			{
-				var ordetata:Object = {};
-				ordetata.orderId = i.toString();
-				
-				var orderitem:QuestOrderItem = new QuestOrderItem();
-				orderitem.setData(ordetata);
-				orderitem.adjustHeight = updateVbox;
-				orderitem.caller = this;
-				uiSkin.orderbox.addChild(orderitem);
-			}
+			uiSkin.orderList.itemRender = OrderCheckListItem;
 			
+			uiSkin.orderList.vScrollBarSkin = "";
+			uiSkin.orderList.repeatX = 1;
+			uiSkin.orderList.spaceY = 2;
+			
+			uiSkin.orderList.renderHandler = new Handler(this, updateOrderList);
+			uiSkin.orderList.selectEnable = false;
+			uiSkin.orderList.array = [];
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
+			EventCenter.instance.on(EventCenter.PAY_ORDER_SUCESS,this,onRefreshOrder);
+
 		}
 		
-		public function updateVbox():void
+		private function onRefreshOrder():void
 		{
-			uiSkin.orderbox.refresh();
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
+		}
+		private function onGetOrderListBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				uiSkin.orderList.array = result.orders;
+			}
+		}
+		public function updateOrderList(cell:OrderCheckListItem):void
+		{
+			cell.setData(cell.dataSource);
+		}
+		
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onRefreshOrder);
+
 		}
 	}
 }

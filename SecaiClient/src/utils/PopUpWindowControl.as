@@ -22,6 +22,11 @@ package utils
 			uiSkin.closebtn.on(Event.CLICK,this,onCloseScene);
 			
 			uiSkin.msgtxt.text = param.msg;
+			if(param.ok != null)
+				uiSkin.okbtn.label = param.ok;
+			if(param.cancel != null)
+				uiSkin.cancelbtn.label = param.cancel;
+			
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmHandler);
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCancelHandler);
 

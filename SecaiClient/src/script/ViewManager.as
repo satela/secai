@@ -14,6 +14,7 @@ package script
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.AddCommentPanelUI;
+	import ui.order.ConfirmOrderPanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectAttchPanelUI;
 	import ui.order.SelectDeliveryPanelUI;
@@ -25,6 +26,7 @@ package script
 	import ui.product.ProductOrderPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.NewAddressPanelUI;
+	import ui.usercenter.OrderDetailPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 
 	public class ViewManager
@@ -69,6 +71,11 @@ package script
 		public static const VIEW_LOADING_PRO:String = "VIEW_LOADING_PRO";//加载界面
 
 		public static const VIEW_ADD_NEW_ADDRESS:String = "VIEW_ADD_NEW_ADDRESS";//添加收货地址
+		
+		public static const VIEW_ORDER_DETAIL_PANEL:String = "VIEW_ORDER_DETAIL_PANEL";//订单详情查询界面
+		
+		public static const VIEW_SELECT_PAYTYPE_PANEL:String = "VIEW_SELECT_PAYTYPE_PANEL";//选择支付方式界面
+
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
@@ -128,6 +135,8 @@ package script
 			
 			viewDict[VIEW_PRODUCT_VIEW] = ProductOrderPanelUI;
 			viewDict[VIEW_BUY_PRODUCT_VIEW] = BuyProductPanelUI;
+			viewDict[VIEW_ORDER_DETAIL_PANEL] = OrderDetailPanelUI;
+			viewDict[VIEW_SELECT_PAYTYPE_PANEL] = ConfirmOrderPanelUI;
 
 
 		}

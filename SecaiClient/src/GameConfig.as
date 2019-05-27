@@ -11,6 +11,7 @@ package {
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
 	import utils.AddMsgControl;
+	import script.order.PayTypeSelectControl;
 	import script.order.SelectAddressControl;
 	import script.order.SelectAttchesControl;
 	import script.order.SelectDeliveryControl;
@@ -27,9 +28,11 @@ package {
 	import script.product.ProductMainControl;
 	import script.picUpload.UpLoadAndOrderContrl;
 	import script.usercenter.AddressMgrControl;
+	import script.usercenter.ChargeControl;
 	import script.usercenter.EnterPrizeInfoControl;
 	import script.usercenter.MyOrderControl;
 	import script.usercenter.AddressEditControl;
+	import script.usercenter.OrderDetailControl;
 	import script.usercenter.UserMainControl;
 	/**
 	 * 游戏初始化配置
@@ -41,7 +44,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "login/RegisterPanel.scene";
+		public static var startScene:* = "usercenter/OrderListItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -59,6 +62,7 @@ package {
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);
 			reg("utils.AddMsgControl",AddMsgControl);
+			reg("script.order.PayTypeSelectControl",PayTypeSelectControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);
 			reg("script.order.SelectAttchesControl",SelectAttchesControl);
 			reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
@@ -75,9 +79,11 @@ package {
 			reg("script.product.ProductMainControl",ProductMainControl);
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 			reg("script.usercenter.AddressMgrControl",AddressMgrControl);
+			reg("script.usercenter.ChargeControl",ChargeControl);
 			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
 			reg("script.usercenter.MyOrderControl",MyOrderControl);
 			reg("script.usercenter.AddressEditControl",AddressEditControl);
+			reg("script.usercenter.OrderDetailControl",OrderDetailControl);
 			reg("script.usercenter.UserMainControl",UserMainControl);
 		}
 		GameConfig.init();

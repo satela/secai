@@ -95,11 +95,14 @@ package script.usercenter
 			uiSkin.btnsave.on(Event.CLICK,this,onSaveCompanyInfo);
 			
 			uiSkin.txt_license.text = "";
+			uiSkin.account.text = Userdata.instance.userAccount;
+			uiSkin.servicetxt.text = Userdata.instance.userAccount;
 			
 			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
 			Browser.window.uploadApp = this;
 			initFileOpen();
 			
+			uiSkin.chargebtn.on(Event.CLICK,this,onCharge);
 			
 //			if(!ChinaAreaModel.hasInit)
 //			{
@@ -110,11 +113,26 @@ package script.usercenter
 //				initView();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
 
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,getCompanyInfo,null,"post");
-
-
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAuditInfo ,this,getCompanyInfo,null,"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
+			
+			
 		}
+		private function getCompanyInfoBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Userdata.instance.money = Number(result.balance);
+				uiSkin.moneytxt.text = Userdata.instance.money.toString() + "元";
+
+			}
+		}	
 		
+		private function onCharge():void
+		{
+			EventCenter.instance.event(EventCenter.SHOW_CHARGE_VIEW);
+		}
 		private function getCompanyInfo(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);

@@ -9,6 +9,9 @@ package script.usercenter
 	import laya.utils.Browser;
 	import laya.utils.Mouse;
 	
+	import model.HttpRequestUtil;
+	import model.Userdata;
+	
 	import script.ViewManager;
 	
 	import ui.usercenter.AddressMgrPanelUI;
@@ -26,6 +29,11 @@ package script.usercenter
 		
 		private var curView:View;
 		private var titleTxt:Array;
+		
+		public var param:Object;
+		
+		public static const MY_ORDER:int = 3;
+		
 		public function UserMainControl()
 		{
 			super();
@@ -52,13 +60,20 @@ package script.usercenter
 				btntxtArr.push(uiSkin["btntxt" + i]);
 
 			}
-			onShowEditView(0);
+			if(param != null && param is int)
+				onShowEditView(param as int);
+			else
+				onShowEditView(0);
 			(uiSkin.panel_main).height = Browser.clientHeight - 20;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
+			
+			EventCenter.instance.on(EventCenter.SHOW_CHARGE_VIEW,this,showCharge);
+
 
 		}
+		
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
@@ -85,6 +100,10 @@ package script.usercenter
 				uiSkin.panel_main.vScrollBar.target = null;
 		}
 		
+		private function showCharge():void
+		{
+			onShowEditView(5);
+		}
 		private function onShowEditView(index:int):void
 		{
 			if(index == 8)
@@ -146,6 +165,7 @@ package script.usercenter
 		{
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.off(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
+			EventCenter.instance.off(EventCenter.SHOW_CHARGE_VIEW,this,showCharge);
 
 		}
 	}
