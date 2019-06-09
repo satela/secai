@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":4,
-    "selecteID":27,
+    "selecteID":8,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":32,
+    "maxID":34,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -56,13 +56,14 @@
                     "compId":6,
                     "child":[
                         ],
+                    "$LOCKED":true,
                     "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":266,"x":460,"width":1000,"skin":"commers/cutline.png","height":1,"alpha":1},
+                    "props":{"y":280,"x":460,"width":1000,"skin":"commers/cutline.png","height":1,"alpha":1},
                     "nodeParent":4,
                     "label":"Image",
                     "isOpen":true,
@@ -77,9 +78,24 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
+                    "props":{"y":248,"x":501,"width":107,"text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":32,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
                     "props":{"y":215,"x":501,"text":"订单详情","fontSize":24,"color":"#756e6e","bold":true},
                     "nodeParent":4,
                     "label":"Label",
+                    "isOpen":true,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -91,7 +107,7 @@
                     "x":30,
                     "type":"Panel",
                     "searchKey":"Panel,orderoanel",
-                    "props":{"y":303,"x":460,"width":1000,"var":"orderoanel","height":589},
+                    "props":{"y":320,"x":460,"width":1000,"var":"orderoanel","height":567},
                     "nodeParent":4,
                     "label":"orderoanel",
                     "isOpen":true,
@@ -133,7 +149,7 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":277,"x":465},
+                    "props":{"y":292,"x":465},
                     "nodeParent":4,
                     "label":"Box",
                     "isOpen":true,
@@ -240,7 +256,22 @@
                             "child":[
                                 ]
                         }]
-                }]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,outputtxt",
+                    "props":{"y":248,"x":608,"width":299,"var":"outputtxt","text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
+                    "nodeParent":4,
+                    "label":"outputtxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":33,
+                    "child":[
+                        ]
+                }],
+            "$LOCKED":true
         },
         {
             "x":15,

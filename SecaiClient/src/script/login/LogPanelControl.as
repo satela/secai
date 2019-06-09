@@ -5,8 +5,11 @@ package script.login
 	import laya.components.Script;
 	import laya.display.Input;
 	import laya.display.Scene;
+	import laya.display.Stage;
 	import laya.events.Event;
+	import laya.events.Keyboard;
 	import laya.ui.Button;
+	import laya.utils.Browser;
 	
 	import model.HttpRequestUtil;
 	import model.Userdata;
@@ -50,10 +53,29 @@ package script.login
 			uiSKin.txt_forget.on(Event.CLICK,this,onResetpwd);
 
 			uiSKin.btn_login.on(Event.CLICK,this,onLogin);
+			
+			uiSKin.input_account.on(Event.KEY_DOWN,this,onAccountKeyUp);
 
+			uiSKin.input_pwd.on(Event.KEY_DOWN,this,onAccountKeyUp);
+			
+			uiSKin.input_account.focus = true;
 
 		}
 		
+		private function onAccountKeyUp(e:Event):void
+		{
+			if(e.keyCode == Keyboard.TAB)
+			{
+				if(uiSKin.input_account.focus)
+					uiSKin.input_pwd.focus = true;
+				else if(uiSKin.input_pwd.focus)
+					uiSKin.input_account.focus = true;
+			}
+			if(e.keyCode == Keyboard.ENTER)
+			{
+				onLogin();
+			}
+		}
 		private function onLogin():void
 		{
 			// TODO Auto Generated method stub

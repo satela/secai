@@ -23,8 +23,10 @@ package script.usercenter
 			uiSkin = this.owner as OrderDetailPanelUI;
 			
 			uiSkin.orderoanel.vScrollBarSkin = "";
+			var orderdata:Object = JSON.parse(param.or_text);
+			var allproduct:Array = orderdata.orderItemList as Array;
 			
-			var allproduct:Array = JSON.parse(param.or_text).orderItemList as Array;
+			uiSkin.outputtxt.text = orderdata.manufacturer_name;
 
 			for(var i:int=0;i < allproduct.length;i++)
 			{

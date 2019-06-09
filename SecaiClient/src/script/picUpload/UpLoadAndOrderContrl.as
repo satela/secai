@@ -352,6 +352,7 @@ package script.picUpload
 		{
 			// TODO Auto Generated method stub
 			Browser.window.uploadApp = null;
+			Laya.timer.clearAll(this);
 
 			EventCenter.instance.event(EventCenter.UPDATE_FILE_LIST);
 			EventCenter.instance.off(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);

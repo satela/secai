@@ -75,7 +75,7 @@ package script.usercenter
 		
 		private function onClickPay():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:orderdata.or_id});
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
 
 		}
 	}

@@ -13,6 +13,7 @@ package script.order
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.DeliveryTypeVo;
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
@@ -24,6 +25,8 @@ package script.order
 	import script.usercenter.UserMainControl;
 	
 	import ui.PaintOrderPanelUI;
+	import ui.order.OrderAddressItemUI;
+	import ui.order.OutPutCenterUI;
 	
 	import utils.UtilTool;
 	
@@ -88,10 +91,11 @@ package script.order
 			
 			//uiSkin.factorytxt.underline = true;
 			//uiSkin.factorytxt.underlineColor = "#222222";
-			uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
+		//	uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 			uiSkin.myaddresstxt.on(Event.CLICK,this,onShowSelectAddress);
-			uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
-			uiSkin.deliverytxt.on(Event.CLICK,this,onShowSelectDelivery);
+		//	uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
+			//uiSkin.deliverytxt.on(Event.CLICK,this,onShowSelectDelivery);
+			
 			uiSkin.batchChange.on(Event.CLICK,this,onBatchChangeMaterial);
 			uiSkin.selectAll.on(Event.CLICK,this,onSelectAll);
 			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
@@ -107,13 +111,17 @@ package script.order
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.on(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
+			EventCenter.instance.on(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
 
 			uiSkin.panelout.vScrollBarSkin = "";
+			uiSkin.deliversp.autoSize = true;
 			//(uiSkin.panel_main).bottom = 298 + (Browser.clientHeight - 1080);
 			//(uiSkin.panelout).height = (Browser.clientHeight - 80);
 
 			this.uiSkin.height = Browser.clientHeight;
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
+			this.uiSkin.btnsaveorder.on(Event.CLICK,this,onSaveOrder);
+
 			this.uiSkin.panelout.on(Event.DRAG_MOVE,this,onDragMove);
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
 //				
@@ -181,20 +189,86 @@ package script.order
 			if(!result.hasOwnProperty("status"))
 			{
 				PaintOrderModel.instance.initOutputAddr(result as Array);
+				
+				PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr.concat();
+				
 				if(PaintOrderModel.instance.outPutAddr.length > 0)
 				{
-					PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
-					this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name + " " + PaintOrderModel.instance.selectFactoryAddress.addr;
-					
+					//PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
+					//this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[0].name + " " + PaintOrderModel.instance.selectFactoryAddress[0].addr;
+					for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
+					{
+						var outputitem:OutPutCenterUI = new OutPutCenterUI();
+						uiSkin.outputbox.addChild(outputitem);
+						outputitem.checkselect.selected = true;
+						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
+						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
+					}
+					uiSkin.fengeimg.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+					uiSkin.floatpt.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+					uiSkin.mainvbox.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid ,this,onGetProductBack,null,null);
+					
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList + PaintOrderModel.instance.outPutAddr[0].org_code + "&addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetDeliveryBack,null,null);
+
 				}
 				else
 				{
 					PaintOrderModel.instance.selectFactoryAddress = null;
 					PaintOrderModel.instance.productList = [];
-					this.uiSkin.factorytxt.text = "你选择的地址暂无生产商";
+					//this.uiSkin.factorytxt.text = "你选择的地址暂无生产商";
 				}
 			}
+		}
+		
+		private function onGetDeliveryBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			while(uiSkin.deliverbox.numChildren > 0)
+				uiSkin.deliverbox.removeChildAt(0);
+			if(!result.hasOwnProperty("status"))
+			{
+				PaintOrderModel.instance.deliveryList = [];
+				for(var i:int=0;i < result.length;i++)
+				{
+					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
+					var deliveritem:OrderAddressItemUI = new OrderAddressItemUI();
+					deliveritem.addresstxt.text = tempdevo.deliveryDesc;
+					if(tempdevo.delivery_name == "送货上门")
+					{
+						deliveritem.btnsel.selected = true;
+						deliveritem.selCheck.selected = true;
+						PaintOrderModel.instance.selectDelivery = tempdevo;
+					}
+					
+					deliveritem.on(Event.CLICK,this,onSelectDeliverAdd,[deliveritem,tempdevo]);
+					uiSkin.deliverbox.addChild(deliveritem);
+					//PaintOrderModel.instance.deliveryList.push(tempdevo);
+				}
+			}
+			Laya.timer.frameOnce(2,this,function(){
+				uiSkin.deliversp.size(1280,uiSkin.deliverbox.height);
+				uiSkin.mainvbox.refresh();
+			});
+		}
+		private function onSelectDeliverAdd(deliitem:OrderAddressItemUI,delivervo:DeliveryTypeVo):void
+		{
+			for(var i:int=0;i < uiSkin.deliverbox.numChildren;i++)
+			{
+				var deitem:OrderAddressItemUI = uiSkin.deliverbox.getChildAt(i) as OrderAddressItemUI;
+				if(deitem)
+				{
+					deitem.btnsel.selected = false;
+					deitem.selCheck.selected = false;
+				}
+			}
+			
+			deliitem.btnsel.selected = true;
+			deliitem.selCheck.selected = true;
+			PaintOrderModel.instance.selectDelivery = delivervo;
+
+			
 		}
 		private function onResizeBrower():void
 		{
@@ -231,7 +305,7 @@ package script.order
 		private function onSelectedAddress():void
 		{
 			if(PaintOrderModel.instance.selectFactoryAddress)
-			this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name +  " " +  PaintOrderModel.instance.selectFactoryAddress.addr;
+			//this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name +  " " +  PaintOrderModel.instance.selectFactoryAddress.addr;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetProductBack,null,null);
 
@@ -389,8 +463,8 @@ package script.order
 		
 		private function updateDeliveryType():void
 		{
-			if(PaintOrderModel.instance.selectDelivery != null)
-				uiSkin.deliverytxt.text = PaintOrderModel.instance.selectDelivery.deliveryDesc;
+			//if(PaintOrderModel.instance.selectDelivery != null)
+			//	uiSkin.deliverytxt.text = PaintOrderModel.instance.selectDelivery.deliveryDesc;
 			resetOrderInfo();
 		}
 		private function onAdjustHeight(changeht:int):void
@@ -404,50 +478,117 @@ package script.order
 //			var obj:Object = {client_code:"SCFY001",order_sn:"123456",refund_amount:"9.12"};
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,onPlaceOrderBack,{data:JSON.stringify(obj)},"post");
 //			return;
+			var arr:Array = getOrderData();
+			if(arr == null)
+				return;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+
+		}
+		
+		private function onSaveOrder():void
+		{
+			var arr:Array = getOrderData();
+			if(arr == null)
+				return;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onSaveOrderBack,{data:JSON.stringify(arr)},"post");
+		}
+		
+		private function onSaveOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				ViewManager.showAlert("保存订单成功，您可以到我的订单继续支付");
+				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+				
+			}
+		}
+		private function onPaySucess():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+
+		}
+		private function onPlaceOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				//ViewManager.showAlert("下单成功");
+				var totalmoney:Number = 0;
+				var allorders:Array = [];
+				for(var i:int=0;i < result.orders.length;i++)
+				{
+					var orderdata:Object = JSON.parse(result.orders[i]);
+					totalmoney += Number(orderdata.money_paidStr);
+					allorders.push(orderdata.order_sn);
+				}
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:totalmoney,orderid:allorders});
+				
+			}
+		}
+		
+		private function getOrderData():Array
+		{
 			if(orderlist.length <= 0)
 			{
 				ViewManager.showAlert("未选择下单图片");
-				return;
+				return null;
 			}
 			
-			var orderitem:PicOrderItem = orderlist[0];
-			if(orderitem.ordervo.orderData == null)
+			if(PaintOrderModel.instance.selectDelivery == null)
 			{
-				ViewManager.showAlert("未选择材料工艺");
-				return;
+				ViewManager.showAlert("请选择配送方式");
+				return null;
 			}
+			var orderFactory:Object = {};
 			
-			var orderdata:Object = {};
-			orderdata.order_sn = PaintOrderModel.getOrderSn();
-			orderdata.client_code = "CL10200";
-			orderdata.consignee = PaintOrderModel.instance.selectAddress.receiverName
-			orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
-			orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
-			orderdata.order_amountStr = "0";
-			orderdata.shipping_feeStr = "0";
-			orderdata.money_paidStr = "0";
-			orderdata.discountStr = "0";
-			orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
-			orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
-
-			orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
-			orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
-			
-			var totalMoney:Number = 0;
-			if(PaintOrderModel.instance.selectDelivery)
+			for(var i:int=0; i < orderlist.length;i++)
 			{
-				orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
-				orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.deliverynet_name;
-			}
-			
-			orderdata.orderItemList = [];
-			for(var i:int=0;i < orderlist.length;i++)
-			{
+				var orderitem:PicOrderItem = orderlist[i];
+				if(orderitem.ordervo.orderData == null)
+				{
+					ViewManager.showAlert("未选择材料工艺");
+					return null;
+				}
+				
+				var orderdata:Object;
+				if(!orderFactory.hasOwnProperty(orderitem.ordervo.manufacturer_code))
+				{
+					orderdata = {};
+					orderdata.order_sn = PaintOrderModel.getOrderSn();
+					orderdata.client_code = "CL10200";
+					orderdata.consignee = PaintOrderModel.instance.selectAddress.receiverName
+					orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
+					orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
+					orderdata.order_amountStr = 0;
+					orderdata.shipping_feeStr = "0";
+					orderdata.money_paidStr = "0";
+					orderdata.discountStr = "0";
+					orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
+					orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
+					
+					orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
+					orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
+					
+					var totalMoney:Number = 0;
+					if(PaintOrderModel.instance.selectDelivery)
+					{
+						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
+						orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.deliverynet_name;
+					}
+					
+					orderdata.orderItemList = [];
+					orderFactory[orderitem.ordervo.manufacturer_code] = orderdata;
+				}
+				else
+					orderdata = orderFactory[orderitem.ordervo.manufacturer_code];
+				
+				
 				if(orderlist[i].ordervo.orderData != null)
 				{
-					totalMoney += orderlist[i].getPrice();
+					orderdata.order_amountStr += orderlist[i].getPrice();
 					//totalMoney += orderlist[i].getPrice();
-
+					
 					if(orderlist[i].ordervo.orderData.comments == "")
 						orderlist[i].ordervo.orderData.comments = uiSkin.commentall.text;
 					orderlist[i].ordervo.orderData.item_seq = i+1;
@@ -456,38 +597,24 @@ package script.order
 				else
 				{
 					ViewManager.showAlert("有图片未选择材料工艺");
-					return;
+					return null;
 				}
-					
+				
+				
+				//orderdata.order_amountStr = totalMoney.toString();
+				//orderdata.money_paidStr =  "0.01";//totalMoney.toString();
+				
 			}
-			orderdata.order_amountStr = totalMoney.toString();
-			orderdata.money_paidStr =  "0.01";//totalMoney.toString();
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(orderdata)},"post");
-
-		}
-		
-		private function onPlaceOrderBack(data:Object):void
-		{
-			var result:Object = JSON.parse(data as String);
-			if(result.status == 0)
+			var arr:Array = [];
+			for each(var odata in orderFactory)
 			{
-				//ViewManager.showAlert("下单成功");
-				
-				var orderdata:Object = JSON.parse(result.data);
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(orderdata.money_paidStr),orderid:result.orderid});
-				
-				//Browser.window.open("about:blank","alipay").location.href = HttpRequestUtil.httpUrl + HttpRequestUtil.chargeRequest + "amount=0&orderid=" + result.orderid;
-				//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
-
+				odata.order_amountStr = odata.order_amountStr.toString();
+				orderdata.money_paidStr = "0.01";//odata.order_amountStr.toString();
+				arr.push(odata);
 			}
+			return arr;
 		}
-		
-		private function confirmSucess(result:Boolean):void
-		{
-			//if(result)
-			//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,UserMainControl.MY_ORDER);
-
-		}
+	
 		private function onClickOpenQQ():void
 		{
 			window.open('tencent://message/?uin=10987654321');
@@ -506,6 +633,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
 			EventCenter.instance.off(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.off(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
+			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
 
 			Laya.timer.clear(this,onDragMove);
 

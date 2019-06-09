@@ -32,24 +32,24 @@ package script.order
 			
 			uiSkin.list_address.itemRender = SelFactoryItem;
 			uiSkin.list_address.vScrollBarSkin = "";
-			uiSkin.list_address.selectEnable = true;
+			uiSkin.list_address.selectEnable = false;
 			uiSkin.list_address.spaceY = 8;
 			uiSkin.list_address.renderHandler = new Handler(this, updateAddressItem);
 			
-			uiSkin.list_address.selectHandler = new Handler(this,onSlecteAddress);
+			//uiSkin.list_address.selectHandler = new Handler(this,onSlecteAddress);
 			
 			uiSkin.list_address.array = PaintOrderModel.instance.outPutAddr;
-			tempaddress = PaintOrderModel.instance.selectFactoryAddress;
-			Laya.timer.once(10,null,function()
-			{
-				var cells:Vector.<Box> = uiSkin.list_address.cells;
-				for(var i:int=0;i < cells.length;i++)
-				{
-					(cells[i] as SelFactoryItem).ShowSelected = (cells[i] as SelFactoryItem).factoryvo == PaintOrderModel.instance.selectFactoryAddress;
-					
-					//uiSkin.list_address.selectedIndex = i;
-				}
-			});
+		//	tempaddress = PaintOrderModel.instance.selectFactoryAddress;
+//			Laya.timer.once(10,null,function()
+//			{
+//				var cells:Vector.<Box> = uiSkin.list_address.cells;
+//				for(var i:int=0;i < cells.length;i++)
+//				{
+//					(cells[i] as SelFactoryItem).ShowSelected = (cells[i] as SelFactoryItem).factoryvo == PaintOrderModel.instance.selectFactoryAddress;
+//					
+//					//uiSkin.list_address.selectedIndex = i;
+//				}
+//			});
 			
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCloseView);
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmSelectAddress);
@@ -75,11 +75,11 @@ package script.order
 		private function onConfirmSelectAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
-			if(tempaddress != null)
-			{
-				PaintOrderModel.instance.selectFactoryAddress = tempaddress;
-				EventCenter.instance.event(EventCenter.SELECT_OUT_ADDRESS);
-			}
+//			if(tempaddress != null)
+//			{
+//				PaintOrderModel.instance.selectFactoryAddress = tempaddress;
+//				EventCenter.instance.event(EventCenter.SELECT_OUT_ADDRESS);
+//			}
 			onCloseView();
 		}
 		

@@ -56,6 +56,8 @@ package script.order
 		}	
 		private function onPayOrder():void
 		{
+			var ordrid:String = (param.orderid as Array).join(",");
+
 			if(uiSkin.paytype.selectedIndex == 0)
 			{
 				Browser.window.open("about:blank","alipay").location.href = HttpRequestUtil.httpUrl + HttpRequestUtil.chargeRequest + "amount=0&orderid=" + param.orderid;
@@ -68,7 +70,7 @@ package script.order
 					ViewManager.showAlert("余额不足");
 					return;
 				}
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + param.orderid,"post");
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + ordrid,"post");
 
 			}
 		}
@@ -81,6 +83,7 @@ package script.order
 				ViewManager.showAlert("支付成功");
 				EventCenter.instance.event(EventCenter.PAY_ORDER_SUCESS);
 				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+
 			}
 		}
 		
@@ -90,6 +93,7 @@ package script.order
 			{
 				EventCenter.instance.event(EventCenter.PAY_ORDER_SUCESS);
 				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+				
 			}
 		}
 		private function onCancel():void

@@ -101,8 +101,8 @@ package script
 			
 			if(screenWidth < 1920)
 			{
-				viewContainer.scaleX = screenWidth/1920;
-				viewContainer.x = (1920 - screenWidth)/2;
+				//viewContainer.scaleX = screenWidth/1920;
+				//viewContainer.x = (1920 - screenWidth)/2;
 			}
 
 			
@@ -154,8 +154,11 @@ package script
 			{
 				for each(var oldview in openViewList)
 				{
-					viewContainer.removeChild(oldview);
-					(oldview as View).destroy(true);
+					if(oldview != null)
+					{
+						viewContainer.removeChild(oldview);
+						(oldview as View).destroy(true);
+					}
 					
 				}
 				openViewList = {};
@@ -178,7 +181,10 @@ package script
 		public function closeView(viewClass:String):void
 		{
 			if(openViewList[viewClass] == null)
+			{
+				return;
 				showAlert("不存在的界面");
+			}
 			viewContainer.removeChild(openViewList[viewClass]);
 			(openViewList[viewClass] as View).destroy(true);
 			openViewList[viewClass] = null;

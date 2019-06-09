@@ -17,6 +17,11 @@ package ui.login {
 		public var btnGetCode:Button;
 		public var btnClose:Button;
 		public var btnReg:Button;
+		public var contractpanel:Panel;
+		public var txtpanel:Panel;
+		public var sevicepro:Text;
+		public var agreebox:CheckBox;
+		public var okbtn:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

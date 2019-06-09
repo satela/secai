@@ -65,6 +65,23 @@ package script.order
 			
 			uiSkin.tablist.selectHandler = new Handler(this,onSlecteMatClass);
 			
+//			uiSkin.factoryList.itemRender = FactoryChooseBtn;
+//			uiSkin.factoryList.vScrollBarSkin = "";
+//			uiSkin.factoryList.selectEnable = true;
+//			uiSkin.factoryList.spaceY = 2;
+//			uiSkin.factoryList.renderHandler = new Handler(this, updateFactoryItem);
+//			
+//			uiSkin.factoryList.selectHandler = new Handler(this,onSlecteFactory);
+//			
+//			if(PaintOrderModel.instance.selectFactoryAddress != null &&PaintOrderModel.instance.selectFactoryAddress.length > 0)
+//			{
+//				uiSkin.factoryList.array = PaintOrderModel.instance.selectFactoryAddress;
+//				
+//				PaintOrderModel.instance.selectFactoryInMat = PaintOrderModel.instance.selectFactoryAddress[0];
+//			}
+//			else
+//				uiSkin.factoryList.array = [];
+			
 			uiSkin.matlist.itemRender = MaterialItem;
 			uiSkin.matlist.vScrollBarSkin = "";
 			uiSkin.matlist.selectEnable = true;
@@ -145,14 +162,50 @@ package script.order
 				item.ShowSelected = item.matclassvo == uiSkin.tablist.array[index];
 			}
 			
-			var matvo:MatetialClassVo = uiSkin.tablist.array[index] as MatetialClassVo;
-			if(matvo.childMatList != null)
-				uiSkin.matlist.array = (uiSkin.tablist.array[index] as MatetialClassVo).childMatList;
-			else
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
-
+			refreshMatList();
 		}
 		
+		private function updateFactoryItem(cell:FactoryChooseBtn):void
+		{
+			cell.setData(cell.dataSource);
+		}
+		
+		private function onSlecteFactory(index:int):void
+		{
+//			for each(var item:FactoryChooseBtn in uiSkin.factoryList.cells)
+//			{
+//				item.setSelected(item.factorydata == uiSkin.factoryList.array[index]);
+//			}
+//			
+//			PaintOrderModel.instance.selectFactoryInMat = uiSkin.factoryList.array[index];
+			
+			
+			refreshMatList();
+//			var matvo:MatetialClassVo = uiSkin.tablist.array[index] as MatetialClassVo;
+//			if(matvo.childMatList != null)
+//				uiSkin.matlist.array = (uiSkin.tablist.array[index] as MatetialClassVo).childMatList;
+//			else
+//				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
+			
+		}
+		
+		private function refreshMatList():void
+		{
+			var matvo:MatetialClassVo = uiSkin.tablist.array[uiSkin.tablist.selectedIndex] as MatetialClassVo;
+			if(matvo.childMatList != null)
+			{
+				var matlist:Array =matvo.childMatList;
+//				var temp:Array = [];
+//				for(var i:int=0;i < matlist.length;i++)
+//				{
+//					if(matlist[i].manufacturer_code == PaintOrderModel.instance.selectFactoryInMat.org_code)
+//						temp.push(matlist[i]);
+//				}
+				uiSkin.matlist.array = matlist;
+			}
+			else
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
+		}
 		private function onGetProductListBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -160,10 +213,14 @@ package script.order
 			{
 				var matvo:MatetialClassVo = uiSkin.tablist.array[uiSkin.tablist.selectedIndex] as MatetialClassVo;
 				matvo.childMatList = [];
+				//var temp:Array = [];
+				
 				for(var i:int=0;i < result.length;i++)
 				{
 					matvo.childMatList.push(new ProductVo(result[i]));
-					
+					//if(result[i].manufacturer_code == PaintOrderModel.instance.selectFactoryInMat.org_code)
+					//	temp.push(matvo.childMatList[matvo.childMatList.length - 1]);
+
 				}
 				uiSkin.matlist.array = matvo.childMatList;
 			}
@@ -382,11 +439,18 @@ package script.order
 				{
 					this.uiSkin.techcontent.hScrollBar.hide = false;
 					Laya.timer.frameOnce(2,this,function(){
-						this.uiSkin.techcontent.scrollTo(itembox.x + itembox.width,0);
+						this.uiSkin.techcontent.scrollTo(itembox.x + itembox.width,this.uiSkin.techcontent.vScrollBar.value);
 					});
 				}
 				else
 					this.uiSkin.techcontent.hScrollBar.visible = false;
+				
+				if(itembox != null && (itembox.y + itembox.height) > uiSkin.techcontent.height)
+				{
+					Laya.timer.frameOnce(2,this,function(){
+						this.uiSkin.techcontent.scrollTo(this.uiSkin.techcontent.hScrollBar.value,itembox.y + itembox.height);
+					});
+				}
 
 				
 			}

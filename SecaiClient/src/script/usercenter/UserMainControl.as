@@ -64,7 +64,7 @@ package script.usercenter
 				onShowEditView(param as int);
 			else
 				onShowEditView(0);
-			(uiSkin.panel_main).height = Browser.clientHeight - 20;
+			(uiSkin.panel_main).height = Browser.clientHeight;// - 20;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
@@ -77,7 +77,7 @@ package script.usercenter
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			(uiSkin.panel_main).height = Browser.clientHeight - 50;
+			(uiSkin.panel_main).height = Browser.clientHeight;// - 50;
 		}
 		private function onMouseOutHandler():void
 		{

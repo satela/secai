@@ -23,9 +23,10 @@ package model.orderModel
 
 		public var selectAddress:AddressVo;//当前选择的收获地址
 		
-		public var selectFactoryAddress:FactoryInfoVo;
+		public var selectFactoryAddress:Array; //当前选中的输出中心 可 多个
 		
-		
+		public var selectFactoryInMat:FactoryInfoVo; //选中工艺的时候 当前选中的输出中心 
+
 		public var curSelectPic:PicInfoVo;
 		
 		public var curSelectMat:ProductVo;

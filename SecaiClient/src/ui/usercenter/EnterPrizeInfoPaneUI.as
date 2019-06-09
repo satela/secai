@@ -10,6 +10,7 @@ package ui.usercenter {
 		public var moneytxt:Label;
 		public var account:Label;
 		public var reditcode:TextInput;
+		public var shortname:TextInput;
 		public var input_companyname:TextInput;
 		public var btnSelProv:Button;
 		public var province:Label;

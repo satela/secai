@@ -98,12 +98,15 @@ package script.usercenter
 			uiSkin.account.text = Userdata.instance.userAccount;
 			uiSkin.servicetxt.text = Userdata.instance.userAccount;
 			
+			uiSkin.shortname.maxChars = 6;
+			
 			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
 			Browser.window.uploadApp = this;
 			initFileOpen();
 			
 			uiSkin.chargebtn.on(Event.CLICK,this,onCharge);
-			
+			//uiSkin.chongzhi1.on(Event.CLICK,this,onCharge);
+
 //			if(!ChinaAreaModel.hasInit)
 //			{
 //				WaitingRespond.instance.showWaitingView(500000);
@@ -120,6 +123,9 @@ package script.usercenter
 		}
 		private function getCompanyInfoBack(data:Object):void
 		{
+			if(this.destroyed)
+				return;
+			
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
@@ -135,6 +141,8 @@ package script.usercenter
 		}
 		private function getCompanyInfo(data:Object):void
 		{
+			if(this.destroyed)
+				return;
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
@@ -162,6 +170,7 @@ package script.usercenter
 						uiSkin.detail_addr.text = cominfo.gp_addr;
 						uiSkin.reditcode.text = cominfo.gp_orgcode;
 						uiSkin.txt_license.text = cominfo.gp_license;
+						uiSkin.shortname.text = cominfo.gp_shortname;
 					}
 				}
 				trace(result);
@@ -217,18 +226,27 @@ package script.usercenter
 				ViewManager.showAlert("请选择营业执照");
 				return;
 			}
+			if(uiSkin.shortname.text == "")
+			{
+				ViewManager.showAlert("请填写企业简称");
+				return;
+			}
+			
 			if(uiSkin.reditcode.text == "")
 			{
 				ViewManager.showAlert("请填写统一社会征信代码");
 				return;
 			}
-			Browser.window.createGroup({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.createGroup, cname:uiSkin.input_companyname.text,cshortname:"色彩飞扬",czoneid:companyareaId,caddr:uiSkin.detail_addr.text,reditcode:uiSkin.reditcode.text,file:curYyzzFile});
+			Browser.window.createGroup({urlpath:HttpRequestUtil.httpUrl + HttpRequestUtil.createGroup, cname:uiSkin.input_companyname.text,cshortname:uiSkin.shortname.text,czoneid:companyareaId,caddr:uiSkin.detail_addr.text,reditcode:uiSkin.reditcode.text,file:curYyzzFile});
 
 			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addCompanyInfo,this,onSaveCompnayBack,"name=" + uiSkin.input_companyname.text + "&addr=" + Userdata.instance.defaultAddrid,"post");
 		}
 		
 		private function onSaveCompnayBack(data:Object):void
 		{
+			if(this.destroyed)
+				return;
+			
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
@@ -308,6 +326,8 @@ package script.usercenter
 
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
+				if(uiSkin == null || uiSkin.citytxt == null)
+					return;
 				var result:Object = JSON.parse(data as String);
 				
 				uiSkin.cityList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
@@ -345,6 +365,9 @@ package script.usercenter
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
+				if(uiSkin == null || uiSkin.areatxt == null)
+					return;
+				
 				var result:Object = JSON.parse(data as String);
 				
 				uiSkin.areaList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);
@@ -385,6 +408,9 @@ package script.usercenter
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
+				if(uiSkin == null || uiSkin.towntxt == null)
+					return;
+				
 				var result:Object = JSON.parse(data as String);
 				
 				uiSkin.townList.array = result.status as Array;//ChinaAreaModel.instance.getAllCity(province.id);

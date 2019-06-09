@@ -15,8 +15,8 @@ package ui {
 		public var userName:Text;
 		public var logout:Text;
 		public var myaddresstxt:Text;
-		public var qqContact:Button;
-		public var factorytxt:Text;
+		public var outputbox:VBox;
+		public var fengeimg:Image;
 		public var floatpt:Box;
 		public var floatdocker:Box;
 		public var selectAll:CheckBox;
@@ -25,11 +25,13 @@ package ui {
 		public var batchChange:Button;
 		public var mainvbox:VBox;
 		public var ordervbox:VBox;
-		public var deliverytxt:Text;
+		public var deliversp:Sprite;
+		public var deliverbox:VBox;
 		public var commentall:TextInput;
 		public var textTotalPrice:HTMLDivElement;
 		public var textDeliveryType:HTMLDivElement;
 		public var textPayPrice:HTMLDivElement;
+		public var btnsaveorder:Button;
 		public var btnordernow:Button;
 
 		override protected function createChildren():void {

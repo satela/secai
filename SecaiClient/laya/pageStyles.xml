@@ -51,4 +51,5 @@
    <item name="usercenter/OderDetailPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/OrderDetailPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/ConfirmOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/OutPutCenter.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>
