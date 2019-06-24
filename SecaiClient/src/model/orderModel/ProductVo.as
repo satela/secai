@@ -49,6 +49,41 @@ package model.orderModel
 			return techstr.substring(0,techstr.length - 1);
 		}
 		
+		/**
+		 *获取所有已选工艺 
+		 * @return 
+		 * 
+		 */		
+		public function getAllSelectedTech():Array
+		{
+			var temp:Array = [];
+			for(var i:int=0;i < prcessCatList.length;i++)
+			{
+				if(prcessCatList[i].selected)
+				{
+					//techstr += prcessCatList[i].procCat_Name;
+					var childtech:Array = getChildSelectedTech(prcessCatList[i].nextMatList);
+					temp = temp.concat(childtech);
+				}
+				
+			}
+			
+			return temp;
+		}
+		
+		private function getChildSelectedTech(arr:Vector.<MaterialItemVo>):Array
+		{
+			var temp:Array = [];
+			for(var i:int=0;i < arr.length;i++)
+			{
+				if(arr[i].selected)
+				{
+					temp.push(arr[i]);
+					temp = temp.concat(getChildSelectedTech(arr[i].nextMatList));
+				}
+			}
+			return temp;
+		}
 		private function getTechStr(arr:Vector.<MaterialItemVo>):String
 		{
 			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;

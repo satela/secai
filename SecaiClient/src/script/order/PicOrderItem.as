@@ -161,7 +161,7 @@ package script.order
 		private function onShowMaterialView():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
+			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
 			PaintOrderModel.instance.curSelectOrderItem = this;
 			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
 		}

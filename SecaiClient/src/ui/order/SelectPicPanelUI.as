@@ -11,6 +11,7 @@ package ui.order {
 		public var btnroot:Label;
 		public var btnprevfolder:Label;
 		public var searchInput:TextInput;
+		public var filetypeRadio:RadioGroup;
 		public var btnok:Button;
 		public var picList:List;
 		public var flder1:Label;

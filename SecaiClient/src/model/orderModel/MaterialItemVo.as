@@ -13,12 +13,18 @@ package model.orderModel
 		public var measure_unit:String = "";//计价单位
 		public var procLvl:int = 0;//工艺层级
 		
+		public var is_startProc:int = 0;//是否起始工艺
+		public var is_endProc:int = 0;//是否结束工艺
+
 		public var nextMatList:Vector.<MaterialItemVo>;
 		
 		public var selected:Boolean = false;
 		
 		public var attchMentFileId:String = "";
 		
+		//附件的文件id
+		public var attchFileId:String = "";
+
 		public var attachList:Array;
 		public var selectAttachVoList:Vector.<AttchCatVo>;//选择的配件
 		
@@ -97,6 +103,7 @@ package model.orderModel
 		{
 			selected = false;
 			attchMentFileId = "";
+			attchFileId = "";
 			if(nextMatList != null)
 			{
 				for(var i:int=0;i < nextMatList.length;i++)

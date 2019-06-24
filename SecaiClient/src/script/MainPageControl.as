@@ -7,6 +7,7 @@ package script {
 	import laya.events.Event;
 	import laya.events.MouseManager;
 	import laya.net.HttpRequest;
+	import laya.ui.Box;
 	import laya.ui.Button;
 	import laya.ui.Label;
 	import laya.ui.Panel;
@@ -38,6 +39,7 @@ package script {
 		private var txtLogin:Label;
 		private var txtReg:Label;
 		
+		private var versioninfo:Box;
 		public function MainPageControl():void {
 			//关闭多点触控，否则就无敌了
 			MouseManager.multiTouchEnabled = false;
@@ -64,9 +66,16 @@ package script {
 			var btnproduct:Button = this.owner["btnproduct"];
 			btnproduct.on(Event.CLICK,this,onProductView);
 			
+			versioninfo = this.owner["enterinfo"];
+			versioninfo.y = Browser.clientHeight - versioninfo.height;
+			
+			var btnlinkto:Button = this.owner["linktobus"];
+			btnlinkto.on(Event.CLICK,this,onOpenGongshang);
+			
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
+			
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
 			
 			
@@ -81,7 +90,10 @@ package script {
 
 		}
 		
-		
+		private function onOpenGongshang()
+		{
+			Browser.window.open("http://www.gsxt.gov.cn/%7BF71C582A907AA9A77C0EF218C30915AFDDBCA77C96F73D4D09E3592B4A85097B87E62C5C18F2E9E75EE4EA5348B4AF45DB63374BC6AAC586EABEEBA8C48C8DD0A853A853A8F58D760E76817A817A8176817A024DB6A75CAB50ABF60D751CACB07FDF33E8223E00FC469D79017924DF021917AEB5D4C813F78F748F748F74-1561088596102%7D",null,null,true);
+		}
 		private function loginAccount():void
 		{
 			var account:String = UtilTool.getLocalVar("useraccount","0");
@@ -123,7 +135,8 @@ package script {
 			// TODO Auto Generated method stub
 			console.log("height:" + Browser.clientHeight + "," + window.screen.availHeight + "," + window.screen.availWidth);
 			//EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
-			
+			versioninfo.y = Browser.clientHeight - versioninfo.height;
+
 			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
 		}
 		

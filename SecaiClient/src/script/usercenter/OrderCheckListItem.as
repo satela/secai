@@ -38,7 +38,7 @@ package script.usercenter
 				this.payagain.visible = false;
 			}
 			var detail:Object = JSON.parse(orderdata.or_text);
-			this.paymoney.text = detail.money_paidStr;
+			this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
 			this.productnum.text = detail.orderItemList.length + "";
 			
 			this.detailbtn.on(Event.CLICK,this,onShowDetail);

@@ -44,7 +44,8 @@ package script.order
 //			uiSkin.folderList.renderHandler = new Handler(this, updateDirectItem);
 //			
 //			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
-			
+			uiSkin.filetypeRadio.visible = false;
+
 			uiSkin.picList.itemRender = PicInfoItem;
 			uiSkin.picList.vScrollBarSkin = "";
 			uiSkin.picList.selectEnable = false;
@@ -84,7 +85,10 @@ package script.order
 		private function onConfirmSelect():void
 		{
 			// TODO Auto Generated method stub
-			EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+			if(!(param is MaterialItemVo))
+			{
+				EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+			}
 			onCloseView();
 		}
 		
@@ -98,10 +102,17 @@ package script.order
 		{
 			if(param is MaterialItemVo)
 			{
-				if((param as MaterialItemVo).attchMentFileId == fvo.fid)
+				if((param as MaterialItemVo).attchFileId == fvo.fid)
+				{
 					(param as MaterialItemVo).attchMentFileId = "";
+					(param as MaterialItemVo).attchFileId = "";
+				}
 				else
+				{
 					(param as MaterialItemVo).attchMentFileId = HttpRequestUtil.originPicPicUrl + fvo.fid + "." + fvo.picClass;
+					(param as MaterialItemVo).attchFileId = fvo.fid;
+
+				}
 				return;
 			}
 			var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
@@ -178,6 +189,8 @@ package script.order
 		
 		override public function onDestroy():void
 		{
+			EventCenter.instance.event(EventCenter.CLOSE_PANEL_VIEW,ViewManager.VIEW_SELECT_PIC_TO_ORDER);
+
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);

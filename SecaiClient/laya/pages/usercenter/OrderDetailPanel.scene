@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":8,
+    "selectedBox":16,
+    "selecteID":17,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -47,7 +47,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":189,"x":460,"width":1000,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":707},
+                    "props":{"y":100,"x":460,"width":1000,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":707},
                     "nodeParent":4,
                     "label":"Image",
                     "isDirectory":false,
@@ -56,14 +56,14 @@
                     "compId":6,
                     "child":[
                         ],
-                    "$LOCKED":true,
+                    "$LOCKED":false,
                     "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":280,"x":460,"width":1000,"skin":"commers/cutline.png","height":1,"alpha":1},
+                    "props":{"y":191,"x":460,"width":1000,"skin":"commers/cutline.png","height":1,"alpha":1},
                     "nodeParent":4,
                     "label":"Image",
                     "isOpen":true,
@@ -78,7 +78,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":248,"x":501,"width":107,"text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
+                    "props":{"y":159,"x":501,"width":107,"text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
                     "nodeParent":4,
                     "label":"Label",
                     "isDirectory":false,
@@ -92,7 +92,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":215,"x":501,"text":"订单详情","fontSize":24,"color":"#756e6e","bold":true},
+                    "props":{"y":126,"x":501,"text":"订单详情","fontSize":24,"color":"#756e6e","bold":true},
                     "nodeParent":4,
                     "label":"Label",
                     "isOpen":true,
@@ -107,7 +107,7 @@
                     "x":30,
                     "type":"Panel",
                     "searchKey":"Panel,orderoanel",
-                    "props":{"y":320,"x":460,"width":1000,"var":"orderoanel","height":567},
+                    "props":{"y":231,"x":460,"width":1000,"var":"orderoanel","height":567},
                     "nodeParent":4,
                     "label":"orderoanel",
                     "isOpen":true,
@@ -120,7 +120,7 @@
                             "x":45,
                             "type":"VBox",
                             "searchKey":"VBox,orderbox",
-                            "props":{"var":"orderbox","top":1,"right":0,"left":0,"height":500},
+                            "props":{"var":"orderbox","top":1,"right":0,"left":0},
                             "nodeParent":16,
                             "label":"orderbox",
                             "isDirectory":false,
@@ -135,7 +135,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,closebtn",
-                    "props":{"y":198,"x":1430,"var":"closebtn","stateNum":"3","skin":"commers/btnclose.png"},
+                    "props":{"y":109,"x":1430,"var":"closebtn","stateNum":"3","skin":"commers/btnclose.png"},
                     "nodeParent":4,
                     "label":"closebtn",
                     "isDirectory":false,
@@ -149,17 +149,16 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":292,"x":465},
+                    "props":{"y":203,"x":465},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":27,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":40,"text":"序号","fontSize":18},
@@ -173,7 +172,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":118,"text":"订单图片","fontSize":18},
@@ -187,7 +185,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":290,"text":"材料","fontSize":18},
@@ -201,7 +198,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":433,"text":"尺寸","fontSize":18},
@@ -215,7 +211,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":597,"text":"工艺","fontSize":18},
@@ -229,7 +224,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":806,"text":"价格","fontSize":20},
@@ -243,7 +237,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":742,"text":"数量","fontSize":20},
@@ -261,7 +254,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,outputtxt",
-                    "props":{"y":248,"x":608,"width":299,"var":"outputtxt","text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
+                    "props":{"y":159,"x":608,"width":299,"var":"outputtxt","text":"输出中心:","height":22,"fontSize":22,"font":"SimHei","color":"#262b2e","bold":false},
                     "nodeParent":4,
                     "label":"outputtxt",
                     "isDirectory":false,

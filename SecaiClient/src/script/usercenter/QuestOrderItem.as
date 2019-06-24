@@ -2,6 +2,8 @@ package script.usercenter
 {
 	import laya.events.Event;
 	
+	import script.ViewManager;
+	
 	import ui.usercenter.OrderQuestItemUI;
 	
 	public class QuestOrderItem extends OrderQuestItemUI
@@ -9,6 +11,7 @@ package script.usercenter
 		public var adjustHeight:Function;
 		public var caller:Object;
 
+		public var ordata:Object;
 		public function QuestOrderItem()
 		{
 			super();
@@ -19,6 +22,7 @@ package script.usercenter
 			this.itemseq.text = orderdata.item_seq;
 			this.picimg.skin = orderdata.thumbnails_path;
 			
+			ordata = orderdata;
 			//this.fileimg.skin = 
 			//this.txtMaterial.text = ;
 			this.matname.text = orderdata.prod_name;
@@ -38,12 +42,19 @@ package script.usercenter
 			
 			//this.txtDetailInfo.text = "收货地址：" + orderdata.address;
 			
+			this.commentmark.visible = orderdata.comments != "";
+			this.comment.on(Event.CLICK,this,onShowComment);
 			
 			this.detailbox.visible = false;
 			this.bgimg.height = 90;
 			this.detailbtn.on(Event.CLICK,this,onClickShowDetail);
 		}
 		
+		private function onShowComment():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_ADD_MESSAGE,false,{msg:ordata.comments});
+
+		}
 		private function onClickShowDetail():void
 		{
 			this.detailbox.visible = !this.detailbox.visible;

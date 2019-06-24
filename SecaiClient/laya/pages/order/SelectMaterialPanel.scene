@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":17,
-    "selecteID":11,
+    "selectedBox":46,
+    "selecteID":47,
     "searchKey":"View",
     "props":{"width":1920,"top":0,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":42,
+    "maxID":51,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -96,13 +96,14 @@
                     "hasChild":false,
                     "compId":27,
                     "child":[
-                        ]
+                        ],
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite,box_mat",
-                    "props":{"y":139,"x":359,"width":1200,"var":"box_mat","height":650},
+                    "props":{"y":139,"x":360,"width":1200,"var":"box_mat","height":650},
                     "nodeParent":6,
                     "label":"box_mat",
                     "isOpen":true,
@@ -115,7 +116,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,matlist",
-                            "props":{"y":132,"x":0,"width":1192,"var":"matlist","spaceY":10,"spaceX":10,"repeatX":5,"height":424},
+                            "props":{"y":132,"x":0,"width":1200,"var":"matlist","spaceY":10,"spaceX":10,"repeatX":5,"height":424},
                             "nodeParent":17,
                             "label":"matlist",
                             "isOpen":true,
@@ -144,7 +145,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,tablist",
-                            "props":{"y":28,"x":0,"width":1192,"var":"tablist","spaceX":5,"repeatX":6,"height":76},
+                            "props":{"y":28,"x":0,"width":1200,"var":"tablist","spaceX":5,"repeatX":6,"height":76},
                             "nodeParent":17,
                             "label":"tablist",
                             "isDirectory":false,
@@ -172,7 +173,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label,hasSelMat",
-                            "props":{"y":-6,"x":123,"wordWrap":true,"width":1003,"var":"hasSelMat","valign":"middle","text":"油画布","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
+                            "props":{"y":-6,"x":123,"wordWrap":true,"width":1079,"var":"hasSelMat","valign":"middle","text":"油画布","height":24,"fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
                             "nodeParent":17,
                             "label":"hasSelMat",
                             "isDirectory":false,
@@ -182,25 +183,40 @@
                             "child":[
                                 ]
                         }],
-                    "$HIDDEN":false
+                    "$HIDDEN":true
                 },
                 {
                     "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite,box_tech",
-                    "props":{"y":139,"x":320,"width":1278,"var":"box_tech","height":663},
+                    "props":{"y":139,"x":330,"width":1250,"var":"box_tech","height":663},
                     "nodeParent":6,
                     "label":"box_tech",
-                    "isOpen":false,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":26,
                     "child":[
                         {
+                            "x":45,
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"y":66,"x":245,"width":1010,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":508},
+                            "nodeParent":26,
+                            "label":"Image",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":50,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
                             "type":"Panel",
                             "searchKey":"Panel,techcontent",
-                            "props":{"x":7,"width":1256,"var":"techcontent","vScrollBarSkin":"comp/vscroll.png","top":71,"height":498,"hScrollBarSkin":"comp/hscroll.png","bottom":94},
+                            "props":{"width":1000,"var":"techcontent","vScrollBarSkin":"comp/vscroll.png","top":71,"right":0,"height":498,"hScrollBarSkin":"comp/hscroll.png","bottom":94},
                             "nodeParent":26,
                             "label":"techcontent",
                             "isOpen":true,
@@ -213,9 +229,10 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":590,"x":11,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","fontSize":20,"font":"SimHei","color":"#EB5767"},
+                            "props":{"y":590,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","right":300,"fontSize":20,"font":"SimHei","color":"#EB5767"},
                             "nodeParent":26,
                             "label":"Label",
                             "isDirectory":false,
@@ -226,9 +243,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
-                            "props":{"y":650,"x":89,"width":1100,"skin":"commers/cutline.png"},
+                            "props":{"y":650,"x":0,"width":1250,"skin":"commers/cutline.png"},
                             "nodeParent":26,
                             "label":"Image",
                             "isDirectory":false,
@@ -239,9 +257,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":0,"x":124,"width":123,"valign":"middle","text":"已选工艺：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
+                            "props":{"y":0,"x":251,"width":123,"valign":"middle","text":"已选工艺：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
                             "nodeParent":26,
                             "label":"Label",
                             "isDirectory":false,
@@ -252,9 +271,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,selecttech",
-                            "props":{"y":0,"x":247,"wordWrap":true,"width":1003,"var":"selecttech","valign":"middle","text":"已选工艺：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
+                            "props":{"y":0,"x":374,"wordWrap":true,"width":760,"var":"selecttech","valign":"middle","text":"已选工艺：","height":24,"fontSize":24,"font":"SimHei","color":"#262B2E","bold":false},
                             "nodeParent":26,
                             "label":"selecttech",
                             "isDirectory":false,
@@ -263,8 +283,121 @@
                             "compId":25,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":37,"x":6},
+                            "nodeParent":26,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":45,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"x":10,"width":185,"valign":"middle","text":"正反透视效果图：","height":24,"fontSize":20,"font":"SimHei","color":"#354052","bold":false},
+                                    "nodeParent":45,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":42,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image,backimg",
+                                    "props":{"y":158,"x":112,"width":224,"var":"backimg","skin":"comp/image.png","scaleX":-1,"height":250,"anchorY":0.5,"anchorX":0.5},
+                                    "nodeParent":45,
+                                    "label":"backimg",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":44,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image,originimg",
+                                    "props":{"y":158,"x":112,"width":224,"var":"originimg","skin":"comp/image.png","height":250,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},
+                                    "nodeParent":45,
+                                    "label":"originimg",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":43,
+                                    "child":[
+                                        ],
+                                    "$HIDDEN":false
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":346,"x":6},
+                            "nodeParent":26,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":46,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"x":10,"width":185,"valign":"middle","text":"异形切割效果图：","height":24,"fontSize":20,"font":"SimHei","color":"#354052","bold":false},
+                                    "nodeParent":46,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":47,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image,qiegeoriginimg",
+                                    "props":{"y":158,"x":112,"width":224,"var":"qiegeoriginimg","skin":"comp/image.png","height":250,"anchorY":0.5,"anchorX":0.5},
+                                    "nodeParent":46,
+                                    "label":"qiegeoriginimg",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":49,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Image",
+                                    "searchKey":"Image,qiegeimg",
+                                    "props":{"y":158,"x":112,"width":224,"var":"qiegeimg","skin":"comp/image.png","height":250,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},
+                                    "nodeParent":46,
+                                    "label":"qiegeimg",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":48,
+                                    "child":[
+                                        ]
+                                }]
                         }],
-                    "$HIDDEN":true
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
@@ -313,14 +446,13 @@
                     "props":{"y":836,"x":1387},
                     "nodeParent":6,
                     "label":"Sprite",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":35,
                     "child":[
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,numinput",
                             "props":{"y":1,"x":19,"width":40,"var":"numinput","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -334,7 +466,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,addbtn",
                             "props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},
@@ -348,7 +479,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,subtn",
                             "props":{"var":"subtn","skin":"order/subtbn.png"},
@@ -362,7 +492,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":0,"x":-99,"text":"批量操作","fontSize":22,"font":"SimHei","color":"#354052","bold":true},

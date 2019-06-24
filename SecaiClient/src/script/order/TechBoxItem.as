@@ -84,6 +84,7 @@ package script.order
 				else
 				{
 					techmainvo.attchMentFileId = "";
+					techmainvo.attchFileId = "";
 					techmainvo.selectAttachVoList = null;
 				}
 			}

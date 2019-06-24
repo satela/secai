@@ -16,6 +16,7 @@ package script.order
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.ProcessCatVo;
 	import model.orderModel.ProductVo;
+	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
 	
@@ -29,7 +30,7 @@ package script.order
 		
 		private var startposx:int = 10;
 		
-		public var param:MaterialItemVo;
+		public var param:PicInfoVo;
 		
 		private var itemheight:int = 40;
 		
@@ -64,6 +65,39 @@ package script.order
 			uiSkin.tablist.renderHandler = new Handler(this, updateMatClassItem);
 			
 			uiSkin.tablist.selectHandler = new Handler(this,onSlecteMatClass);
+			
+			uiSkin.originimg.skin = "";
+			
+			uiSkin.backimg.skin = "";
+			
+			uiSkin.qiegeimg.skin = "";
+			uiSkin.qiegeoriginimg.skin = "";
+			
+			if(param != null)
+			{
+				if(param.picWidth > param.picHeight)
+				{
+					uiSkin.originimg.width = 250;					
+					uiSkin.originimg.height = 250/param.picWidth * param.picHeight;
+					
+				}
+				else
+				{
+					uiSkin.originimg.height = 250;
+					uiSkin.originimg.width = 250/param.picHeight * param.picWidth;
+					
+				}
+				
+				uiSkin.qiegeimg.width = uiSkin.originimg.width;
+				uiSkin.qiegeimg.height = uiSkin.originimg.height;
+				
+				uiSkin.backimg.width = uiSkin.originimg.width;
+				uiSkin.backimg.height = uiSkin.originimg.height;
+				
+				uiSkin.qiegeoriginimg.width = uiSkin.originimg.width;
+				uiSkin.qiegeoriginimg.height = uiSkin.originimg.height;
+
+			}
 			
 //			uiSkin.factoryList.itemRender = FactoryChooseBtn;
 //			uiSkin.factoryList.vScrollBarSkin = "";
@@ -121,6 +155,8 @@ package script.order
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.SHOW_SELECT_TECH,this,initTechView);
 			EventCenter.instance.on(EventCenter.CLOSE_PANEL_VIEW,this,onUpdateTechDes);
+			//EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,checkShowEffectImg);
+			EventCenter.instance.on(EventCenter.CLOSE_PANEL_VIEW,this,checkShowEffectImg);
 
 			uiSkin.main_panel.height = Browser.clientHeight;
 		}
@@ -270,7 +306,7 @@ package script.order
 			uiSkin.hasSelMat.text =  PaintOrderModel.instance.curSelectMat.prod_name;
 			
 			showTechView();
-			
+			checkShowEffectImg();
 			var list:Array = [];
 			hasShowItemList = [];
 			linelist = new Vector.<Sprite>();
@@ -586,6 +622,7 @@ package script.order
 		{
 			
 			this.uiSkin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes();
+			checkShowEffectImg();
 		}
 		
 		private function cancelTech(arr:Vector.<MaterialItemVo>):void
@@ -601,6 +638,54 @@ package script.order
 			}
 		}
 		
+		private function checkShowEffectImg():void
+		{
+			if(param == null)
+				return;
+			
+			var hasSelectedTech:Array = PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
+			var doublesideImg:String = "";
+			var yixingqiegeImg:String = "";
+			var doublesame:Boolean = false;
+			for(var i:int=0;i < hasSelectedTech.length;i++)
+			{
+				if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_SAME_TECHNO )
+				{
+					doublesame = true;
+				}
+				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+				{
+					doublesideImg = hasSelectedTech[i].attchFileId;
+
+				}
+				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+				{
+					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+				}
+			}
+			
+			uiSkin.originimg.visible = doublesideImg != "" || doublesame;
+			uiSkin.backimg.visible = doublesideImg != "" || doublesame;
+
+			if(doublesideImg != "")
+			{
+				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				uiSkin.backimg.skin = HttpRequestUtil.biggerPicUrl +doublesideImg + ".jpg";	
+			}
+			if(doublesame)
+			{
+				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				uiSkin.backimg.skin = HttpRequestUtil.biggerPicUrl +param.fid + ".jpg";	
+			}
+			uiSkin.qiegeimg.visible = yixingqiegeImg != "";
+			uiSkin.qiegeoriginimg.visible = yixingqiegeImg != "";
+			
+			if(yixingqiegeImg != "")
+			{
+				uiSkin.qiegeoriginimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				uiSkin.qiegeimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+			}
+		}
 		private function getItembox():TechBoxItem
 		{
 			if(allitemlist.length > 0)
@@ -618,8 +703,8 @@ package script.order
 		{
 			if(!hasFinishAllFlow)
 			{
-				ViewManager.showAlert("未选择完整工艺");
-				return;
+				//ViewManager.showAlert("未选择完整工艺");
+				//return;
 			}
 			if(PaintOrderModel.instance.curSelectOrderItem)
 				PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
@@ -649,6 +734,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.off(EventCenter.SHOW_SELECT_TECH,this,initTechView);
 			EventCenter.instance.off(EventCenter.CLOSE_PANEL_VIEW,this,onUpdateTechDes);
+			EventCenter.instance.off(EventCenter.CLOSE_PANEL_VIEW,this,checkShowEffectImg);
 
 		}
 	}

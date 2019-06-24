@@ -15,6 +15,7 @@ package script.order
 	import model.Userdata;
 	import model.orderModel.DeliveryTypeVo;
 	import model.orderModel.MatetialClassVo;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
 	import model.orderModel.PicOrderItemVo;
@@ -36,6 +37,13 @@ package script.order
 		public var param:Object;
 		
 		private var orderlist:Vector.<PicOrderItem>;
+		
+		private var fengeoriginy:Number = 0;
+		
+		private var floatpyy:Number = 0;
+		
+		private var mianvbox:Number = 0;
+		
 		public function PaintOrderControl()
 		{
 			super();
@@ -53,6 +61,10 @@ package script.order
 			//uiSkin.ordervbox.autoSize = true;
 			var num:int = 0;
 			var totalheight:int= 0;
+			
+			fengeoriginy = uiSkin.fengeimg.y;
+			floatpyy = uiSkin.floatpt.y;
+			mianvbox = uiSkin.mainvbox.y;
 			
 			orderlist = new Vector.<PicOrderItem>();
 			for each(var fvo in DirectoryFileModel.instance.haselectPic)
@@ -135,7 +147,7 @@ package script.order
 			resetOrderInfo();
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid,this,onGetOutPutAddress,null,null);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
 				uiSkin.myaddresstxt.text = Userdata.instance.getDefaultAddress().addressDetail;
 				PaintOrderModel.instance.selectAddress = Userdata.instance.getDefaultAddress();
 			}
@@ -191,7 +203,8 @@ package script.order
 				PaintOrderModel.instance.initOutputAddr(result as Array);
 				
 				PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr.concat();
-				
+				while(uiSkin.outputbox.numChildren > 0)
+					uiSkin.outputbox.removeChildAt(0);
 				if(PaintOrderModel.instance.outPutAddr.length > 0)
 				{
 					//PaintOrderModel.instance.selectFactoryAddress = PaintOrderModel.instance.outPutAddr[0];
@@ -204,9 +217,9 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
 					}
-					uiSkin.fengeimg.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
-					uiSkin.floatpt.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
-					uiSkin.mainvbox.y += (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+					uiSkin.fengeimg.y = fengeoriginy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+					uiSkin.floatpt.y = floatpyy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
+					uiSkin.mainvbox.y = mianvbox + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid ,this,onGetProductBack,null,null);
 					
@@ -299,7 +312,7 @@ package script.order
 			if(PaintOrderModel.instance.selectAddress)
 			{
 			uiSkin.myaddresstxt.text = PaintOrderModel.instance.selectAddress.addressDetail;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
 			}
 		}
 		private function onSelectedAddress():void
@@ -608,8 +621,9 @@ package script.order
 			var arr:Array = [];
 			for each(var odata in orderFactory)
 			{
-				odata.order_amountStr = odata.order_amountStr.toString();
-				orderdata.money_paidStr = "0.01";//odata.order_amountStr.toString();
+				orderdata.money_paidStr =  (odata.order_amountStr as Number).toFixed(2);
+				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
+
 				arr.push(odata);
 			}
 			return arr;

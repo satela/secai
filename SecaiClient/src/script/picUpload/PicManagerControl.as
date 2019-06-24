@@ -82,6 +82,7 @@ package script.picUpload
 			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
 			uiSkin.btnUploadPic.on(Event.CLICK,this,onShowUploadView);
 			
+			uiSkin.filetypeRadio.visible = false;
 			//Laya.timer.once(10,this,function():void
 			//{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];

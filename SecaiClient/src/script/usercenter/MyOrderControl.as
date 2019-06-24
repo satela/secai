@@ -44,7 +44,7 @@ package script.usercenter
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				uiSkin.orderList.array = result.orders;
+				uiSkin.orderList.array = (result.orders as Array).reverse();
 			}
 		}
 		public function updateOrderList(cell:OrderCheckListItem):void

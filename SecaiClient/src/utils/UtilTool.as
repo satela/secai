@@ -34,11 +34,11 @@ package utils
 				return v;
 			}
 			
-			if(defaultValue!=null)if(Math.floor(defaultValue)==defaultValue){
+			if(defaultValue!=null)if(Math.floor(defaultValue)===defaultValue){
 				if(v == "")
 					v = "0"
 				return parseInt(v); 
-			}else if (parseFloat(defaultValue+"")==defaultValue){
+			}else if (parseFloat(defaultValue+"")===defaultValue){
 				if(v == "")
 					v = "0"
 				return parseFloat(v);
