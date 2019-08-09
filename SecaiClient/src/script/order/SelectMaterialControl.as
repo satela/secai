@@ -706,6 +706,12 @@ package script.order
 				//ViewManager.showAlert("未选择完整工艺");
 				//return;
 			}
+			if(PaintOrderModel.instance.curSelectMat == null || PaintOrderModel.instance.curSelectMat.getTechDes() == "")
+			{
+				ViewManager.showAlert("请选择一个工艺");
+				return;
+
+			}
 			if(PaintOrderModel.instance.curSelectOrderItem)
 				PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);
 			else if(PaintOrderModel.instance.batchChangeMatItems && PaintOrderModel.instance.batchChangeMatItems.length > 0)

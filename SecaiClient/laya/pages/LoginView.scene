@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":65,
-    "selecteID":66,
+    "selectedBox":3,
+    "selecteID":52,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
@@ -49,13 +49,14 @@
             "props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
             "nodeParent":2,
             "label":"panel_main",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":3,
             "child":[
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":0,"width":1920,"texture":"mainpage/mainbg.jpg","height":1080},
@@ -69,6 +70,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},
@@ -82,6 +84,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},
@@ -95,6 +98,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUpload",
@@ -135,6 +139,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,paintOrderBtn",
@@ -175,90 +180,11 @@
                         }]
                 },
                 {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"y":34,"x":781,"width":92,"text":"字牌下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
-                    "nodeParent":3,
-                    "maxID":5,
-                    "label":"Text(LinksText)",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":44,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"txttype":1,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
-                            "nodeParent":44,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":45,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text",
-                    "props":{"y":34,"x":901,"width":92,"text":"印刷下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
-                    "nodeParent":3,
-                    "maxID":5,
-                    "label":"Text(LinksText)",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":46,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"txttype":1,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
-                            "nodeParent":46,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":47,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
-                },
-                {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnproduct",
-                    "props":{"y":34,"x":1020,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":781,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"btnproduct",
@@ -295,10 +221,11 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text",
-                    "props":{"y":34,"x":1140,"width":92,"text":"视觉资料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":901,"width":92,"text":"视觉资料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"Text(LinksText)",
@@ -335,10 +262,11 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUserCenter",
-                    "props":{"y":34,"x":1260,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":1021,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"btnUserCenter",
@@ -375,6 +303,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_login",
@@ -415,6 +344,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_reg",
@@ -455,6 +385,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},
@@ -468,6 +399,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},

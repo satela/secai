@@ -98,7 +98,7 @@ package script {
 		{
 			var account:String = UtilTool.getLocalVar("useraccount","0");
 			var pwd:String = UtilTool.getLocalVar("userpwd","0");
-			if(account != "0" && pwd != "0")
+			if(account != "0" && pwd != "0" && account != "" && pwd != "")
 			{
 				var param:String = "phone=" + account + "&pwd=" + pwd + "&mode=0";
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.loginInUrl,this,onLoginBack,param,"post");

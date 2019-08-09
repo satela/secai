@@ -27,7 +27,7 @@ package utils
 
 		}
 		
-		public function showWaitingView(requesTime:int = 10000):void
+		public function showWaitingView(requesTime:int = 15000):void
 		{
 			if(gui.parent == null)
 			{

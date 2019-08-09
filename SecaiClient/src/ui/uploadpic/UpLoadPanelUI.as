@@ -8,6 +8,7 @@ package ui.uploadpic {
 		public var bgimg:Image;
 		public var uploadinfo:Label;
 		public var btnClose:Button;
+		public var goonbtn:Button;
 		public var errortxt:Label;
 		public var btnOpenFile:Button;
 		public var fileList:List;

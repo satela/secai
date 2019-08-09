@@ -62,6 +62,9 @@ package script.order
 			var num:int = 0;
 			var totalheight:int= 0;
 			
+			uiSkin.commentall.visible = false;
+			uiSkin.batchcomment.visible = false;
+			
 			fengeoriginy = uiSkin.fengeimg.y;
 			floatpyy = uiSkin.floatpt.y;
 			mianvbox = uiSkin.mainvbox.y;

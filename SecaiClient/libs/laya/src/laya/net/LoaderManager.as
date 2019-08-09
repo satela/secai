@@ -191,7 +191,7 @@ package laya.net {
 		 * @param	useWorkerLoader(default = false)是否使用worker加载（只针对IMAGE类型和ATLAS类型，并且浏览器支持的情况下生效）
 		 * @return 此 LoaderManager 对象本身。
 		 */
-		public function load(url:*, complete:Handler = null, progress:Handler = null, type:String = null, priority:int = 1, cache:Boolean = true, group:String = null, ignoreCache:Boolean = false, useWorkerLoader:Boolean = false):LoaderManager {
+		public function load(url:*, complete:Handler = null, progress:Handler = null, type:String = null, priority:int = 1, cache:Boolean = true, group:String = null, ignoreCache:Boolean = true, useWorkerLoader:Boolean = false):LoaderManager {
 			if (url is Array) return _loadAssets(url as Array, complete, progress, type, priority, cache, group);
 			var content:* = Loader.getRes(url);
 			if (!ignoreCache && content != null) {

@@ -32,6 +32,8 @@ package model.orderModel
 		
 		public function getTechDes():String
 		{
+			if(prcessCatList == null)
+				return "";
 			var techstr:String = "";
 			for(var i:int=0;i < prcessCatList.length;i++)
 			{
@@ -46,7 +48,10 @@ package model.orderModel
 				
 				//techstr += ",";
 			}
-			return techstr.substring(0,techstr.length - 1);
+			if(techstr.length > 0)
+				return techstr.substring(0,techstr.length - 1);
+			else
+				return "";
 		}
 		
 		/**

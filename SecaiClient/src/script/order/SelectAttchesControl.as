@@ -117,6 +117,12 @@ package script.order
 		}
 		private function onSureClose(index:int):void
 		{
+			if(uiSkin.attachList.array.length > 0 &&  (selectAttach == null || selectAttach.length == 0))
+			{
+				ViewManager.showAlert("请选择附件");
+				return;
+			}
+			
 			matvo.selectAttachVoList = selectAttach;
 			onCloseView();
 			EventCenter.instance.event(EventCenter.CLOSE_PANEL_VIEW,ViewManager.VIEW_SELECT_ATTACH);
@@ -134,6 +140,14 @@ package script.order
 		
 		private function onCloseView():void
 		{
+			if(uiSkin.attachList.array.length > 0 && (selectAttach == null || selectAttach.length == 0))
+			{
+				ViewManager.showAlert("请选择附件");
+				return;
+			}
+			matvo.selectAttachVoList = selectAttach;
+			EventCenter.instance.event(EventCenter.CLOSE_PANEL_VIEW,ViewManager.VIEW_SELECT_ATTACH);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_ATTACH);
 			EventCenter.instance.off(EventCenter.ADD_TECH_ATTACH,this,onAddAttach);
 

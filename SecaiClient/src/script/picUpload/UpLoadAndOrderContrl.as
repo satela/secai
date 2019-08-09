@@ -53,7 +53,10 @@ package script.picUpload
 			initFileOpen();
 			uiSkin.uploadinfo.visible = false;
 			uiSkin.errortxt.visible = false;
+			uiSkin.goonbtn.visible = false;
 			
+			uiSkin.goonbtn.on(Event.CLICK,this,reUploadFile);
+
 			Browser.window.uploadApp = this;
 			if(param != null && (param as Array) != null)
 			{
@@ -73,6 +76,8 @@ package script.picUpload
 		private function reUploadFile():void
 		{
 			uiSkin.errortxt.visible = false;
+			uiSkin.goonbtn.visible = false;
+			
 			onClickBegin();
 		}
 		private function onClickOpenFile():void
@@ -207,6 +212,14 @@ package script.picUpload
 				ossFileName = result.ObjectName + "." + (arr[arr.length - 1] == null ?"jpg":arr[arr.length - 1]);
 				uploadFileImmediate();
 			}
+			else if(result.status == 304)
+			{
+				curUploadIndex++;
+				checkpoint = 0;
+				callbackparam = null;
+				ossFileName = "";
+				onBeginUpload();
+			}
 		}
 		private function onCompleteUpload(e:Object):void
 		{
@@ -250,6 +263,7 @@ package script.picUpload
 				if(cells[i] as FileUpLoadItem != null && (cells[i] as FileUpLoadItem).fileobj == fileListData[curUploadIndex])
 				{
 					(cells[i] as FileUpLoadItem).showReUploadbtn();
+					uiSkin.goonbtn.visible = true;
 					break;
 				}
 			}
@@ -274,28 +288,33 @@ package script.picUpload
 		
 		private function onDeleteItem(delitem:FileUpLoadItem):void
 		{
+			var index:int = fileListData.indexOf(delitem.fileobj);
+			if(index == curUploadIndex)
+			{
+				return;
+			}
 			if(delitem.fileobj.progress >= 99)
 				return;
 			
 			var index:int = fileListData.indexOf(delitem.fileobj);
-			if(index == curUploadIndex)
-			{
-				Browser.window.cancelUpload();
-				
-			}
+//			if(index == curUploadIndex)
+//			{
+//				Browser.window.cancelUpload();
+//				
+//			}
 			uiSkin.fileList.deleteItem(index);
-			callbackparam = null;
-			checkpoint = 0;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.abortUpload,this,function(data:String)
-			{
-				var result:Object = JSON.parse(data as String);
-				if(result.status == 0)
-				{
-					if(isUploading)
-						onBeginUpload();
-				}
-				
-			},null ,"post");
+//			callbackparam = null;
+//			checkpoint = 0;
+//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.abortUpload,this,function(data:String)
+//			{
+//				var result:Object = JSON.parse(data as String);
+//				if(result.status == 0)
+//				{
+//					if(isUploading)
+//						onBeginUpload();
+//				}
+//				
+//			},null ,"post");
 
 			
 		}
@@ -351,6 +370,8 @@ package script.picUpload
 		private function onCloseScene():void
 		{
 			// TODO Auto Generated method stub
+			if(isUploading)
+				return;
 			Browser.window.uploadApp = null;
 			Laya.timer.clearAll(this);
 

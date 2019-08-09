@@ -27,6 +27,7 @@ package ui {
 		public var ordervbox:VBox;
 		public var deliversp:Sprite;
 		public var deliverbox:VBox;
+		public var batchcomment:Box;
 		public var commentall:TextInput;
 		public var textTotalPrice:HTMLDivElement;
 		public var textDeliveryType:HTMLDivElement;

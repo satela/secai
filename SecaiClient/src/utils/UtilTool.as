@@ -1,6 +1,8 @@
 package utils
 {
 	import laya.net.LocalStorage;
+	
+	import model.picmanagerModel.PicInfoVo;
 
 	public class UtilTool
 	{
@@ -67,7 +69,7 @@ package utils
 				datestr += "0" + (date.getMonth()+1) + "-";
 			
 			if(date.getDate() >= 10)
-				datestr += date.getDate() + "-";
+				datestr += date.getDate();
 			else
 				datestr += "0" + date.getDate();
 			if(isFull == false)
@@ -93,6 +95,13 @@ package utils
 			return datestr;
 		}  
 		
+		public static function checkFileIsImg(picInfo:PicInfoVo):Boolean
+		{
+			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG"))
+				return false;
+			else return true;
+
+		}
 		public function UtilTool()
 		{
 		}

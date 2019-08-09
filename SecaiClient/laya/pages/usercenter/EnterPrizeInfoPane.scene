@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":10,
+    "selectedBox":126,
+    "selecteID":128,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":900},
     "nodeParent":-1,
@@ -603,7 +603,7 @@
                     "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,txt_license",
-                    "props":{"y":-3,"x":187,"width":440,"var":"txt_license","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请上传企业执照，我们会尊重并保护企业隐私","height":50,"fontSize":20,"font":"SimHei"},
+                    "props":{"y":-3,"x":187,"width":440,"var":"txt_license","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#FF0000","prompt":"请上传企业执照(限JPG图片，尺寸不超过6m)","height":50,"fontSize":20,"font":"SimHei"},
                     "nodeParent":126,
                     "label":"txt_license",
                     "isDirectory":false,
@@ -653,7 +653,7 @@
             "props":{"y":509,"x":200.23046875,"width":172,"var":"provbox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
             "nodeParent":2,
             "label":"provbox",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
@@ -689,7 +689,7 @@
                         ],
                     "$HIDDEN":false
                 }],
-            "$HIDDEN":false
+            "$HIDDEN":true
         },
         {
             "x":15,
@@ -698,7 +698,7 @@
             "props":{"y":509,"x":393,"width":172,"var":"citybox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
             "nodeParent":2,
             "label":"citybox",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
@@ -734,7 +734,7 @@
                         ],
                     "$HIDDEN":false
                 }],
-            "$HIDDEN":false
+            "$HIDDEN":true
         },
         {
             "x":15,
@@ -779,7 +779,7 @@
                         ],
                     "$HIDDEN":false
                 }],
-            "$HIDDEN":false
+            "$HIDDEN":true
         },
         {
             "x":15,

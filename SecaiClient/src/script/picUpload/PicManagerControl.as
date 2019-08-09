@@ -1,7 +1,7 @@
 package script.picUpload
 {
 	import eventUtil.EventCenter;
-		
+	
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.Box;
@@ -16,6 +16,8 @@ package script.picUpload
 	import script.ViewManager;
 	
 	import ui.PicManagePanelUI;
+	
+	import utils.UtilTool;
 	
 	public class PicManagerControl extends Script
 	{
@@ -83,6 +85,7 @@ package script.picUpload
 			uiSkin.btnUploadPic.on(Event.CLICK,this,onShowUploadView);
 			
 			uiSkin.filetypeRadio.visible = false;
+			uiSkin.radiosel.on(Event.CLICK,this,onSelectAllPic);
 			//Laya.timer.once(10,this,function():void
 			//{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
@@ -108,7 +111,9 @@ package script.picUpload
 			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
 			uiSkin.main_panel.height = Browser.clientHeight;
 			uiSkin.picList.height =  Browser.clientHeight - 365;
-
+			
+			DirectoryFileModel.instance.curFileList = [];
+			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
 		}
 		private function onResizeBrower():void
 		{
@@ -117,6 +122,53 @@ package script.picUpload
 			uiSkin.picList.height =  Browser.clientHeight - 365;
 		}
 		
+		private function onSelectAllPic():void
+		{
+			var allfilse:Array = DirectoryFileModel.instance.curFileList;
+			if(allfilse == null)
+				return;
+			
+			for(var i:int=0;i < allfilse.length;i++)
+			{
+				if(allfilse[i].picType == 1)
+				{
+					if(uiSkin.radiosel.selected)
+					{
+						var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
+						if( !hasfic && UtilTool.checkFileIsImg(allfilse[i]))
+						{
+							//delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+							DirectoryFileModel.instance.haselectPic[allfilse[i].fid] = allfilse[i];
+						}
+							
+					}
+					else
+					{
+						var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
+						if( hasfic)
+						{
+							delete DirectoryFileModel.instance.haselectPic[allfilse[i].fid];
+						}
+					}
+				}
+			}
+			for(var i:int=0;i < uiSkin.picList.cells.length;i++)
+			{
+				if((uiSkin.picList.cells[i] as PicInfoItem).picInfo != null && UtilTool.checkFileIsImg((uiSkin.picList.cells[i] as PicInfoItem).picInfo))
+				{
+					(uiSkin.picList.cells[i] as PicInfoItem).sel.visible = uiSkin.radiosel.selected;
+					(uiSkin.picList.cells[i] as PicInfoItem).sel.selected = uiSkin.radiosel.selected;
+				}
+			}
+			var num:int = 0;
+			for each(var picvo in DirectoryFileModel.instance.haselectPic)
+			{
+				num++;
+			}
+			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
+
+			
+		}
 		
 		private function initFileOpen():void
 		{
@@ -188,8 +240,10 @@ package script.picUpload
 				DirectoryFileModel.instance.initTopDirectoryList(result);
 				
 				//uiSkin.folderList.array = DirectoryFileModel.instance.topDirectList;
+				uiSkin.radiosel.selected = false;
 				uiSkin.picList.array = DirectoryFileModel.instance.topDirectList;
 				curFileList = DirectoryFileModel.instance.topDirectList;
+				DirectoryFileModel.instance.curFileList = [];
 //				if(DirectoryFileModel.instance.topDirectList.length > 0)
 //				{
 //					//curDirect += (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + "|";
@@ -217,6 +271,8 @@ package script.picUpload
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
+				uiSkin.radiosel.selected = false;
+
 				DirectoryFileModel.instance.initCurDirFiles(result);
 				uiSkin.picList.array = DirectoryFileModel.instance.curFileList;
 				curFileList = DirectoryFileModel.instance.curFileList;
@@ -237,6 +293,8 @@ package script.picUpload
 					if((curFileList[i].directName as String).indexOf(uiSkin.searchInput.text) >= 0)
 						temparr.push(curFileList[i]);
 				}
+				uiSkin.radiosel.selected = false;
+
 				uiSkin.picList.array = temparr;
 			}
 			
@@ -261,7 +319,7 @@ package script.picUpload
 		private function onShowUploadView():void
 		{
 			// TODO Auto Generated method stub
-			if(DirectoryFileModel.instance.curSelectDir == null)
+			if(DirectoryFileModel.instance.curSelectDir == null || DirectoryFileModel.instance.curSelectDir.directId == "0")
 			{
 				ViewManager.showAlert("请先创建一个目录");
 				return;
@@ -316,6 +374,8 @@ package script.picUpload
 //				{
 					 var picinfo:PicInfoVo = new PicInfoVo(result.dir,0);
 					uiSkin.picList.addItem(picinfo);
+					uiSkin.radiosel.selected = false;
+
 					curFileList = uiSkin.picList.array;
 //				}
 			}

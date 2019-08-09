@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":21,
-    "selecteID":36,
+    "selectedBox":22,
+    "selecteID":10,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff"},
     "nodeParent":-1,
@@ -105,7 +105,7 @@
             "x":15,
             "type":"Box",
             "searchKey":"Box,operatebox",
-            "props":{"y":17,"x":1191,"var":"operatebox"},
+            "props":{"y":9,"x":1191,"var":"operatebox"},
             "nodeParent":2,
             "label":"operatebox",
             "isOpen":true,
@@ -126,13 +126,14 @@
                     "hasChild":false,
                     "compId":18,
                     "child":[
-                        ]
+                        ],
+                    "$HIDDEN":true
                 },
                 {
                     "x":30,
                     "type":"Text",
                     "searchKey":"Text,deleteorder",
-                    "props":{"y":30,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E"},
+                    "props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E"},
                     "nodeParent":21,
                     "label":"deleteorder",
                     "isDirectory":false,
@@ -164,13 +165,14 @@
             "props":{"y":12,"x":488,"var":"editbox"},
             "nodeParent":2,
             "label":"editbox",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":22,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -184,6 +186,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
@@ -197,9 +200,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editwidth",
-                    "props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
+                    "props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
                     "nodeParent":22,
                     "label":"editwidth",
                     "isDirectory":false,
@@ -210,9 +214,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,editheight",
-                    "props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
+                    "props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},
                     "nodeParent":22,
                     "label":"editheight",
                     "isDirectory":false,

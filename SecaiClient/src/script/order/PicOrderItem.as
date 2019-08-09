@@ -33,6 +33,7 @@ package script.order
 			this.subtn.on(Event.CLICK,this,onSubItemNum);
 			this.addbtn.on(Event.CLICK,this,onAddItemNum);
 			this.hascomment.visible = false;
+			this.addmsg.visible = false;
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 100;					
@@ -136,7 +137,7 @@ package script.order
 			this.numbox.y = (this.height)/2 - 12;
 			this.price.y = (this.height - this.price.height)/2;
 			this.total.y = (this.height - this.total.height)/2;
-			this.operatebox.y = (this.height - this.operatebox.height)/2;
+			this.operatebox.y = (this.height - this.operatebox.height)/2 - 10;
 
 		}
 		public function updateIndex():void
@@ -172,6 +173,8 @@ package script.order
 			updateOrderData(provo);
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
 			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
+			if(area < 0.1)
+				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
 				this.price.text = (provo.getTotalPrice(area,perimeter)/area).toFixed(2);
@@ -179,7 +182,7 @@ package script.order
 				this.price.text = (provo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
 
 			
-			this.total.text = parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter)).toFixed(2) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -213,6 +216,9 @@ package script.order
 			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
 			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
 
+			if(area < 0.1)
+				area = 0.1;
+			
 			this.ordervo.orderPrice = productVo.getTotalPrice(area,perimeter);
 			ordervo.manufacturer_code = productVo.manufacturer_code;
 			ordervo.manufacturer_name = productVo.manufacturer_name;

@@ -135,7 +135,7 @@ package model
 		
 		private function onHttpRequestError(url:String,caller:Object,complete:Function,param:Object,requestType:String,request:HttpRequest,e:Object=null):void
 		{
-			
+			//ViewManager.showAlert("您的网络出了个小差，请重试！");
 		}
 		
 		private function onHttpRequestProgress(e:Object=null):void

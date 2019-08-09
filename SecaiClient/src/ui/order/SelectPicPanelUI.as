@@ -8,6 +8,7 @@ package ui.order {
 	public class SelectPicPanelUI extends View {
 		public var flder0:Label;
 		public var htmltext:HTMLDivElement;
+		public var radiosel:CheckBox;
 		public var btnroot:Label;
 		public var btnprevfolder:Label;
 		public var searchInput:TextInput;

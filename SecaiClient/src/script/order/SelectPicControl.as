@@ -17,6 +17,8 @@ package script.order
 	
 	import ui.order.SelectPicPanelUI;
 	
+	import utils.UtilTool;
+	
 	public class SelectPicControl extends Script
 	{
 		private var uiSkin:SelectPicPanelUI;
@@ -60,6 +62,8 @@ package script.order
 			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
 			uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
 
+			uiSkin.radiosel.on(Event.CLICK,this,onSelectAllPic);
+
 			//Laya.timer.once(10,this,function():void
 			//{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
@@ -96,6 +100,57 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PIC_TO_ORDER);
+		}
+		
+		private function onSelectAllPic():void
+		{
+			var allfilse:Array = DirectoryFileModel.instance.curFileList;
+			if(allfilse == null)
+				return;
+			if(param is MaterialItemVo)
+			{
+				return;
+			}
+			for(var i:int=0;i < allfilse.length;i++)
+			{
+				if(allfilse[i].picType == 1)
+				{
+					if(uiSkin.radiosel.selected)
+					{
+						var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
+						if( !hasfic && UtilTool.checkFileIsImg(allfilse[i]))
+						{
+							//delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+							DirectoryFileModel.instance.haselectPic[allfilse[i].fid] = allfilse[i];
+						}
+						
+					}
+					else
+					{
+						var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
+						if( hasfic)
+						{
+							delete DirectoryFileModel.instance.haselectPic[allfilse[i].fid];
+						}
+					}
+				}
+			}
+			for(var i:int=0;i < uiSkin.picList.cells.length;i++)
+			{
+				if((uiSkin.picList.cells[i] as PicInfoItem).picInfo != null && UtilTool.checkFileIsImg((uiSkin.picList.cells[i] as PicInfoItem).picInfo))
+				{
+					(uiSkin.picList.cells[i] as PicInfoItem).sel.visible = uiSkin.radiosel.selected;
+					(uiSkin.picList.cells[i] as PicInfoItem).sel.selected = uiSkin.radiosel.selected;
+				}
+			}
+			var num:int = 0;
+			for each(var picvo in DirectoryFileModel.instance.haselectPic)
+			{
+				num++;
+			}
+			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
+			
+			
 		}
 		
 		private function seletPicToOrder(fvo:PicInfoVo):void

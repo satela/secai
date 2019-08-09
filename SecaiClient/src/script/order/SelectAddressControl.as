@@ -41,6 +41,7 @@ package script.order
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
 			
 
+			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
 			uiSkin.list_address.array = Userdata.instance.addressList;
 			
 			Laya.timer.once(10,null,function()
@@ -55,15 +56,37 @@ package script.order
 			//PaintOrderModel.instance.selectAddress = null;
 		}
 		
+		private function onSearchAddress():void
+		{
+			if(uiSkin.inputsearch.text == "")
+			{
+				uiSkin.list_address.array = Userdata.instance.addressList;
+				return;
+			}
+			var tempadd:Array = [];
+			for(var i:int=0;i < Userdata.instance.addressList.length;i++)
+			{
+				if((Userdata.instance.addressList[i].addressDetail as String).indexOf(uiSkin.inputsearch.text) >= 0)
+				{
+					tempadd.push(Userdata.instance.addressList[i]);
+				}
+			}
+			uiSkin.list_address.array = tempadd;
+		}
 		private function onSlecteAddress(index:int):void
 		{
 			// TODO Auto Generated method stub
-			for each(var item:SelAddressItem in uiSkin.list_address.cells)
-			{
-				item.ShowSelected = item.address == uiSkin.list_address.array[index];
-			}
+			
 			//(uiSkin.list_address.cells[index] as SelAddressItem).ShowSelected = true;
 			tempaddress = uiSkin.list_address.array[index];;
+		
+			Laya.timer.frameOnce(1,this,function(){
+				
+				for each(var item:SelAddressItem in uiSkin.list_address.cells)
+				{
+					item.ShowSelected = item.address == uiSkin.list_address.array[index];
+				}
+			});
 		}
 		
 		private function updateAddressItem(cell:SelAddressItem):void

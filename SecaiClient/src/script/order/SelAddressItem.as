@@ -19,6 +19,7 @@ package script.order
 		{
 			address = data as AddressVo;
 			this.addresstxt.text = address.addressDetail;
+			ShowSelected = false;
 			//ShowSelected = address == PaintOrderModel.instance.selectAddress;
 		}
 		

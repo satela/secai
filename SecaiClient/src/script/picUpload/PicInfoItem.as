@@ -38,6 +38,8 @@ package script.picUpload
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 			trytime = 0;
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
+			this.sel.selected = this.sel.visible;
+
 			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG"))
 			{
 				this.img.skin = "upload/fold.png";

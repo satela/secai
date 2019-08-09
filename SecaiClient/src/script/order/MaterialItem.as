@@ -48,7 +48,6 @@ package script.order
 			{
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessCatList + matvo.prod_code,this,onGetProcessListBack,null,null);
 				
-				PaintOrderModel.instance.curSelectMat = matvo;
 			}
 			
 			
