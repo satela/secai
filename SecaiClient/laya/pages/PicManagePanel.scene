@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":3,
+    "selectedBox":4,
+    "selecteID":87,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
-    "maxID":86,
+    "maxID":89,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -461,6 +461,51 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":60,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":234,"x":864,"text":"已用空间","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":87,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"ProgressBar",
+                    "searchKey":"ProgressBar,prgcap",
+                    "props":{"y":232,"x":938,"width":300,"var":"prgcap","skin":"comp/progress.png","sizeGrid":"2,2,2,2","height":20},
+                    "nodeParent":4,
+                    "label":"prgcap",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":86,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,leftcapacity",
+                    "props":{"y":232,"x":1030,"width":106,"var":"leftcapacity","text":"0m/0G","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"center"},
+                    "nodeParent":4,
+                    "label":"leftcapacity",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":88,
                     "child":[
                         ],
                     "$HIDDEN":false

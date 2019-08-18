@@ -300,12 +300,26 @@ package script.order
 			uiSkin.box_mat.visible = false;
 			uiSkin.box_tech.visible = true;
 			uiSkin.backBtn.label = "材料";
+			if(PaintOrderModel.instance.curSelectMat == null)
+			{
+				ViewManager.showAlert("未选择材料");
+				
+			}
+			if(PaintOrderModel.instance.curSelectMat != null && PaintOrderModel.instance.curSelectMat.prcessCatList.length == 0)
+			{
+				ViewManager.showAlert("未获取到工艺流");
+				
+			}
 		}
 		private function initTechView():void
 		{
 			uiSkin.hasSelMat.text =  PaintOrderModel.instance.curSelectMat.prod_name;
 			
+			uiSkin.mattext.text = "已选材料:" + PaintOrderModel.instance.curSelectMat.prod_name;
+			
+			updateSelectedTech();
 			showTechView();
+			
 			checkShowEffectImg();
 			var list:Array = [];
 			hasShowItemList = [];

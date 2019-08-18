@@ -1253,7 +1253,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="uploadpic/UpLoadPanel.scene";
+	GameConfig.startScene="PopUpDialog.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1822,23 +1822,15 @@ var ProcessCatVo=(function(){
 		// 工艺类名称
 		this.selected=false;
 		this.nextMatList=null;
-		var _$this=this;
 		for(var key in data){
 			if(this.hasOwnProperty(key))
 				this[key]=data[key];
-		};
-		var manufacturecode=PaintOrderModel.instance.curSelectMat.manufacturer_code;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/procflowlist?manufacturer_code="+manufacturecode+"&procCat_name="+this.procCat_Name,this,function(data){
-			var result=JSON.parse(data);
-			if(!result.hasOwnProperty("status")){
-				PaintOrderModel.instance.curSelectProcList=result;
-				_$this.initProcFlow(result);
-			}
-		},null,null);
+		}
 	}
 
 	__class(ProcessCatVo,'model.orderModel.ProcessCatVo');
 	var __proto=ProcessCatVo.prototype;
+	// },null,null);
 	__proto.initProcFlow=function(flowdata){
 		var proclist=flowdata;
 		this.nextMatList=[];
@@ -2271,6 +2263,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getDirectoryList="dir/list?";
 	HttpRequestUtil.uploadPic="file/add";
 	HttpRequestUtil.deletePic="file/remove?";
+	HttpRequestUtil.getCapacity="get-info?";
 	HttpRequestUtil.createGroup="group/create-group?";
 	HttpRequestUtil.addressManageUrl="group/opt-group-express?";
 	HttpRequestUtil.biggerPicUrl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/";
@@ -2481,7 +2474,8 @@ var ErrorCode=(function(){
 			601:"权限错误",
 			666:"数据异常",
 			667:"数据异常",
-			701:"设置默认地址失败"
+			701:"设置默认地址失败",
+			801:"订单正在支付中或已经支付成功，请勿重复支付"
 	};}
 
 	]);
@@ -26962,6 +26956,7 @@ var EventCenter=(function(_super){
 	EventCenter.CLOSE_PANEL_VIEW="CLOSE_PANEL_VIEW";
 	EventCenter.SHOW_CHARGE_VIEW="SHOW_CHARGE_VIEW";
 	EventCenter.PAY_ORDER_SUCESS="PAY_ORDER_SUCESS";
+	EventCenter.CANCEL_PAY_ORDER="CANCEL_PAY_ORDER";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -35528,11 +35523,25 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.height=Browser.clientHeight-365;
 		DirectoryFileModel.instance.curFileList=[];
 		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.onGetLeftCapacitBack,null,"post");
 	}
 
 	__proto.onResizeBrower=function(){
 		this.uiSkin.main_panel.height=Browser.clientHeight;
 		this.uiSkin.picList.height=Browser.clientHeight-365;
+	}
+
+	__proto.onGetLeftCapacitBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var size=parseInt(result.size)/1024/1024;
+			var maxsize=parseInt(result.maxsize)/1024/1024/1024;
+			if(parseInt(result.size)< parseInt(result.maxsize))
+				this.uiSkin.prgcap.value=parseInt(result.size)/parseInt(result.maxsize);
+			else
+			this.uiSkin.prgcap.value=1;
+			this.uiSkin.leftcapacity.text=size.toFixed(0)+"M/"+maxsize+"G";
+		}
 	}
 
 	__proto.onSelectAllPic=function(){
@@ -35625,6 +35634,7 @@ var PicManagerControl=(function(_super){
 	// }
 	__proto.getFileList=function(){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.onGetLeftCapacitBack,null,"post");
 	}
 
 	__proto.onGetDirFileListBack=function(data){
@@ -35958,6 +35968,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.on("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
 		EventCenter.instance.on("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
 		EventCenter.instance.on("PAY_ORDER_SUCESS",this,this.onPaySucess);
+		EventCenter.instance.on("CANCEL_PAY_ORDER",this,this.onCancelPay);
 		this.uiSkin.panelout.vScrollBarSkin="";
 		this.uiSkin.deliversp.autoSize=true;
 		this.uiSkin.height=Browser.clientHeight;
@@ -36238,6 +36249,10 @@ var PaintOrderControl=(function(_super){
 		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 	}
 
+	__proto.onCancelPay=function(){
+		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+	}
+
 	__proto.onPlaceOrderBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
@@ -36333,6 +36348,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
 		EventCenter.instance.off("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
 		EventCenter.instance.off("PAY_ORDER_SUCESS",this,this.onPaySucess);
+		EventCenter.instance.off("CANCEL_PAY_ORDER",this,this.onCancelPay);
 		Laya.timer.clear(this,this.onDragMove);
 	}
 
@@ -36699,7 +36715,14 @@ var PayTypeSelectControl=(function(_super){
 	}
 
 	__proto.onCancel=function(){
-		ViewManager.instance.closeView("VIEW_SELECT_PAYTYPE_PANEL");
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定取消支付吗？取消支付您可以到订单界面查询支付状态或继续支付。",caller:this,callback:this.confirmCancel});
+	}
+
+	__proto.confirmCancel=function(b){
+		if(b){
+			ViewManager.instance.closeView("VIEW_SELECT_PAYTYPE_PANEL");
+			EventCenter.instance.event("CANCEL_PAY_ORDER");
+		}
 	}
 
 	return PayTypeSelectControl;
@@ -37325,6 +37348,8 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.callbackparam=null;
 		//服务器回调参数
 		this.ossFileName=null;
+		//服务器指定的文件名
+		this.reupTryTimes=0;
 		UpLoadAndOrderContrl.__super.call(this);
 	}
 
@@ -37413,6 +37438,7 @@ var UpLoadAndOrderContrl=(function(_super){
 	}
 
 	__proto.onClickBegin=function(){
+		Laya.timer.clear(this,this.reUploadFile);
 		if(this.isUploading)
 			return;
 		if(this.clientParam==null){
@@ -37488,16 +37514,21 @@ var UpLoadAndOrderContrl=(function(_super){
 
 	//trace("up progress"+JSON.stringify(e));
 	__proto.onUploadError=function(err){
-		this.uiSkin.errortxt.visible=true;
-		this.uiSkin.errortxt.text=this.getErrorMsg(err);
 		this.isUploading=false;
 		this.clientParam=null;
-		var cells=this.uiSkin.fileList.cells;
-		for(var i=0;i < cells.length;i++){
-			if(cells [i] !=null && (cells [i]).fileobj==this.fileListData[this.curUploadIndex]){
-				(cells [i]).showReUploadbtn();
-				this.uiSkin.goonbtn.visible=true;
-				break ;
+		if(this.reupTryTimes < 10){
+			Laya.timer.once(100,this,this.reUploadFile);
+			this.reupTryTimes++;
+			}{
+			this.uiSkin.errortxt.visible=true;
+			this.uiSkin.errortxt.text=this.getErrorMsg(err);
+			var cells=this.uiSkin.fileList.cells;
+			for(var i=0;i < cells.length;i++){
+				if(cells [i] !=null && (cells [i]).fileobj==this.fileListData[this.curUploadIndex]){
+					(cells [i]).showReUploadbtn();
+					this.uiSkin.goonbtn.visible=true;
+					break ;
+				}
 			}
 		}
 	}
@@ -37772,11 +37803,19 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.box_mat.visible=false;
 		this.uiSkin.box_tech.visible=true;
 		this.uiSkin.backBtn.label="材料";
+		if(PaintOrderModel.instance.curSelectMat==null){
+			ViewManager.showAlert("未选择材料");
+		}
+		if(PaintOrderModel.instance.curSelectMat !=null && PaintOrderModel.instance.curSelectMat.prcessCatList.length==0){
+			ViewManager.showAlert("未获取到工艺流");
+		}
 	}
 
 	__proto.initTechView=function(){
 		var _$this=this;
 		this.uiSkin.hasSelMat.text=PaintOrderModel.instance.curSelectMat.prod_name;
+		this.uiSkin.mattext.text="已选材料:"+PaintOrderModel.instance.curSelectMat.prod_name;
+		this.updateSelectedTech();
 		this.showTechView();
 		this.checkShowEffectImg();
 		var list=[];
@@ -44431,7 +44470,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":143,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":35,"x":53,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":17,"x":195,"wordWrap":true,"width":118,"var":"filename","text":"PP纸无背胶（海报、展架）.tif","fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":38.5,"x":816,"width":58,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1083,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":488,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11}]},{"type":"VBox","props":{"y":29.5,"x":635,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":320,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":950,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":143,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":35,"x":53,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":195,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":38.5,"x":816,"width":58,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1083,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":488,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11}]},{"type":"VBox","props":{"y":29.5,"x":635,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":320,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":950,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -51110,6 +51149,8 @@ var PicManagePanelUI=(function(_super){
 		this.radiosel=null;
 		this.searchInput=null;
 		this.filetypeRadio=null;
+		this.prgcap=null;
+		this.leftcapacity=null;
 		this.btnorder=null;
 		this.picList=null;
 		this.btnroot=null;
@@ -51164,6 +51205,7 @@ var SelectMaterialPanelUI=(function(_super){
 		this.hasSelMat=null;
 		this.box_tech=null;
 		this.techcontent=null;
+		this.mattext=null;
 		this.selecttech=null;
 		this.backimg=null;
 		this.originimg=null;

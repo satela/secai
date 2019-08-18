@@ -114,6 +114,9 @@ package script.picUpload
 			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,onGetLeftCapacitBack,null,"post");
+
 		}
 		private function onResizeBrower():void
 		{
@@ -122,6 +125,21 @@ package script.picUpload
 			uiSkin.picList.height =  Browser.clientHeight - 365;
 		}
 		
+		private function onGetLeftCapacitBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				var  size:Number = parseInt(result.size)/1024/1024;
+				var maxsize:int = parseInt(result.maxsize)/1024/1024/1024;
+				if( parseInt(result.size) < parseInt(result.maxsize))
+					uiSkin.prgcap.value = parseInt(result.size)/parseInt(result.maxsize);
+				else
+					uiSkin.prgcap.value = 1;
+									
+				uiSkin.leftcapacity.text = size.toFixed(0) + "M/" + maxsize + "G";
+			}
+		}
 		private function onSelectAllPic():void
 		{
 			var allfilse:Array = DirectoryFileModel.instance.curFileList;
@@ -263,6 +281,7 @@ package script.picUpload
 		private function getFileList():void
 		{
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetDirFileListBack,"path=" + DirectoryFileModel.instance.curSelectDir.dpath,"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,onGetLeftCapacitBack,null,"post");
 
 		}
 		

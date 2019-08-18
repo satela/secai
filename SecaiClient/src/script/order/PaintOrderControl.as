@@ -127,6 +127,7 @@ package script.order
 			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.on(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 			EventCenter.instance.on(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
+			EventCenter.instance.on(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
 
 			uiSkin.panelout.vScrollBarSkin = "";
 			uiSkin.deliversp.autoSize = true;
@@ -524,6 +525,12 @@ package script.order
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 
 		}
+		
+		private function onCancelPay():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+			
+		}
 		private function onPlaceOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -624,7 +631,7 @@ package script.order
 			var arr:Array = [];
 			for each(var odata in orderFactory)
 			{
-				orderdata.money_paidStr =  (odata.order_amountStr as Number).toFixed(2);
+				orderdata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
 				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
 
 				arr.push(odata);
@@ -651,6 +658,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.off(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
+			EventCenter.instance.off(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
 
 			Laya.timer.clear(this,onDragMove);
 

@@ -53,6 +53,7 @@ package eventUtil
 		
 		public static const PAY_ORDER_SUCESS:String = "PAY_ORDER_SUCESS";//支付成功
 
+		public static const CANCEL_PAY_ORDER:String = "CANCEL_PAY_ORDER";//取消支付
 
 
 		private static var _eventCenter:EventCenter;

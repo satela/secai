@@ -18,18 +18,19 @@ package model.orderModel
 				this[key] = data[key];
 			}
 			
-			var manufacturecode = PaintOrderModel.instance.curSelectMat.manufacturer_code;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + manufacturecode + "&procCat_name=" + procCat_Name,this,function(data:Object):void{
-				
-				var result:Object = JSON.parse(data as String);
-				if(!result.hasOwnProperty("status"))
-				{
-					PaintOrderModel.instance.curSelectProcList = result as Array;
-					initProcFlow(result);
-					//onClickMat(parentitem,processCatvo);
-				}
-				
-			},null,null);
+//			var manufacturecode = PaintOrderModel.instance.curSelectMat.manufacturer_code;
+//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow + manufacturecode + "&procCat_name=" + procCat_Name,this,function(data:Object):void{
+//				
+//				var result:Object = JSON.parse(data as String);
+//				if(!result.hasOwnProperty("status"))
+//				{
+//					Laya.timer.once(100,this,function(){
+//					PaintOrderModel.instance.curSelectProcList = result as Array;
+//					initProcFlow(result);});
+//					//onClickMat(parentitem,processCatvo);
+//				}
+//				
+//			},null,null);
 		}
 		
 		public function initProcFlow(flowdata:Object):void

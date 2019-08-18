@@ -98,7 +98,17 @@ package script.order
 		}
 		private function onCancel():void
 		{
-			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+			ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"确定取消支付吗？取消支付您可以到订单界面查询支付状态或继续支付。",caller:this,callback:confirmCancel});		
+		}
+		
+		private function confirmCancel(b:Boolean):void
+		{
+			if(b)
+			{
+				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+				EventCenter.instance.event(EventCenter.CANCEL_PAY_ORDER);
+			}
+
 		}
 	}
 }

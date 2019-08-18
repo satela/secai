@@ -30,6 +30,9 @@ package model
 		public static const uploadPic:String = "file/add";
 		public static const deletePic:String = "file/remove?";
 		
+		public static const getCapacity:String = "get-info?";
+		
+		
 		public static const createGroup:String = "group/create-group?";//cname,cshortname,czoneid,caddr,cyyzz
 
 

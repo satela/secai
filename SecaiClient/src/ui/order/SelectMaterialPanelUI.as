@@ -13,6 +13,7 @@ package ui.order {
 		public var hasSelMat:Label;
 		public var box_tech:Sprite;
 		public var techcontent:Panel;
+		public var mattext:Label;
 		public var selecttech:Label;
 		public var backimg:Image;
 		public var originimg:Image;

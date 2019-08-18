@@ -31,6 +31,8 @@ package script.picUpload
 		private var checkpoint:Object = 0;
 		private var callbackparam:Object; //服务器回调参数
 		private var ossFileName:String;//服务器指定的文件名
+		
+		private var reupTryTimes:int = 0;
 		public function UpLoadAndOrderContrl()
 		{
 			super();
@@ -155,6 +157,8 @@ package script.picUpload
 		
 		private function onClickBegin():void
 		{
+			Laya.timer.clear(this,reUploadFile);
+			
 			if(isUploading)
 				return;
 			if(clientParam == null)
@@ -249,25 +253,35 @@ package script.picUpload
 		
 		private function onUploadError(err:Object):void
 		{
-			uiSkin.errortxt.visible = true;
-			uiSkin.errortxt.text = getErrorMsg(err);
+			
 			
 			isUploading = false;
 			clientParam = null;
 			//callbackparam = null;
 			//ossFileName = "";
 			
-			var cells:Vector.<Box> = uiSkin.fileList.cells;
-			for(var i:int=0;i < cells.length;i++)
+			
+			if(reupTryTimes < 10)
 			{
-				if(cells[i] as FileUpLoadItem != null && (cells[i] as FileUpLoadItem).fileobj == fileListData[curUploadIndex])
-				{
-					(cells[i] as FileUpLoadItem).showReUploadbtn();
-					uiSkin.goonbtn.visible = true;
-					break;
-				}
+				Laya.timer.once(100,this,reUploadFile);
+				reupTryTimes++;
 			}
 			
+			{
+				uiSkin.errortxt.visible = true;
+				uiSkin.errortxt.text = getErrorMsg(err);
+				
+				var cells:Vector.<Box> = uiSkin.fileList.cells;
+				for(var i:int=0;i < cells.length;i++)
+				{
+					if(cells[i] as FileUpLoadItem != null && (cells[i] as FileUpLoadItem).fileobj == fileListData[curUploadIndex])
+					{
+						(cells[i] as FileUpLoadItem).showReUploadbtn();
+						uiSkin.goonbtn.visible = true;
+						break;
+					}
+				}
+			}
 		}
 		private function updateProgress():void
 		{

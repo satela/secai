@@ -21,6 +21,8 @@ package ui {
 		public var radiosel:CheckBox;
 		public var searchInput:TextInput;
 		public var filetypeRadio:RadioGroup;
+		public var prgcap:ProgressBar;
+		public var leftcapacity:Label;
 		public var btnorder:Button;
 		public var picList:List;
 		public var btnroot:Label;
