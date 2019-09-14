@@ -23,6 +23,7 @@ package script
 	import ui.order.SelectPicPanelUI;
 	import ui.picManager.PicCheckPanelUI;
 	import ui.product.BuyProductPanelUI;
+	import ui.product.ProductMarketPanelUI;
 	import ui.product.ProductOrderPanelUI;
 	import ui.uploadpic.UpLoadPanelUI;
 	import ui.usercenter.NewAddressPanelUI;
@@ -133,7 +134,7 @@ package script
 			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;
 			viewDict[VIEW_LOADING_PRO] = LoadingPanelUI;
 			
-			viewDict[VIEW_PRODUCT_VIEW] = ProductOrderPanelUI;
+			viewDict[VIEW_PRODUCT_VIEW] = ProductMarketPanelUI;// ProductOrderPanelUI;//
 			viewDict[VIEW_BUY_PRODUCT_VIEW] = BuyProductPanelUI;
 			viewDict[VIEW_ORDER_DETAIL_PANEL] = OrderDetailPanelUI;
 			viewDict[VIEW_SELECT_PAYTYPE_PANEL] = ConfirmOrderPanelUI;

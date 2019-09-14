@@ -258,8 +258,34 @@ package script.order
 					//	temp.push(matvo.childMatList[matvo.childMatList.length - 1]);
 
 				}
+				matvo.childMatList.sort(sortMaterial);
+				
 				uiSkin.matlist.array = matvo.childMatList;
 			}
+		}
+		
+		private function sortMaterial(a:ProductVo,b:ProductVo):int
+		{
+			var anum:String = a.prod_code;
+			var bnum:String = b.prod_code;
+			
+			var ano:String = "";
+			for(var i:int=0;i < anum.length;i++)
+			{
+				if(anum.charCodeAt(i) <= 57 && anum.charCodeAt(i) >= 48)
+					ano = ano + anum[i];
+			}
+			var bno:String = "";
+			for(var i:int=0;i < bnum.length;i++)
+			{
+				if(bnum.charCodeAt(i) <= 57 && bnum.charCodeAt(i) >= 48)
+					bno = bno + bnum[i];
+			}
+		
+			if(parseInt(ano) <= parseInt(bno))
+				return -1;
+			else
+				return 1;
 		}
 		private function updateMatNameItem(cell:MaterialItem):void
 		{
@@ -494,13 +520,26 @@ package script.order
 				}
 				else
 					this.uiSkin.techcontent.hScrollBar.visible = false;
+								
 				
 				if(itembox != null && (itembox.y + itembox.height) > uiSkin.techcontent.height)
 				{
+					this.uiSkin.techcontent.vScrollBar.hide = false;
+
 					Laya.timer.frameOnce(2,this,function(){
 						this.uiSkin.techcontent.scrollTo(this.uiSkin.techcontent.hScrollBar.value,itembox.y + itembox.height);
 					});
 				}
+				else if(itembox != null && itembox.y < 0 )
+				{
+					this.uiSkin.techcontent.vScrollBar.hide = false;
+					
+					Laya.timer.frameOnce(2,this,function(){
+						this.uiSkin.techcontent.scrollTo(this.uiSkin.techcontent.hScrollBar.value,itembox.y);
+					});
+				}
+				else
+					this.uiSkin.techcontent.vScrollBar.visible = false;
 
 				
 			}

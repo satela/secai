@@ -99,7 +99,7 @@ package script.order
 			if(tempaddress != null)
 			{
 				PaintOrderModel.instance.selectAddress = tempaddress;
-				EventCenter.instance.event(EventCenter.SELECT_ORDER_ADDRESS);
+				EventCenter.instance.event(EventCenter.SELECT_ORDER_ADDRESS,tempaddress);
 			}
 			onCloseView();
 		}

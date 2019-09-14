@@ -226,6 +226,16 @@ package script.usercenter
 				ViewManager.showAlert("请选择营业执照");
 				return;
 			}
+			if(curYyzzFile.size >= 6*1024*1024)
+			{
+				ViewManager.showAlert("营业执照尺寸不能超过6M");
+				return;
+			}
+			if(curYyzzFile.type != "image/jpg" && curYyzzFile.type != "image/jpeg")
+			{
+				ViewManager.showAlert("营业执照图片必须为JPG格式");
+				return;
+			}
 			if(uiSkin.shortname.text == "")
 			{
 				ViewManager.showAlert("请填写企业简称");
@@ -326,7 +336,7 @@ package script.usercenter
 
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
-				if(uiSkin == null || uiSkin.citytxt == null)
+				if(uiSkin == null || uiSkin.citytxt == null || uiSkin.destroyed)
 					return;
 				var result:Object = JSON.parse(data as String);
 				
@@ -365,7 +375,7 @@ package script.usercenter
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
-				if(uiSkin == null || uiSkin.areatxt == null)
+				if(uiSkin == null || uiSkin.areatxt == null || uiSkin.destroyed)
 					return;
 				
 				var result:Object = JSON.parse(data as String);
@@ -408,7 +418,7 @@ package script.usercenter
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,function(data:String)
 			{
-				if(uiSkin == null || uiSkin.towntxt == null)
+				if(uiSkin == null || uiSkin.towntxt == null || uiSkin.destroyed)
 					return;
 				
 				var result:Object = JSON.parse(data as String);

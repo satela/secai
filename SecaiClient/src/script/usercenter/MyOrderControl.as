@@ -41,6 +41,9 @@ package script.usercenter
 		}
 		private function onGetOrderListBack(data:Object):void
 		{
+			if (data == null || data == "")
+				return;
+			
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{

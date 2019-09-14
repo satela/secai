@@ -219,7 +219,7 @@ package script.order
 						uiSkin.outputbox.addChild(outputitem);
 						outputitem.checkselect.selected = true;
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
-						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
+						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
 					}
 					uiSkin.fengeimg.y = fengeoriginy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 					uiSkin.floatpt.y = floatpyy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;

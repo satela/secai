@@ -5,7 +5,13 @@ package ui.login {
 	import script.login.ResetPwdControl;
 
 	public class ResetPwdPanelUI extends View {
+		public var inputphone:TextInput;
+		public var inputpwd:TextInput;
+		public var inputcfmpwd:TextInput;
+		public var inputcode:TextInput;
+		public var btngetcode:Button;
 		public var btnClose:Button;
+		public var btnok:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();
