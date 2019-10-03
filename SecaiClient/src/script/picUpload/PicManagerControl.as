@@ -115,7 +115,6 @@ package script.picUpload
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,onGetLeftCapacitBack,null,"post");
 
 		}
 		private function onResizeBrower():void
@@ -262,6 +261,8 @@ package script.picUpload
 				uiSkin.picList.array = DirectoryFileModel.instance.topDirectList;
 				curFileList = DirectoryFileModel.instance.topDirectList;
 				DirectoryFileModel.instance.curFileList = [];
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,onGetLeftCapacitBack,null,"post");
+
 //				if(DirectoryFileModel.instance.topDirectList.length > 0)
 //				{
 //					//curDirect += (DirectoryFileModel.instance.topDirectList[0] as PicInfoVo).directName + "|";
@@ -274,6 +275,10 @@ package script.picUpload
 //					(uiSkin.folderList.cells[0] as DirectFolderItem).ShowSelected = true;
 //					getFileList();
 //				}
+			}
+			else if(result.status == 205)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 			}
 			
 		}

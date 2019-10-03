@@ -39,6 +39,7 @@ package script.order
 			
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
+			uiSkin.btnadd.on(Event.CLICK,this,onShowAddAdress);
 			
 
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
@@ -52,10 +53,29 @@ package script.order
 					(cells[i] as SelAddressItem).ShowSelected = (cells[i] as SelAddressItem).address == PaintOrderModel.instance.selectAddress;
 				}
 			});
-			
+			EventCenter.instance.on(EventCenter.UPDATE_MYADDRESS_LIST,this,updateList);
+
 			//PaintOrderModel.instance.selectAddress = null;
 		}
 		
+		private function updateList(data:AddressVo):void
+		{
+			
+			uiSkin.list_address.refresh();
+			Laya.timer.once(10,null,function()
+			{
+				var cells:Vector.<Box> = uiSkin.list_address.cells;
+				for(var i:int=0;i < cells.length;i++)
+				{
+					(cells[i] as SelAddressItem).ShowSelected = (cells[i] as SelAddressItem).address == PaintOrderModel.instance.selectAddress;
+				}
+			});
+			
+		}
+		private function onShowAddAdress():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+		}
 		private function onSearchAddress():void
 		{
 			if(uiSkin.inputsearch.text == "")
@@ -108,6 +128,11 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_ADDRESS);
+		}
+		public override function onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.UPDATE_MYADDRESS_LIST,this,updateList);
+			
 		}
 	}
 }

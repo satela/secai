@@ -120,7 +120,7 @@ package script.login
 		
 		private function onResetpwd():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_CHANGEPWD,true);
+			ViewManager.instance.openView(ViewManager.VIEW_CHANGEPWD,false);
 
 		}
 		override public function onEnable():void

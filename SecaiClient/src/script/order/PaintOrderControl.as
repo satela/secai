@@ -148,6 +148,8 @@ package script.order
 //				}
 //				trace(data);
 //			});
+			PaintOrderModel.instance.selectAddress = null;
+
 			resetOrderInfo();
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
@@ -384,6 +386,12 @@ package script.order
 		}
 		private function onBatchChangeMaterial():void
 		{			
+			if(PaintOrderModel.instance.selectAddress == null)
+			{
+				ViewManager.showAlert("请先选择收货地址");
+				return;
+			}
+			
 			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
 			for(var i:int=0;i < orderlist.length;i++)
 			{
@@ -545,7 +553,7 @@ package script.order
 					totalmoney += Number(orderdata.money_paidStr);
 					allorders.push(orderdata.order_sn);
 				}
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:totalmoney,orderid:allorders});
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
 				
 			}
 		}
@@ -631,7 +639,7 @@ package script.order
 			var arr:Array = [];
 			for each(var odata in orderFactory)
 			{
-				orderdata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
+				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
 				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
 
 				arr.push(odata);

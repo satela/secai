@@ -17,6 +17,13 @@ package script.order
 	public class PicOrderItem extends OrderItemUI
 	{
 		public var ordervo:PicOrderItemVo;
+		public var locked:Boolean = true;
+		
+		public var finalWidth:Number;
+		public var finalHeight:Number;
+		
+		private var curproductvo:ProductVo;
+		
 		public function PicOrderItem(vo:PicOrderItemVo)
 		{
 			super();
@@ -47,8 +54,14 @@ package script.order
 				
 			}
 			this.fileimg.on(Event.DOUBLE_CLICK,this,onShowBigImg);
+			
+			finalWidth = ordervo.picinfo.picPhysicWidth;
+			finalHeight = ordervo.picinfo.picPhysicHeight;
+			
 			this.editwidth.text = ordervo.picinfo.picPhysicWidth.toString();
 			this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
+			this.editwidth.restrict = "0-9" + ".";
+			this.editheight.restrict = "0-9" + ".";
 			this.filename.text = ordervo.picinfo.directName;
 			this.architype.text = ordervo.techStr;
 			this.total.text = "0";
@@ -70,6 +83,10 @@ package script.order
 			//this.changearchitxt.on(Event.CLICK,this,onchangeTech);
 			this.inputnum.on(Event.INPUT,this,onNumChange);
 
+			this.editwidth.on(Event.INPUT,this,onWidthSizeChange);
+			this.editheight.on(Event.INPUT,this,onHeightSizeChange);
+			this.lockratio.on(Event.CLICK,this,onLockChange);
+
 			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
 			else
@@ -83,6 +100,48 @@ package script.order
 				this.height = 113;
 			this.bgimg.height = this.height;
 			alighComponet();
+		}
+		
+		private function onLockChange():void
+		{
+			if(locked)
+			{
+				this.lockratio.skin = "commers/unlock.png";
+				locked = false;
+			}
+			else
+			{
+				this.lockratio.skin = "commers/lock.png";
+				locked = true;
+			}
+		}
+		private function onWidthSizeChange():void
+		{
+			var curwidth:Number = Number(this.editwidth.text);
+			
+			finalWidth = curwidth;
+			if(locked)
+			{
+				var heightration:Number = curwidth/ordervo.picinfo.picPhysicWidth*ordervo.picinfo.picPhysicHeight;
+				finalHeight = heightration;
+				
+				this.editheight.text = heightration.toFixed(2);
+			}
+			updatePrice();
+		}
+		private function onHeightSizeChange():void
+		{
+			var curheight:Number = Number(this.editheight.text);
+			finalHeight = curheight;
+
+			if(locked)
+			{
+				var widthration:Number = curheight/ordervo.picinfo.picPhysicHeight*ordervo.picinfo.picPhysicWidth;
+				finalWidth = widthration;
+
+				this.editwidth.text = widthration.toFixed(2);
+			}
+			updatePrice();
 		}
 		
 		private function onSubItemNum():void
@@ -150,6 +209,27 @@ package script.order
 			EventCenter.instance.event(EventCenter.DELETE_PIC_ORDER,this);
 		}
 		
+		private function updatePrice():void
+		{
+			if(curproductvo != null)
+			{
+				updateOrderData(curproductvo);
+				var area:Number = (finalHeight * finalWidth)/10000;
+				var perimeter:Number = (finalHeight + finalWidth)*2/100;
+				if(area < 0.1)
+					area = 0.1;
+				
+				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+					this.price.text = (curproductvo.getTotalPrice(area,perimeter)/area).toFixed(2);
+				else
+					this.price.text = (curproductvo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
+				
+				
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(area,perimeter)).toFixed(2) + "";
+				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+
+			}
+		}
 		private function onNumChange():void
 		{
 			
@@ -162,6 +242,11 @@ package script.order
 		private function onShowMaterialView():void
 		{
 			// TODO Auto Generated method stub
+			if(PaintOrderModel.instance.selectAddress == null)
+			{
+				ViewManager.showAlert("请先选择收货地址");
+				return;
+			}
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
 			PaintOrderModel.instance.curSelectOrderItem = this;
 			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
@@ -170,9 +255,11 @@ package script.order
 		public function changeProduct(provo:ProductVo):void
 		{
 			//this.ordervo.orderData = provo;
+			curproductvo = provo;
+			
 			updateOrderData(provo);
-			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
-			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
+			var area:Number = (finalHeight * finalWidth)/10000;
+			var perimeter:Number = (finalHeight + finalWidth)*2/100;
 			if(area < 0.1)
 				area = 0.1;
 			
@@ -213,8 +300,8 @@ package script.order
 		public function updateOrderData(productVo:ProductVo)
 		{
 			
-			var area:Number = (ordervo.picinfo.picPhysicHeight * ordervo.picinfo.picPhysicWidth)/10000;
-			var perimeter:Number = (ordervo.picinfo.picPhysicHeight + ordervo.picinfo.picPhysicWidth)*2/100;
+			var area:Number = (finalHeight * finalWidth)/10000;
+			var perimeter:Number = (finalHeight + finalWidth)*2/100;
 
 			if(area < 0.1)
 				area = 0.1;
@@ -229,7 +316,7 @@ package script.order
 			orderitemdata.prod_code = productVo.prod_code;
 			
 			orderitemdata.prod_description = "";
-			orderitemdata.LWH = ordervo.picinfo.picPhysicWidth + "/" + ordervo.picinfo.picPhysicHeight + "/1";
+			orderitemdata.LWH = finalWidth + "/" + finalHeight + "/1";
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();

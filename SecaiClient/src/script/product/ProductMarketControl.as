@@ -73,7 +73,7 @@ package script.product
 			
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid + "&manufacturer_type=商品输出中心",this,onGetOutPutAddress,null,null);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + Userdata.instance.getDefaultAddress().searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
 				uiSkin.myaddresstxt.text = Userdata.instance.getDefaultAddress().addressDetail;
 				selectAddress = Userdata.instance.getDefaultAddress();
 			}
@@ -154,7 +154,7 @@ package script.product
 			{
 				selectAddress = add;
 				uiSkin.myaddresstxt.text = selectAddress.addressDetail;
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + selectAddress.searchZoneid + "&manufacturer_type=商品输出中心",this,onGetOutPutAddress,null,null);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + selectAddress.searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
 			}
 		}
 		public function initOutputAddr(addrobj:Array):void

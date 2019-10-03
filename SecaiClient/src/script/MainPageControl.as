@@ -19,6 +19,7 @@ package script {
 	import model.Userdata;
 	
 	import script.login.LogPanelControl;
+	import script.usercenter.UserMainControl;
 	
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
@@ -128,6 +129,10 @@ package script {
 			{
 				Userdata.instance.initMyAddress(result.data as Array);
 				Userdata.instance.defaultAddId = result["default"];
+			}
+			else if(result.status == 205 || result.status　== 404)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 			}
 		}
 		private function onResizeBrower():void

@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":6,
-    "selecteID":27,
+    "selectedBox":26,
+    "selecteID":23,
     "searchKey":"View",
     "props":{"width":1920,"top":0,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -227,20 +227,6 @@
                             "child":[
                                 ],
                             "$HIDDEN":false
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":590,"text":"注:除以上工艺外的特殊工艺请在下单页面备注栏内备注！","right":300,"fontSize":20,"font":"SimHei","color":"#EB5767"},
-                            "nodeParent":26,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":23,
-                            "child":[
-                                ]
                         },
                         {
                             "x":45,

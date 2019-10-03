@@ -453,7 +453,7 @@ package script.order
 			if(parentitem.isSelected)
 			{
 				//hideItems(parentitem.x,true);
-				refreshHashowItem(parentitem.x);
+				refreshHashowItem(parentitem.techmainvo,parentitem.x);
 				updateSelectedTech();
 				//if(matvo is MaterialItemVo)
 				//return;
@@ -658,7 +658,7 @@ package script.order
 			
 		}
 		
-		private function refreshHashowItem(curposx:Number):void
+		private function refreshHashowItem(matvo:MaterialItemVo,curposx:Number):void
 		{
 			for(var i:int=0;i < hasShowItemList.length;i++)
 			{
@@ -666,9 +666,29 @@ package script.order
 				{
 					hasShowItemList[i].setSelected(false);
 					if(hasShowItemList[i].techmainvo != null)
-						hasShowItemList[i].techmainvo.selected = false;					
+						hasShowItemList[i].techmainvo.selected = false;			
+					if(matvo.nextMatList.indexOf(hasShowItemList[i].techmainvo) < 0)
+					{
+						hasShowItemList[i].removeSelf();
+						
+						allitemlist.push(hasShowItemList[i]);
+						(hasShowItemList[i] as TechBoxItem).offAll();
+						hasShowItemList.splice(i,1);
+						i--;
+					}
 				}
 				
+			}
+			
+			for(var i:int=0;i < linelist.length;i++)
+			{
+				if(linelist[i].x > curposx + itemspaceH + 140)
+				{
+					linelist[i].graphics.clear(true);
+					linelist[i].removeSelf();				
+					linelist.splice(i,1);
+					i--;
+				}
 			}
 		}
 		private function updateSelectedTech():void

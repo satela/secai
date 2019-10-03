@@ -1254,7 +1254,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="product/ProductMarketPanel.scene";
+	GameConfig.startScene="order/OrderItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1540,7 +1540,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_ADD_MESSAGE"]=AddCommentPanelUI;
 		this.viewDict["VIEW_ADD_NEW_ADDRESS"]=NewAddressPanelUI;
 		this.viewDict["VIEW_LOADING_PRO"]=LoadingPanelUI;
-		this.viewDict["VIEW_PRODUCT_VIEW"]=ProductMarketPanelUI;
+		this.viewDict["VIEW_PRODUCT_VIEW"]=ProductOrderPanelUI;
 		this.viewDict["VIEW_BUY_PRODUCT_VIEW"]=BuyProductPanelUI;
 		this.viewDict["VIEW_ORDER_DETAIL_PANEL"]=OrderDetailPanelUI;
 		this.viewDict["VIEW_SELECT_PAYTYPE_PANEL"]=ConfirmOrderPanelUI;
@@ -1672,7 +1672,7 @@ var UtilTool=(function(){
 		var datestr="";
 		datestr+=date.getFullYear()+"-";
 		if((date.getMonth()+1)>=10)
-			datestr+=(date.month+1)+"-";
+			datestr+=(date.getMonth()+1)+"-";
 		else
 		datestr+="0"+(date.getMonth()+1)+"-";
 		if(date.getDate()>=10)
@@ -2265,6 +2265,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.uploadPic="file/add";
 	HttpRequestUtil.deletePic="file/remove?";
 	HttpRequestUtil.getCapacity="get-info?";
+	HttpRequestUtil.getChangePwdCode="account/getcode?";
+	HttpRequestUtil.changePwdReqUrl="account/modify?";
 	HttpRequestUtil.createGroup="group/create-group?";
 	HttpRequestUtil.addressManageUrl="group/opt-group-express?";
 	HttpRequestUtil.biggerPicUrl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/";
@@ -34669,6 +34671,9 @@ var MainPageControl=(function(_super){
 			Userdata.instance.initMyAddress(result.data);
 			Userdata.instance.defaultAddId=result["default"];
 		}
+		else if(result.status==205 || result.status　==404){
+			ViewManager.instance.openView("VIEW_USERCENTER",true);
+		}
 	}
 
 	__proto.onResizeBrower=function(){
@@ -35246,7 +35251,7 @@ var LogPanelControl=(function(_super){
 	}
 
 	__proto.onResetpwd=function(){
-		ViewManager.instance.openView("VIEW_CHANGEPWD",true);
+		ViewManager.instance.openView("VIEW_CHANGEPWD",false);
 	}
 
 	__proto.onEnable=function(){}
@@ -35524,7 +35529,6 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.height=Browser.clientHeight-365;
 		DirectoryFileModel.instance.curFileList=[];
 		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.onGetLeftCapacitBack,null,"post");
 	}
 
 	__proto.onResizeBrower=function(){
@@ -35629,10 +35633,13 @@ var PicManagerControl=(function(_super){
 			this.uiSkin.picList.array=DirectoryFileModel.instance.topDirectList;
 			this.curFileList=DirectoryFileModel.instance.topDirectList;
 			DirectoryFileModel.instance.curFileList=[];
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.onGetLeftCapacitBack,null,"post");
+		}
+		else if(result.status==205){
+			ViewManager.instance.openView("VIEW_USERCENTER",true);
 		}
 	}
 
-	// }
 	__proto.getFileList=function(){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/list?",this,this.onGetDirFileListBack,"path="+DirectoryFileModel.instance.curSelectDir.dpath,"post");
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.onGetLeftCapacitBack,null,"post");
@@ -35830,7 +35837,7 @@ var ProductMarketControl=(function(_super){
 		this.uiSkin.haschooselist.selectEnable=false;
 		this.uiSkin.haschooselist.array=[4,3,2,1];
 		if(Userdata.instance.getDefaultAddress()!=null){
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid+"&manufacturer_type=商品输出中心",this,this.onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid+"&manufacturer_type=喷印输出中心",this,this.onGetOutPutAddress,null,null);
 			this.uiSkin.myaddresstxt.text=Userdata.instance.getDefaultAddress().addressDetail;
 			this.selectAddress=Userdata.instance.getDefaultAddress();
 		}
@@ -35888,7 +35895,7 @@ var ProductMarketControl=(function(_super){
 		if(add){
 			this.selectAddress=add;
 			this.uiSkin.myaddresstxt.text=this.selectAddress.addressDetail;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+this.selectAddress.searchZoneid+"&manufacturer_type=商品输出中心",this,this.onGetOutPutAddress,null,null);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+this.selectAddress.searchZoneid+"&manufacturer_type=喷印输出中心",this,this.onGetOutPutAddress,null,null);
 		}
 	}
 
@@ -36145,6 +36152,7 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
 		this.uiSkin.btnsaveorder.on("click",this,this.onSaveOrder);
 		this.uiSkin.panelout.on("dragmove",this,this.onDragMove);
+		PaintOrderModel.instance.selectAddress=null;
 		this.resetOrderInfo();
 		if(Userdata.instance.getDefaultAddress()!=null){
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid+"&manufacturer_type=喷印输出中心",this,this.onGetOutPutAddress,null,null);
@@ -36311,6 +36319,10 @@ var PaintOrderControl=(function(_super){
 	}
 
 	__proto.onBatchChangeMaterial=function(){
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请先选择收货地址");
+			return;
+		}
 		PaintOrderModel.instance.batchChangeMatItems=[];
 		for(var i=0;i < this.orderlist.length;i++){
 			if(this.orderlist[i].checkSel.selected){
@@ -36433,7 +36445,7 @@ var PaintOrderControl=(function(_super){
 				totalmoney+=Number(orderdata.money_paidStr);
 				allorders.push(orderdata.order_sn);
 			}
-			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:totalmoney,orderid:allorders});
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
 		}
 	}
 
@@ -36495,7 +36507,7 @@ var PaintOrderControl=(function(_super){
 		var odata;
 		for(var $each_odata in orderFactory){
 			odata=orderFactory[$each_odata];
-			orderdata.money_paidStr=(odata.order_amountStr).toFixed(2);
+			odata.money_paidStr=(odata.order_amountStr).toFixed(2);
 			odata.order_amountStr=(odata.order_amountStr).toFixed(2);
 			arr.push(odata);
 		}
@@ -36914,6 +36926,7 @@ var ResetPwdControl=(function(_super){
 		this.param=null;
 		this.inputarr=null;
 		this.focusindex=0;
+		this.coutdown=60;
 		ResetPwdControl.__super.call(this);
 	}
 
@@ -36922,6 +36935,15 @@ var ResetPwdControl=(function(_super){
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
 		this.uiSkin.btnClose.on("click",this,this.onCloseScen);
+		this.uiSkin.btngetcode.on("click",this,this.onGetCode);
+		this.uiSkin.btnok.on("click",this,this.onChangepwd);
+		this.uiSkin.inputpwd.maxChars=20;
+		this.uiSkin.inputpwd.type="password";
+		this.uiSkin.inputphone.maxChars=11;
+		this.uiSkin.inputphone.restrict="0-9";
+		this.uiSkin.inputcode.maxChars=6;
+		this.uiSkin.inputcfmpwd.maxChars=20;
+		this.uiSkin.inputcfmpwd.type="password";
 		this.inputarr=[this.uiSkin.inputphone,this.uiSkin.inputpwd,this.uiSkin.inputcfmpwd,this.uiSkin.inputcode];
 		for(var i=0;i < this.inputarr.length;i++){
 			this.inputarr[i].on("keydown",this,this.onAccountKeyUp);
@@ -36931,8 +36953,72 @@ var ResetPwdControl=(function(_super){
 		this.focusindex=0;
 	}
 
+	__proto.onGetCode=function(){
+		if(this.uiSkin.inputphone.text.length < 11){
+			Browser.window.alert("请填写正确的手机号");
+			return;
+		}
+		this.uiSkin.btngetcode.disabled=true;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/getcode?" ,this,this.onGetPhoneCodeBack,"phone="+this.uiSkin.inputphone.text,"post");
+	}
+
+	__proto.onGetPhoneCodeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var phonecode=result.code;
+			this.uiSkin.btngetcode.label="60秒后重试";
+			Laya.timer.loop(1000,this,this.countdownCode);
+		}
+		else
+		this.uiSkin.btngetcode.disabled=false;
+		console.log("pho code:"+data);
+	}
+
+	__proto.countdownCode=function(){
+		this.coutdown--;
+		if(this.coutdown > 0){
+			this.uiSkin.btngetcode.label=this.coutdown+"秒后重试";
+		}
+		else{
+			this.uiSkin.btngetcode.disabled=false;
+			this.uiSkin.btngetcode.label="获取验证码";
+			Laya.timer.clear(this,this.countdownCode);
+		}
+	}
+
+	__proto.onChangepwd=function(){
+		if(this.uiSkin.inputcode.text==""){
+			ViewManager.showAlert("请填写验证码");
+			return;
+		}
+		if(this.uiSkin.inputpwd.text==""){
+			ViewManager.showAlert("请填写新的密码");
+			return;
+		}
+		if(this.uiSkin.inputpwd.text.length < 6){
+			Browser.window.alert("密码长度至少6位");
+			return;
+		}
+		if(this.uiSkin.inputpwd.text !=this.uiSkin.inputcfmpwd.text){
+			ViewManager.showAlert("两次填写的密码不一致");
+			return;
+		}
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/modify?" ,this,this.onChangePwdBack,"phone="+this.uiSkin.inputphone.text+"&newpassword="+this.uiSkin.inputpwd.text+"&code="+this.uiSkin.inputcode.text,"post");
+	}
+
+	__proto.onChangePwdBack=function(data){
+		if(data !=""){
+			var result=JSON.parse(data);
+			if(result.status==0){
+				ViewManager.showAlert("修改成功");
+				this.onCloseScen();
+				ViewManager.instance.openView("VIEW_lOGPANEL");
+			}
+		}
+	}
+
 	__proto.onFocusChange=function(e){
-		if(this.inputarr.indexOf(Laya.stage.focus.parent)>=0)
+		if(Laya.stage.focus !=null && this.inputarr.indexOf(Laya.stage.focus.parent)>=0)
 			this.focusindex=this.inputarr.indexOf(Laya.stage.focus.parent);
 	}
 
@@ -36983,7 +37069,6 @@ var SelectAttchesControl=(function(_super){
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/acccatlist?"+"prod_code="+PaintOrderModel.instance.curSelectMat.prod_code+"&proc_name="+this.matvo.preProc_Name,this,this.onAccCatlistBack,null,null);
 		}
 		this.selectAttach=[];
-		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onSureClose);
 		EventCenter.instance.on("ADD_TECH_ATTACH",this,this.onAddAttach);
 	}
@@ -37074,6 +37159,7 @@ var SelectAddressControl=(function(_super){
 		this.uiSkin.list_address.selectHandler=new Handler(this,this.onSlecteAddress);
 		this.uiSkin.btncancel.on("click",this,this.onCloseView);
 		this.uiSkin.btnok.on("click",this,this.onConfirmSelectAddress);
+		this.uiSkin.btnadd.on("click",this,this.onShowAddAdress);
 		this.uiSkin.inputsearch.on("input",this,this.onSearchAddress);
 		this.uiSkin.list_address.array=Userdata.instance.addressList;
 		Laya.timer.once(10,null,function(){
@@ -37082,9 +37168,25 @@ var SelectAddressControl=(function(_super){
 				(cells [i]).ShowSelected=(cells [i]).address==PaintOrderModel.instance.selectAddress;
 			}
 		});
+		EventCenter.instance.on("UPDATE_MYADDRESS_LIST",this,this.updateList);
 	}
 
 	//PaintOrderModel.instance.selectAddress=null;
+	__proto.updateList=function(data){
+		var _$this=this;
+		this.uiSkin.list_address.refresh();
+		Laya.timer.once(10,null,function(){
+			var cells=_$this.uiSkin.list_address.cells;
+			for(var i=0;i < cells.length;i++){
+				(cells [i]).ShowSelected=(cells [i]).address==PaintOrderModel.instance.selectAddress;
+			}
+		});
+	}
+
+	__proto.onShowAddAdress=function(){
+		ViewManager.instance.openView("VIEW_ADD_NEW_ADDRESS");
+	}
+
 	__proto.onSearchAddress=function(){
 		if(this.uiSkin.inputsearch.text==""){
 			this.uiSkin.list_address.array=Userdata.instance.addressList;
@@ -37125,6 +37227,10 @@ var SelectAddressControl=(function(_super){
 
 	__proto.onCloseView=function(){
 		ViewManager.instance.closeView("VIEW_SELECT_ADDRESS");
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("UPDATE_MYADDRESS_LIST",this,this.updateList);
 	}
 
 	return SelectAddressControl;
@@ -38109,7 +38215,7 @@ var SelectMaterialControl=(function(_super){
 		}
 		this.hasFinishAllFlow=false;
 		if(parentitem.isSelected){
-			this.refreshHashowItem(parentitem.x);
+			this.refreshHashowItem(parentitem.techmainvo,parentitem.x);
 			this.updateSelectedTech();
 		}
 		if(!this.hasShowNextMaterial(matvo)){
@@ -38226,12 +38332,27 @@ var SelectMaterialControl=(function(_super){
 		}
 	}
 
-	__proto.refreshHashowItem=function(curposx){
+	__proto.refreshHashowItem=function(matvo,curposx){
 		for(var i=0;i < this.hasShowItemList.length;i++){
 			if(this.hasShowItemList[i].x > curposx){
 				this.hasShowItemList[i].setSelected(false);
 				if(this.hasShowItemList[i].techmainvo !=null)
 					this.hasShowItemList[i].techmainvo.selected=false;
+				if(matvo.nextMatList.indexOf(this.hasShowItemList[i].techmainvo)< 0){
+					this.hasShowItemList[i].removeSelf();
+					this.allitemlist.push(this.hasShowItemList[i]);
+					(this.hasShowItemList [i]).offAll();
+					this.hasShowItemList.splice(i,1);
+					i--;
+				}
+			}
+		}
+		for(var i=0;i < this.linelist.length;i++){
+			if(this.linelist[i].x > curposx+this.itemspaceH+140){
+				this.linelist[i].graphics.clear(true);
+				this.linelist[i].removeSelf();
+				this.linelist.splice(i,1);
+				i--;
 			}
 		}
 	}
@@ -38702,7 +38823,7 @@ var AddressEditControl=(function(_super){
 				Userdata.instance.addNewAddress(result);
 			else
 			Userdata.instance.updateAddress(result);
-			EventCenter.instance.event("UPDATE_MYADDRESS_LIST");
+			EventCenter.instance.event("UPDATE_MYADDRESS_LIST",Userdata.instance.addressList[Userdata.instance.addressList.length-1]);
 			ViewManager.showAlert("添加地址成功");
 			this.onCloseView();
 		}
@@ -44685,6 +44806,7 @@ var OrderItemUI=(function(_super){
 		this.editbox=null;
 		this.editwidth=null;
 		this.editheight=null;
+		this.lockratio=null;
 		this.architype=null;
 		this.matbox=null;
 		this.mattxt=null;
@@ -44704,7 +44826,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":143,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":35,"x":53,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":195,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":38.5,"x":816,"width":58,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1083,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":488,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":false,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11}]},{"type":"VBox","props":{"y":29.5,"x":635,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":320,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":950,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":143,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":35,"x":53,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":195,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":35.5,"x":847,"width":58,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1083,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":488,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11},{"type":"Image","props":{"y":17,"x":142,"width":20,"var":"lockratio","skin":"commers/lock.png","height":20},"compId":37}]},{"type":"VBox","props":{"y":29.5,"x":663,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":320,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":950,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/lock.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -51113,7 +51235,6 @@ var SelectAttchPanelUI=(function(_super){
 	function SelectAttchPanelUI(){
 		this.attachList=null;
 		this.btnok=null;
-		this.btncancel=null;
 		SelectAttchPanelUI.__super.call(this);
 	}
 
@@ -51212,6 +51333,10 @@ var UserMainPanelUI=(function(_super){
 var PicOrderItem=(function(_super){
 	function PicOrderItem(vo){
 		this.ordervo=null;
+		this.locked=true;
+		this.finalWidth=NaN;
+		this.finalHeight=NaN;
+		this.curproductvo=null;
 		PicOrderItem.__super.call(this);
 		this.ordervo=vo;
 		this.initItem();
@@ -51235,8 +51360,12 @@ var PicOrderItem=(function(_super){
 			this.fileimg.width=100/this.ordervo.picinfo.picHeight *this.ordervo.picinfo.picWidth;
 		}
 		this.fileimg.on("doubleclick",this,this.onShowBigImg);
+		this.finalWidth=this.ordervo.picinfo.picPhysicWidth;
+		this.finalHeight=this.ordervo.picinfo.picPhysicHeight;
 		this.editwidth.text=this.ordervo.picinfo.picPhysicWidth.toString();
 		this.editheight.text=this.ordervo.picinfo.picPhysicHeight.toString();
+		this.editwidth.restrict="0-9"+".";
+		this.editheight.restrict="0-9"+".";
 		this.filename.text=this.ordervo.picinfo.directName;
 		this.architype.text=this.ordervo.techStr;
 		this.total.text="0";
@@ -51254,6 +51383,9 @@ var PicOrderItem=(function(_super){
 		this.changemat.underlineColor="#222222";
 		this.changemat.on("click",this,this.onShowMaterialView);
 		this.inputnum.on("input",this,this.onNumChange);
+		this.editwidth.on("input",this,this.onWidthSizeChange);
+		this.editheight.on("input",this,this.onHeightSizeChange);
+		this.lockratio.on("click",this,this.onLockChange);
 		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
 		else
@@ -51264,6 +51396,39 @@ var PicOrderItem=(function(_super){
 		this.height=113;
 		this.bgimg.height=this.height;
 		this.alighComponet();
+	}
+
+	__proto.onLockChange=function(){
+		if(this.locked){
+			this.lockratio.skin="commers/unlock.png";
+			this.locked=false;
+		}
+		else{
+			this.lockratio.skin="commers/lock.png";
+			this.locked=true;
+		}
+	}
+
+	__proto.onWidthSizeChange=function(){
+		var curwidth=Number(this.editwidth.text);
+		this.finalWidth=curwidth;
+		if(this.locked){
+			var heightration=curwidth/this.ordervo.picinfo.picPhysicWidth*this.ordervo.picinfo.picPhysicHeight;
+			this.finalHeight=heightration;
+			this.editheight.text=heightration.toFixed(2);
+		}
+		this.updatePrice();
+	}
+
+	__proto.onHeightSizeChange=function(){
+		var curheight=Number(this.editheight.text);
+		this.finalHeight=curheight;
+		if(this.locked){
+			var widthration=curheight/this.ordervo.picinfo.picPhysicHeight*this.ordervo.picinfo.picPhysicWidth;
+			this.finalWidth=widthration;
+			this.editwidth.text=widthration.toFixed(2);
+		}
+		this.updatePrice();
 	}
 
 	__proto.onSubItemNum=function(){
@@ -51318,6 +51483,22 @@ var PicOrderItem=(function(_super){
 		EventCenter.instance.event("DELETE_PIC_ORDER",this);
 	}
 
+	__proto.updatePrice=function(){
+		if(this.curproductvo !=null){
+			this.updateOrderData(this.curproductvo);
+			var area=(this.finalHeight *this.finalWidth)/10000;
+			var perimeter=(this.finalHeight+this.finalWidth)*2/100;
+			if(area < 0.1)
+				area=0.1;
+			if(this.curproductvo.measure_unit=="平方米")
+				this.price.text=(this.curproductvo.getTotalPrice(area,perimeter)/area).toFixed(2);
+			else
+			this.price.text=(this.curproductvo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
+			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(area,perimeter)).toFixed(2)+"";
+			EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
+		}
+	}
+
 	__proto.onNumChange=function(){
 		this.total.text=(parseInt(this.inputnum.text)*this.ordervo.orderPrice).toFixed(2).toString();
 		if(this.ordervo.orderData)
@@ -51326,15 +51507,20 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.onShowMaterialView=function(){
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请先选择收货地址");
+			return;
+		}
 		ViewManager.instance.openView("VIEW_SELECT_MATERIAL",false,this.ordervo.picinfo);
 		PaintOrderModel.instance.curSelectOrderItem=this;
 		PaintOrderModel.instance.batchChangeMatItems=[];
 	}
 
 	__proto.changeProduct=function(provo){
+		this.curproductvo=provo;
 		this.updateOrderData(provo);
-		var area=(this.ordervo.picinfo.picPhysicHeight *this.ordervo.picinfo.picPhysicWidth)/10000;
-		var perimeter=(this.ordervo.picinfo.picPhysicHeight+this.ordervo.picinfo.picPhysicWidth)*2/100;
+		var area=(this.finalHeight *this.finalWidth)/10000;
+		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
 		if(area < 0.1)
 			area=0.1;
 		if(provo.measure_unit=="平方米")
@@ -51363,8 +51549,8 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.updateOrderData=function(productVo){
-		var area=(this.ordervo.picinfo.picPhysicHeight *this.ordervo.picinfo.picPhysicWidth)/10000;
-		var perimeter=(this.ordervo.picinfo.picPhysicHeight+this.ordervo.picinfo.picPhysicWidth)*2/100;
+		var area=(this.finalHeight *this.finalWidth)/10000;
+		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
 		if(area < 0.1)
 			area=0.1;
 		this.ordervo.orderPrice=productVo.getTotalPrice(area,perimeter);
@@ -51374,7 +51560,7 @@ var PicOrderItem=(function(_super){
 		orderitemdata.prod_name=productVo.prod_name;
 		orderitemdata.prod_code=productVo.prod_code;
 		orderitemdata.prod_description="";
-		orderitemdata.LWH=this.ordervo.picinfo.picPhysicWidth+"/"+this.ordervo.picinfo.picPhysicHeight+"/1";
+		orderitemdata.LWH=this.finalWidth+"/"+this.finalHeight+"/1";
 		orderitemdata.weightStr=1;
 		orderitemdata.item_number=parseInt(this.inputnum.text);
 		orderitemdata.item_priceStr=this.ordervo.orderPrice.toString();

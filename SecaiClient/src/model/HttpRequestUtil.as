@@ -32,7 +32,9 @@ package model
 		
 		public static const getCapacity:String = "get-info?";
 		
-		
+		public static const getChangePwdCode:String = "account/getcode?";
+		public static const changePwdReqUrl:String = "account/modify?";
+
 		public static const createGroup:String = "group/create-group?";//cname,cshortname,czoneid,caddr,cyyzz
 
 

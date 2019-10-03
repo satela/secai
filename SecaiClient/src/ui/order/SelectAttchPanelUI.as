@@ -7,7 +7,6 @@ package ui.order {
 	public class SelectAttchPanelUI extends View {
 		public var attachList:List;
 		public var btnok:Button;
-		public var btncancel:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

@@ -64,7 +64,7 @@ package utils
 			var datestr:String = "";
 			datestr += date.getFullYear() + "-" ;
 			if((date.getMonth()+1) >= 10)
-				datestr += (date.month+1) + "-";
+				datestr += (date.getMonth()+1) + "-";
 			else
 				datestr += "0" + (date.getMonth()+1) + "-";
 			

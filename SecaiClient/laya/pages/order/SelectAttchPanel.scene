@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":13,
+    "selectedBox":4,
+    "selecteID":15,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
@@ -120,7 +120,7 @@
                     "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
-                    "props":{"y":773,"x":793},
+                    "props":{"y":773,"x":890},
                     "nodeParent":4,
                     "label":"Sprite",
                     "isOpen":true,
@@ -133,27 +133,13 @@
                             "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnok",
-                            "props":{"y":0,"x":194,"width":140,"var":"btnok","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF,","label":"确定","height":42},
+                            "props":{"y":0,"x":0,"width":140,"var":"btnok","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF,","label":"确定","height":42},
                             "nodeParent":15,
                             "label":"btnok",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
                             "compId":16,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,btncancel",
-                            "props":{"y":0,"x":0,"width":140,"var":"btncancel","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"取消","height":42},
-                            "nodeParent":15,
-                            "label":"btncancel",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":17,
                             "child":[
                                 ]
                         }]

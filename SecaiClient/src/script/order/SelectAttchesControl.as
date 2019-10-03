@@ -61,7 +61,7 @@ package script.order
 			//uiSkin.matlist.selectHandler = new Handler(this,onSlecteMat);
 			
 			selectAttach = new Vector.<AttchCatVo>();
-			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
+			//uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onSureClose);
 			EventCenter.instance.on(EventCenter.ADD_TECH_ATTACH,this,onAddAttach);
 
