@@ -1243,7 +1243,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="PicManagePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -35043,6 +35043,16 @@ var SelectPicControl=(function(_super){
 				(this.param).attchFileId="";
 			}
 			else{
+				if(PaintOrderModel.instance.curSelectOrderItem !=null)
+					var picinfo=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo;
+				if(picinfo !=null){
+					var xdif=Math.abs(picinfo.picPhysicWidth-fvo.picPhysicWidth)/picinfo.picPhysicWidth;
+					var ydif=Math.abs(picinfo.picPhysicHeight-fvo.picPhysicHeight)/picinfo.picPhysicHeight;
+					if(xdif >0.01 || ydif > 0.01){
+						ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"图片尺寸和当前下单图片尺寸不匹配"});
+						return;
+					}
+				}
 				(this.param).attchMentFileId="http://original-image.oss-cn-hangzhou.aliyuncs.com/"+fvo.fid+"."+fvo.picClass;
 				(this.param).attchFileId=fvo.fid;
 			}
@@ -35487,7 +35497,6 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.input_folename.maxChars=10;
 		this.uiSkin.btnCloseInput.on("click",this,this.onCloseCreateFolder);
 		this.uiSkin.picList.itemRender=PicInfoItem;
-		this.uiSkin.picList.vScrollBarSkin="";
 		this.uiSkin.picList.selectEnable=false;
 		this.uiSkin.picList.spaceY=0;
 		this.uiSkin.picList.renderHandler=new Handler(this,this.updatePicInfoItem);
@@ -35501,6 +35510,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.btnUploadPic.on("click",this,this.onShowUploadView);
 		this.uiSkin.filetypeRadio.visible=false;
 		this.uiSkin.radiosel.on("click",this,this.onSelectAllPic);
+		this.uiSkin.freshbtn.on("click",this,this.onFreshList);
 		this.uiSkin.picList.array=[];
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
 		this.initFileOpen();
@@ -35599,19 +35609,21 @@ var PicManagerControl=(function(_super){
 	}
 
 	__proto.seletPicToOrder=function(fvo){
-		var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
-		if(hasfic){
-			delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+		if(UtilTool.checkFileIsImg(fvo)){
+			var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
+			if(hasfic){
+				delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+			}
+			else
+			DirectoryFileModel.instance.haselectPic[fvo.fid]=fvo;
+			var num=0;
+			var picvo;
+			for(var $each_picvo in DirectoryFileModel.instance.haselectPic){
+				picvo=DirectoryFileModel.instance.haselectPic[$each_picvo];
+				num++;
+			}
+			this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>"+num+"</span>"+"<span color='#222222' size='20'>张图片</span>";
 		}
-		else
-		DirectoryFileModel.instance.haselectPic[fvo.fid]=fvo;
-		var num=0;
-		var picvo;
-		for(var $each_picvo in DirectoryFileModel.instance.haselectPic){
-			picvo=DirectoryFileModel.instance.haselectPic[$each_picvo];
-			num++;
-		}
-		this.uiSkin.htmltext.innerHTML="<span color='#222222' size='20'>已选择</span>"+"<span color='#FF0000' size='20'>"+num+"</span>"+"<span color='#222222' size='20'>张图片</span>";
 	}
 
 	__proto.onGetTopDirListBack=function(data){
@@ -35740,6 +35752,10 @@ var PicManagerControl=(function(_super){
 		else{
 			this.backToRootDir();
 		}
+	}
+
+	__proto.onFreshList=function(){
+		this.getFileList();
 	}
 
 	__proto.onClickTopDirectLbl=function(index){
@@ -37151,6 +37167,7 @@ var SelectAddressControl=(function(_super){
 		this.uiSkin.btnadd.on("click",this,this.onShowAddAdress);
 		this.uiSkin.inputsearch.on("input",this,this.onSearchAddress);
 		this.uiSkin.list_address.array=Userdata.instance.addressList;
+		this.tempaddress=PaintOrderModel.instance.selectAddress;
 		Laya.timer.once(10,null,function(){
 			var cells=_$this.uiSkin.list_address.cells;
 			for(var i=0;i < cells.length;i++){
@@ -37167,7 +37184,7 @@ var SelectAddressControl=(function(_super){
 		Laya.timer.once(10,null,function(){
 			var cells=_$this.uiSkin.list_address.cells;
 			for(var i=0;i < cells.length;i++){
-				(cells [i]).ShowSelected=(cells [i]).address==PaintOrderModel.instance.selectAddress;
+				(cells [i]).ShowSelected=(cells [i]).address==_$this.tempaddress;
 			}
 		});
 	}
@@ -50852,6 +50869,7 @@ var OrderAddressItemUI=(function(_super){
 		this.btnsel=null;
 		this.selCheck=null;
 		this.addresstxt=null;
+		this.btnSetDefault=null;
 		OrderAddressItemUI.__super.call(this);
 	}
 
@@ -50862,7 +50880,7 @@ var OrderAddressItemUI=(function(_super){
 		this.createView(OrderAddressItemUI.uiView);
 	}
 
-	OrderAddressItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":1090,"var":"btnsel","skin":"order/chooseadd.png","sizeGrid":"3,3,3,3","height":50},"compId":6},{"type":"Radio","props":{"y":17,"x":22,"var":"selCheck","skin":"commers/checksingle.png","mouseEnabled":false},"compId":7},{"type":"Label","props":{"y":17,"x":60,"var":"addresstxt","text":"浙江省 金华市 义乌市 抽成街道","mouseEnabled":false,"height":18,"fontSize":18,"font":"SimHei","color":"#262B2E"},"compId":8}],"loadList":["order/chooseadd.png","commers/checksingle.png"],"loadList3D":[]};
+	OrderAddressItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":1090,"var":"btnsel","skin":"order/chooseadd.png","sizeGrid":"3,3,3,3","height":50},"compId":6},{"type":"Radio","props":{"y":17,"x":22,"var":"selCheck","skin":"commers/checksingle.png","mouseEnabled":false},"compId":7},{"type":"Label","props":{"y":17,"x":60,"width":823,"var":"addresstxt","text":"浙江省 金华市 义乌市 抽成街道","overflow":"scroll","mouseEnabled":false,"height":18,"fontSize":18,"font":"SimHei","color":"#262B2E"},"compId":8},{"type":"Text","props":{"y":15,"x":900,"width":70,"var":"btnSetDefault","text":"设为默认","presetID":1,"height":21,"fontSize":16,"font":"SimHei","color":"#354052","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]}],"loadList":["order/chooseadd.png","commers/checksingle.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderAddressItemUI;
 })(View)
 
@@ -51598,6 +51616,7 @@ var PicManagePanelUI=(function(_super){
 		this.flder0=null;
 		this.htmltext=null;
 		this.radiosel=null;
+		this.freshbtn=null;
 		this.searchInput=null;
 		this.filetypeRadio=null;
 		this.prgcap=null;
@@ -56454,10 +56473,24 @@ var SelAddressItem=(function(_super){
 	__proto.setData=function(data){
 		this.address=data;
 		this.addresstxt.text=this.address.addressDetail;
+		this.btnSetDefault.visible=Userdata.instance.defaultAddId !=this.address.id;
+		this.btnSetDefault.on("click",this,this.setDefaultAdd);
 		this.ShowSelected=false;
 	}
 
 	//ShowSelected=address==PaintOrderModel.instance.selectAddress;
+	__proto.setDefaultAdd=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/opt-group-express?",this,this.defaultAddressBack,"opt=default&id="+this.address.id,"post");
+	}
+
+	__proto.defaultAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.defaultAddId=this.address.id;
+			EventCenter.instance.event("UPDATE_MYADDRESS_LIST");
+		}
+	}
+
 	__getset(0,__proto,'ShowSelected',null,function(value){
 		this.btnsel.selected=value;
 		this.selCheck.selected=value;

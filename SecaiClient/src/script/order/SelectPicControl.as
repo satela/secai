@@ -8,6 +8,7 @@ package script.order
 	
 	import model.HttpRequestUtil;
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.PaintOrderModel;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
 	
@@ -164,6 +165,19 @@ package script.order
 				}
 				else
 				{
+					if(PaintOrderModel.instance.curSelectOrderItem != null)
+						var picinfo:PicInfoVo = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo;
+					if(picinfo != null)
+					{
+						var xdif:Number = Math.abs(picinfo.picPhysicWidth - fvo.picPhysicWidth)/picinfo.picPhysicWidth;
+						var ydif:Number = Math.abs(picinfo.picPhysicHeight - fvo.picPhysicHeight)/picinfo.picPhysicHeight;
+						if(xdif >0.01 || ydif > 0.01)
+						{
+							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸和当前下单图片尺寸不匹配"});
+							return;
+						}
+
+					}
 					(param as MaterialItemVo).attchMentFileId = HttpRequestUtil.originPicPicUrl + fvo.fid + "." + fvo.picClass;
 					(param as MaterialItemVo).attchFileId = fvo.fid;
 

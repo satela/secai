@@ -69,7 +69,7 @@ package script.picUpload
 //			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
 			
 			uiSkin.picList.itemRender = PicInfoItem;
-			uiSkin.picList.vScrollBarSkin = "";
+			//uiSkin.picList.scrollBar.autoHide = true;
 			uiSkin.picList.selectEnable = false;
 			uiSkin.picList.spaceY = 0;
 			uiSkin.picList.renderHandler = new Handler(this, updatePicInfoItem);
@@ -86,6 +86,7 @@ package script.picUpload
 			
 			uiSkin.filetypeRadio.visible = false;
 			uiSkin.radiosel.on(Event.CLICK,this,onSelectAllPic);
+			uiSkin.freshbtn.on(Event.CLICK,this,onFreshList);
 			//Laya.timer.once(10,this,function():void
 			//{
 				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
@@ -234,19 +235,22 @@ package script.picUpload
 		
 		private function seletPicToOrder(fvo:PicInfoVo):void
 		{
-			var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
-			if( hasfic)
+			if(UtilTool.checkFileIsImg(fvo))
 			{
-				delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+				var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
+				if( hasfic)
+				{
+					delete DirectoryFileModel.instance.haselectPic[fvo.fid];
+				}
+				else
+					DirectoryFileModel.instance.haselectPic[fvo.fid] = fvo;
+				var num:int = 0;
+				for each(var picvo in DirectoryFileModel.instance.haselectPic)
+				{
+					num++;
+				}
+				uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
 			}
-			else
-				DirectoryFileModel.instance.haselectPic[fvo.fid] = fvo;
-			var num:int = 0;
-			for each(var picvo in DirectoryFileModel.instance.haselectPic)
-			{
-				num++;
-			}
-			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
 
 		}
 		private function onGetTopDirListBack(data:Object):void
@@ -458,6 +462,11 @@ package script.picUpload
 				backToRootDir();
 				
 			}
+		}
+		
+		private function onFreshList():void
+		{
+			getFileList();
 		}
 		private function onClickTopDirectLbl(index:int):void
 		{

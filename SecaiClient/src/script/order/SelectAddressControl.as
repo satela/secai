@@ -45,6 +45,8 @@ package script.order
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
 			uiSkin.list_address.array = Userdata.instance.addressList;
 			
+			tempaddress = PaintOrderModel.instance.selectAddress;
+			
 			Laya.timer.once(10,null,function()
 			{
 				var cells:Vector.<Box> = uiSkin.list_address.cells;
@@ -67,7 +69,7 @@ package script.order
 				var cells:Vector.<Box> = uiSkin.list_address.cells;
 				for(var i:int=0;i < cells.length;i++)
 				{
-					(cells[i] as SelAddressItem).ShowSelected = (cells[i] as SelAddressItem).address == PaintOrderModel.instance.selectAddress;
+					(cells[i] as SelAddressItem).ShowSelected = (cells[i] as SelAddressItem).address == tempaddress;
 				}
 			});
 			

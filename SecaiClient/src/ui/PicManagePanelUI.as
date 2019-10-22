@@ -19,6 +19,7 @@ package ui {
 		public var flder0:Label;
 		public var htmltext:HTMLDivElement;
 		public var radiosel:CheckBox;
+		public var freshbtn:Button;
 		public var searchInput:TextInput;
 		public var filetypeRadio:RadioGroup;
 		public var prgcap:ProgressBar;
