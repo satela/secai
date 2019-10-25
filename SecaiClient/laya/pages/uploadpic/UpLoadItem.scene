@@ -2,7 +2,7 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":16,
+    "selecteID":9,
     "searchKey":"View",
     "props":{"sceneColor":"#0b0a0a"},
     "nodeParent":-1,
@@ -96,7 +96,8 @@
             "hasChild":false,
             "compId":9,
             "child":[
-                ]
+                ],
+            "$HIDDEN":false
         },
         {
             "x":15,

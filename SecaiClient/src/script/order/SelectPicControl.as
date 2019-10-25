@@ -119,7 +119,7 @@ package script.order
 					if(uiSkin.radiosel.selected)
 					{
 						var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
-						if( !hasfic && UtilTool.checkFileIsImg(allfilse[i]))
+						if( !hasfic && UtilTool.checkFileIsImg(allfilse[i]) && allfilse[i].picPhysicWidth != 0)
 						{
 							//delete DirectoryFileModel.instance.haselectPic[fvo.fid];
 							DirectoryFileModel.instance.haselectPic[allfilse[i].fid] = allfilse[i];
@@ -138,7 +138,7 @@ package script.order
 			}
 			for(var i:int=0;i < uiSkin.picList.cells.length;i++)
 			{
-				if((uiSkin.picList.cells[i] as PicInfoItem).picInfo != null && UtilTool.checkFileIsImg((uiSkin.picList.cells[i] as PicInfoItem).picInfo))
+				if((uiSkin.picList.cells[i] as PicInfoItem).picInfo != null && UtilTool.checkFileIsImg((uiSkin.picList.cells[i] as PicInfoItem).picInfo) && (uiSkin.picList.cells[i] as PicInfoItem).picInfo.picPhysicWidth != 0)
 				{
 					(uiSkin.picList.cells[i] as PicInfoItem).sel.visible = uiSkin.radiosel.selected;
 					(uiSkin.picList.cells[i] as PicInfoItem).sel.selected = uiSkin.radiosel.selected;
@@ -156,6 +156,8 @@ package script.order
 		
 		private function seletPicToOrder(fvo:PicInfoVo):void
 		{
+			if(!UtilTool.checkFileIsImg(fvo) ||  fvo.picPhysicWidth == 0)
+				return;
 			if(param is MaterialItemVo)
 			{
 				if((param as MaterialItemVo).attchFileId == fvo.fid)

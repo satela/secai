@@ -1243,7 +1243,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PicManagePanel.scene";
+	GameConfig.startScene="picManager/PicShortItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1687,7 +1687,7 @@ var UtilTool=(function(){
 	}
 
 	UtilTool.checkFileIsImg=function(picInfo){
-		if(picInfo.picType==0 ||(picInfo.picClass.toLocaleUpperCase()!="JPEG" && picInfo.picClass.toLocaleUpperCase()!="JPG" && picInfo.picClass.toLocaleUpperCase()!="TIF" && picInfo.picClass.toLocaleUpperCase()!="PNG"))
+		if(picInfo.picType==0 ||(picInfo.picClass.toLocaleUpperCase()!="JPEG" && picInfo.picClass.toLocaleUpperCase()!="JPG" && picInfo.picClass.toLocaleUpperCase()!="TIF" && picInfo.picClass.toLocaleUpperCase()!="PNG" && picInfo.isCdr==false))
 			return false;
 		else return true;
 	}
@@ -1727,12 +1727,13 @@ var PicInfoVo=(function(){
 		this.fid="";
 		this.picWidth=0;
 		this.picHeight=0;
-		this.picPhysicWidth=NaN;
-		this.picPhysicHeight=NaN;
+		this.picPhysicWidth=0;
+		this.picPhysicHeight=0;
 		this.colorspace="";
 		this.picClass="";
 		this.dpi=NaN;
 		this.isProcessing=false;
+		this.isCdr=false;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1749,11 +1750,25 @@ var PicInfoVo=(function(){
 				this.dpi=UtilTool.oneCutNineAdd(fattr.dpi);
 				this.picPhysicWidth=UtilTool.oneCutNineAdd(this.picWidth/this.dpi*2.54);
 				this.picPhysicHeight=UtilTool.oneCutNineAdd(this.picHeight/this.dpi*2.54);
+				if(fattr !=null && fattr.flag==1){
+					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
+					this.picHeight=Math.round(Number(fattr.height)*this.dpi);
+					this.picPhysicWidth=UtilTool.oneCutNineAdd(fattr.width*2.54);
+					this.picPhysicHeight=UtilTool.oneCutNineAdd(fattr.height*2.54);
+					this.isCdr=true;
+				}
 			}
 			catch(err){
 				this.isProcessing=true;
 			}
 			this.picClass=fileinfo.ftype;
+			if(fattr !=null && fattr.flag==1){
+				this.directName=fileinfo.fname;
+				var strs=this.directName.split(".");
+				strs.splice(strs.length-1,1);
+				this.directName=strs.join()+".cdr";
+			}
+			else
 			this.directName=fileinfo.fname;
 			this.parentDirect=fileinfo.fpath;
 		}
@@ -35009,7 +35024,7 @@ var SelectPicControl=(function(_super){
 			if(allfilse[i].picType==1){
 				if(this.uiSkin.radiosel.selected){
 					var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
-					if(!hasfic && UtilTool.checkFileIsImg(allfilse[i])){
+					if(!hasfic && UtilTool.checkFileIsImg(allfilse[i])&& allfilse[i].picPhysicWidth !=0){
 						DirectoryFileModel.instance.haselectPic[allfilse[i].fid]=allfilse[i];
 					}
 				}
@@ -35022,7 +35037,7 @@ var SelectPicControl=(function(_super){
 			}
 		}
 		for(var i=0;i < this.uiSkin.picList.cells.length;i++){
-			if((this.uiSkin.picList.cells [i]).picInfo !=null && UtilTool.checkFileIsImg((this.uiSkin.picList.cells [i]).picInfo)){
+			if((this.uiSkin.picList.cells [i]).picInfo !=null && UtilTool.checkFileIsImg((this.uiSkin.picList.cells [i]).picInfo)&& (this.uiSkin.picList.cells [i]).picInfo.picPhysicWidth !=0){
 				(this.uiSkin.picList.cells [i]).sel.visible=this.uiSkin.radiosel.selected;
 				(this.uiSkin.picList.cells [i]).sel.selected=this.uiSkin.radiosel.selected;
 			}
@@ -35037,6 +35052,8 @@ var SelectPicControl=(function(_super){
 	}
 
 	__proto.seletPicToOrder=function(fvo){
+		if(!UtilTool.checkFileIsImg(fvo)|| fvo.picPhysicWidth==0)
+			return;
 		if((this.param instanceof model.orderModel.MaterialItemVo )){
 			if((this.param).attchFileId==fvo.fid){
 				(this.param).attchMentFileId="";
@@ -35556,7 +35573,7 @@ var PicManagerControl=(function(_super){
 			if(allfilse[i].picType==1){
 				if(this.uiSkin.radiosel.selected){
 					var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(allfilse[i].fid)
-					if(!hasfic && UtilTool.checkFileIsImg(allfilse[i])){
+					if(!hasfic && UtilTool.checkFileIsImg(allfilse[i])&& allfilse[i].picPhysicWidth !=0){
 						DirectoryFileModel.instance.haselectPic[allfilse[i].fid]=allfilse[i];
 					}
 				}
@@ -35569,7 +35586,7 @@ var PicManagerControl=(function(_super){
 			}
 		}
 		for(var i=0;i < this.uiSkin.picList.cells.length;i++){
-			if((this.uiSkin.picList.cells [i]).picInfo !=null && UtilTool.checkFileIsImg((this.uiSkin.picList.cells [i]).picInfo)){
+			if((this.uiSkin.picList.cells [i]).picInfo !=null && UtilTool.checkFileIsImg((this.uiSkin.picList.cells [i]).picInfo)&& (this.uiSkin.picList.cells [i]).picInfo.picPhysicWidth !=0){
 				(this.uiSkin.picList.cells [i]).sel.visible=this.uiSkin.radiosel.selected;
 				(this.uiSkin.picList.cells [i]).sel.selected=this.uiSkin.radiosel.selected;
 			}
@@ -35609,7 +35626,7 @@ var PicManagerControl=(function(_super){
 	}
 
 	__proto.seletPicToOrder=function(fvo){
-		if(UtilTool.checkFileIsImg(fvo)){
+		if(UtilTool.checkFileIsImg(fvo)&& fvo.picPhysicWidth !=0){
 			var hasfic=DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)
 			if(hasfic){
 				delete DirectoryFileModel.instance.haselectPic[fvo.fid];
@@ -37715,7 +37732,7 @@ var UpLoadAndOrderContrl=(function(_super){
 		this.file=Browser.document.createElement("input");
 		this.file.style="filter:alpha(opacity=0);opacity:0;width: 100;height:34px;left:395px;top:-248";
 		this.file.multiple="multiple";
-		this.file.accept=".jpg,.jpeg,.png,.tif";
+		this.file.accept=".jpg,.jpeg,.png,.tif,.zip";
 		this.file.type="file";
 		this.file.style.position="absolute";
 		this.file.style.zIndex=999;
@@ -56796,7 +56813,7 @@ var PicInfoItem=(function(_super){
 		this.trytime=0;
 		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid);
 		this.sel.selected=this.sel.visible;
-		if(this.picInfo.picType==0 ||(this.picInfo.picClass.toLocaleUpperCase()!="JPEG" && this.picInfo.picClass.toLocaleUpperCase()!="JPG" && this.picInfo.picClass.toLocaleUpperCase()!="TIF" && this.picInfo.picClass.toLocaleUpperCase()!="PNG")){
+		if(this.picInfo.picType==0 ||(this.picInfo.picClass.toLocaleUpperCase()!="JPEG" && this.picInfo.picClass.toLocaleUpperCase()!="JPG" && this.picInfo.picClass.toLocaleUpperCase()!="TIF" && this.picInfo.picClass.toLocaleUpperCase()!="PNG" && this.picInfo.picClass.toLocaleUpperCase()!="ZIP")){
 			this.img.skin="upload/fold.png";
 			this.filename.text=this.picInfo.directName;
 			this.fileinfo.visible=false;

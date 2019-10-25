@@ -40,7 +40,7 @@ package script.picUpload
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
 			this.sel.selected = this.sel.visible;
 
-			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG"))
+			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG" && picInfo.picClass.toLocaleUpperCase() != "ZIP"))
 			{
 				this.img.skin = "upload/fold.png";
 				this.filename.text = picInfo.directName;

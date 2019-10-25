@@ -17,14 +17,16 @@ package model.picmanagerModel
 		public var picWidth:int;
 		public var picHeight:int;
 		
-		public var picPhysicWidth:Number;
-		public var picPhysicHeight:Number;
+		public var picPhysicWidth:Number = 0;
+		public var picPhysicHeight:Number = 0;
 		
 		public var colorspace:String = "";
 		
 		public var picClass:String = "";
 		public var dpi:Number;
 		public var isProcessing:Boolean = false;
+		
+		public var isCdr:Boolean = false;
 		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
@@ -47,6 +49,16 @@ package model.picmanagerModel
 					dpi = UtilTool.oneCutNineAdd(fattr.dpi);
 					picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
 					picPhysicHeight = UtilTool.oneCutNineAdd(picHeight/dpi*2.54);
+					
+					if(fattr != null && fattr.flag == 1)
+					{
+						picWidth = Math.round(Number(fattr.width)*dpi);
+						picHeight =  Math.round(Number(fattr.height)*dpi);
+						
+						picPhysicWidth = UtilTool.oneCutNineAdd(fattr.width*2.54);
+						picPhysicHeight = UtilTool.oneCutNineAdd(fattr.height*2.54);
+						isCdr = true;
+					}
 				}
 				catch(err:Error)
 				{
@@ -55,7 +67,15 @@ package model.picmanagerModel
 
 				picClass = fileinfo.ftype;
 				
-				directName = fileinfo.fname;
+				if(fattr != null && fattr.flag == 1)
+				{
+					directName = fileinfo.fname;
+					var strs:Array = directName.split(".");
+					 strs.splice(strs.length - 1,1);
+					 directName = strs.join() + ".cdr";
+				}
+				else
+					directName = fileinfo.fname;
 				parentDirect = fileinfo.fpath;
 				
 			}

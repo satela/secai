@@ -99,7 +99,7 @@ package script.picUpload
 //			else
 				file.multiple="multiple";
 
-			file.accept = ".jpg,.jpeg,.png,.tif";
+			file.accept = ".jpg,.jpeg,.png,.tif,.zip";
 			file.type ="file";
 			file.style.position ="absolute";
 			file.style.zIndex = 999;
