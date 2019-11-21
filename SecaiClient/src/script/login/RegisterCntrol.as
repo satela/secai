@@ -5,6 +5,7 @@ package script.login
 	import laya.components.Script;
 	import laya.display.Input;
 	import laya.events.Event;
+	import laya.maths.Point;
 	import laya.net.Loader;
 	import laya.ui.List;
 	import laya.utils.Browser;
@@ -33,6 +34,7 @@ package script.login
 		private var phonecode:String = "";
 		
 		private var coutdown:int = 60;
+		
 		
 		private var serviceTxt:String = "尊敬的用户：\n" +
      									"   色彩飞扬是专业的为广告及相关产品委托生产、买卖、交付等提供服务的网站（下称“本网站”），为广告相关产品及其他产品的委托生产、买卖、交付等的双方用户提供居间服务及其他相关服务，在此特别提醒用户认真阅读本《服务协议》(下称“本协议”)中各个条款，并确认是否同意本协议条款。用户的使用行为将视为对本协议的接受，并同意接受本协议各项条款的约束。\n\n" + 
@@ -90,7 +92,11 @@ package script.login
 		{
 			
 			uiSkin = this.owner as RegisterPanelUI; 
-			
+						
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+			uiSkin.contractpanel.hScrollBarSkin = "";
+
 //			uiSkin.input_adress.maxChars = 200;
 //			uiSkin.input_company.maxChars = 50;
 			uiSkin.input_conpwd.maxChars = 20;
@@ -111,9 +117,16 @@ package script.login
 			uiSkin.sevicepro.text = serviceTxt;
 			
 			uiSkin.txtpanel.vScrollBarSkin = "";
+			uiSkin.txtpanel.hScrollBarSkin = "";
+
+			if(Browser.height > Laya.stage.height)
+				uiSkin.contractpanel.height = Laya.stage.height;
+			else
+				uiSkin.contractpanel.height = Browser.height;
+
 			
-			uiSkin.contractpanel.height = Browser.clientHeight;
-			
+			uiSkin.contractpanel.width = Browser.width;
+
 //			uiSkin.radio_default.selectedIndex = 0;
 //			
 //			uiSkin.provList.itemRender = CityAreaItem;
@@ -174,10 +187,15 @@ package script.login
 			uiSkin.txtRefresh.on(Event.CLICK,this,onRefreshVerify);
 
 			uiSkin.btnReg.on(Event.CLICK,this,onRegister);
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
 
 			
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
-
+			
+			Laya.timer.frameLoop(1,this,updateVerifyPos);
+			
+			
 			uiSkin.okbtn.disabled = true;
 			uiSkin.agreebox.on(Event.CLICK,this,onAgreeService);
 			uiSkin.okbtn.on(Event.CLICK,this,onReadService);
@@ -205,7 +223,7 @@ package script.login
 			verifycode.id = "v_container";
 			verifycode.style="width: 200px;height: 50px;left:950px;top:548";
 			
-			verifycode.style.left = 950 - (1920 - Browser.clientWidth)/2 + "px";
+			verifycode.style.left = 950 - (1920 - Browser.width)/2 + "px";
 			
 			verifycode.style.position ="absolute";
 			verifycode.style.zIndex = 999;
@@ -222,9 +240,39 @@ package script.login
 		private function onResizeBrower():void
 		{
 			if(verifycode != null)
-			verifycode.style.left = 950 - (1920 - Browser.clientWidth)/2 + "px";
+			{
+				//verifycode.style.left = 950 - (1920 - Browser.width)/2 + "px";
+				//verifycode.style.top = 548 - (1920 - Browser.width)/2 + "px";
+				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
+
+			}
 			
-			uiSkin.contractpanel.height = Browser.clientHeight;
+			//uiSkin.contractpanel.height = Browser.height;
+			if(Browser.height > Laya.stage.height)
+				uiSkin.contractpanel.height = Laya.stage.height;
+			else
+				uiSkin.contractpanel.height = Browser.height;
+			uiSkin.contractpanel.width = Browser.width;
+
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
+		}
+		
+		private function updateVerifyPos():void
+		{
+			if(verifycode != null)
+			{
+				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
+				var pt:Point = uiSkin.inputCode.localToGlobal(new Point(uiSkin.inputCode.x,uiSkin.inputCode.y),true);
+				
+				verifycode.style.top = pt.y + "px";
+				verifycode.style.left = (pt.x +  80) +  "px";
+				trace("pos:" + pt.x + "," + pt.y);
+				//verifycode.style.left = 950 -  uiSkin.mainpanel.hScrollBar.value + "px";
+
+			}
+			
 		}
 		private function onGetPhoneCode():void
 		{
@@ -386,7 +434,12 @@ package script.login
 
 			}
 		}		
-		
+		public override function onDestroy():void
+		{
+			
+			Laya.timer.clearAll(this);
+
+		}
 //		private function hideAddressPanel(e:Event):void
 //		{
 //			if(e.target is List)

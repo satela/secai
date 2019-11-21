@@ -4,9 +4,9 @@ package {
 	import laya.ui.View;
 	import laya.webgl.WebGL;
 	import utils.LoadingPrgControl;
-	import script.login.LogPanelControl;
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
+	import script.login.LogPanelControl;
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
 	import script.MainPageControl;
@@ -45,7 +45,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "picManager/PicShortItem.scene";
+		public static var startScene:* = "product/ProductMarketPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -56,9 +56,9 @@ package {
 			//注册Script或者Runtime引用
 			var reg:Function = ClassUtils.regClass;
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
-			reg("script.login.LogPanelControl",LogPanelControl);
 			reg("laya.display.Text",Text);
 			reg("script.prefabScript.LinkTextControl",LinkTextControl);
+			reg("script.login.LogPanelControl",LogPanelControl);
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
 			reg("script.MainPageControl",MainPageControl);

@@ -4,7 +4,7 @@ package model.orderModel
 	{
 		public static const MEASURE_UNIT_AREA:String = "平方米";//
 		public static const MEASURE_UNIT_PERIMETER:String = "米";//
-		
+
 		public static const MEASURE_UNIT_KILOMETER:String = "千克";//
 		public static const MEASURE_UNIT_KILO:String = "克";//
 		

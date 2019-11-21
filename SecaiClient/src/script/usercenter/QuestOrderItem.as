@@ -40,6 +40,10 @@ package script.usercenter
 			
 			this.money.text = (Number(orderdata.item_priceStr) * Number(orderdata.item_number)).toFixed(2);
 			
+			if(orderdata.filename != null)
+				this.filename.text = orderdata.filename;
+			else
+				this.filename.text = "";
 			//this.txtDetailInfo.text = "收货地址：" + orderdata.address;
 			
 			this.commentmark.visible = orderdata.comments != "";

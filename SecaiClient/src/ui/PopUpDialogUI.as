@@ -5,6 +5,7 @@ package ui {
 	import utils.PopUpWindowControl;
 
 	public class PopUpDialogUI extends View {
+		public var mainpanel:Panel;
 		public var msgtxt:Label;
 		public var okbtn:Button;
 		public var cancelbtn:Button;

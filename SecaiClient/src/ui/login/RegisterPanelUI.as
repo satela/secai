@@ -7,6 +7,7 @@ package ui.login {
 	import script.login.RegisterCntrol;
 
 	public class RegisterPanelUI extends View {
+		public var mainpanel:Panel;
 		public var bgimg:Image;
 		public var input_phone:TextInput;
 		public var input_pwd:TextInput;

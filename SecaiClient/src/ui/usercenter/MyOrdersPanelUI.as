@@ -5,7 +5,18 @@ package ui.usercenter {
 	import script.usercenter.MyOrderControl;
 
 	public class MyOrdersPanelUI extends Scene {
+		public var yearCombox:ComboBox;
+		public var monthCombox:ComboBox;
 		public var orderList:List;
+		public var lastyearbtn:Button;
+		public var nextyearbtn:Button;
+		public var lastmonthbtn:Button;
+		public var nextmonthbtn:Button;
+		public var ordertotalNum:Label;
+		public var ordertotalMoney:Label;
+		public var pagenum:Label;
+		public var lastpage:Button;
+		public var nexttpage:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

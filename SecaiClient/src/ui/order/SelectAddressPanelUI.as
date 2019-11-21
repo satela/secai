@@ -5,6 +5,7 @@ package ui.order {
 	import script.order.SelectAddressControl;
 
 	public class SelectAddressPanelUI extends View {
+		public var mainpanel:Panel;
 		public var btnadd:Button;
 		public var inputsearch:TextInput;
 		public var btnsearch:Button;

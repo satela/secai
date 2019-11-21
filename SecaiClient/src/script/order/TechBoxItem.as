@@ -5,11 +5,14 @@ package script.order
 	import model.orderModel.AttchCatVo;
 	import model.orderModel.MaterialItemVo;
 	import model.orderModel.OrderConstant;
+	import model.orderModel.PaintOrderModel;
 	import model.orderModel.ProcessCatVo;
 	
 	import script.ViewManager;
 	
 	import ui.order.TechorItemUI;
+	
+	import utils.UtilTool;
 	
 	public class TechBoxItem extends TechorItemUI
 	{
@@ -31,6 +34,14 @@ package script.order
 			processCatVo = null;
 			techmainvo = tvo;
 			initView();
+			
+			if(techmainvo.preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO || techmainvo.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+			{
+				this.techBtn.disabled = PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
+				this.mouseEnabled = !this.techBtn.disabled;
+				this.grayimg.visible = !this.mouseEnabled;
+			}
+			//PaintOrderModel.instance.batchChangeMatItems
 			if(tvo.selected)
 				setSelected(true);
 			else

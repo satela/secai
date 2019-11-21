@@ -5,6 +5,7 @@ package ui.usercenter {
 	import script.usercenter.AddressEditControl;
 
 	public class NewAddressPanelUI extends View {
+		public var mainpanel:Panel;
 		public var btnok:Button;
 		public var btncancel:Button;
 		public var input_username:TextInput;

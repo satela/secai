@@ -6,6 +6,7 @@ package ui.order {
 	import laya.html.dom.HTMLDivElement;
 
 	public class SelectPicPanelUI extends View {
+		public var mainpanel:Panel;
 		public var flder0:Label;
 		public var htmltext:HTMLDivElement;
 		public var radiosel:CheckBox;

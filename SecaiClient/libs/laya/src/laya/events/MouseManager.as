@@ -215,7 +215,7 @@ package laya.events {
 				for (var i:int = sp._children.length - 1; i > -1; i--) {
 					var child:Sprite = sp._children[i];
 					//只有接受交互事件的，才进行处理
-					if (child != null && !child.destroyed && child._mouseState > 1 && child._visible) {
+					if (!child.destroyed && child._mouseState > 1 && child._visible) {
 						if (check(child, mouseX, mouseY, callBack)) return true;
 					}
 				}

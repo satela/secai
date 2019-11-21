@@ -1,5 +1,6 @@
 package utils
 {
+	import laya.filters.ColorFilter;
 	import laya.net.LocalStorage;
 	
 	import model.picmanagerModel.PicInfoVo;
@@ -20,6 +21,17 @@ package utils
 
 		}
 		
+		private static var grayscaleMat:Array = [
+			0.3086, 0.6094, 0.0820, 0, 0, 
+			0.3086, 0.6094, 0.0820, 0, 0, 
+			0.3086, 0.6094, 0.0820, 0, 0, 
+			0, 0, 0, 1, 0];
+		
+		//创建一个颜色滤镜对象，灰图
+		public static var grayscaleFilter:ColorFilter = new ColorFilter(grayscaleMat);
+		
+		
+
 		/**
 		 *获取本地记录的内容 
 		 * @param key

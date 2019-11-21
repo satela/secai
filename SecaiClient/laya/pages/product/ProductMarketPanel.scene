@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":68,
-    "selecteID":29,
+    "selecteID":65,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":69,
+    "maxID":75,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -464,15 +464,29 @@
                     "child":[
                         {
                             "x":45,
-                            "type":"Tree",
-                            "searchKey":"Tree,producttree",
-                            "props":{"width":231,"var":"producttree","scrollBarSkin":"comp/vscroll.png","height":635},
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"y":0,"x":0,"width":1280,"skin":"commers/grayback.jpg","height":720},
                             "nodeParent":68,
-                            "label":"producttree",
+                            "label":"Image",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
-                            "compId":61,
+                            "compId":71,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"List",
+                            "searchKey":"List,productCateList",
+                            "props":{"y":4,"x":10,"width":194,"var":"productCateList","height":500},
+                            "nodeParent":68,
+                            "label":"productCateList",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":69,
                             "child":[
                                 ]
                         },
@@ -480,7 +494,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,productlist",
-                            "props":{"x":238,"width":415,"var":"productlist","height":634},
+                            "props":{"y":4,"x":238,"width":415,"var":"productlist","height":500},
                             "nodeParent":68,
                             "label":"productlist",
                             "isDirectory":false,
@@ -494,7 +508,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,haschooselist",
-                            "props":{"y":1,"x":666,"width":415,"var":"haschooselist","height":634},
+                            "props":{"y":4,"x":666,"width":415,"var":"haschooselist","height":500},
                             "nodeParent":68,
                             "label":"haschooselist",
                             "isDirectory":false,
@@ -506,19 +520,60 @@
                         },
                         {
                             "x":45,
+                            "type":"Sprite",
+                            "searchKey":"Sprite,deliversp",
+                            "props":{"y":521,"x":10,"var":"deliversp"},
+                            "nodeParent":68,
+                            "label":"deliversp",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":72,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"配送方式","height":0,"fontSize":22,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":72,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":73,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"VBox",
+                                    "searchKey":"VBox,deliverbox",
+                                    "props":{"y":0,"x":100,"var":"deliverbox","right":0,"left":100,"height":50},
+                                    "nodeParent":72,
+                                    "label":"deliverbox",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":74,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
-                            "props":{"y":661,"x":709,"width":371,"height":48},
+                            "props":{"y":626,"x":709,"width":371,"height":48},
                             "nodeParent":68,
                             "label":"Box",
-                            "isOpen":true,
+                            "isOpen":false,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":65,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button",
                                     "props":{"y":0,"x":0,"width":160,"skin":"commers/btn3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"保存订单","height":48},
@@ -532,7 +587,6 @@
                                         ]
                                 },
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button",
                                     "props":{"y":-2,"x":208,"width":160,"skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"去结算","height":48},

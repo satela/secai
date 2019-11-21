@@ -6,6 +6,7 @@ package ui.order {
 
 	public class SelectMaterialPanelUI extends View {
 		public var main_panel:Panel;
+		public var dragImg:Image;
 		public var backBtn:Button;
 		public var box_mat:Sprite;
 		public var matlist:List;
@@ -15,10 +16,9 @@ package ui.order {
 		public var techcontent:Panel;
 		public var mattext:Label;
 		public var selecttech:Label;
-		public var backimg:Image;
 		public var originimg:Image;
-		public var qiegeoriginimg:Image;
-		public var qiegeimg:Image;
+		public var yixingimg:Image;
+		public var backimg:Image;
 		public var btnok:Button;
 		public var btncancel:Button;
 		public var numinput:TextInput;

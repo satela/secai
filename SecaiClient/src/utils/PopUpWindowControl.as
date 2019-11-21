@@ -1,7 +1,10 @@
 package utils
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	
 	import script.ViewManager;
 	
@@ -27,11 +30,24 @@ package utils
 			if(param.cancel != null)
 				uiSkin.cancelbtn.label = param.cancel;
 			
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+			
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			
 			uiSkin.okbtn.on(Event.CLICK,this,onConfirmHandler);
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCancelHandler);
 
 		}
-		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+			
+		}
 		private function onConfirmHandler():void
 		{
 			// TODO Auto Generated method stub
@@ -51,7 +67,8 @@ package utils
 		private function onCloseScene():void
 		{
 			ViewManager.instance.closeView(ViewManager.VIEW_POPUPDIALOG);
-			
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
 	}
 }

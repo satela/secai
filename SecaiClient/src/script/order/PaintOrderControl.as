@@ -130,15 +130,30 @@ package script.order
 			EventCenter.instance.on(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
 
 			uiSkin.panelout.vScrollBarSkin = "";
-			uiSkin.deliversp.autoSize = true;
-			//(uiSkin.panel_main).bottom = 298 + (Browser.clientHeight - 1080);
-			//(uiSkin.panelout).height = (Browser.clientHeight - 80);
+			uiSkin.panelout.hScrollBarSkin = "";
+			
+			uiSkin.panelbottom.hScrollBarSkin = "";
+			
 
-			this.uiSkin.height = Browser.clientHeight;
+			uiSkin.panelout.width = Browser.width;
+			uiSkin.panelbottom.width = Browser.width;
+
+			uiSkin.deliversp.autoSize = true;
+			//(uiSkin.panel_main).bottom = 298 + (Browser.height - 1080);
+			//(uiSkin.panelout).height = (Browser.height - 80);
+
+			if(Browser.height > Laya.stage.height)
+				this.uiSkin.height = 1080;
+			else
+				this.uiSkin.height = Browser.height;
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
 			this.uiSkin.btnsaveorder.on(Event.CLICK,this,onSaveOrder);
 
 			this.uiSkin.panelout.on(Event.DRAG_MOVE,this,onDragMove);
+			
+			if(Userdata.instance.company == null || Userdata.instance.company == "")
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAuditInfo ,this,getCompanyInfo,null,"post");
+
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
 //				
 //				var result:Object = JSON.parse(data as String);
@@ -160,6 +175,27 @@ package script.order
 			Laya.timer.frameLoop(5,this,onDragMove);
 		}
 		
+		private function getCompanyInfo(data:Object):void
+		{
+			if(this.destroyed)
+				return;
+			var result:Object = JSON.parse(data as String);
+			
+			if(result.status == 0)
+			{
+				if(result[0] != null)
+				{
+					
+					if(result[0].info != null && result[0].info != "")
+					{
+						var cominfo:Object = JSON.parse(result[0].info);
+						Userdata.instance.company = cominfo.gp_name;
+						Userdata.instance.companyShort = cominfo.gp_shortname;
+					}
+				}
+			}
+			
+		}
 		private function onDragMove():void
 		{
 			//if(uiSkin.panelout.hScrollBar)
@@ -292,12 +328,17 @@ package script.order
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			//if(Browser.clientHeight - 350 > 0)
-			//	(uiSkin.panel_main).height = (Browser.clientHeight - 350);
-			//(uiSkin.panel_main).bottom = 298 + (Browser.clientHeight - 1080);
+			//if(Browser.height - 350 > 0)
+			//	(uiSkin.panel_main).height = (Browser.height - 350);
+			//(uiSkin.panel_main).bottom = 298 + (Browser.height - 1080);
 
-			//(uiSkin.panelout).height = (Browser.clientHeight - 80);
-			this.uiSkin.height = Browser.clientHeight;
+			//(uiSkin.panelout).height = (Browser.height - 80);
+			if(Browser.height > Laya.stage.height)
+				this.uiSkin.height = 1080;
+			else
+				this.uiSkin.height = Browser.height;
+			uiSkin.panelout.width = Browser.width;
+			uiSkin.panelbottom.width = Browser.width;
 
 		}
 		private function onShowSelectPic():void
@@ -576,9 +617,9 @@ package script.order
 			for(var i:int=0; i < orderlist.length;i++)
 			{
 				var orderitem:PicOrderItem = orderlist[i];
-				if(orderitem.ordervo.orderData == null)
+				if(!orderitem.checkCanOrder())
 				{
-					ViewManager.showAlert("未选择材料工艺");
+					//ViewManager.showAlert("未选择材料工艺");
 					return null;
 				}
 				
@@ -588,7 +629,7 @@ package script.order
 					orderdata = {};
 					orderdata.order_sn = PaintOrderModel.getOrderSn();
 					orderdata.client_code = "CL10200";
-					orderdata.consignee = PaintOrderModel.instance.selectAddress.receiverName
+					orderdata.consignee = Userdata.instance.companyShort + "#" + PaintOrderModel.instance.selectAddress.receiverName;
 					orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
 					orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
 					orderdata.order_amountStr = 0;
@@ -605,7 +646,7 @@ package script.order
 					if(PaintOrderModel.instance.selectDelivery)
 					{
 						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
-						orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.deliverynet_name;
+						orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
 					}
 					
 					orderdata.orderItemList = [];

@@ -9,6 +9,7 @@ package script.order
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
 	import model.orderModel.ProductVo;
+	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
 	
@@ -23,6 +24,8 @@ package script.order
 		public var finalHeight:Number;
 		
 		private var curproductvo:ProductVo;
+		
+		private var fanmianFid:String;
 		
 		public function PicOrderItem(vo:PicOrderItemVo)
 		{
@@ -43,18 +46,30 @@ package script.order
 			this.addmsg.visible = false;
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
-				this.fileimg.width = 100;					
-				this.fileimg.height = 100/ordervo.picinfo.picWidth * ordervo.picinfo.picHeight;
+				this.fileimg.width = 80;					
+				this.fileimg.height = 80/ordervo.picinfo.picWidth * ordervo.picinfo.picHeight;
 				
 			}
 			else
 			{
-				this.fileimg.height = 100;
-				this.fileimg.width = 100/ordervo.picinfo.picHeight * ordervo.picinfo.picWidth;
+				this.fileimg.height = 80;
+				this.fileimg.width = 80/ordervo.picinfo.picHeight * ordervo.picinfo.picWidth;
 				
 			}
-			this.fileimg.on(Event.DOUBLE_CLICK,this,onShowBigImg);
 			
+			this.yixingimg.width = this.fileimg.width;
+			this.yixingimg.height = this.fileimg.height;
+			
+			this.backimg.width = this.fileimg.width;
+			this.backimg.height = this.fileimg.height;
+			
+			this.yixingimg.visible = false;
+			this.backimg.visible = false;
+			
+			
+			this.fileimg.on(Event.CLICK,this,onShowBigImg);
+			this.backimg.on(Event.CLICK,this,onShowBackImg);
+
 			finalWidth = ordervo.picinfo.picPhysicWidth;
 			finalHeight = ordervo.picinfo.picPhysicHeight;
 			
@@ -162,7 +177,28 @@ package script.order
 		
 		private function onShowBigImg():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,this.ordervo.picinfo);
+			if(this.yixingimg.visible)
+			{
+				var obj:Array = [];
+				obj.push(this.ordervo.picinfo);
+				obj.push(this.yixingimg.skin);
+				ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,obj);
+
+			}
+			else
+				ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,this.ordervo.picinfo);
+
+
+		}
+		
+		private function onShowBackImg():void
+		{
+			var obj:PicInfoVo = new PicInfoVo({},1);  
+			obj.fid = fanmianFid;
+			obj.picWidth = this.ordervo.picinfo.picWidth;
+			obj.picHeight = this.ordervo.picinfo.picHeight;
+			
+			ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,obj);
 
 		}
 		private function onAddComment():void
@@ -188,6 +224,10 @@ package script.order
 			this.numindex.y = (this.height - this.numindex.height)/2;
 			
 			this.fileimg.y = this.height/2;
+			
+			this.backimg.y =  this.height/2;
+			
+			this.yixingimg.y = this.height/2;
 			
 			this.filename.y = (this.height - this.filename.height)/2;
 			this.matbox.y = (this.height - 42)/2;
@@ -216,16 +256,16 @@ package script.order
 				updateOrderData(curproductvo);
 				var area:Number = (finalHeight * finalWidth)/10000;
 				var perimeter:Number = (finalHeight + finalWidth)*2/100;
-				if(area < 0.1)
-					area = 0.1;
-				
+//				if(area < 0.1)
+//					area = 0.1;
+//				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(area,perimeter)/area).toFixed(2);
+					this.price.text = (curproductvo.getTotalPrice(area,perimeter,true)/area).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
+					this.price.text = (curproductvo.getTotalPrice(area,perimeter,true)/perimeter).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(area,perimeter)).toFixed(2) + "";
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(area,perimeter)).toFixed(1) + "";
 				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
 
 			}
@@ -233,7 +273,7 @@ package script.order
 		private function onNumChange():void
 		{
 			
-			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(2).toString();
+			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(1).toString();
 			if(this.ordervo.orderData)
 			this.ordervo.orderData.item_number = parseInt(this.inputnum.text);
 			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
@@ -256,20 +296,66 @@ package script.order
 		{
 			//this.ordervo.orderData = provo;
 			curproductvo = provo;
-			
+			fanmianFid = "";
 			updateOrderData(provo);
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
-			if(area < 0.1)
-				area = 0.1;
+			
+			
+			var hasSelectedTech:Array = provo.getAllSelectedTech();
+			var doublesideImg:String = "";
+			var yixingqiegeImg:String = "";
+			var doublesame:Boolean = false;
+			for(var i:int=0;i < hasSelectedTech.length;i++)
+			{
+				if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_SAME_TECHNO )
+				{
+					doublesame = true;
+				}
+				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+				{
+					doublesideImg = hasSelectedTech[i].attchFileId;
+					fanmianFid = doublesideImg;
+					
+				}
+				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+				{
+					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+				}
+			}
+			
+			this.backimg.visible = doublesideImg != "" || doublesame;
+			//uiSkin.backimg.visible = doublesideImg != "" || doublesame;
+			
+			if(doublesideImg != "")
+			{
+				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				this.backimg.skin = HttpRequestUtil.biggerPicUrl +doublesideImg + ".jpg";	
+			}
+			if(doublesame)
+			{
+				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				this.backimg.skin = HttpRequestUtil.biggerPicUrl + ordervo.picinfo.fid + ".jpg";	
+			}
+			
+			this.yixingimg.visible = yixingqiegeImg != "";
+			
+			if(yixingqiegeImg != "")
+			{
+				this.yixingimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+			}
+			
+			
+//			if(area < 0.1)
+//				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(area,perimeter)/area).toFixed(2);
+				this.price.text = (provo.getTotalPrice(area,perimeter,true)/area).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(area,perimeter)/perimeter).toFixed(2);
+				this.price.text = (provo.getTotalPrice(area,perimeter,true)/perimeter).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter)).toFixed(2) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter)).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -303,10 +389,13 @@ package script.order
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
 
-			if(area < 0.1)
-				area = 0.1;
+//			if(area < 0.1)
+//				area = 0.1;
 			
 			this.ordervo.orderPrice = productVo.getTotalPrice(area,perimeter);
+			if(this.ordervo.orderPrice < 0.1)
+				this.ordervo.orderPrice = 0.1;
+			
 			ordervo.manufacturer_code = productVo.manufacturer_code;
 			ordervo.manufacturer_name = productVo.manufacturer_name;
 			
@@ -316,7 +405,7 @@ package script.order
 			orderitemdata.prod_code = productVo.prod_code;
 			
 			orderitemdata.prod_description = "";
-			orderitemdata.LWH = finalWidth + "/" + finalHeight + "/1";
+			orderitemdata.LWH = finalWidth.toFixed(2) + "/" + finalHeight.toFixed(2) + "/1";
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
@@ -325,12 +414,39 @@ package script.order
 			orderitemdata.imagefile_path = HttpRequestUtil.originPicPicUrl + this.ordervo.picinfo.fid + "." + this.ordervo.picinfo.picClass;
 			orderitemdata.previewImage_path = HttpRequestUtil.biggerPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";
-
+			orderitemdata.filename = this.ordervo.picinfo.directName;
 			
 			orderitemdata.procInfoList = productVo.getProInfoList();
 			
 
 			this.ordervo.orderData =  orderitemdata;
+		}
+		
+		public function checkCanOrder():Boolean
+		{
+//			var pixel:Array = this.fileimg._bitmap.source.getPixels(0,0,this.fileimg.width,this.fileimg.height);
+//			for(var i:int=0;i < pixel.length;i+=4)
+//			{
+//				var r:int = pixel[i];
+//				var g:int = pixel[i+1];
+//				var b:int = pixel[i+2];
+//				if(r== g && r == b)
+//				{
+//					trace("rgb=" + r);
+//				}
+//				
+//			}
+			if(ordervo.orderData == null)
+			{
+				ViewManager.showAlert("未选择材料工艺");
+				return false;
+			}
+			
+			if(curproductvo != null)
+				return curproductvo.checkCurTechValid();
+			else
+				return false;
+			
 		}
 	}
 }

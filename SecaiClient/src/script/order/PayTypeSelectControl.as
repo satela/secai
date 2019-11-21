@@ -2,6 +2,8 @@ package script.order
 {
 	import eventUtil.EventCenter;
 	
+	import flashx.textLayout.elements.OverflowPolicy;
+	
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.utils.Browser;
@@ -41,7 +43,20 @@ package script.order
 			uiSkin.paybtn.on(Event.CLICK,this,onPayOrder);
 			uiSkin.cancelbtn.on(Event.CLICK,this,onCancel);
 			
-			
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
+
+		}
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
 
 		}
 		private function getCompanyInfoBack(data:Object):void
@@ -109,6 +124,11 @@ package script.order
 				EventCenter.instance.event(EventCenter.CANCEL_PAY_ORDER);
 			}
 
+		}
+		
+		public override function  onDestroy():void
+		{
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 		}
 	}
 }

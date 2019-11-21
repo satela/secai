@@ -110,8 +110,10 @@ package script.picUpload
 			DirectoryFileModel.instance.haselectPic = {};
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
-			uiSkin.main_panel.height = Browser.clientHeight;
-			uiSkin.picList.height =  Browser.clientHeight - 365;
+			uiSkin.main_panel.height = Browser.height;
+			uiSkin.main_panel.width = Browser.width;
+			uiSkin.main_panel.hScrollBarSkin = "";
+			uiSkin.picList.height =  Browser.height - 365;
 			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
@@ -121,13 +123,18 @@ package script.picUpload
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			uiSkin.main_panel.height = Browser.clientHeight;
-			uiSkin.picList.height =  Browser.clientHeight - 365;
+			uiSkin.main_panel.height = Browser.height;
+			uiSkin.picList.height =  Browser.height - 365;
+			uiSkin.main_panel.width = Browser.width;
+
 		}
 		
 		private function onGetLeftCapacitBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
+			if(uiSkin == null || uiSkin.destroyed)
+				return;
+				
 			if(result.status == 0)
 			{
 				var  size:Number = parseInt(result.size)/1024/1024;
@@ -233,8 +240,10 @@ package script.picUpload
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
-		private function seletPicToOrder(fvo:PicInfoVo):void
+		private function seletPicToOrder(data:Array):void
 		{
+			var fvo:PicInfoVo = data[0];
+			
 			if(UtilTool.checkFileIsImg(fvo) && fvo.picPhysicWidth != 0)
 			{
 				var hasfic:Boolean = DirectoryFileModel.instance.haselectPic.hasOwnProperty(fvo.fid)

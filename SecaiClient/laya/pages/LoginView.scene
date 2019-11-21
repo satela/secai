@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":3,
-    "selecteID":52,
+    "selectedBox":65,
+    "selecteID":62,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
@@ -21,14 +21,13 @@
             "props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"Image",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":29,
             "child":[
                 {
-                    "x":30,
                     "type":"Rect",
                     "searchKey":"Rect",
                     "props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},
@@ -49,14 +48,13 @@
             "props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
             "nodeParent":2,
             "label":"panel_main",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":3,
             "child":[
                 {
-                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":0,"width":1920,"texture":"mainpage/mainbg.jpg","height":1080},
@@ -70,7 +68,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},
@@ -84,7 +81,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},
@@ -98,7 +94,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUpload",
@@ -139,7 +134,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,paintOrderBtn",
@@ -180,7 +174,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnproduct",
@@ -221,7 +214,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text",
@@ -262,7 +254,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUserCenter",
@@ -303,7 +294,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_login",
@@ -344,7 +334,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_reg",
@@ -385,7 +374,6 @@
                         }]
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},
@@ -399,7 +387,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},

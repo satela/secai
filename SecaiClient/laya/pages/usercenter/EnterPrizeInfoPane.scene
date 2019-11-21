@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":126,
-    "selecteID":128,
+    "selectedBox":2,
+    "selecteID":97,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":900},
     "nodeParent":-1,
@@ -660,7 +660,6 @@
             "compId":35,
             "child":[
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
@@ -675,7 +674,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"List",
                     "searchKey":"List,provList",
                     "props":{"var":"provList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
@@ -705,7 +703,6 @@
             "compId":36,
             "child":[
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
@@ -720,7 +717,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"List",
                     "searchKey":"List,cityList",
                     "props":{"var":"cityList","vScrollBarSkin":"comp/vscroll.png","top":0,"right":0,"left":0,"bottom":0},
@@ -785,7 +781,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,btnsave",
-            "props":{"y":846,"x":404,"width":142,"var":"btnsave","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"提交申请","height":42},
+            "props":{"y":753.5,"x":685,"width":142,"var":"btnsave","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"提交申请","height":42},
             "nodeParent":2,
             "label":"btnsave",
             "isDirectory":false,

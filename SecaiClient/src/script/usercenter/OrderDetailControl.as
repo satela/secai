@@ -1,7 +1,10 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	
 	import script.ViewManager;
 	
@@ -23,6 +26,13 @@ package script.usercenter
 			uiSkin = this.owner as OrderDetailPanelUI;
 			
 			uiSkin.orderoanel.vScrollBarSkin = "";
+
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 			var orderdata:Object = JSON.parse(param.or_text);
 			var allproduct:Array = orderdata.orderItemList as Array;
 			
@@ -43,8 +53,15 @@ package script.usercenter
 			
 			uiSkin.orderbox.size(uiSkin.orderbox.width,uiSkin.orderbox.getBounds().height);
 			uiSkin.closebtn.on(Event.CLICK,this,onCloseView);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
-		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+			
+		}
 		private function sortProduct(a:Object,b:Object):int
 		{
 			if(parseInt(a.item_seq) > parseInt(b.item_seq))
@@ -62,6 +79,8 @@ package script.usercenter
 		private function onCloseView():void
 		{
 			ViewManager.instance.closeView(ViewManager.VIEW_ORDER_DETAIL_PANEL);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
 	}
 }

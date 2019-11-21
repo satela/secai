@@ -33,8 +33,14 @@ package script.login
 		override public function onStart():void
 		{
 			uiSKin = this.owner as LogPanelUI;
-			this.owner["closebtn"].on(Event.CLICK,this,onCloseScene);
-			this.owner["bgimg"].alpha = 0.95;
+			uiSKin.closebtn .on(Event.CLICK,this,onCloseScene);
+			//uiSKin.bgimg.alpha = 0.95;
+			
+			uiSKin.mainpanel.hScrollBarSkin = "";
+			uiSKin.mainpanel.width = Browser.width;
+			uiSKin.mainpanel.height = Browser.height;
+			uiSKin.mainpanel.vScrollBarSkin = "";
+
 			
 			uiSKin.input_account.maxChars = 11;
 			uiSKin.input_account.restrict = "0-9";
@@ -59,7 +65,17 @@ package script.login
 			uiSKin.input_pwd.on(Event.KEY_DOWN,this,onAccountKeyUp);
 			
 			uiSKin.input_account.focus = true;
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
+		}
+		
+		private function onResizeBrower():void
+		{
+			
+			
+			uiSKin.mainpanel.height = Browser.height;
+			uiSKin.mainpanel.width = Browser.width;
+			
 		}
 		
 		private function onAccountKeyUp(e:Event):void
@@ -108,6 +124,7 @@ package script.login
 				UtilTool.setLocalVar("userpwd",uiSKin.input_pwd.text);
 
 				ViewManager.instance.closeView(ViewManager.VIEW_lOGPANEL);
+				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			}
 			
 		}
@@ -132,8 +149,10 @@ package script.login
 		{
 			// TODO Auto Generated method stub
 			//Scene.close("login/LogPanel.scene");
-			
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_lOGPANEL);
+			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 		}		
 		
 	}

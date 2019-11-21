@@ -8,6 +8,7 @@ package ui.picManager {
 		public var imgbg:Image;
 		public var mainpanel:Panel;
 		public var img:Image;
+		public var yixingimg:Image;
 		public var closeBtn:Button;
 
 		override protected function createChildren():void {

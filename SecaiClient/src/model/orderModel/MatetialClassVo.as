@@ -5,6 +5,8 @@ package model.orderModel
 		public var matclassname:String = "喷绘材料";
 		
 		public var childMatList:Array;
+		public var isMerchan:Boolean = false;
+		
 		public function MatetialClassVo(data:Object)
 		{
 			matclassname = data as String;

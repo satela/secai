@@ -16,9 +16,11 @@ package ui.product {
 		public var myaddresstxt:Text;
 		public var outputbox:VBox;
 		public var downbox:Box;
-		public var producttree:Tree;
+		public var productCateList:List;
 		public var productlist:List;
 		public var haschooselist:List;
+		public var deliversp:Sprite;
+		public var deliverbox:VBox;
 
 		override protected function createChildren():void {
 			super.createChildren();

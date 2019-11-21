@@ -170,6 +170,7 @@ package script
 			
 			if(openViewList[viewClass] != null)
 				return;
+			
 			var view:View = new viewDict[viewClass]();
 			view.param = params;
 //			var control:Script = view.getComponent(Script);

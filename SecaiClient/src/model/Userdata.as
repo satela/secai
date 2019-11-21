@@ -16,6 +16,7 @@ package model
 		public var userName:String;
 		
 		public var company:String;
+		public var companyShort:String;
 		
 		public var addressList:Array = [];
 		public var defaultAddId:String = "";//默认收货地址

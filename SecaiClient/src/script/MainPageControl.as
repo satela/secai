@@ -68,7 +68,10 @@ package script {
 			btnproduct.on(Event.CLICK,this,onProductView);
 			
 			versioninfo = this.owner["enterinfo"];
-			versioninfo.y = Browser.clientHeight - versioninfo.height;
+			if(Browser.height < Laya.stage.height)
+				versioninfo.y = Browser.height - versioninfo.height;
+			else
+				versioninfo.y = Laya.stage.height - versioninfo.height;
 			
 			var btnlinkto:Button = this.owner["linktobus"];
 			btnlinkto.on(Event.CLICK,this,onOpenGongshang);
@@ -77,8 +80,9 @@ package script {
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			
-			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
-			
+			(this.owner["panel_main"] as Panel).height = Browser.height;
+			(this.owner["panel_main"] as Panel).hScrollBarSkin = "";
+			(this.owner["panel_main"] as Panel).width = Browser.width;
 			
 			if(!Userdata.instance.isLogin)
 				loginAccount();
@@ -138,11 +142,18 @@ package script {
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			console.log("height:" + Browser.clientHeight + "," + window.screen.availHeight + "," + window.screen.availWidth);
+			//console.log("height:" + Browser.height + "," + window.screen.availHeight + "," + window.screen.availWidth);
 			//EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
-			versioninfo.y = Browser.clientHeight - versioninfo.height;
+			//versioninfo.y = Browser.height - versioninfo.height;
+			
+			if(Browser.height < Laya.stage.height)
+				versioninfo.y = Browser.height - versioninfo.height;
+			else
+				versioninfo.y = Laya.stage.height - versioninfo.height;
 
-			(this.owner["panel_main"] as Panel).height = Browser.clientHeight;
+			(this.owner["panel_main"] as Panel).height = Browser.height;
+			(this.owner["panel_main"] as Panel).width = Browser.width;
+
 		}
 		
 		private function onShowUpload():void

@@ -1,5 +1,7 @@
 package script.login
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.display.Input;
 	import laya.events.Event;
@@ -44,7 +46,12 @@ package script.login
 			uiSkin.inputcfmpwd.maxChars = 20;
 			uiSkin.inputcfmpwd.type = Input.TYPE_PASSWORD;
 			
-			
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 			
 			inputarr = [uiSkin.inputphone,uiSkin.inputpwd,uiSkin.inputcfmpwd,uiSkin.inputcode];
 			for(var i:int=0;i < inputarr.length;i++)
@@ -53,11 +60,17 @@ package script.login
 			}
 			
 			Laya.stage.on(Event.FOCUS_CHANGE,this,onFocusChange);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			uiSkin.inputphone.focus = true;
 			focusindex = 0;
 		}
-		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
+		}
 		private function onGetCode():void
 		{
 			// TODO Auto Generated method stub
@@ -167,6 +180,7 @@ package script.login
 			//ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 			ViewManager.instance.closeView(ViewManager.VIEW_CHANGEPWD);
 			Laya.stage.off(Event.FOCUS_CHANGE,this,onFocusChange);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 		}
 	}

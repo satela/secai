@@ -5,6 +5,7 @@ package ui.order {
 	import script.order.PayTypeSelectControl;
 
 	public class ConfirmOrderPanelUI extends View {
+		public var mainpanel:Panel;
 		public var cancelbtn:Button;
 		public var paybtn:Button;
 		public var accountmoney:Label;

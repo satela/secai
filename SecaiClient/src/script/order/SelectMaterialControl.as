@@ -5,6 +5,7 @@ package script.order
 	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.events.Event;
+	import laya.maths.Rectangle;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
@@ -47,6 +48,7 @@ package script.order
 		
 		private var hasFinishAllFlow:Boolean = false;
 		
+		private var curclickItem:TechBoxItem;
 		
 		public function SelectMaterialControl()
 		{
@@ -58,6 +60,8 @@ package script.order
 			hasFinishAllFlow = false;
 			uiSkin = this.owner as SelectMaterialPanelUI; 
 			uiSkin.main_panel.vScrollBarSkin = "";
+			uiSkin.main_panel.hScrollBarSkin = "";
+			
 			uiSkin.tablist.itemRender = MaterialClassBtn;
 			uiSkin.tablist.vScrollBarSkin = "";
 			uiSkin.tablist.selectEnable = true;
@@ -70,8 +74,7 @@ package script.order
 			
 			uiSkin.backimg.skin = "";
 			
-			uiSkin.qiegeimg.skin = "";
-			uiSkin.qiegeoriginimg.skin = "";
+			uiSkin.yixingimg.skin = "";
 			
 			if(param != null)
 			{
@@ -88,14 +91,14 @@ package script.order
 					
 				}
 				
-				uiSkin.qiegeimg.width = uiSkin.originimg.width;
-				uiSkin.qiegeimg.height = uiSkin.originimg.height;
+				uiSkin.yixingimg.width = uiSkin.originimg.width;
+				uiSkin.yixingimg.height = uiSkin.originimg.height;
 				
 				uiSkin.backimg.width = uiSkin.originimg.width;
 				uiSkin.backimg.height = uiSkin.originimg.height;
 				
-				uiSkin.qiegeoriginimg.width = uiSkin.originimg.width;
-				uiSkin.qiegeoriginimg.height = uiSkin.originimg.height;
+				//uiSkin.qiegeoriginimg.width = uiSkin.originimg.width;
+				//uiSkin.qiegeoriginimg.height = uiSkin.originimg.height;
 
 			}
 			
@@ -131,7 +134,7 @@ package script.order
 			this.uiSkin.techcontent.vScrollBar.hide = true;
 			this.uiSkin.techcontent.hScrollBar.hide = true;
 			
-			this.uiSkin.main_panel.vScrollBarSkin = "";
+			//this.uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.subtn.on(Event.CLICK,this,onSubItemNum);
 			uiSkin.addbtn.on(Event.CLICK,this,onAddItemNum);
 			uiSkin.numinput.on(Event.INPUT,this,onNumChange);
@@ -157,10 +160,29 @@ package script.order
 			EventCenter.instance.on(EventCenter.CLOSE_PANEL_VIEW,this,onUpdateTechDes);
 			//EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,checkShowEffectImg);
 			EventCenter.instance.on(EventCenter.CLOSE_PANEL_VIEW,this,checkShowEffectImg);
+			EventCenter.instance.on(EventCenter.CANCEL_CHOOSE_ATTACH,this,onCancaleChooseAttach);
 
-			uiSkin.main_panel.height = Browser.clientHeight;
+			uiSkin.main_panel.height = Browser.height;
+			uiSkin.main_panel.width = Browser.width;
+			
+			uiSkin.dragImg.on(Event.MOUSE_DOWN,this,startDragPanel);
+			//uiSkin.dragImg.on(Event.MOUSE_OUT,this,stopDragPanel);
+			uiSkin.dragImg.on(Event.MOUSE_UP,this,stopDragPanel);
+
 		}
 		
+		private function startDragPanel(e:Event):void
+		{			
+			if(e.target == uiSkin.techcontent.vScrollBar.slider.bar || e.target == uiSkin.techcontent.hScrollBar.slider.bar)
+				return;
+
+			uiSkin.dragImg.startDrag();//new Rectangle(0,0,Browser.width,Browser.height));
+			e.stopPropagation();
+		}
+		private function stopDragPanel():void
+		{
+			uiSkin.dragImg.stopDrag();
+		}
 		private function onSubItemNum():void
 		{
 			var num:int = parseInt(uiSkin.numinput.text);
@@ -184,7 +206,11 @@ package script.order
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			 uiSkin.main_panel.height = Browser.clientHeight;
+			 uiSkin.main_panel.height = Browser.height;
+			 uiSkin.main_panel.width = Browser.width;
+
+			// uiSkin.dragImg.x = 320;
+			// uiSkin.dragImg.y = 50;
 		}
 		
 		private function updateMatClassItem(cell:MaterialClassBtn):void
@@ -240,6 +266,8 @@ package script.order
 				uiSkin.matlist.array = matlist;
 			}
 			else
+				//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getMerchandiseList + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
+
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdList + PaintOrderModel.instance.selectAddress.searchZoneid + "&prodCat_name=" + matvo.matclassname,this,onGetProductListBack,null,null);
 		}
 		private function onGetProductListBack(data:Object):void
@@ -254,6 +282,7 @@ package script.order
 				for(var i:int=0;i < result.length;i++)
 				{
 					matvo.childMatList.push(new ProductVo(result[i]));
+					trace("产品类型：" + result[i].is_merchandise);
 					//if(result[i].manufacturer_code == PaintOrderModel.instance.selectFactoryInMat.org_code)
 					//	temp.push(matvo.childMatList[matvo.childMatList.length - 1]);
 
@@ -400,7 +429,7 @@ package script.order
 			//this.uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			allitemlist = [];
 			
-			//(uiSkin.main_panel).height = Browser.clientHeight;
+			//(uiSkin.main_panel).height = Browser.height;
 			
 		}
 		
@@ -482,6 +511,7 @@ package script.order
 				hideItems(parentitem.x,true);
 			}
 			
+			curclickItem = parentitem;
 			parentitem.setSelected(true);
 			parentitem.setTechSelected(true);
 			
@@ -711,6 +741,15 @@ package script.order
 			}
 		}
 		
+		private function onCancaleChooseAttach(matvo:MaterialItemVo):void
+		{
+			if(curclickItem != null)
+			{
+				hideItems(curclickItem.x,true);
+				updateSelectedTech();
+			}
+		}
+		
 		private function checkShowEffectImg():void
 		{
 			if(param == null)
@@ -737,26 +776,26 @@ package script.order
 				}
 			}
 			
-			uiSkin.originimg.visible = doublesideImg != "" || doublesame;
 			uiSkin.backimg.visible = doublesideImg != "" || doublesame;
+			//uiSkin.backimg.visible = doublesideImg != "" || doublesame;
 
 			if(doublesideImg != "")
 			{
-				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
 				uiSkin.backimg.skin = HttpRequestUtil.biggerPicUrl +doublesideImg + ".jpg";	
 			}
 			if(doublesame)
 			{
-				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
 				uiSkin.backimg.skin = HttpRequestUtil.biggerPicUrl +param.fid + ".jpg";	
 			}
-			uiSkin.qiegeimg.visible = yixingqiegeImg != "";
-			uiSkin.qiegeoriginimg.visible = yixingqiegeImg != "";
+			uiSkin.originimg.visible = yixingqiegeImg != "";
+			uiSkin.yixingimg.visible = yixingqiegeImg != "";
 			
 			if(yixingqiegeImg != "")
 			{
-				uiSkin.qiegeoriginimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
-				uiSkin.qiegeimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				uiSkin.yixingimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
 			}
 		}
 		private function getItembox():TechBoxItem
@@ -814,6 +853,7 @@ package script.order
 			EventCenter.instance.off(EventCenter.SHOW_SELECT_TECH,this,initTechView);
 			EventCenter.instance.off(EventCenter.CLOSE_PANEL_VIEW,this,onUpdateTechDes);
 			EventCenter.instance.off(EventCenter.CLOSE_PANEL_VIEW,this,checkShowEffectImg);
+			EventCenter.instance.off(EventCenter.CANCEL_CHOOSE_ATTACH,this,onCancaleChooseAttach);
 
 		}
 	}

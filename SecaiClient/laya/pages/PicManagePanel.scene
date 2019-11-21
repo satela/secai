@@ -2,7 +2,7 @@
     "x":0,
     "type":"View",
     "selectedBox":4,
-    "selecteID":22,
+    "selecteID":48,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
@@ -34,7 +34,7 @@
             "x":15,
             "type":"Panel",
             "searchKey":"Panel,main_panel",
-            "props":{"y":0,"var":"main_panel","right":0,"left":0,"height":1080},
+            "props":{"y":0,"x":0,"width":1920,"var":"main_panel","height":1080},
             "nodeParent":2,
             "label":"main_panel",
             "isOpen":true,
@@ -664,7 +664,7 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box,boxNewFolder",
-                    "props":{"y":0,"x":0,"var":"boxNewFolder","top":0,"right":0,"left":0,"bottom":0},
+                    "props":{"y":0,"x":0,"width":1920,"var":"boxNewFolder","top":0,"left":0,"height":1080},
                     "nodeParent":4,
                     "label":"boxNewFolder",
                     "isOpen":true,
@@ -749,7 +749,7 @@
                                 }],
                             "$HIDDEN":false
                         }],
-                    "$HIDDEN":true
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,

@@ -5,6 +5,7 @@ package script.order
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.Box;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.Userdata;
@@ -40,11 +41,16 @@ package script.order
 			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelectAddress);
 			uiSkin.btnadd.on(Event.CLICK,this,onShowAddAdress);
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
 			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
 
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
 			uiSkin.list_address.array = Userdata.instance.addressList;
-			
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			tempaddress = PaintOrderModel.instance.selectAddress;
 			
 			Laya.timer.once(10,null,function()
@@ -59,7 +65,12 @@ package script.order
 
 			//PaintOrderModel.instance.selectAddress = null;
 		}
-		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+			
+		}
 		private function updateList(data:AddressVo):void
 		{
 			
@@ -134,6 +145,8 @@ package script.order
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.UPDATE_MYADDRESS_LIST,this,updateList);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 			
 		}
 	}

@@ -10,12 +10,17 @@ package script.product
 	
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.DeliveryTypeVo;
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.MatetialClassVo;
+	import model.orderModel.PaintOrderModel;
+	import model.orderModel.ProductVo;
 	import model.users.AddressVo;
 	import model.users.FactoryInfoVo;
 	
 	import script.ViewManager;
 	
+	import ui.order.OrderAddressItemUI;
 	import ui.order.OutPutCenterUI;
 	import ui.product.ProductMarketPanelUI;
 	import ui.product.TreeClipUI;
@@ -41,19 +46,34 @@ package script.product
 			uiSkin = this.owner as ProductMarketPanelUI;
 			
 			uiSkin.panel_main.vScrollBarSkin = "";
-
-			(uiSkin.panel_main).height = Browser.clientHeight;// - 20;
+			uiSkin.panel_main.hScrollBarSkin = "";
+			
+			uiSkin.panel_main.width = Browser.width;
+			uiSkin.panel_main.height = Browser.height;// - 20;
 			uiSkin.downbox.height = 710;
+			
 			uiSkin.myaddresstxt.on(Event.CLICK,this,onShowSelectAddress);
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
 
+			uiSkin.productCateList.itemRender = ProductCategoryItem;
+			
+			uiSkin.productCateList.vScrollBarSkin = "";
+			uiSkin.productCateList.repeatX = 1;
+			uiSkin.productlist.spaceY = 5;
+			
+			uiSkin.productCateList.renderHandler = new Handler(this, updateProductcateList);
+			uiSkin.productCateList.selectEnable = true;
+			uiSkin.productCateList.selectHandler = new Handler(this,onSelectCategory);
+			//uiSkin.productlist.array = [4,3,2,1];
+			
+			
 			uiSkin.productlist.itemRender = AdvertiseProItem;
 			
 			uiSkin.productlist.vScrollBarSkin = "";
 			uiSkin.productlist.repeatX = 1;
-			//uiSkin.productlist.spaceY = 2;
+			uiSkin.productlist.spaceY = 2;
 			
 			uiSkin.productlist.renderHandler = new Handler(this, updateProductList);
 			uiSkin.productlist.selectEnable = false;
@@ -78,34 +98,7 @@ package script.product
 				selectAddress = Userdata.instance.getDefaultAddress();
 			}
 			
-			for(var i:int=0;i < 3;i++)
-			{
-				var mat:MaterialItemVo = new MaterialItemVo({});
-				mat.preProc_Name = "商品" + i;
-				mat.is_endProc = i==2?1:0;
-				mat.preProc_Code = i.toString();
-				treedic[mat.preProc_Code] = mat;
-				list.push(mat);
-			}
 			
-			var treeData:String = "<data>";
-			
-			for(var i:int=0;i < list.length;i++)
-			{
-				
-				treeData += getTreeData(list[i]);
-
-				
-			}
-
-			treeData += "</data>";
-			// 解析tree的数据
-			var xml:* = Utils.parseXMLFromString(treeData);
-						uiSkin.producttree.itemRender = TreeClipUI;
-			uiSkin.producttree.xml = xml;
-			uiSkin.producttree.on(Event.OPEN,this,onOpenList);
-			uiSkin.producttree.on(Event.CHANGE,this,onOpenList);
-
 		}
 		
 		private function onGetOutPutAddress(data:*):void
@@ -130,6 +123,11 @@ package script.product
 						outputitem.factorytxt.text = outPutAddr[i].name;// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
 					}
 					uiSkin.downbox.y = 295 + (outPutAddr.length - 1)*40 + (outPutAddr.length - 1)*uiSkin.outputbox.space;
+					if(outPutAddr.length > 0)
+					{
+						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + selectAddress.searchZoneid ,this,onGetMerchanProductBack,null,null);
+						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList + outPutAddr[0].org_code + "&addr_id=" + selectAddress.searchZoneid,this,onGetDeliveryBack,null,null);
+					}
 
 				}
 				else
@@ -138,6 +136,44 @@ package script.product
 			}
 			
 			uiSkin.panel_main.refresh();
+		}
+		
+		private function onGetMerchanProductBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var product:Array = result as Array;
+				PaintOrderModel.instance.productList = [];
+				
+				var hasMatName:Array = [];
+				var tempArr:Array = [];
+				for(var i:int=0;i < product.length;i++)
+				{
+					if(hasMatName.indexOf(product[i].prodCat_name) < 0)
+					{
+						var proVo:MatetialClassVo = new MatetialClassVo(product[i].prodCat_name);						
+						tempArr.push(proVo);
+						hasMatName.push(product[i].prodCat_name);
+					}
+				}
+				
+				this.uiSkin.productCateList.array = tempArr;
+			}
+		}
+		
+		private function onSelectCategory(index:int):void
+		{
+			for each(var item:ProductCategoryItem in uiSkin.productCateList.cells)
+			{
+				item.ShowSelected = item.matvo == uiSkin.productCateList.array[index];
+			}
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getMerchandiseList + "addr_id=" + selectAddress.searchZoneid + "&prodCat_name=" + uiSkin.productCateList.array[index].matclassname,this,onGetProductListBack,null,null);
+			
+		}
+		private function initMerchanTree(allmatClass:Array):void
+		{
+			
 		}
 		private function onClickOpenQQ():void
 		{
@@ -174,70 +210,68 @@ package script.product
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			(uiSkin.panel_main).height = Browser.clientHeight;// - 50;
+			(uiSkin.panel_main).height = Browser.height;// - 50;
+			uiSkin.panel_main.width = Browser.width;
 		}
-		private function getTreeData(matvo:MaterialItemVo):String
+		
+		private function updateProductcateList(cell:ProductCategoryItem):void
 		{
-			if(matvo.is_endProc == 1)
-				return "<leaf label='File " + matvo.preProc_Name + "' id='" + matvo.preProc_Code + "'/>";
-			else
-			{
-				var treeData:String = "";
-				if(curselectItemId != matvo.preProc_Code)
-				 	treeData = "<item label='Directory " +matvo.preProc_Name + "' id='" + matvo.preProc_Code + "' isOpen='false'>";
-				else
-					treeData = "<item label='Directory " +matvo.preProc_Name + "' id='" + matvo.preProc_Code + "' isOpen='true'>";
-
-				if(matvo.nextMatList != null)
-				{
-					for(var i:int=0;i < matvo.nextMatList.length;i++)
-						treeData += getTreeData(matvo.nextMatList[i]);
-				}
-				treeData += "</item>";
-				return treeData;
-			}
+			cell.setData(cell.dataSource);
 		}
-		private function onOpenList(e:Event):void
+		
+		private function onGetProductListBack(data:Object):void
 		{
-			if(uiSkin.producttree.selectedItem != null)
+			var result:Object = JSON.parse(data as String);
+		}
+		
+		private function onGetDeliveryBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			while(uiSkin.deliverbox.numChildren > 0)
+				uiSkin.deliverbox.removeChildAt(0);
+			if(!result.hasOwnProperty("status"))
 			{
-				var matid:String = uiSkin.producttree.selectedItem.id;
-				if(treedic.hasOwnProperty(matid))
+				PaintOrderModel.instance.deliveryList = [];
+				for(var i:int=0;i < result.length;i++)
 				{
-					var matvo:MaterialItemVo = treedic[matid];
-					if(matvo.is_endProc == 0 && matvo.nextMatList.length == 0)
+					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
+					var deliveritem:OrderAddressItemUI = new OrderAddressItemUI();
+					deliveritem.addresstxt.text = tempdevo.deliveryDesc;
+					if(tempdevo.delivery_name == "送货上门")
 					{
-						for(var j:int=0;j < 2;j++)
-						{
-							var matsub:MaterialItemVo = new MaterialItemVo({});
-							matsub.preProc_Name = "商品" + matid +"_" + j;
-							matsub.preProc_Code = matid +"_" + j;
-							matsub.is_endProc = Math.random() > 0.5 ? 1:0;
-							matvo.nextMatList.push(matsub);
-							treedic[matsub.preProc_Code] = matsub;
-
-						}
+						deliveritem.btnsel.selected = true;
+						deliveritem.selCheck.selected = true;
+						PaintOrderModel.instance.selectDelivery = tempdevo;
 					}
-				}
-				
-				curselectItemId = uiSkin.producttree.selectedItem.id;
-
-				var treeData:String = "<data>";
-				
-				for(var i:int=0;i < list.length;i++)
-				{
 					
-					treeData += getTreeData(list[i]);					
-					
+					deliveritem.on(Event.CLICK,this,onSelectDeliverAdd,[deliveritem,tempdevo]);
+					uiSkin.deliverbox.addChild(deliveritem);
+					//PaintOrderModel.instance.deliveryList.push(tempdevo);
 				}
-				treeData += "</data>";
-
-				// 解析tree的数据
-				var xml:* = Utils.parseXMLFromString(treeData);
-				uiSkin.producttree.xml = xml;
-
-				trace("uiskin.tree:" + uiSkin.producttree.selectedItem.toString());
 			}
+			Laya.timer.frameOnce(2,this,function(){
+				uiSkin.deliversp.size(1280,uiSkin.deliverbox.height);
+				//uiSkin.mainvbox.refresh();
+			});
+		}
+		
+		private function onSelectDeliverAdd(deliitem:OrderAddressItemUI,delivervo:DeliveryTypeVo):void
+		{
+			for(var i:int=0;i < uiSkin.deliverbox.numChildren;i++)
+			{
+				var deitem:OrderAddressItemUI = uiSkin.deliverbox.getChildAt(i) as OrderAddressItemUI;
+				if(deitem)
+				{
+					deitem.btnsel.selected = false;
+					deitem.selCheck.selected = false;
+				}
+			}
+			
+			deliitem.btnsel.selected = true;
+			deliitem.selCheck.selected = true;
+			PaintOrderModel.instance.selectDelivery = delivervo;
+			
+			
 		}
 		
 		public override function onDestroy():void

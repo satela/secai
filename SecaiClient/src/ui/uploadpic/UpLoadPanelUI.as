@@ -6,6 +6,7 @@ package ui.uploadpic {
 
 	public class UpLoadPanelUI extends View {
 		public var bgimg:Image;
+		public var mainpanel:Panel;
 		public var uploadinfo:Label;
 		public var btnClose:Button;
 		public var goonbtn:Button;

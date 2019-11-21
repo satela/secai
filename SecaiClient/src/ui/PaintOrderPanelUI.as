@@ -5,8 +5,8 @@ package ui {
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
 	import script.prefabScript.TopBannerControl;
-	import laya.html.dom.HTMLDivElement;
 	import script.order.PaintOrderControl;
+	import laya.html.dom.HTMLDivElement;
 
 	public class PaintOrderPanelUI extends View {
 		public var panelout:Panel;
@@ -29,6 +29,7 @@ package ui {
 		public var deliverbox:VBox;
 		public var batchcomment:Box;
 		public var commentall:TextInput;
+		public var panelbottom:Panel;
 		public var textTotalPrice:HTMLDivElement;
 		public var textDeliveryType:HTMLDivElement;
 		public var textPayPrice:HTMLDivElement;

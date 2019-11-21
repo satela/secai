@@ -5,8 +5,6 @@ package laya.net {
 	import laya.utils.Browser;
 	import laya.utils.Utils;
 	
-	import script.ViewManager;
-	
 	/**
 	 * 请求进度改变时调度。
 	 * @eventType Event.PROGRESS
@@ -37,7 +35,6 @@ package laya.net {
 		/**@private */
 		protected var _url:String;
 		
-		private var timeout:Boolean = false;
 		/**
 		 * 发送 HTTP 请求。
 		 * @param	url				请求的地址。大多数浏览器实施了一个同源安全策略，并且要求这个 URL 与包含脚本的文本具有相同的主机名和端口。
@@ -53,9 +50,6 @@ package laya.net {
 			var _this:HttpRequest = this;
 			var http:* = this._http;
 			//临时，因为微信不支持以下文件格式
-					
-			Laya.timer.once(15000,this,onTimeOut);
-			
 			url = URL.getAdptedFilePath(url);
 			http.open(method, url, true);
 			if (headers) {
@@ -69,28 +63,19 @@ package laya.net {
 			http.responseType = responseType !== "arraybuffer" ? "text" : "arraybuffer";
 			http.onerror = function(e:*):void {
 				_this._onError(e);
-				Laya.timer.clear(_this,onTimeOut);
 			}
 			http.onabort = function(e:*):void {
 				_this._onAbort(e);
-				Laya.timer.clear(_this,onTimeOut);
 			}
 			http.onprogress = function(e:*):void {
 				_this._onProgress(e);
 			}
 			http.onload = function(e:*):void {
-							
 				_this._onLoad(e);
 			}
 			http.send(data);
 		}
 		
-		private function onTimeOut():void
-		{
-			timeout = true;
-			http.abort();//请求中止
-			ViewManager.showAlert("请求超时，请重试");
-		}
 		/**
 		 * @private
 		 * 请求进度的侦听处理函数。
@@ -128,10 +113,6 @@ package laya.net {
 			var status:Number = http.status !== undefined ? http.status : 200;
 			
 			if (status === 200 || status === 204 || status === 0) {
-								
-				Laya.timer.clear(this,onTimeOut);
-				if(timeout)
-					return;
 				complete();
 			} else {
 				error("[" + http.status + "]" + http.statusText + ":" + http.responseURL);

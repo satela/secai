@@ -4,6 +4,7 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
@@ -34,6 +35,12 @@ package script.order
 			
 			uiSkin = this.owner as SelectAttchPanelUI; 
 			
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 			uiSkin.attachList.itemRender = SelectAttachBtn;
 			uiSkin.attachList.vScrollBarSkin = "";
 			uiSkin.attachList.selectEnable = true;
@@ -64,9 +71,16 @@ package script.order
 			//uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			uiSkin.btnok.on(Event.CLICK,this,onSureClose);
 			EventCenter.instance.on(EventCenter.ADD_TECH_ATTACH,this,onAddAttach);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 		}
 		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
+		}
 		private function onAccCatlistBack(data:String):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -150,6 +164,7 @@ package script.order
 
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_ATTACH);
 			EventCenter.instance.off(EventCenter.ADD_TECH_ATTACH,this,onAddAttach);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 		}
 	}

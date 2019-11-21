@@ -1,5 +1,7 @@
 package model.orderModel
 {
+	import script.ViewManager;
+
 	//产品列表 vo
 	public class ProductVo
 	{
@@ -19,11 +21,14 @@ package model.orderModel
 		public var manufacturer_code: String = "";//  输出中心编码
 		public var manufacturer_name: String = "";//  输出中心名称
 		public var unit_price: Number = 0;//  材料单位价格
-		public var additional_unitFee: Number = 0;//  单位附加金额
+		public var additional_unitfee: Number = 0;//  单位附加金额
+		public var is_merchandise:Boolean = false;
 
 		public var prcessCatList:Vector.<ProcessCatVo>;//工艺类列表
 		
 		private var hasDoublePrint:int = 1; //如果有双面打印的工艺，这个等于2，用于主材料计算价格
+		
+		public var merchanList:Array = [];
 		public function ProductVo(data:Object)
 		{
 			for(var key in data)
@@ -114,12 +119,12 @@ package model.orderModel
 			return "";
 		}
 		
-		public function getTotalPrice(area:Number,perimeter:Number):Number
+		public function getTotalPrice(area:Number,perimeter:Number,ignoreOther:Boolean = false):Number
 		{
 			if(measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				var prices:Number = area*(unit_price + additional_unitFee);
+				var prices:Number = area*(unit_price + additional_unitfee);
 			else
-				prices = perimeter*(unit_price + additional_unitFee);
+				prices = perimeter*(unit_price + additional_unitfee);
 			
 			hasDoublePrint = 1;
 			
@@ -128,7 +133,7 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther));					
 				}
 				
 			}
@@ -139,10 +144,38 @@ package model.orderModel
 			{
 				prices +=  allprices[i];
 			}
-			return parseFloat(prices.toFixed(2));
+			if(prices < 0.1)
+				prices = 0.1;
+			return parseFloat(prices.toFixed(1));
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number):Array
+		public function getDanjia():Number
+		{
+			
+			var	prices:Number = unit_price + additional_unitfee;
+			
+			
+			var allprices:Array = [];
+			for(var i:int=0;i < prcessCatList.length;i++)
+			{
+				if(prcessCatList[i].selected)
+				{
+					//allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter));					
+				}
+				
+			}
+			
+			prices *= hasDoublePrint;
+			
+			for(i=0;i < allprices.length;i++)
+			{
+				prices +=  allprices[i];
+			}
+			
+			return 0;
+		}
+		
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -166,13 +199,16 @@ package model.orderModel
 						{
 							totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
 						}
-						else
+						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
 							totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
+							totalprice += arr[i].selectAttachVoList[0].accessory_price;						
+							
 					}
 					
 					prices.push(totalprice);
 					
-					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter));
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther));
 				}
 			}
 			return prices;
@@ -215,6 +251,23 @@ package model.orderModel
 			return arr;
 		}
 		
+		public function checkCurTechValid():Boolean
+		{
+			var techArr:Array = getAllSelectedTech();
+			for(var i:int=0;i < techArr.length;i++)
+			{
+				if( techArr[i].preProc_attachmentTypeList != null && techArr[i].preProc_attachmentTypeList != "" && techArr[i].preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_NO && techArr[i].preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_PEIJIAN)
+				{
+					if(techArr[i].attchFileId == null || techArr[i].attchFileId == "")
+					{
+						ViewManager.showAlert("有工艺未选择合适的附件图片");
+						return false;
+					}
+				}
+			}
+			
+			return true;
+		}
 		public function resetData():void
 		{
 			if(prcessCatList != null)

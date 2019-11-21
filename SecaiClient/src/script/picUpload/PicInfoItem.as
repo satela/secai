@@ -122,7 +122,12 @@ package script.picUpload
 			{
 				if(this.sel.visible)
 				{
-					EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo);
+					var datainfo:Array = [];
+					datainfo.push(picInfo);
+					datainfo.push(this.img);
+					datainfo.push(this);
+					
+					EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,[datainfo]);
 				}
 				if(picInfo.picType == 1)
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.deletePic,this,onDeleteFileBack,"fid=" + picInfo.fid,"post");
@@ -147,6 +152,12 @@ package script.picUpload
 
 		}
 		
+		public function canCelSelected():void
+		{
+			this.sel.visible = false;
+			this.sel.selected = false;
+		}
+		
 		private function onMouseOverHandler():void
 		{
 			// TODO Auto Generated method stub
@@ -161,7 +172,13 @@ package script.picUpload
 			{
 				this.sel.visible = !this.sel.visible;
 				this.sel.selected = this.sel.visible;
-				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,picInfo);
+				
+				var datainfo:Array = [];
+				datainfo.push(picInfo);
+				datainfo.push(this.img);
+				datainfo.push(this);
+
+				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,[datainfo]);
 
 			}
 		}

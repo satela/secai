@@ -46,6 +46,9 @@ package script.picUpload
 			//uiSkin.btnBegin.on(Event.CLICK,this,onClickBegin);
 			uiSkin.btnOpenFile.on(Event.CLICK,this,onClickOpenFile);
 
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+
 			//uiSkin.bgimg.alpha = 0.7;
 			uiSkin.fileList.itemRender = FileUpLoadItem;
 			uiSkin.fileList.vScrollBarSkin = "";
@@ -69,9 +72,20 @@ package script.picUpload
 			else
 				uiSkin.fileList.array = [];
 
-			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 			EventCenter.instance.on(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
 			EventCenter.instance.on(EventCenter.RE_UPLOAD_FILE,this,reUploadFile);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
+		}
+		
+		private function onResizeBrower():void
+		{
+			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
 
 		}
 		
@@ -392,6 +406,7 @@ package script.picUpload
 			EventCenter.instance.event(EventCenter.UPDATE_FILE_LIST);
 			EventCenter.instance.off(EventCenter.CANCAEL_UPLOAD_ITEM,this,onDeleteItem);
 			EventCenter.instance.off(EventCenter.RE_UPLOAD_FILE,this,reUploadFile);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			ViewManager.instance.closeView(ViewManager.VIEW_MYPICPANEL);
 			

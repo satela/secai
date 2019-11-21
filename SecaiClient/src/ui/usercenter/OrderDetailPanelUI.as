@@ -9,6 +9,7 @@ package ui.usercenter {
 		public var orderoanel:Panel;
 		public var orderbox:VBox;
 		public var closebtn:Button;
+		public var filename:Label;
 		public var outputtxt:Label;
 
 		override protected function createChildren():void {

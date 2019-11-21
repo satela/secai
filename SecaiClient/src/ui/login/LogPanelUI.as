@@ -2,11 +2,12 @@
 package ui.login {
 	import laya.ui.*;
 	import laya.display.*;
-	import script.login.LogPanelControl;
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
+	import script.login.LogPanelControl;
 
 	public class LogPanelUI extends View {
+		public var mainpanel:Panel;
 		public var bgimg:Image;
 		public var input_account:TextInput;
 		public var input_pwd:TextInput;

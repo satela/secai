@@ -11,7 +11,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static var httpUrl:String = "../scfy/";//http://www.cmyk.com.cn/scfy/" ;//	"http://47.98.218.56/scfy/"; //"http://dhs3iy.natappfree.cc/";//
+		public static var httpUrl:String =  "http://seiuf7.natappfree.cc/";//"../scfy/";//http://www.cmyk.com.cn/scfy/" ;//	"http://47.98.218.56/scfy/"; //"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		
@@ -75,6 +75,9 @@ package model
 		
 		public static const abortUpload:String = "file/abortadd?";//主动终止上传
 		
+		public static const getMerchandiseList:String = "business/merchandiselist?client_code=CL10200&";
+
+		
 		//充值
 		public static const getCompanyInfo:String = "group/get-info?";//账户信息
 
@@ -87,6 +90,7 @@ package model
 
 		public static const checkOrderList:String = "business/list-order?";//查询订单
 
+		public static const getOrderRecordList:String = "account/listorder?";//查询订单 date = 201910 curpage=1
 
 		public static function get instance():HttpRequestUtil
 		{
@@ -163,12 +167,17 @@ package model
 						{
 							ViewManager.showAlert(ErrorCode.ErrorTips[result.status]);
 						}
+						if(result.status == 203)
+						{
+							ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL,true);
+						}
 					}
 				}
 			}
 			catch(err:Error)
 			{
-				
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL,true);
+				return;
 			}
 			Laya.timer.clearAll(request);
 			// TODO Auto Generated method stub

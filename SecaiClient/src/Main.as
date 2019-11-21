@@ -34,14 +34,23 @@
 //			Browser.window.mainLaya = this;
 //			console.log("Start laya");
 //			return;
+			//trace("brower width:" + Browser.width);
 			if (window["Laya3D"]) window["Laya3D"].init(1920, 1080);
 			else Laya.init(1920, 1080, Laya["WebGL"]);
 			//Laya["Physics"] && Laya["Physics"].enable();
 			//Laya["DebugPanel"] && Laya["DebugPanel"].enable();
 			Laya.stage.scaleMode = Stage.SCALE_NOSCALE; // "noscale";//GameConfig.scaleMode;
 			Laya.stage.screenMode = GameConfig.screenMode;
-			Laya.stage.alignV = GameConfig.alignV;
-			Laya.stage.alignH = "center";//GameConfig.alignH;
+			Laya.stage.alignV = "top";//GameConfig.alignV;
+			Laya.stage.alignH = "left";//
+			
+			if(Browser.width > Laya.stage.width)
+				Laya.stage.alignH = "center";
+			else
+				Laya.stage.alignH = "left";
+			
+			//Laya.stage.alignH = GameConfig.alignH;
+
 			//兼容微信不支持加载scene后缀场景
 			URL.exportSceneToJson = GameConfig.exportSceneToJson;
 			
@@ -67,16 +76,27 @@
 //				Laya.stage.scaleX = screenWidth/1920;
 		}
 		
+		private function changeAligh():void
+		{
+			if(Browser.width > Laya.stage.width && Laya.stage.alignH != "center")
+				Laya.stage.alignH = "center";
+			else if(Browser.width <= Laya.stage.width && Laya.stage.alignH != "left")
+				Laya.stage.alignH = "left";
+
+		}
 		public function startInit():void
 		{
-			if (window["Laya3D"]) window["Laya3D"].init(1920, 1080);
-			else Laya.init(1920, 1080, Laya["WebGL"]);
+			if (window["Laya3D"]) window["Laya3D"].init(Browser.width, Browser.height);
+			else Laya.init(288, 1620, Laya["WebGL"]);
 			//Laya["Physics"] && Laya["Physics"].enable();
 			//Laya["DebugPanel"] && Laya["DebugPanel"].enable();
 			Laya.stage.scaleMode = Stage.SCALE_NOSCALE;//// Stage.SCALE_NOSCALE; // "noscale";//GameConfig.scaleMode;
 			Laya.stage.screenMode = GameConfig.screenMode;
 			Laya.stage.alignV = GameConfig.alignV;
 			Laya.stage.alignH = "center";//GameConfig.alignH;
+			
+			
+			
 			//兼容微信不支持加载scene后缀场景
 			URL.exportSceneToJson = GameConfig.exportSceneToJson;
 			
@@ -117,6 +137,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
+			//HttpRequestUtil.httpUrl = "http://eezpgn.natappfree.cc/scfy/";
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			//ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);
 			
@@ -132,6 +153,9 @@
 		{
 			// TODO Auto Generated method stub
 			EventCenter.instance.event(EventCenter.BROWER_WINDOW_RESIZE);
+			
+			Laya.timer.once(50,this,changeAligh);
+
 		}		
 	
 	}

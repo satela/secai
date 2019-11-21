@@ -44,6 +44,8 @@ package script.usercenter
 			uiSkin = this.owner as UserMainPanelUI;
 			
 			uiSkin.panel_main.vScrollBarSkin = "";
+			uiSkin.panel_main.hScrollBarSkin = "";
+
 			//uiSkin.sp_container.autoSize = true;
 			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
 			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
@@ -64,7 +66,8 @@ package script.usercenter
 				onShowEditView(param as int);
 			else
 				onShowEditView(0);
-			(uiSkin.panel_main).height = Browser.clientHeight;// - 20;
+			(uiSkin.panel_main).height = Browser.height;// - 20;
+			(uiSkin.panel_main).width = Browser.width;// - 20;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
@@ -77,7 +80,10 @@ package script.usercenter
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			(uiSkin.panel_main).height = Browser.clientHeight;// - 50;
+			uiSkin.panel_main.height = Browser.height;// - 50;
+			uiSkin.panel_main.width = Browser.width;// - 20;
+			trace("uiski wid:" + uiSkin.panel_main.width);
+
 		}
 		private function onMouseOutHandler():void
 		{

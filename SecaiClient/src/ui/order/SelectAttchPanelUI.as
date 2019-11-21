@@ -5,6 +5,7 @@ package ui.order {
 	import script.order.SelectAttchesControl;
 
 	public class SelectAttchPanelUI extends View {
+		public var mainpanel:Panel;
 		public var attachList:List;
 		public var btnok:Button;
 

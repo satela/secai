@@ -4,10 +4,13 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Image;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
 	import model.orderModel.MaterialItemVo;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
@@ -29,6 +32,7 @@ package script.order
 		public var param:Object;
 		private var curFileList:Array;
 
+		private var texture:Image;
 		public function SelectPicControl()
 		{
 			super();
@@ -48,6 +52,12 @@ package script.order
 //			
 //			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
 			uiSkin.filetypeRadio.visible = false;
+
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
 
 			uiSkin.picList.itemRender = PicInfoItem;
 			uiSkin.picList.vScrollBarSkin = "";
@@ -77,7 +87,7 @@ package script.order
 			uiSkin.htmltext.style.fontSize = 20;
 			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
 			
-			uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
+			uiSkin.btncancel.on(Event.CLICK,this,onCancelChoose);
 			uiSkin.btnok.on(Event.CLICK,this,onConfirmSelect);
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 
@@ -85,6 +95,15 @@ package script.order
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
+		}
+		private function onResizeBrower():void
+		{
+			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 		}
 		
 		private function onConfirmSelect():void
@@ -94,15 +113,94 @@ package script.order
 			{
 				EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
 			}
+			else if((param as MaterialItemVo).attchFileId == null || (param as MaterialItemVo).attchFileId == "")
+			{
+				//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{"msg":"请选择合适的附件"});
+				ViewManager.showAlert("请选择合适的附件");
+
+				return;
+			}
+			else if(texture != null && texture.source != null)
+			{
+//				var pixel:Array = texture.source.getPixels(0,0,texture.width,texture.height);
+//				var blackpixel:int = 0;
+//				
+//				for(var i:int=0;i < pixel.length;i+=4)
+//				{
+//					var r:int = pixel[i];
+//					var g:int = pixel[i+1];
+//					var b:int = pixel[i+2];
+//					if(r >= 250 )
+//					{
+//						blackpixel++;
+//					}
+//					
+//				}
+//				if( blackpixel/(pixel.length/4) < 0.15)
+//				{
+//					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"当前选择的异性切割文件可能不对，确定使用该图片吗",caller:this,callback:confirmChoose});
+//					return;
+//				}
+			}
 			onCloseView();
 		}
 		
+		private function checkIsValidYixing(text:Image):Boolean
+		{
+//			if(text != null && text.source != null)
+//			{
+//				var pixel:Array = text.source.getPixels(0,0,text.width,text.height);
+//				var blackpixel:int = 0;
+//				var colorNum:int = 0;
+//				var whiteNum:int = 0;
+//				for(var i:int=0;i < pixel.length;i+=4)
+//				{
+//					var r:int = pixel[i];
+//					var g:int = pixel[i+1];
+//					var b:int = pixel[i+2];
+//					
+//					if(r >= 250)
+//					{
+//						blackpixel++;
+//					}
+//					else if(r > 0 )
+//					{
+//						colorNum++;
+//					}
+//					else
+//					{
+//						whiteNum++;
+//					}
+//					
+//				}
+//				if ( colorNum/(pixel.length/4) > 0.01)
+//					return false;
+//				return true;
+//			}
+			
+			return true;
+		}
+		private function confirmChoose(b:Boolean):void
+		{
+			if(b)
+			{
+				texture = null;
+				onCloseView();
+			}
+		}
 		private function onCloseView():void
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PIC_TO_ORDER);
 		}
 		
+		private function onCancelChoose():void
+		{
+			if(param is MaterialItemVo)
+				EventCenter.instance.event(EventCenter.CANCEL_CHOOSE_ATTACH,param);
+			this.onCloseView();
+
+		}
 		private function onSelectAllPic():void
 		{
 			var allfilse:Array = DirectoryFileModel.instance.curFileList;
@@ -154,8 +252,9 @@ package script.order
 			
 		}
 		
-		private function seletPicToOrder(fvo:PicInfoVo):void
+		private function seletPicToOrder(data:Array):void
 		{
+			var fvo:PicInfoVo = data[0];
 			if(!UtilTool.checkFileIsImg(fvo) ||  fvo.picPhysicWidth == 0)
 				return;
 			if(param is MaterialItemVo)
@@ -164,6 +263,9 @@ package script.order
 				{
 					(param as MaterialItemVo).attchMentFileId = "";
 					(param as MaterialItemVo).attchFileId = "";
+					if(data[2] != null)
+						data[2].canCelSelected();
+					texture = null;
 				}
 				else
 				{
@@ -176,12 +278,28 @@ package script.order
 						if(xdif >0.01 || ydif > 0.01)
 						{
 							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸和当前下单图片尺寸不匹配"});
+							if(data[2] != null)
+								data[2].canCelSelected();
 							return;
 						}
 
 					}
+					if(param.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO && this.checkIsValidYixing(data[1]))
+					{
+						texture = data[1];
+					}
+					else if(param.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO && !this.checkIsValidYixing(data[1]))
+					{
+						ViewManager.showAlert("该图片不符合异形切割要求")
+						if(data[2] != null)
+							data[2].canCelSelected();
+						return
+					}
+						
+					
 					(param as MaterialItemVo).attchMentFileId = HttpRequestUtil.originPicPicUrl + fvo.fid + "." + fvo.picClass;
 					(param as MaterialItemVo).attchFileId = fvo.fid;
+					
 
 				}
 				return;
@@ -265,6 +383,8 @@ package script.order
 			EventCenter.instance.off(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
 	
 	

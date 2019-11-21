@@ -5,6 +5,7 @@ package script.usercenter
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.ui.List;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.ChinaAreaModel;
@@ -42,6 +43,13 @@ package script.usercenter
 			
 			if(param != null && param is AddressVo)
 				isAddOrEdit = false;
+			
+			uiSkin.mainpanel.vScrollBarSkin = "";
+			uiSkin.mainpanel.hScrollBarSkin = "";
+			
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+
 			
 			uiSkin.input_username.maxChars = 10;
 			uiSkin.input_phone.maxChars = 11;
@@ -112,9 +120,15 @@ package script.usercenter
 			this.uiSkin.btncancel.on(Event.CLICK,this,onCloseView);
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initAddr,"parentid=0","post");
+			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 		}
-		
+		private function onResizeBrower():void
+		{
+			uiSkin.mainpanel.height = Browser.height;
+			uiSkin.mainpanel.width = Browser.width;
+			
+		}
 		private function hideAddressPanel(e:Event):void
 		{
 			if(e.target is List)
@@ -435,6 +449,8 @@ package script.usercenter
 		private function onCloseView():void
 		{
 			ViewManager.instance.closeView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
 		}
 		
 	}

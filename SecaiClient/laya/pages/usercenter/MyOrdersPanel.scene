@@ -2,11 +2,11 @@
     "x":0,
     "type":"Scene",
     "selectedBox":3,
-    "selecteID":11,
+    "selecteID":30,
     "searchKey":"Scene",
     "props":{"width":1000,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
-    "maxID":16,
+    "maxID":31,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -31,13 +31,42 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":13,"x":36,"text":"订单号","fontSize":18},
+                    "props":{"y":14,"x":70,"width":99,"text":"下单时间","height":24,"fontSize":18},
                     "nodeParent":3,
                     "label":"Label",
+                    "isOpen":true,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
-                    "compId":6,
+                    "compId":19,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"ComboBox",
+                    "searchKey":"ComboBox,yearCombox",
+                    "props":{"y":10,"x":186,"var":"yearCombox","skin":"comp/combobox.png","selectedLabel":"2019年","scrollBarSkin":"comp/vscroll.png","labels":"2019年,2020年,2021年","labelSize":18,"labelFont":"SimHei","labelColors":"#"},
+                    "nodeParent":3,
+                    "label":"yearCombox",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":17,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"ComboBox",
+                    "searchKey":"ComboBox,monthCombox",
+                    "props":{"y":10,"x":336,"var":"monthCombox","skin":"comp/combobox.png","selectedLabel":"1月","scrollBarSkin":"comp/vscroll.png","labels":"1月,2月","labelSize":18,"labelFont":"SimHei","labelColors":"#"},
+                    "nodeParent":3,
+                    "label":"monthCombox",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":18,
                     "child":[
                         ]
                 },
@@ -45,7 +74,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":873,"x":476,"width":46.7109375,"text":"1/20","height":24,"fontSize":24},
+                    "props":{"y":656,"x":77,"width":115,"text":"订单总数：","height":24,"fontSize":24,"color":"#52B232"},
                     "nodeParent":3,
                     "label":"Label",
                     "isOpen":true,
@@ -58,79 +87,101 @@
                 },
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":13,"x":180,"text":"下单日期","fontSize":18},
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":63,"x":36},
                     "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
+                    "label":"Box",
+                    "isOpen":false,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":8,
+                    "hasChild":true,
+                    "compId":16,
                     "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":13,"x":318,"text":"商品数量","fontSize":18},
-                    "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":9,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":13,"x":412,"text":"订单金额","fontSize":18},
-                    "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":10,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":13,"x":514,"text":"支付状态","fontSize":18},
-                    "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":11,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":13,"x":631,"text":"操作","fontSize":20},
-                    "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":12,
-                    "child":[
-                        ]
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"text":"订单号","fontSize":18},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":6,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"x":144,"text":"下单日期","fontSize":18},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":8,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"x":282,"text":"商品数量","fontSize":18},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":9,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"x":376,"text":"订单金额","fontSize":18},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":10,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"x":478,"text":"支付状态","fontSize":18},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":11,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"x":595,"text":"操作","fontSize":20},
+                            "nodeParent":16,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":12,
+                            "child":[
+                                ]
+                        }]
                 },
                 {
                     "x":30,
                     "type":"List",
                     "searchKey":"List,orderList",
-                    "props":{"y":55,"x":0,"width":975,"var":"orderList","repeatY":0,"repeatX":1,"height":789},
+                    "props":{"y":95,"x":0,"width":917,"var":"orderList","vScrollBarSkin":"comp/vscroll.png","repeatY":0,"repeatX":1,"height":483},
                     "nodeParent":3,
                     "label":"orderList",
                     "isDirectory":false,
@@ -139,6 +190,164 @@
                     "compId":15,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,lastyearbtn",
+                    "props":{"y":22,"x":177,"width":20,"var":"lastyearbtn","skin":"commers/pagedown.png","rotation":90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                    "nodeParent":3,
+                    "label":"lastyearbtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":20,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,nextyearbtn",
+                    "props":{"y":22,"x":286,"width":20,"var":"nextyearbtn","skin":"commers/pagedown.png","rotation":-90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                    "nodeParent":3,
+                    "label":"nextyearbtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":21,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,lastmonthbtn",
+                    "props":{"y":22,"x":327,"width":20,"var":"lastmonthbtn","skin":"commers/pagedown.png","rotation":90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                    "nodeParent":3,
+                    "label":"lastmonthbtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":22,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,nextmonthbtn",
+                    "props":{"y":22,"x":436,"width":20,"var":"nextmonthbtn","skin":"commers/pagedown.png","rotation":-90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                    "nodeParent":3,
+                    "label":"nextmonthbtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":23,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,ordertotalNum",
+                    "props":{"y":656,"x":197,"width":58,"var":"ordertotalNum","text":"25","height":24,"fontSize":24,"color":"#dd4721"},
+                    "nodeParent":3,
+                    "label":"ordertotalNum",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":24,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":656,"x":306,"width":115,"text":"订单总金额：","height":24,"fontSize":24,"color":"#52B232"},
+                    "nodeParent":3,
+                    "label":"Label",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":25,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,ordertotalMoney",
+                    "props":{"y":656,"x":447,"width":99,"var":"ordertotalMoney","text":"25000","height":24,"fontSize":24,"color":"#dd4721"},
+                    "nodeParent":3,
+                    "label":"ordertotalMoney",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":26,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":604,"x":297},
+                    "nodeParent":3,
+                    "label":"Box",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":30,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,pagenum",
+                            "props":{"x":19.500000267948963,"width":115,"var":"pagenum","text":"1/20","height":24,"fontSize":24,"color":"#1b1c1a","align":"center"},
+                            "nodeParent":30,
+                            "label":"pagenum",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":27,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Button",
+                            "searchKey":"Button,lastpage",
+                            "props":{"y":13,"x":5,"width":20,"var":"lastpage","skin":"commers/pagedown.png","rotation":90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                            "nodeParent":30,
+                            "label":"lastpage",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":28,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Button",
+                            "searchKey":"Button,nexttpage",
+                            "props":{"y":13,"x":147.50000026794896,"width":20,"var":"nexttpage","skin":"commers/pagedown.png","rotation":-90,"height":12,"anchorY":0.5,"anchorX":0.5},
+                            "nodeParent":30,
+                            "label":"nexttpage",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":29,
+                            "child":[
+                                ]
+                        }]
                 }]
         },
         {

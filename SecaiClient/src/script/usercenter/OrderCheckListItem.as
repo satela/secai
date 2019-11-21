@@ -37,6 +37,12 @@ package script.usercenter
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
 			}
+			else
+			{
+				this.orderstatus.text = "订单异常";
+				this.orderstatus.color = "#52B232";
+				this.payagain.visible = false;
+			}
 			var detail:Object = JSON.parse(orderdata.or_text);
 			this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
 			this.productnum.text = detail.orderItemList.length + "";
@@ -60,7 +66,11 @@ package script.usercenter
 		
 		private function confirmDelete():void
 		{
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,null,"get");
+			var detail:Object = JSON.parse(orderdata.or_text);
+			
+			var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
+				
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
 
 		}
 		

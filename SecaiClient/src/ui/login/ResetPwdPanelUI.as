@@ -5,6 +5,7 @@ package ui.login {
 	import script.login.ResetPwdControl;
 
 	public class ResetPwdPanelUI extends View {
+		public var mainpanel:Panel;
 		public var inputphone:TextInput;
 		public var inputpwd:TextInput;
 		public var inputcfmpwd:TextInput;
