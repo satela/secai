@@ -15,6 +15,8 @@ package script.product
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.ProductVo;
+	import model.productModel.MerchanVo;
+	import model.productModel.ProductInShopCar;
 	import model.users.AddressVo;
 	import model.users.FactoryInfoVo;
 	
@@ -24,6 +26,8 @@ package script.product
 	import ui.order.OutPutCenterUI;
 	import ui.product.ProductMarketPanelUI;
 	import ui.product.TreeClipUI;
+	
+	import utils.UtilTool;
 	
 	public class ProductMarketControl extends Script
 	{
@@ -36,6 +40,9 @@ package script.product
 		
 		private var selectAddress:AddressVo;
 		private var outPutAddr:Array;
+		
+		private var goodsInCar:Array=[];
+		private var deliveryAddress:DeliveryTypeVo;
 		public function ProductMarketControl()
 		{
 			super();
@@ -66,7 +73,7 @@ package script.product
 			uiSkin.productCateList.renderHandler = new Handler(this, updateProductcateList);
 			uiSkin.productCateList.selectEnable = true;
 			uiSkin.productCateList.selectHandler = new Handler(this,onSelectCategory);
-			//uiSkin.productlist.array = [4,3,2,1];
+			uiSkin.productCateList.array = [];
 			
 			
 			uiSkin.productlist.itemRender = AdvertiseProItem;
@@ -77,7 +84,7 @@ package script.product
 			
 			uiSkin.productlist.renderHandler = new Handler(this, updateProductList);
 			uiSkin.productlist.selectEnable = false;
-			uiSkin.productlist.array = [4,3,2,1];
+			uiSkin.productlist.array = [];
 			
 			uiSkin.haschooselist.itemRender = AdvertiseProItem;
 			
@@ -88,8 +95,16 @@ package script.product
 			uiSkin.haschooselist.renderHandler = new Handler(this, updateProductList);
 			uiSkin.haschooselist.selectEnable = false;
 			//uiSkin.haschooselist.array = [];
-			uiSkin.haschooselist.array = [4,3,2,1];
+			uiSkin.haschooselist.array = [];
 
+			uiSkin.panelbottom.hScrollBarSkin = "";			
+			uiSkin.panelbottom.width = Browser.width;
+			
+			if(Browser.height > Laya.stage.height)
+				this.uiSkin.height = 1080;
+			else
+				this.uiSkin.height = Browser.height;
+			
 			
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
@@ -97,10 +112,59 @@ package script.product
 				uiSkin.myaddresstxt.text = Userdata.instance.getDefaultAddress().addressDetail;
 				selectAddress = Userdata.instance.getDefaultAddress();
 			}
+			if(Userdata.instance.company == null || Userdata.instance.company == "")
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAuditInfo ,this,getCompanyInfo,null,"post");
 			
-			
+			uiSkin.paybtn.on(Event.CLICK,this,onPayProductNow);
+			EventCenter.instance.on(EventCenter.PRODUCT_ADD_GOODS,this,onAddGoods);
+			EventCenter.instance.on(EventCenter.PRODUCT_DELETE_GOODS,this,onDeleteGoods);
+			resetOrderInfo();
 		}
 		
+		private function getCompanyInfo(data:Object):void
+		{
+			if(this.destroyed)
+				return;
+			var result:Object = JSON.parse(data as String);
+			
+			if(result.status == 0)
+			{
+				if(result[0] != null)
+				{
+					
+					if(result[0].info != null && result[0].info != "")
+					{
+						var cominfo:Object = JSON.parse(result[0].info);
+						Userdata.instance.company = cominfo.gp_name;
+						Userdata.instance.companyShort = cominfo.gp_shortname;
+					}
+				}
+			}
+			
+		}
+		private function onAddGoods(goodvo:ProductInShopCar):void
+		{
+			for(var i:int=0;i < goodsInCar.length;i++)
+			{
+				if(goodvo.prod_code == goodsInCar[i].prod_code)
+				{
+					goodsInCar[i].goodsNum += goodvo.goodsNum;
+					uiSkin.haschooselist.array = goodsInCar;
+					return;;
+				}
+			}
+			
+			goodsInCar.push(goodvo);
+			uiSkin.haschooselist.array = goodsInCar;
+			resetOrderInfo();
+		}
+		
+		private function onDeleteGoods(items:AdvertiseProItem):void
+		{
+			uiSkin.haschooselist.deleteItem(uiSkin.haschooselist.array.indexOf(items.productvo));
+			resetOrderInfo();
+
+		}
 		private function onGetOutPutAddress(data:*):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -144,7 +208,7 @@ package script.product
 			if(!result.hasOwnProperty("status"))
 			{
 				var product:Array = result as Array;
-				PaintOrderModel.instance.productList = [];
+				//PaintOrderModel.instance.productList = [];
 				
 				var hasMatName:Array = [];
 				var tempArr:Array = [];
@@ -168,6 +232,8 @@ package script.product
 			{
 				item.ShowSelected = item.matvo == uiSkin.productCateList.array[index];
 			}
+						
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getMerchandiseList + "addr_id=" + selectAddress.searchZoneid + "&prodCat_name=" + uiSkin.productCateList.array[index].matclassname,this,onGetProductListBack,null,null);
 			
 		}
@@ -175,6 +241,28 @@ package script.product
 		{
 			
 		}
+		
+		private function resetOrderInfo():void
+		{
+			//			if(PaintOrderModel.instance.selectDelivery == null)
+			//				uiSkin.textDeliveryType.text = "送货方式：无";
+			//			else
+			//				uiSkin.textDeliveryType.text = "送货方式：" + PaintOrderModel.instance.selectDelivery.delivery_name;
+			
+			//uiSkin.textProductNum.text = "商品总数：" + orderlist.length + "";
+			var total:Number = 0;
+			for(var i:int=0;i < goodsInCar.length;i++)
+			{
+				total += Number(goodsInCar[i].goodsNum * goodsInCar[i].mer_price);
+			}
+			
+			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			
+			uiSkin.textPayPrice.innerHTML = "<span color='#262B2E' size='20'>应付总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			
+		}
+		
 		private function onClickOpenQQ():void
 		{
 			window.open('tencent://message/?uin=10987654321');
@@ -210,8 +298,15 @@ package script.product
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
+			if(Browser.height > Laya.stage.height)
+				this.uiSkin.height = 1080;
+			else
+				this.uiSkin.height = Browser.height;
+			
 			(uiSkin.panel_main).height = Browser.height;// - 50;
 			uiSkin.panel_main.width = Browser.width;
+			uiSkin.panelbottom.width = Browser.width;
+
 		}
 		
 		private function updateProductcateList(cell:ProductCategoryItem):void
@@ -221,7 +316,21 @@ package script.product
 		
 		private function onGetProductListBack(data:Object):void
 		{
-			var result:Object = JSON.parse(data as String);
+			var result:Array = JSON.parse(data as String) as Array;
+			if(result != null)
+			{
+				var list:Array = [];
+				for(var i:int=0;i < result.length;i++)
+				{
+					
+					var temp:MerchanVo = new MerchanVo(result[i]);
+					
+					list.push(temp);
+					
+				}
+				uiSkin.productlist.array = list;
+
+			}
 		}
 		
 		private function onGetDeliveryBack(data:Object):void
@@ -231,7 +340,7 @@ package script.product
 				uiSkin.deliverbox.removeChildAt(0);
 			if(!result.hasOwnProperty("status"))
 			{
-				PaintOrderModel.instance.deliveryList = [];
+				//PaintOrderModel.instance.deliveryList = [];
 				for(var i:int=0;i < result.length;i++)
 				{
 					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
@@ -241,7 +350,7 @@ package script.product
 					{
 						deliveritem.btnsel.selected = true;
 						deliveritem.selCheck.selected = true;
-						PaintOrderModel.instance.selectDelivery = tempdevo;
+						deliveryAddress = tempdevo;
 					}
 					
 					deliveritem.on(Event.CLICK,this,onSelectDeliverAdd,[deliveritem,tempdevo]);
@@ -269,11 +378,117 @@ package script.product
 			
 			deliitem.btnsel.selected = true;
 			deliitem.selCheck.selected = true;
-			PaintOrderModel.instance.selectDelivery = delivervo;
+			deliveryAddress = delivervo;
 			
 			
 		}
 		
+		private function onPayProductNow():void
+		{
+			var orderFactory:Object = {};
+			
+			if(goodsInCar.length <=0 )
+			{
+				ViewManager.showAlert("未选择任何产品");
+				return;
+			}
+			if(selectAddress == null)
+			{
+				ViewManager.showAlert("请选择收货地址");
+				return;
+			}
+			if(deliveryAddress == null)
+			{
+				ViewManager.showAlert("请选择配送中心");
+				return;
+			}
+			for(var i:int=0; i < goodsInCar.length;i++)
+			{
+				
+				var orderdata:Object;
+				if(!orderFactory.hasOwnProperty(goodsInCar[i].manufacturer_code))
+				{
+					orderdata = {};
+					orderdata.order_sn = PaintOrderModel.getOrderSn();
+					orderdata.client_code = "CL10200";
+					orderdata.consignee = Userdata.instance.companyShort + "#" + selectAddress.receiverName;
+					orderdata.tel = selectAddress.phone;
+					orderdata.address = selectAddress.proCityArea;
+					orderdata.order_amountStr = 0;
+					orderdata.shipping_feeStr = "0";
+					orderdata.money_paidStr = "0";
+					orderdata.discountStr = "0";
+					orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
+					orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
+					
+					orderdata.manufacturer_code = goodsInCar[i].manufacturer_code;
+					orderdata.manufacturer_name = goodsInCar[i].manufacturer_name;
+					
+					var totalMoney:Number = 0;
+					if(deliveryAddress != null)
+					{
+						orderdata.logistic_code = deliveryAddress.deliverynet_code + "#" +  deliveryAddress.delivery_name;
+						//orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
+					}
+					
+					orderdata.orderItemList = [];
+					orderFactory[goodsInCar[i].manufacturer_code] = orderdata;
+				}
+				else
+					orderdata = orderFactory[goodsInCar[i].manufacturer_code];
+				
+				
+				if(goodsInCar[i] != null)
+				{
+					orderdata.order_amountStr += goodsInCar[i].mer_price * goodsInCar[i].goodsNum;
+					//totalMoney += orderlist[i].getPrice();
+					
+					
+					var proddata:Object = goodsInCar[i].getOrderData();
+					proddata.item_seq = i+1;
+					orderdata.orderItemList.push(proddata);
+				}
+				else
+				{
+					//ViewManager.showAlert("有图片未选择材料工艺");
+					return;
+				}
+				
+				
+				//orderdata.order_amountStr = totalMoney.toString();
+				//orderdata.money_paidStr =  "0.01";//totalMoney.toString();
+				
+			}
+			var arr:Array = [];
+			for each(var odata in orderFactory)
+			{
+				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
+				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);				
+				arr.push(odata);
+			}
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+
+		}
+		
+		private function onPlaceOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				//ViewManager.showAlert("下单成功");
+				var totalmoney:Number = 0;
+				var allorders:Array = [];
+				for(var i:int=0;i < result.orders.length;i++)
+				{
+					var orderdata:Object = JSON.parse(result.orders[i]);
+					totalmoney += Number(orderdata.money_paidStr);
+					allorders.push(orderdata.order_sn);
+				}
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+				
+			}
+		}
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);

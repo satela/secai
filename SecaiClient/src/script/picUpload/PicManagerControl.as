@@ -10,6 +10,7 @@ package script.picUpload
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.PaintOrderModel;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
 	
@@ -206,7 +207,7 @@ package script.picUpload
 //			else
 			file.multiple="multiple";
 			
-			file.accept = ".jpg,.jpeg,.png,.tif";
+			file.accept = ".jpg,.jpeg,.tif,.zip";
 			file.type ="file";
 			file.style.position ="absolute";
 			file.style.zIndex = 999;
@@ -237,9 +238,33 @@ package script.picUpload
 		private function onshowOrder():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			var hassrgb:Boolean = false;
+			
+			for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
+			{
+				if(pic.colorspace.toUpperCase() == "SRGB")
+				{
+					hassrgb = true;
+					break;
+				}
+			}
+			
+			if(hassrgb)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:confirmOrderNow});
+			}
+			else
+				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
+		private function confirmOrderNow(b:Boolean):void
+		{
+			if(b)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+
+			}
+		}
 		private function seletPicToOrder(data:Array):void
 		{
 			var fvo:PicInfoVo = data[0];

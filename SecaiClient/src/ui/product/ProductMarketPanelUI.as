@@ -6,6 +6,7 @@ package ui.product {
 	import script.prefabScript.LinkTextControl;
 	import script.prefabScript.TopBannerControl;
 	import script.product.ProductMarketControl;
+	import laya.html.dom.HTMLDivElement;
 
 	public class ProductMarketPanelUI extends View {
 		public var panel_main:Panel;
@@ -21,6 +22,12 @@ package ui.product {
 		public var haschooselist:List;
 		public var deliversp:Sprite;
 		public var deliverbox:VBox;
+		public var panelbottom:Panel;
+		public var textTotalPrice:HTMLDivElement;
+		public var textDeliveryType:HTMLDivElement;
+		public var textPayPrice:HTMLDivElement;
+		public var saveorder:Button;
+		public var paybtn:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

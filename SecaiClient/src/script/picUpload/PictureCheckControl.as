@@ -43,6 +43,7 @@ package script.picUpload
 			{
 				var picvo:PicInfoVo = param[0];
 				var yixingimg:String =  param[1];
+				var scalex:Number = param[2];
 			}
 			else
 				picvo = param as PicInfoVo;
@@ -71,6 +72,7 @@ package script.picUpload
 					uiSkin.yixingimg.skin = yixingimg;
 					uiSkin.yixingimg.width = this.uiSkin.img.width;
 					uiSkin.yixingimg.height = this.uiSkin.img.height;
+					uiSkin.yixingimg.scaleX = scalex;
 
 				}
 			}

@@ -58,6 +58,7 @@ package model.picmanagerModel
 						picPhysicWidth = UtilTool.oneCutNineAdd(fattr.width*2.54);
 						picPhysicHeight = UtilTool.oneCutNineAdd(fattr.height*2.54);
 						isCdr = true;
+						
 					}
 				}
 				catch(err:Error)
@@ -66,6 +67,8 @@ package model.picmanagerModel
 				}
 
 				picClass = fileinfo.ftype;
+				if(isCdr)
+					picClass = "zip";
 				
 				if(fattr != null && fattr.flag == 1)
 				{

@@ -57,7 +57,10 @@ package eventUtil
 		
 		public static const CANCEL_CHOOSE_ATTACH:String = "CANCEL_CHOOSE_ATTACH";//取消选择附件
 
-		
+		public static const PRODUCT_DELETE_GOODS:String = "PRODUCT_DELETE_GOODS";//删除成品商品
+
+		public static const PRODUCT_ADD_GOODS:String = "PRODUCT_ADD_GOODS";//加入成品商品到购物车
+
 
 
 		private static var _eventCenter:EventCenter;

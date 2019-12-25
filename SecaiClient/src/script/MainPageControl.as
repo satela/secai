@@ -121,6 +121,10 @@ package script {
 				Userdata.instance.isLogin = true;
 				txtLogin.text =  account;
 				txtReg.text = "[退出]";
+				
+				Userdata.instance.loginTime = (new Date()).getTime();
+				UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
+				
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 
 			}

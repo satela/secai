@@ -63,9 +63,12 @@ package script.order
 			this.backimg.width = this.fileimg.width;
 			this.backimg.height = this.fileimg.height;
 			
+			this.yingxback.width = this.fileimg.width;
+			this.yingxback.height = this.fileimg.height;
+
 			this.yixingimg.visible = false;
 			this.backimg.visible = false;
-			
+			this.yingxback.visible = false;
 			
 			this.fileimg.on(Event.CLICK,this,onShowBigImg);
 			this.backimg.on(Event.CLICK,this,onShowBackImg);
@@ -182,6 +185,7 @@ package script.order
 				var obj:Array = [];
 				obj.push(this.ordervo.picinfo);
 				obj.push(this.yixingimg.skin);
+				obj.push(1);
 				ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,obj);
 
 			}
@@ -198,7 +202,16 @@ package script.order
 			obj.picWidth = this.ordervo.picinfo.picWidth;
 			obj.picHeight = this.ordervo.picinfo.picHeight;
 			
-			ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,obj);
+			if(this.yingxback.visible)
+			{
+				var objdata:Array = [];
+				objdata.push(obj);
+				objdata.push(this.yingxback.skin);
+				objdata.push(-1);
+				ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,objdata);
+			}
+			else
+				ViewManager.instance.openView(ViewManager.VIEW_PICTURE_CHECK,false,obj);
 
 		}
 		private function onAddComment():void
@@ -226,7 +239,8 @@ package script.order
 			this.fileimg.y = this.height/2;
 			
 			this.backimg.y =  this.height/2;
-			
+			this.yingxback.y =  this.height/2;
+
 			this.yixingimg.y = this.height/2;
 			
 			this.filename.y = (this.height - this.filename.height)/2;
@@ -311,6 +325,8 @@ package script.order
 				if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_SAME_TECHNO )
 				{
 					doublesame = true;
+					fanmianFid = this.ordervo.picinfo.fid;
+
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
 				{
@@ -326,7 +342,8 @@ package script.order
 			
 			this.backimg.visible = doublesideImg != "" || doublesame;
 			//uiSkin.backimg.visible = doublesideImg != "" || doublesame;
-			
+			this.yingxback.visible = (doublesideImg != "" || doublesame) && yixingqiegeImg != "";
+
 			if(doublesideImg != "")
 			{
 				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
@@ -343,6 +360,8 @@ package script.order
 			if(yixingqiegeImg != "")
 			{
 				this.yixingimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+				if(this.yingxback.visible)
+					this.yingxback.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
 			}
 			
 			

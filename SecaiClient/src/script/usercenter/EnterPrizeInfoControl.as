@@ -137,8 +137,25 @@ package script.usercenter
 			{
 				Userdata.instance.money = Number(result.balance);
 				uiSkin.moneytxt.text = Userdata.instance.money.toString() + "元";
-
+				
+				uiSkin.input_companyname.text = result.name;
+				uiSkin.detail_addr.text = result.addr;
+				uiSkin.reditcode.text = result.license
+				uiSkin.txt_license.text = "";
+				uiSkin.shortname.text = result.shortname;
+				
+				Userdata.instance.company = result.name;
+				Userdata.instance.companyShort = result.shortname;
+				//var nums = Number(cominfo.gp_zone);
+				proid = (result.zone as String).slice(0,2) + "0000";
+				cityid = (result.zone as String).slice(0,4) + "00";
+				areaid = (result.zone as String).slice(0,6);
+				townid = result.zone;
+				uiSkin.btnsave.disabled = true;
+				uiSkin.btnsave.label = "已审核";
 			}
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
+
 		}	
 		
 		private function onCharge():void
@@ -163,6 +180,21 @@ package script.usercenter
 					{
 						uiSkin.btnsave.disabled = true;
 						uiSkin.btnsave.label = "审核中";
+						
+						var cominfo:Object = JSON.parse(result[0].info);
+						uiSkin.input_companyname.text = cominfo.gp_name;
+						uiSkin.detail_addr.text = cominfo.gp_addr;
+						uiSkin.reditcode.text = cominfo.gp_orgcode;
+						uiSkin.txt_license.text = cominfo.gp_license;
+						uiSkin.shortname.text = cominfo.gp_shortname;
+						
+						proid = (cominfo.gp_zone as String).slice(0,2) + "0000";
+						cityid = (cominfo.gp_zone as String).slice(0,4) + "00";
+						areaid = (cominfo.gp_zone as String).slice(0,6);
+						townid = cominfo.gp_zone.zone;
+						
+						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
+
 					}
 					else
 					{
@@ -171,25 +203,13 @@ package script.usercenter
 					}
 					if(result[0].info != null && result[0].info != "")
 					{
-						var cominfo:Object = JSON.parse(result[0].info);
-						uiSkin.input_companyname.text = cominfo.gp_name;
-						uiSkin.detail_addr.text = cominfo.gp_addr;
-						uiSkin.reditcode.text = cominfo.gp_orgcode;
-						uiSkin.txt_license.text = cominfo.gp_license;
-						uiSkin.shortname.text = cominfo.gp_shortname;
-						Userdata.instance.company = cominfo.gp_name;
-						Userdata.instance.companyShort = cominfo.gp_shortname;
-						//var nums = Number(cominfo.gp_zone);
-						proid = (cominfo.gp_zone as String).slice(0,2) + "0000";
-						cityid = (cominfo.gp_zone as String).slice(0,4) + "00";
-						areaid = (cominfo.gp_zone as String).slice(0,6);
-						townid = cominfo.gp_zone;
+						
+						
 					}
 				}
 				trace(result);
 			}
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
 
 		}
 		private function initView(data:Object):void

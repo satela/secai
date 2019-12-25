@@ -19,6 +19,7 @@ package ui.order {
 		public var originimg:Image;
 		public var yixingimg:Image;
 		public var backimg:Image;
+		public var yingxBack:Image;
 		public var btnok:Button;
 		public var btncancel:Button;
 		public var numinput:TextInput;

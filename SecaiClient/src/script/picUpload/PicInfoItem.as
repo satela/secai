@@ -14,6 +14,8 @@ package script.picUpload
 	
 	import ui.picManager.PicShortItemUI;
 	
+	import utils.UtilTool;
+	
 	public class PicInfoItem extends PicShortItemUI
 	{
 		public var picInfo:PicInfoVo;
@@ -40,7 +42,7 @@ package script.picUpload
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid);
 			this.sel.selected = this.sel.visible;
 
-			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG" && picInfo.picClass.toLocaleUpperCase() != "ZIP"))
+			if(picInfo.picType == 0 || !UtilTool.checkFileIsImg(picInfo))
 			{
 				this.img.skin = "upload/fold.png";
 				this.filename.text = picInfo.directName;
@@ -92,8 +94,12 @@ package script.picUpload
 				str += "dpi:" + picInfo.dpi;
 				this.fileinfo.text = str;
 				
+				if(picInfo.isCdr)
+					this.picClassTxt.text = "CDR";
+				else
+					this.picClassTxt.text = picInfo.picClass.toLocaleUpperCase();
+
 				
-				this.picClassTxt.text = picInfo.picClass.toLocaleUpperCase();
 				this.picClassTxt.visible = true;
 				//if(this.picInfo.colorspace)
 				this.colorspacetxt.text = picInfo.colorspace.toLocaleUpperCase();
@@ -168,7 +174,11 @@ package script.picUpload
 		private function onClickHandler():void
 		{
 			// TODO Auto Generated method stub
-			if(this.picInfo.picType == 1)
+			
+			if(this.picInfo.picType == 1 && this.picInfo.picClass.toLocaleUpperCase() == "PNG")
+				return;
+			
+			if(this.picInfo.picType == 1  && this.picInfo.picPhysicWidth > 0)
 			{
 				this.sel.visible = !this.sel.visible;
 				this.sel.selected = this.sel.visible;

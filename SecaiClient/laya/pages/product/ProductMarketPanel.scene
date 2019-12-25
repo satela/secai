@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":68,
-    "selecteID":65,
+    "selecteID":63,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":75,
+    "maxID":86,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -494,7 +494,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,productlist",
-                            "props":{"y":4,"x":238,"width":415,"var":"productlist","height":500},
+                            "props":{"y":4,"x":238,"width":480,"var":"productlist","height":500},
                             "nodeParent":68,
                             "label":"productlist",
                             "isDirectory":false,
@@ -508,7 +508,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,haschooselist",
-                            "props":{"y":4,"x":666,"width":415,"var":"haschooselist","height":500},
+                            "props":{"y":4,"x":776,"width":480,"var":"haschooselist","height":500},
                             "nodeParent":68,
                             "label":"haschooselist",
                             "isDirectory":false,
@@ -562,46 +562,6 @@
                         },
                         {
                             "x":45,
-                            "type":"Box",
-                            "searchKey":"Box",
-                            "props":{"y":626,"x":709,"width":371,"height":48},
-                            "nodeParent":68,
-                            "label":"Box",
-                            "isOpen":false,
-                            "isDirectory":true,
-                            "isAniNode":true,
-                            "hasChild":true,
-                            "compId":65,
-                            "child":[
-                                {
-                                    "type":"Button",
-                                    "searchKey":"Button",
-                                    "props":{"y":0,"x":0,"width":160,"skin":"commers/btn3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"保存订单","height":48},
-                                    "nodeParent":65,
-                                    "label":"Button",
-                                    "isDirectory":false,
-                                    "isAniNode":true,
-                                    "hasChild":false,
-                                    "compId":66,
-                                    "child":[
-                                        ]
-                                },
-                                {
-                                    "type":"Button",
-                                    "searchKey":"Button",
-                                    "props":{"y":-2,"x":208,"width":160,"skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"去结算","height":48},
-                                    "nodeParent":65,
-                                    "label":"Button",
-                                    "isDirectory":false,
-                                    "isAniNode":true,
-                                    "hasChild":false,
-                                    "compId":67,
-                                    "child":[
-                                        ]
-                                }]
-                        },
-                        {
-                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"y":-11,"x":-18,"width":1280,"skin":"commers/cutline.png","height":1,"alpha":1},
@@ -634,6 +594,140 @@
             "compId":64,
             "child":[
                 ]
+        },
+        {
+            "x":15,
+            "type":"Panel",
+            "searchKey":"Panel,panelbottom",
+            "props":{"y":0,"x":0,"width":1920,"var":"panelbottom","height":71,"bottom":0},
+            "nodeParent":2,
+            "label":"panelbottom",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":75,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":0,"x":0,"width":1920},
+                    "nodeParent":75,
+                    "label":"Box",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":76,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Sprite",
+                            "searchKey":"Sprite",
+                            "props":{"texture":"commers/cutline.png"},
+                            "nodeParent":76,
+                            "label":"Sprite",
+                            "isOpen":false,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":77,
+                            "child":[
+                                {
+                                    "type":"Image",
+                                    "searchKey":"Image",
+                                    "props":{"y":0,"x":0,"width":1920,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","height":71,"alpha":1},
+                                    "nodeParent":77,
+                                    "label":"Image",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":78,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"HTMLDivElement",
+                                    "searchKey":"HTMLDivElement,textTotalPrice",
+                                    "props":{"y":29,"x":350,"width":300,"var":"textTotalPrice","innerHTML":"htmlText","height":100},
+                                    "nodeParent":77,
+                                    "label":"textTotalPrice",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":79,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"HTMLDivElement",
+                                    "searchKey":"HTMLDivElement,textDeliveryType",
+                                    "props":{"y":29,"x":619,"width":300,"var":"textDeliveryType","innerHTML":"htmlText","height":100},
+                                    "nodeParent":77,
+                                    "label":"textDeliveryType",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":80,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"HTMLDivElement",
+                                    "searchKey":"HTMLDivElement,textPayPrice",
+                                    "props":{"y":29,"x":888,"width":300,"var":"textPayPrice","innerHTML":"htmlText","height":100},
+                                    "nodeParent":77,
+                                    "label":"textPayPrice",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":81,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "type":"Box",
+                                    "searchKey":"Box",
+                                    "props":{"y":12,"x":1210,"width":371,"height":48},
+                                    "nodeParent":77,
+                                    "label":"Box",
+                                    "isOpen":true,
+                                    "isDirectory":true,
+                                    "isAniNode":true,
+                                    "hasChild":true,
+                                    "compId":83,
+                                    "child":[
+                                        {
+                                            "type":"Button",
+                                            "searchKey":"Button,saveorder",
+                                            "props":{"y":0,"x":0,"width":160,"var":"saveorder","skin":"commers/btn3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#FFFFFF,#FFFFFF","label":"保存订单","height":48},
+                                            "nodeParent":83,
+                                            "label":"saveorder",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":84,
+                                            "child":[
+                                                ]
+                                        },
+                                        {
+                                            "type":"Button",
+                                            "searchKey":"Button,paybtn",
+                                            "props":{"y":-2,"x":208,"width":160,"var":"paybtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"去结算","height":48},
+                                            "nodeParent":83,
+                                            "label":"paybtn",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":85,
+                                            "child":[
+                                                ]
+                                        }]
+                                }],
+                            "$HIDDEN":false
+                        }]
+                }]
         }],
     "animations":[
         {

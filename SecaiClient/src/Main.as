@@ -137,7 +137,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
-			//HttpRequestUtil.httpUrl = "http://eezpgn.natappfree.cc/scfy/";
+			//HttpRequestUtil.httpUrl = "http://uspntg.natappfree.cc/scfy/";
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			//ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);
 			

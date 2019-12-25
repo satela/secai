@@ -2,14 +2,14 @@ package model.productModel
 {
 	public class MerchanVo
 	{
-		public var Prod_Code:String;//产品编码
-		public var Prod_Name:String;//产品名称
-		public var Measure_Unit:String;//计量单位
-		public var Manufacturer_Code:String;//输出中心编码
-		public var Manufacturer_Name:String;//输出中心名称
-		public var Mer_volume:String;//成品商品体积（长*宽*高
-		public var Mer_weight:Number;//成品商品重量
-		public var Mer_price:Number;// 成品商品价格
+		public var prod_code:String;//产品编码
+		public var prod_name:String;//产品名称
+		public var measure_unit:String;//计量单位
+		public var manufacturer_code:String;//输出中心编码
+		public var manufacturer_name:String;//输出中心名称
+		public var mer_volume:String;//成品商品体积（长*宽*高
+		public var mer_weight:Number;//成品商品重量
+		public var mer_price:Number;// 成品商品价格
 
 		public function MerchanVo(data:Object)
 		{

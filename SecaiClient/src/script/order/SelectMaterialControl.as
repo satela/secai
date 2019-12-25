@@ -76,6 +76,8 @@ package script.order
 			
 			uiSkin.yixingimg.skin = "";
 			
+			uiSkin.yingxBack.skin = "";
+			
 			if(param != null)
 			{
 				if(param.picWidth > param.picHeight)
@@ -96,6 +98,9 @@ package script.order
 				
 				uiSkin.backimg.width = uiSkin.originimg.width;
 				uiSkin.backimg.height = uiSkin.originimg.height;
+				
+				uiSkin.yingxBack.width = uiSkin.originimg.width;
+				uiSkin.yingxBack.height = uiSkin.originimg.height;
 				
 				//uiSkin.qiegeoriginimg.width = uiSkin.originimg.width;
 				//uiSkin.qiegeoriginimg.height = uiSkin.originimg.height;
@@ -777,6 +782,8 @@ package script.order
 			}
 			
 			uiSkin.backimg.visible = doublesideImg != "" || doublesame;
+			
+			uiSkin.yingxBack.visible = (doublesideImg != "" || doublesame) && yixingqiegeImg != "";
 			//uiSkin.backimg.visible = doublesideImg != "" || doublesame;
 
 			if(doublesideImg != "")
@@ -796,6 +803,10 @@ package script.order
 			{
 				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
 				uiSkin.yixingimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+				
+				if(uiSkin.yingxBack.visible)
+					uiSkin.yingxBack.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
+
 			}
 		}
 		private function getItembox():TechBoxItem
@@ -823,6 +834,19 @@ package script.order
 				ViewManager.showAlert("请选择一个工艺");
 				return;
 
+			}
+			
+			var hasSelectedTech:Array = PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
+			for(var i:int=0;i < hasSelectedTech.length;i++)
+			{
+				if(hasSelectedTech[i].preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
+				{
+					if(hasSelectedTech[i].selectAttachVoList == null || hasSelectedTech[i].selectAttachVoList.length == 0 )
+					{
+						ViewManager.showAlert("未选择配件");
+						return;
+					}
+				}
 			}
 			if(PaintOrderModel.instance.curSelectOrderItem)
 				PaintOrderModel.instance.curSelectOrderItem.changeProduct(PaintOrderModel.instance.curSelectMat);

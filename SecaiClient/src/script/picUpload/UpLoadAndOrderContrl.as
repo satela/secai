@@ -113,7 +113,7 @@ package script.picUpload
 //			else
 				file.multiple="multiple";
 
-			file.accept = ".jpg,.jpeg,.png,.tif,.zip";
+			file.accept = ".jpg,.jpeg,.tif,.zip";
 			file.type ="file";
 			file.style.position ="absolute";
 			file.style.zIndex = 999;
@@ -159,6 +159,8 @@ package script.picUpload
 		private function onGetAuthor(data:Object):void
 		{
 			var authordata:Object = JSON.parse(data as String);
+			if(authordata == null || authordata.Credentials == null)
+				return;
 			clientParam = {};
 			clientParam.accessKeyId = authordata.Credentials.AccessKeyId;
 			clientParam.accessKeySecret = authordata.Credentials.AccessKeySecret;

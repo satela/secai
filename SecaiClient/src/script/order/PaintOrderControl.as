@@ -152,7 +152,7 @@ package script.order
 			this.uiSkin.panelout.on(Event.DRAG_MOVE,this,onDragMove);
 			
 			if(Userdata.instance.company == null || Userdata.instance.company == "")
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAuditInfo ,this,getCompanyInfo,null,"post");
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,getCompanyInfo,null,"post");
 
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
 //				
@@ -183,16 +183,8 @@ package script.order
 			
 			if(result.status == 0)
 			{
-				if(result[0] != null)
-				{
-					
-					if(result[0].info != null && result[0].info != "")
-					{
-						var cominfo:Object = JSON.parse(result[0].info);
-						Userdata.instance.company = cominfo.gp_name;
-						Userdata.instance.companyShort = cominfo.gp_shortname;
-					}
-				}
+				Userdata.instance.company = result.name;
+				Userdata.instance.companyShort = result.shortname;
 			}
 			
 		}
@@ -544,6 +536,27 @@ package script.order
 //			var obj:Object = {client_code:"SCFY001",order_sn:"123456",refund_amount:"9.12"};
 //			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,onPlaceOrderBack,{data:JSON.stringify(obj)},"post");
 //			return;
+			
+			if(Userdata.instance.companyShort == null)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,function(data:Object){
+					
+					if(this.destroyed)
+						return;
+					var result:Object = JSON.parse(data as String);
+					
+					if(result.status == 0)
+					{
+						Userdata.instance.company = result.name;
+						Userdata.instance.companyShort = result.shortname;
+					}
+					
+					onOrderPaint();		
+				}
+				,null,"post");	
+				
+				return;
+			}
 			var arr:Array = getOrderData();
 			if(arr == null)
 				return;
@@ -553,6 +566,27 @@ package script.order
 		
 		private function onSaveOrder():void
 		{
+			if(Userdata.instance.companyShort == null)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,function(data:Object){
+					
+					if(this.destroyed)
+						return;
+					var result:Object = JSON.parse(data as String);
+					
+					if(result.status == 0)
+					{
+						Userdata.instance.company = result.name;
+						Userdata.instance.companyShort = result.shortname;
+					}
+					
+					onSaveOrder();		
+				}
+					,null,"post");	
+				
+				return;
+			}
+			
 			var arr:Array = getOrderData();
 			if(arr == null)
 				return;
@@ -601,6 +635,7 @@ package script.order
 		
 		private function getOrderData():Array
 		{
+			
 			if(orderlist.length <= 0)
 			{
 				ViewManager.showAlert("未选择下单图片");
@@ -645,8 +680,8 @@ package script.order
 					var totalMoney:Number = 0;
 					if(PaintOrderModel.instance.selectDelivery)
 					{
-						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;
-						orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
+						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;// + "#" +  PaintOrderModel.instance.selectDelivery.delivery_name;
+						//orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
 					}
 					
 					orderdata.orderItemList = [];

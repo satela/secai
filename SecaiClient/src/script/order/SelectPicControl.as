@@ -3,10 +3,15 @@ package script.order
 	import eventUtil.EventCenter;
 	
 	import laya.components.Script;
+	import laya.display.Sprite;
+	import laya.display.cmd.DrawTextureCmd;
 	import laya.events.Event;
+	import laya.resource.Texture;
 	import laya.ui.Image;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
+	import laya.webgl.resource.BaseTexture;
+	import laya.webgl.resource.Texture2D;
 	
 	import model.HttpRequestUtil;
 	import model.orderModel.MaterialItemVo;
@@ -111,7 +116,24 @@ package script.order
 			// TODO Auto Generated method stub
 			if(!(param is MaterialItemVo))
 			{
-				EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+				var hassrgb:Boolean = false;
+				
+				for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
+				{
+					if(pic.colorspace.toUpperCase() == "SRGB")
+					{
+						hassrgb = true;
+						break;
+					}
+				}
+				
+				if(hassrgb)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:confirmOrderNow});
+					return;
+				}
+				else
+					EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
 			}
 			else if((param as MaterialItemVo).attchFileId == null || (param as MaterialItemVo).attchFileId == "")
 			{
@@ -144,12 +166,21 @@ package script.order
 			}
 			onCloseView();
 		}
-		
+		private function confirmOrderNow(b:Boolean):void
+		{
+			if(b)
+			{
+				EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+				onCloseView();
+			}
+		}
 		private function checkIsValidYixing(text:Image):Boolean
 		{
+					
 //			if(text != null && text.source != null)
 //			{
-//				var pixel:Array = text.source.getPixels(0,0,text.width,text.height);
+//				//(text.source.bitmap as Texture2D).
+//				var pixel:Array= text.source.getPixels(0,0,text.width,text.height);
 //				var blackpixel:int = 0;
 //				var colorNum:int = 0;
 //				var whiteNum:int = 0;
@@ -159,6 +190,7 @@ package script.order
 //					var g:int = pixel[i+1];
 //					var b:int = pixel[i+2];
 //					
+//					trace("rgb=" + r +"," +g +"," + b);
 //					if(r >= 250)
 //					{
 //						blackpixel++;
@@ -173,6 +205,9 @@ package script.order
 //					}
 //					
 //				}
+//				
+//				trace(" 黑色 ：" + blackpixel + ",白色:" + whiteNum);
+//				
 //				if ( colorNum/(pixel.length/4) > 0.01)
 //					return false;
 //				return true;

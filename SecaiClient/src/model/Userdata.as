@@ -27,6 +27,7 @@ package model
 		
 		public var defaultAddrid:String = "0";
 		
+		public var loginTime:Number = 0;
 
 		public static function get instance():Userdata
 		{

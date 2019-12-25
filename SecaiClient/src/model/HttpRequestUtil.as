@@ -2,9 +2,12 @@ package model
 {
 	import laya.events.Event;
 	import laya.net.HttpRequest;
+	import laya.ui.View;
+	import laya.utils.Browser;
 	
 	import script.ViewManager;
 	
+	import utils.UtilTool;
 	import utils.WaitingRespond;
 
 	public class HttpRequestUtil
@@ -186,6 +189,22 @@ package model
 		}
 		
 		public  function Request(url:String,caller:Object=null,complete:Function=null,param:Object=null,type:String="get",onProgressFun:Function = null,showwaiting:Boolean=true):void{
+			
+			var logtime:String = UtilTool.getLocalVar("loginTime","");
+			if(Userdata.instance.loginTime != 0 && logtime != Userdata.instance.loginTime.toString())
+			{
+				ViewManager.showAlert("不能同时登陆两个账号，请重新登录");
+				Userdata.instance.isLogin = false;
+				
+				UtilTool.setLocalVar("useraccount","");
+				UtilTool.setLocalVar("userpwd","");
+				
+				Browser.window.location.reload();
+				//ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+				
+				return;
+			}
+			
 			if(showwaiting)
 			{
 				WaitingRespond.instance.showWaitingView();

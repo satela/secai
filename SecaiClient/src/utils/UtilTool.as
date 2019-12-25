@@ -109,7 +109,7 @@ package utils
 		
 		public static function checkFileIsImg(picInfo:PicInfoVo):Boolean
 		{
-			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "PNG" && picInfo.isCdr == false))
+			if(picInfo.picType == 0 ||(picInfo.picClass.toLocaleUpperCase() != "JPEG" && picInfo.picClass.toLocaleUpperCase() != "JPG" && picInfo.picClass.toLocaleUpperCase() != "TIF" && picInfo.picClass.toLocaleUpperCase() != "TIFF" && picInfo.picClass.toLocaleUpperCase() != "PNG" && picInfo.isCdr == false))
 				return false;
 			else return true;
 
