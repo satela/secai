@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":3,
-    "selecteID":5,
+    "selecteID":9,
     "searchKey":"View",
     "props":{"width":0,"sceneColor":"#000000","height":40},
     "nodeParent":-1,
-    "maxID":9,
+    "maxID":10,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -93,6 +93,20 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":8,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,holaday",
+                    "props":{"y":5,"x":284,"var":"holaday","text":"放假时间20200122-1220","fontSize":22,"font":"SimHei","color":"#e8100c"},
+                    "nodeParent":3,
+                    "label":"holaday",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":9,
                     "child":[
                         ]
                 }]

@@ -102,6 +102,9 @@ package script.order
 				uiSkin.yingxBack.width = uiSkin.originimg.width;
 				uiSkin.yingxBack.height = uiSkin.originimg.height;
 				
+				uiSkin.originimg.visible = true;
+				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";	
+
 				//uiSkin.qiegeoriginimg.width = uiSkin.originimg.width;
 				//uiSkin.qiegeoriginimg.height = uiSkin.originimg.height;
 
@@ -796,12 +799,12 @@ package script.order
 				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
 				uiSkin.backimg.skin = HttpRequestUtil.biggerPicUrl +param.fid + ".jpg";	
 			}
-			uiSkin.originimg.visible = yixingqiegeImg != "";
+			//uiSkin.originimg.visible = yixingqiegeImg != "";
 			uiSkin.yixingimg.visible = yixingqiegeImg != "";
 			
 			if(yixingqiegeImg != "")
 			{
-				uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
+				//uiSkin.originimg.skin = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";				
 				uiSkin.yixingimg.skin = HttpRequestUtil.biggerPicUrl +yixingqiegeImg + ".jpg";	
 				
 				if(uiSkin.yingxBack.visible)

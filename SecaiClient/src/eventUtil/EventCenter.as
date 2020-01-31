@@ -48,6 +48,9 @@ package eventUtil
 		public static const PAUSE_SCROLL_VIEW:String = "PAUSE_SCROLL_VIEW";//暂停滚动
 
 
+		public static const OPEN_PANEL_VIEW:String = "OPEN_PANEL_VIEW";//打开界面消息
+		public static const COMMON_CLOSE_PANEL_VIEW:String = "COMMON_CLOSE_PANEL_VIEW";//关闭界面消息
+
 		public static const CLOSE_PANEL_VIEW:String = "CLOSE_PANEL_VIEW";//关闭界面消息
 		public static const SHOW_CHARGE_VIEW:String = "SHOW_CHARGE_VIEW";//充值
 		

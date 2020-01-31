@@ -4,11 +4,15 @@ package script.usercenter
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.maths.Point;
+	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
 	
 	import ui.usercenter.MyOrdersPanelUI;
+	
+	import utils.UtilTool;
 	
 	public class MyOrderControl extends Script
 	{
@@ -17,7 +21,9 @@ package script.usercenter
 		private var curpage:int = 1;
 		
 		private var totalPage:int = 1;
-		
+		private var dateInput:Object; 
+		private var dateInput2:Object; 
+
 		public function MyOrderControl()
 		{
 			super();
@@ -43,7 +49,8 @@ package script.usercenter
 			
 			//uiSkin.yearCombox.scrollBarSkin = "";
 			
-			
+			//Laya.timer.frameLoop(1,this,updateDateInputPos);
+
 			var curyear:int = (new Date()).getFullYear();
 			var curmonth:int = (new Date()).getMonth();
 			
@@ -51,6 +58,8 @@ package script.usercenter
 			uiSkin.monthCombox.selectedIndex = curmonth;
 			
 			var param:String = "date=" + curyear + (curmonth + 1) + "&curpage=1";
+			if(curmonth + 1 < 10 )
+				param = "date=" + curyear + "0" + (curmonth + 1) + "&curpage=1";
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
 
@@ -72,8 +81,139 @@ package script.usercenter
 			
 			uiSkin.orderList.on(Event.MOUSE_UP,this,onMouseUpHandler);
 			
-			Laya.stage.on(Event.MOUSE_UP,this,onMouseUpHandler);
+			uiSkin.yearCombox.on(Event.CHANGE,this,getOrderListAgain);
+			uiSkin.monthCombox.on(Event.CHANGE,this,getOrderListAgain);
 
+			EventCenter.instance.on(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);
+			EventCenter.instance.on(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);
+
+			Laya.stage.on(Event.MOUSE_UP,this,onMouseUpHandler);
+			//this.initFileOpen();
+		}
+		
+		private function onshowInputDate():void
+		{
+			if(dateInput != null)
+			{
+				dateInput.hidden = false;
+				dateInput2.hidden = false;
+
+			}
+		}
+		
+		private function onHideInputDate():void
+		{
+			if(dateInput != null)
+			{
+				dateInput.hidden = true;
+				dateInput2.hidden = true;
+				
+			}
+		}
+		
+		private function initFileOpen():void
+		{
+			var curdate:Date = new Date();
+			
+			var nextmonth:Date = new Date(curdate.getTime() + 31 * 24 * 3600 * 1000);
+			
+			//trace(UtilTool.formatFullDateTime(curdate,false));
+			//trace(UtilTool.formatFullDateTime(nextmonth,false));
+
+			//var curyear:int = (new Date()).getFullYear();
+			//var curmonth:int = (new Date()).getMonth();
+			
+			
+			dateInput = Browser.document.createElement("input");
+			
+			dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
+			
+			//			if(param && param.type == "License")
+			//				file.multiple="";
+			//			else			
+			
+			dateInput.type ="date";
+			dateInput.style.position ="absolute";
+			dateInput.style.zIndex = 999;
+			dateInput.value = UtilTool.formatFullDateTime(curdate,false);
+			Browser.document.body.appendChild(dateInput);//添加到舞台
+			
+			dateInput.onchange = function(datestr):void
+			{
+				if(dateInput.value == "")
+					return;
+				var curdata:Date = new Date(dateInput.value);
+				var nextdate:Date = new Date(dateInput2.value);
+				
+				if(nextdate.getTime() - curdata.getTime() > 31 * 24 * 3600 * 1000)
+				{
+					nextdate =  new Date(curdata.getTime() + 31 * 24 * 3600 * 1000);
+					
+					dateInput2.value = UtilTool.formatFullDateTime(nextdate,false);
+				}
+				else if(nextdate.getTime() - curdata.getTime() < 0 )
+				{
+					dateInput2.value = UtilTool.formatFullDateTime(curdata,false);
+
+				}
+				//trace(UtilTool.formatFullDateTime(curdata,false));
+			}
+				
+			dateInput2 = Browser.document.createElement("input");
+			
+			dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
+			
+			//			if(param && param.type == "License")
+			//				file.multiple="";
+			//			else			
+			
+			dateInput2.type ="date";
+			dateInput2.style.position ="absolute";
+			dateInput2.style.zIndex = 999;
+			Browser.document.body.appendChild(dateInput2);//添加到舞台
+			dateInput2.value = UtilTool.formatFullDateTime(nextmonth,false);
+
+			dateInput2.onchange = function(datestr):void
+			{
+				if(dateInput2.value == "")
+					return;
+				//trace("选择的日期：" + datestr);
+				var curdata:Date = new Date(dateInput2.value);
+				var lastdate:Date = new Date(dateInput.value);
+				
+				if(curdata.getTime() - lastdate.getTime() > 31 * 24 * 3600 * 1000)
+				{
+					lastdate =  new Date(curdata.getTime() - 31 * 24 * 3600 * 1000);
+					
+					dateInput.value = UtilTool.formatFullDateTime(lastdate,false);
+				}
+				else if(curdata.getTime() - lastdate.getTime() < 0 )
+				{
+					dateInput.value = UtilTool.formatFullDateTime(curdata,false);
+					
+				}
+				
+			}
+		}
+		
+		private function updateDateInputPos():void
+		{
+			if(dateInput != null)
+			{
+				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
+				var pt:Point = uiSkin.ordertime.localToGlobal(new Point(uiSkin.ordertime.x,uiSkin.ordertime.y),true);
+				
+				dateInput.style.top = (pt.y - 15) + "px";
+				dateInput.style.left = (pt.x + 15) +  "px";
+				
+				dateInput2.style.top = (pt.y - 15) + "px";
+				dateInput2.style.left = (pt.x + 205) +  "px";
+				
+				//trace("pos:" + pt.x + "," + pt.y);
+				//verifycode.style.left = 950 -  uiSkin.mainpanel.hScrollBar.value + "px";
+				
+			}
+			
 		}
 		
 		private function onLastYear():void
@@ -135,7 +275,11 @@ package script.usercenter
 		}
 		private function getOrderListAgain()
 		{
-			var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			if(uiSkin.monthCombox.selectedIndex + 1 >= 10)
+				var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			else
+				 param = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) +  "0" + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
 		}
@@ -185,9 +329,16 @@ package script.usercenter
 		public override function onDestroy():void
 		{
 			Laya.stage.off(Event.MOUSE_UP,this,onMouseUpHandler);
+			Laya.timer.clearAll(this);
+			if(dateInput != null)
+			{
+				Browser.document.body.removeChild(dateInput);//添加到舞台
+				Browser.document.body.removeChild(dateInput2);//添加到舞台
+			}
 
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onRefreshOrder);
-
+			EventCenter.instance.off(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);
+			EventCenter.instance.off(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);
 		}
 	}
 }

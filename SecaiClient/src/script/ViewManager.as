@@ -1,5 +1,7 @@
 package script
 {
+	import eventUtil.EventCenter;
+	
 	import laya.components.Script;
 	import laya.display.Sprite;
 	import laya.ui.View;
@@ -168,6 +170,8 @@ package script
 			if(viewDict[viewClass] == null)
 				return;
 			
+			EventCenter.instance.event(EventCenter.OPEN_PANEL_VIEW,viewClass);
+			
 			if(openViewList[viewClass] != null)
 				return;
 			
@@ -191,6 +195,7 @@ package script
 			(openViewList[viewClass] as View).destroy(true);
 			openViewList[viewClass] = null;
 			delete openViewList[viewClass];
+			EventCenter.instance.event(EventCenter.COMMON_CLOSE_PANEL_VIEW,viewClass);
 
 		}
 	}

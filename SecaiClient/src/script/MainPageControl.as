@@ -21,6 +21,7 @@ package script {
 	import script.login.LogPanelControl;
 	import script.usercenter.UserMainControl;
 	
+	import ui.LoginViewUI;
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
 	
@@ -76,6 +77,7 @@ package script {
 			var btnlinkto:Button = this.owner["linktobus"];
 			btnlinkto.on(Event.CLICK,this,onOpenGongshang);
 			
+			(this.owner as LoginViewUI).linkicp.on(Event.CLICK,this,onOpenOficial);
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
@@ -98,6 +100,11 @@ package script {
 		private function onOpenGongshang()
 		{
 			Browser.window.open("http://www.gsxt.gov.cn/%7BF71C582A907AA9A77C0EF218C30915AFDDBCA77C96F73D4D09E3592B4A85097B87E62C5C18F2E9E75EE4EA5348B4AF45DB63374BC6AAC586EABEEBA8C48C8DD0A853A853A8F58D760E76817A817A8176817A024DB6A75CAB50ABF60D751CACB07FDF33E8223E00FC469D79017924DF021917AEB5D4C813F78F748F748F74-1561088596102%7D",null,null,true);
+
+		}
+		private function onOpenOficial():void
+		{
+			Browser.window.open("http://beian.miit.gov.cn",null,null,true);
 		}
 		private function loginAccount():void
 		{

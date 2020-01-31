@@ -5,6 +5,7 @@ package ui.usercenter {
 	import script.usercenter.MyOrderControl;
 
 	public class MyOrdersPanelUI extends Scene {
+		public var ordertime:Label;
 		public var yearCombox:ComboBox;
 		public var monthCombox:ComboBox;
 		public var orderList:List;

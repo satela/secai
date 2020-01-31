@@ -268,7 +268,7 @@ package script.login
 				
 				verifycode.style.top = pt.y + "px";
 				verifycode.style.left = (pt.x +  80) +  "px";
-				trace("pos:" + pt.x + "," + pt.y);
+				//trace("pos:" + pt.x + "," + pt.y);
 				//verifycode.style.left = 950 -  uiSkin.mainpanel.hScrollBar.value + "px";
 
 			}
