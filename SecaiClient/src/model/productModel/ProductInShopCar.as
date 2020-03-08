@@ -14,7 +14,7 @@ package model.productModel
 			
 			orderitemdata.prod_name = prod_name;
 			orderitemdata.prod_code = prod_code;
-			
+			orderitemdata.is_merchandise = 1;
 			orderitemdata.prod_description = "";
 			orderitemdata.LWH = mer_volume;
 			orderitemdata.weightStr = mer_weight;

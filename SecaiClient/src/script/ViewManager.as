@@ -136,7 +136,7 @@ package script
 			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;
 			viewDict[VIEW_LOADING_PRO] = LoadingPanelUI;
 			
-			viewDict[VIEW_PRODUCT_VIEW] =  ProductOrderPanelUI;//ProductMarketPanelUI;//
+			viewDict[VIEW_PRODUCT_VIEW] = ProductOrderPanelUI;// ProductMarketPanelUI;//
 			viewDict[VIEW_BUY_PRODUCT_VIEW] = BuyProductPanelUI;
 			viewDict[VIEW_ORDER_DETAIL_PANEL] = OrderDetailPanelUI;
 			viewDict[VIEW_SELECT_PAYTYPE_PANEL] = ConfirmOrderPanelUI;

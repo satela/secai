@@ -189,10 +189,17 @@ package script.picUpload
 				datainfo.push(this);
 
 				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,[datainfo]);
+				
+				//UtilTool.getYixingImageCount("circle.jpg",this);
 
 			}
 		}
 		
+		private function getPixelInfo(pixel:Object):void
+		{
+			var imgdata = pixel;
+			UtilTool.getCutCountLength(imgdata);
+		}
 		private function onDoubleClick():void
 		{
 			if(this.picInfo.picType == 0)

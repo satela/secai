@@ -365,10 +365,9 @@ package script.usercenter
 						}
 					}
 				}
-				hasinit = true;
 
 				uiSkin.towntxt.text = uiSkin.townList.array[cityindex].areaname;
-				uiSkin.townList.selectedIndex = cityindex;
+				//uiSkin.townList.selectedIndex = cityindex;
 				zoneid = uiSkin.townList.array[cityindex].id;
 
 				//companyareaId = uiSkin.townList.array[0].id;
@@ -393,6 +392,8 @@ package script.usercenter
 		{
 			if( index == -1 )
 				return;
+			hasinit = true;
+
 			uiSkin.townbox.visible = false;
 			uiSkin.towntxt.text = uiSkin.townList.array[index].areaname;
 			zoneid = uiSkin.townList.array[0].id;

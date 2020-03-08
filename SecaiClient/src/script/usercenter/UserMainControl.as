@@ -82,7 +82,7 @@ package script.usercenter
 			// TODO Auto Generated method stub
 			uiSkin.panel_main.height = Browser.height;// - 50;
 			uiSkin.panel_main.width = Browser.width;// - 20;
-			trace("uiski wid:" + uiSkin.panel_main.width);
+			//trace("uiski wid:" + uiSkin.panel_main.width);
 
 		}
 		private function onMouseOutHandler():void

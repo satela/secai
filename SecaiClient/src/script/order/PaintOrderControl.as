@@ -211,17 +211,94 @@ package script.order
 		}
 		private function resetOrderInfo():void
 		{
-//			if(PaintOrderModel.instance.selectDelivery == null)
-//				uiSkin.textDeliveryType.text = "送货方式：无";
-//			else
-//				uiSkin.textDeliveryType.text = "送货方式：" + PaintOrderModel.instance.selectDelivery.delivery_name;
-			
-			//uiSkin.textProductNum.text = "商品总数：" + orderlist.length + "";
 			var total:Number = 0;
-			for(var i:int=0;i < orderlist.length;i++)
+//			for(var i:int=0;i < orderlist.length;i++)
+//			{
+//				total += Number(orderlist[i].total.text);
+//			}
+			//var arr:Array = [];
+			if(orderlist.length > 0)
 			{
-				total += Number(orderlist[i].total.text);
+				
+				var orderFactory:Object = {};
+				
+				for(var i:int=0; i < orderlist.length;i++)
+				{
+					var orderitem:PicOrderItem = orderlist[i];
+					//				if(!orderitem.checkCanOrder())
+					//				{
+					//					//ViewManager.showAlert("未选择材料工艺");
+					//					return null;
+					//				}
+					
+					var orderdata:Object;
+					if(orderitem.ordervo.orderData != null && !orderFactory.hasOwnProperty(orderitem.ordervo.manufacturer_code))
+					{
+						orderdata = {};
+						orderdata.order_sn = PaintOrderModel.getOrderSn();
+						orderdata.client_code = "CL10200";
+						orderdata.consignee = Userdata.instance.companyShort + "#" + PaintOrderModel.instance.selectAddress.receiverName;
+						orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
+						orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
+						orderdata.order_amountStr = 0;
+						orderdata.shipping_feeStr = "0";
+						orderdata.money_paidStr = "0";
+						orderdata.discountStr = "0";
+						orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
+						orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
+						
+						orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
+						orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
+						orderdata.contact_phone = PaintOrderModel.instance.getContactPhone(orderitem.ordervo.manufacturer_code);
+						
+						var totalMoney:Number = 0;
+						if(PaintOrderModel.instance.selectDelivery)
+						{
+							orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code + "#" +  PaintOrderModel.instance.selectDelivery.delivery_name;
+							//orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
+						}
+						
+						orderdata.orderItemList = [];
+						orderFactory[orderitem.ordervo.manufacturer_code] = orderdata;
+					}
+					else
+						orderdata = orderFactory[orderitem.ordervo.manufacturer_code];
+					
+					
+					if(orderlist[i].ordervo.orderData != null)
+					{
+						orderdata.order_amountStr += orderlist[i].getPrice();
+						//totalMoney += orderlist[i].getPrice();
+						
+						if(orderlist[i].ordervo.orderData.comments == "")
+							orderlist[i].ordervo.orderData.comments = uiSkin.commentall.text;
+						orderlist[i].ordervo.orderData.item_seq = i+1;
+						orderdata.orderItemList.push(orderlist[i].ordervo.orderData);
+					}
+					else
+					{
+						//ViewManager.showAlert("有图片未选择材料工艺");
+						//return null;
+					}
+					
+				}
+				//orderdata.order_amountStr = totalMoney.toString();
+				//orderdata.money_paidStr =  "0.01";//totalMoney.toString();
+				for each(var odata in orderFactory)
+				{
+					if( (odata.order_amountStr as Number) < 2)
+						odata.order_amountStr = 2.00;
+					
+					total += (Number)((odata.order_amountStr as Number).toFixed(2));
+						
+					//odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
+					
+					//arr.push(odata);
+				}				
+				
 			}
+			
+			
 			
 			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
@@ -251,10 +328,10 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;
 						outputitem.holaday.text = "";
-						if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("义乌物与") >= 0)
-							outputitem.holaday.text = "2020年春节放假时间1月17日22时截稿，2月4日正式上班";
-						else if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("无锡点") >= 0)
-							outputitem.holaday.text = "2020年春节放假时间1月19日22时截稿，2月1日正式上班";
+//						if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("义乌物与") >= 0)
+//							outputitem.holaday.text = "2020年春节放假时间1月17日22时截稿，2月4日正式上班";
+//						else if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("无锡点") >= 0)
+//							outputitem.holaday.text = "2020年春节放假时间1月19日22时截稿，2月1日正式上班";
 						// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
 					}
 					uiSkin.fengeimg.y = fengeoriginy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
@@ -682,11 +759,12 @@ package script.order
 					
 					orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
 					orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
-					
+					orderdata.contact_phone = PaintOrderModel.instance.getContactPhone(orderitem.ordervo.manufacturer_code);
+						
 					var totalMoney:Number = 0;
 					if(PaintOrderModel.instance.selectDelivery)
 					{
-						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code;// + "#" +  PaintOrderModel.instance.selectDelivery.delivery_name;
+						orderdata.logistic_code = PaintOrderModel.instance.selectDelivery.deliverynet_code + "#" +  PaintOrderModel.instance.selectDelivery.delivery_name;
 						//orderdata.logistic_name = PaintOrderModel.instance.selectDelivery.delivery_name;
 					}
 					
@@ -721,6 +799,25 @@ package script.order
 			var arr:Array = [];
 			for each(var odata in orderFactory)
 			{
+				if( (odata.order_amountStr as Number) < 2)
+				{
+					odata.order_amountStr = 2.00;
+					var itemarr:Array = odata.orderItemList;
+					if(itemarr.length > 0)
+					{
+						var eachprice:Number = Number((2/itemarr.length).toFixed(2));
+						
+						var overflow:Number = 2 - eachprice*itemarr.length;
+						for(var j:int=0;j < itemarr.length;j++)
+						{
+							if(j==0)
+								itemarr[j].item_priceStr = (((eachprice + overflow)/itemarr[j].item_number) as Number).toFixed(2);
+							else
+								itemarr[j].item_priceStr =  ((eachprice/itemarr[j].item_number) as Number).toFixed(2);
+						}
+					}
+				}
+				
 				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
 				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
 

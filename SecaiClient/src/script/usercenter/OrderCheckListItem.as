@@ -1,5 +1,7 @@
 package script.usercenter
 {
+	import eventUtil.EventCenter;
+	
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
@@ -37,6 +39,14 @@ package script.usercenter
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
 			}
+			else if(status == 4)
+			{
+				this.orderstatus.text = "已撤单";
+				this.orderstatus.color = "#52B232";
+				this.payagain.visible = false;
+				this.deletebtn.visible = false;
+				this.payagain.visible = false;
+			}
 			else
 			{
 				this.orderstatus.text = "订单异常";
@@ -68,18 +78,34 @@ package script.usercenter
 		{
 			var detail:Object = JSON.parse(orderdata.or_text);
 			
-			var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
-				
+			//var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
+			var orderdataStr:Object = {"orderid":orderdata.or_id,"client_code":"CL10200"};
+			//var param:String = "orderid=" + orderdata.or_id;
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,param,"post");
 
 		}
 		
 		private function deleteOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
-			if(result.status == 0)
+			if(result.code == 0)
 			{
+				EventCenter.instance.event(EventCenter.DELETE_ORDER_BACK);
+			}
+			else if( result.code == 1)
+			{
+				var detail:Object = JSON.parse(orderdata.or_text);
+
+				ViewManager.showAlert("订单已开始生产，请联系厂家取消订单，联系电话" + detail.contact_phone);
+			}
+			else
+			{
+				//var detail:Object = JSON.parse(orderdata.or_text);
 				
+				//ViewManager.showAlert("订单已开始生产，请联系厂家取消订单，联系电话" + detail.contact_phone);
+				ViewManager.showAlert("删除订单失败");
 			}
 		}
 		

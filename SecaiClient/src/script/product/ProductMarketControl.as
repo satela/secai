@@ -76,6 +76,15 @@ package script.product
 			uiSkin.productCateList.array = [];
 			
 			
+			uiSkin.textTotalPrice.style.fontSize = 22;
+			uiSkin.textTotalPrice.style.font = "SimHei";
+			
+			uiSkin.textDeliveryType.style.fontSize = 22;
+			uiSkin.textDeliveryType.style.font = "SimHei";
+			
+			uiSkin.textPayPrice.style.fontSize = 22;
+			uiSkin.textPayPrice.style.font = "SimHei";
+			
 			uiSkin.productlist.itemRender = AdvertiseProItem;
 			
 			uiSkin.productlist.vScrollBarSkin = "";
@@ -181,6 +190,7 @@ package script.product
 					for(var i:int=0;i < outPutAddr.length;i++)
 					{
 						var outputitem:OutPutCenterUI = new OutPutCenterUI();
+						outputitem.holaday.text = "";
 						uiSkin.outputbox.addChild(outputitem);
 						outputitem.checkselect.selected = true;
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
@@ -492,6 +502,7 @@ package script.product
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			EventCenter.instance.off(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
 
 		}
 	}

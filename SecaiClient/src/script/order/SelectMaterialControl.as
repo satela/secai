@@ -303,8 +303,11 @@ package script.order
 		
 		private function sortMaterial(a:ProductVo,b:ProductVo):int
 		{
-			var anum:String = a.prod_code;
-			var bnum:String = b.prod_code;
+			//var anum:String = a.prod_code;
+			//var bnum:String = b.prod_code;
+			
+			var anum:String = a.material_code;
+			var bnum:String = b.material_code;
 			
 			var ano:String = "";
 			for(var i:int=0;i < anum.length;i++)

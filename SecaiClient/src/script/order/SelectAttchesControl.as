@@ -105,10 +105,39 @@ package script.order
 					matvo.attachList.push(attachVo);
 
 				}
+				
+				matvo.attachList.sort(sortAttach);
 				uiSkin.attachList.array = matvo.attachList;
 
 			}
 			
+		}
+		
+		private function sortAttach(a:AttchCatVo,b:AttchCatVo):int
+		{
+			//var anum:String = a.prod_code;
+			//var bnum:String = b.prod_code;
+			
+			var anum:String = a.accessory_code;
+			var bnum:String = b.accessory_code;
+			
+			var ano:String = "";
+			for(var i:int=0;i < anum.length;i++)
+			{
+				if(anum.charCodeAt(i) <= 57 && anum.charCodeAt(i) >= 48)
+					ano = ano + anum[i];
+			}
+			var bno:String = "";
+			for(var i:int=0;i < bnum.length;i++)
+			{
+				if(bnum.charCodeAt(i) <= 57 && bnum.charCodeAt(i) >= 48)
+					bno = bno + bnum[i];
+			}
+			
+			if(parseInt(ano) <= parseInt(bno))
+				return -1;
+			else
+				return 1;
 		}
 		
 		private function updateAttachClassItem(cell:SelectAttachBtn):void

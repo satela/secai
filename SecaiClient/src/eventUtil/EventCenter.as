@@ -64,6 +64,7 @@ package eventUtil
 
 		public static const PRODUCT_ADD_GOODS:String = "PRODUCT_ADD_GOODS";//加入成品商品到购物车
 
+		public static const DELETE_ORDER_BACK:String = "DELETE_ORDER_BACK";//删除订单 返回
 
 
 		private static var _eventCenter:EventCenter;

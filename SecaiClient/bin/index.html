@@ -36,6 +36,20 @@
 	 if(window.event.keyCode == 9)
 		window.event.returnValue=false;
 	 }
+	 
+	 function getImagePixels(imgurl)
+	 {
+	 	var picdata = ImageUtil.getImageData(imgurl,getImageBack);
+
+		//var pixels = imgdata;
+	 }
+	 function getImageBack(picdata)
+	 {
+		if(picProcess != null)
+		{
+			picProcess.getPixelInfo(picdata);
+		}
+	 }
 	function goprogress(){
         var pro=document.getElementsByTagName("progress")[0];
         gotoend(pro,0);
@@ -47,7 +61,7 @@
             setTimeout(function(){gotoend(pro, value);},60)
         }else{
             //setTimeout(function(){alert("任务完成")},20);
-        }
+        }		
     }
         function loadLib(url) {
             var script = document.createElement("script");
@@ -197,7 +211,8 @@
 	<script type="text/javascript" src="GVerify.js"></script>
 	<script type="text/javascript" src="aliOss.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
-	
+	<script type="text/javascript" src="imageUtil.js"></script>
+
 </body>
 
 </html>

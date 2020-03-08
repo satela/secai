@@ -68,6 +68,18 @@ package model.orderModel
 			}
 		}
 		
+		public function getContactPhone(manuFactoryCode:String):String
+		{
+			for(var i:int=0;i < outPutAddr.length;i++)
+			{
+				if(outPutAddr[i].org_code == manuFactoryCode)
+					return outPutAddr[i].contact_phone;
+					
+			}
+			
+			return "";
+			
+		}
 		public function getProcDataByProcName(procName:String):Object
 		{
 			if(curSelectProcList == null)

@@ -88,6 +88,9 @@ package script.usercenter
 			EventCenter.instance.on(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);
 
 			Laya.stage.on(Event.MOUSE_UP,this,onMouseUpHandler);
+			
+			EventCenter.instance.on(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
+
 			//this.initFileOpen();
 		}
 		
@@ -335,6 +338,7 @@ package script.usercenter
 				Browser.document.body.removeChild(dateInput);//添加到舞台
 				Browser.document.body.removeChild(dateInput2);//添加到舞台
 			}
+			EventCenter.instance.off(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
 
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onRefreshOrder);
 			EventCenter.instance.off(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);

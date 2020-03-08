@@ -119,12 +119,13 @@ package model.orderModel
 			return "";
 		}
 		
-		public function getTotalPrice(area:Number,perimeter:Number,ignoreOther:Boolean = false):Number
+		public function getTotalPrice(area:Number,perimeter:Number,ignoreOther:Boolean = false,longside:Number = 0,picwidth:Number = 0):Number
 		{
 			if(measure_unit == OrderConstant.MEASURE_UNIT_AREA)
 				var prices:Number = area*(unit_price + additional_unitfee);
 			else
-				prices = perimeter*(unit_price + additional_unitfee);
+				//prices = perimeter*(unit_price + additional_unitfee);
+				prices = longside*(unit_price + additional_unitfee);
 			
 			hasDoublePrint = 1;
 			
@@ -133,7 +134,7 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth));					
 				}
 				
 			}
@@ -175,7 +176,7 @@ package model.orderModel
 			return 0;
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther,picwidth:Number):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -200,7 +201,14 @@ package model.orderModel
 							totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
 						}
 						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
-							totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+						{
+							if("SPAS42110" == arr[i].selectAttachVoList[0].accessory_code) //铝合金挂轴只计算宽
+							{
+								totalprice += arr[i].selectAttachVoList[0].accessory_price * picwidth*2;
+							}
+							else
+								totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+						}
 						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
 							totalprice += arr[i].selectAttachVoList[0].accessory_price;						
 							
@@ -208,7 +216,7 @@ package model.orderModel
 					
 					prices.push(totalprice);
 					
-					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther));
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth));
 				}
 			}
 			return prices;

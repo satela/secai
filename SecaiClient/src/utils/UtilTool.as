@@ -1,7 +1,9 @@
 package utils
 {
 	import laya.filters.ColorFilter;
+	import laya.maths.Point;
 	import laya.net.LocalStorage;
+	import laya.utils.Browser;
 	
 	import model.picmanagerModel.PicInfoVo;
 
@@ -117,5 +119,503 @@ package utils
 		public function UtilTool()
 		{
 		}
-	}
+		
+		public static function getYixingImageCount(url:String,caller:*):void
+		{
+			Browser.window.picProcess = caller;
+			Browser.window.getImagePixels(url);
+		}
+		
+		public static function getYixingImageInfo(imgdata:*):void
+		{
+			var pixelsArr:Array = imgdata.data;
+			var imgwidth:int = imgdata.width;
+			var imgheight:int = imgdata.height;
+			
+			var pixelVec:Array = new Array(imgheight);
+			var temparr:Array = new Array(imgheight);
+
+			var rowBlot:Array = new Array(imgheight);
+			var blotIndex:int = 1;
+			var allblotindex:Array = [];
+			var equalBlot:Object = {};
+			
+			for(var i:int=0;i < imgheight;i++)
+			{
+				pixelVec[i] = new Array(imgwidth);
+				temparr[i] = new Array(imgwidth);
+				
+				rowBlot[i] = [];
+
+				for(var j:int=0;j < imgwidth;j++)
+				{
+					var startindex:int = (i*imgwidth + j)*4;
+					pixelVec[i][j] = pixelsArr[startindex] +  pixelsArr[startindex+1] + pixelsArr[startindex+2];
+					if(pixelVec[i][j] > 100)
+						pixelVec[i][j] = 1;
+					else
+						pixelVec[i][j] = 0;
+					temparr[i][j] = pixelVec[i][j];
+					if(pixelVec[i][j] == 0 )
+					{
+						if(rowBlot[i].length == 0)
+						{
+							rowBlot[i].push({start:j,end:j,blot:blotIndex});
+							blotIndex++;
+						}
+						else
+						{
+							if(j-1 == rowBlot[i][rowBlot[i].length - 1].end)
+							{
+								rowBlot[i][rowBlot[i].length - 1].end = j;						
+							}
+							else
+							{
+								rowBlot[i].push({start:j,end:j,blot:blotIndex});
+								blotIndex++;
+							}
+						}
+					}
+										
+				}
+				
+				for(m=0;m < rowBlot[i].length;m++)
+					allblotindex.push(rowBlot[i][m].blot);
+				
+				
+				if(i > 0 && rowBlot[i].length > 0 && rowBlot[i - 1].length > 0 )
+				{
+					for(var m:int=0;m < rowBlot[i].length;m++)
+					{
+						var start:int = rowBlot[i][m].start;
+						var end:int = rowBlot[i][m].end;
+						var connectBlot:Array = [];
+						
+						for(var n:int=0;n < rowBlot[i - 1].length;n++)
+						{
+							if(start > rowBlot[i - 1][n].end+1 || end < rowBlot[i - 1][n].start-1)
+								continue;
+							else if(connectBlot.indexOf(rowBlot[i - 1][n].blot) < 0 )
+								connectBlot.push(rowBlot[i - 1][n].blot);
+						}
+						
+						if(connectBlot.length > 0)
+						{
+							if(allblotindex.indexOf(rowBlot[i][m].blot) >= 0)
+								allblotindex.splice(allblotindex.indexOf(rowBlot[i][m].blot),1);
+							
+							connectBlot.sort();
+							rowBlot[i][m].blot = connectBlot[0];
+							if(connectBlot.length > 1)
+							{
+								if(!equalBlot.hasOwnProperty(connectBlot[0]))
+									equalBlot[connectBlot[0]] = [];
+								
+								for(n=1;n < connectBlot.length;n++)
+								{
+									if(equalBlot[connectBlot[0]].indexOf(connectBlot[n]) < 0)
+										equalBlot[connectBlot[0]].push(connectBlot[n]);
+								}
+								
+							}
+							
+						}
+						
+						
+					}
+				}
+				
+			}
+			
+			
+			for(var i:int=1;i < imgheight - 1;i++)
+			{
+				for(var j:int=1;j < imgwidth - 1;j++)
+				{
+					if(pixelVec[i][j] == 0)
+					{
+						var eightnei:int = pixelVec[i-1][j-1] + pixelVec[i-1][j] + pixelVec[i-1][j+1] + pixelVec[i][j+1] + pixelVec[i][j-1] + pixelVec[i+1][j-1] + pixelVec[i+1][j] + pixelVec[i+1][j+1];
+						if(eightnei == 0)
+						{
+							temparr[i][j] = 1;
+						}
+					}
+					
+				}
+			}
+			var edgenum:int = 0;
+			
+
+			for(var i:int=0;i < imgheight;i++)
+			{
+				for(var j:int=0;j < imgwidth;j++)
+				{
+					if(temparr[i][j] == 0)
+					{
+						
+						edgenum++;
+					}
+				}
+							
+			}
+			
+			var allEqualBlot:Array = [];
+			for(var startblotindex in equalBlot)
+			{
+				var hasfind:Boolean = false;
+				var startblot:int = Number(startblotindex);
+				var hasFindBlotIndex:int = -1;
+				for(var i:int=0;i < allEqualBlot.length;i++)
+				{
+					var equalline:Array = allEqualBlot[i];
+					if(equalline.indexOf(startblot) >= 0)
+					{
+						hasfind = true;
+						break;						
+					}
+					var sameblot:Array = equalBlot[startblotindex];
+					for(var j:int=0;j < sameblot.length;j++)
+					{
+						if(equalline.indexOf(sameblot[j]) >= 0)
+						{
+							hasfind = true;
+							hasFindBlotIndex = i;
+							break;
+							break;
+						}
+					}
+				}
+				if(hasfind && hasFindBlotIndex == -1)
+					continue;
+				else
+				{
+					var templine:Array;
+					if(hasFindBlotIndex != -1)
+						templine = allEqualBlot[hasFindBlotIndex];
+					else
+						templine = [];
+					if(templine.indexOf(startblot) < 0)
+						templine.push(startblot);
+					
+					var equalarr:Array = getEqualBlot(equalBlot[startblotindex],equalBlot);
+					//templine.concat(equalarr);
+					if(hasFindBlotIndex == -1)
+						allEqualBlot.push(templine.concat(equalarr));
+					else
+						allEqualBlot[hasFindBlotIndex] = templine.concat(equalarr);
+					
+				}
+			}
+			
+			var blotnum:int = 0;
+			for(var i:int=0; i < allblotindex.length;i++)
+			{
+				
+				var inequal:Boolean = false;
+				for(var j:int=0;j < allEqualBlot.length;j++)
+				{
+					if(allEqualBlot[j].indexOf(allblotindex[i]) >= 0)
+					{
+						inequal = true;
+						break;
+					}
+				}
+				if(inequal == false)
+					blotnum++;
+			}
+			trace("边缘数量：" + edgenum);
+			trace("连通域数量:" + (blotnum + allEqualBlot.length));
+			
+		}
+		
+		public static function getCutCountLength(imgdata:*):void
+		{
+			var pixelsArr:Array = imgdata.data;
+			var imgwidth:int = imgdata.width;
+			var imgheight:int = imgdata.height;
+			
+			var pixelVec:Array = new Array(imgheight);
+			var temparr:Array = new Array(imgheight);
+			
+			
+			var str:String = "";
+			
+			for(var i:int=0;i < 20000;i++)
+			{											
+				str += pixelsArr[i] + " ";
+			}
+			
+			trace(str);
+			
+			for(var i:int=0;i < imgheight;i++)
+			{
+				pixelVec[i] = new Array(imgwidth);
+				temparr[i] = new Array(imgwidth);
+								
+				for(var j:int=0;j < imgwidth;j++)
+				{
+					var startindex:int = (i*imgwidth + j)*4;
+					pixelVec[i][j] = pixelsArr[startindex] +  pixelsArr[startindex+1] + pixelsArr[startindex+2];
+									
+					if(pixelVec[i][j] > 200)
+						pixelVec[i][j] = 1;
+					else
+						pixelVec[i][j] = 0;
+					temparr[i][j] = pixelVec[i][j];					
+					
+				}				
+				
+			}
+//			var str:String = "";
+//			for(var i:int=0;i < imgheight;i++)
+//			{
+//				
+//				for(var j:int=0;j < imgwidth;j++)
+//				{
+//					str += 	pixelVec[i][j] + " ";			
+//					
+//				}				
+//				str += "\n";
+//			}
+//			
+//			trace(str);
+			
+			for(var i:int=1;i < imgheight - 1;i++)
+			{
+				for(var j:int=1;j < imgwidth - 1;j++)
+				{
+					if(pixelVec[i][j] == 0)
+					{
+						var eightnei:int = pixelVec[i-1][j-1] + pixelVec[i-1][j] + pixelVec[i-1][j+1] + pixelVec[i][j+1] + pixelVec[i][j-1] + pixelVec[i+1][j-1] + pixelVec[i+1][j] + pixelVec[i+1][j+1];
+						if(eightnei == 0)
+						{
+							temparr[i][j] = 1;
+						}
+					}
+					
+				}
+			}
+			var edgenum:int = 0;
+			
+			var allcutRoad:Array;
+			var roadindex:int = 3;
+			var curRouteDic:Object = {};
+			var roadNum:int = 0;
+			var totalLength:int = 0;
+			
+			for(var i:int=0;i < imgheight;i++)
+			{
+				for(var j:int=0;j < imgwidth;j++)
+				{
+					if(temparr[i][j] == 0)
+					{
+						
+						curRouteDic = {};
+						edgenum++;
+						var backtimes:int = 0;
+						var pathroute:Array = [];
+						var nextpoint:Point = getNextCutPoint(i,j,temparr,imgwidth,imgheight,curRouteDic,new Point(i,j));
+						
+						while(nextpoint != null && (nextpoint.x != i || nextpoint.y != j))
+						{
+													
+							if(curRouteDic[(nextpoint.x+"_" + nextpoint.y)] == null)
+							{
+								curRouteDic[(nextpoint.x+"_" + nextpoint.y)] = 1;
+								pathroute.push(nextpoint);
+
+							}
+							nextpoint = getNextCutPoint(nextpoint.x,nextpoint.y,temparr,imgwidth,imgheight,curRouteDic);
+							if(nextpoint == null)
+							{
+								backtimes++;
+								var lastpoint:Point = pathroute[pathroute.length - 1];
+								
+								temparr[lastpoint.x][lastpoint.y] = 1;
+								pathroute.splice(pathroute.length - 1,1);
+								if(pathroute.length > 0)
+								{
+									nextpoint = pathroute[pathroute.length - 1];
+								}
+							}
+							else
+							{
+								backtimes = 0;
+							}
+							if(backtimes > 30)
+							{
+								break;
+								trace("back");
+							}
+							
+						}
+						
+						if(nextpoint != null && nextpoint.x == i && nextpoint.y == j && pathroute.length > 5)
+						{
+							temparr[i][j] = roadindex;
+							for(var m:int=0;m < pathroute.length;m++)
+								temparr[pathroute[m].x][pathroute[m].y] = roadindex;
+							roadNum++;
+							totalLength += pathroute.length;
+							
+							var endpoint:Point = pathroute[pathroute.length - 1];						
+							trace("找到路径：" + roadindex + "，起始点" + "[" + i + "," + j + "]" + "终点:" + "[" + endpoint.x + "," + endpoint.y + "]" );
+							trace("路径长度:" + (pathroute.length - 1));
+							roadindex++;	
+						}
+					}
+				}
+				
+			}
+			
+		
+			trace("边缘数量：" + totalLength + ",路径数：" + roadNum);
+			
+		}
+		
+		private static function getNextCutPoint(row:int,column:int,imgdata:Array,imgwidth:int,imgheight:int,haspassRoute:Object):Point
+		{
+			var upcenter:int = -1;
+			var upright:int = -1;
+			var rightpx:int = -1;
+			var rightdown:int = -1;
+			var centerdown:int = -1;
+			var leftdown:int = -1;
+			var leftcenter:int = -1;
+			var leftup:int = -1;
+			
+			if(row > 0)
+			{
+				upcenter = imgdata[row-1][column];
+				if(column < imgwidth - 1)
+					upright = imgdata[row-1][column+1];
+				if(column > 0 )
+					leftup = imgdata[row-1][column - 1];
+			}
+			if(row < imgheight - 1)
+			{
+				centerdown = imgdata[row+1][column];
+				if(column < imgwidth - 1)
+					rightdown =  imgdata[row+1][column+1];
+				if(column > 0 )
+					leftdown = imgdata[row+1][column - 1];
+			}
+			
+			if(column > 0)
+				leftcenter = imgdata[row][column - 1];
+			
+			if(column < imgwidth - 1)
+				rightpx =  imgdata[row][column+1];
+			
+			var nextpoint:Point;
+			if(upright == 0 && haspassRoute.hasOwnProperty((row-1) + "_" +(column+1)) == false)
+			{
+				//imgdata[row-1][column] = 1;
+				nextpoint = new Point(row-1,column+1);
+				return nextpoint;
+			}
+			if(upcenter == 0 && haspassRoute.hasOwnProperty((row-1) + "_" +(column)) == false)
+			{
+				nextpoint = new Point(row-1,column);
+				return nextpoint;
+			}
+			
+			if(rightpx == 0 && haspassRoute.hasOwnProperty((row) + "_" +(column+1)) == false)
+			{
+				nextpoint = new Point(row,column+1);
+				return nextpoint;
+			}
+			
+		
+			if(rightdown == 0 && haspassRoute.hasOwnProperty((row+1) + "_" +(column+1)) == false)
+			{
+				//imgdata[row][column + 1] = 1;
+				nextpoint = new Point(row+1,column+1);
+				return nextpoint;
+			}
+			
+			
+			if(centerdown == 0 && haspassRoute.hasOwnProperty((row+1) + "_" +(column)) == false)
+			{
+				nextpoint = new Point(row+1,column);
+				return nextpoint;
+			}
+			
+			if(leftdown == 0 && haspassRoute.hasOwnProperty((row+1) + "_" +(column-1)) == false)
+			{
+				//imgdata[row+1][column] = 1;			
+				nextpoint = new Point(row+1,column - 1);
+				return nextpoint;
+			}
+			
+			
+			if(leftcenter == 0 && haspassRoute.hasOwnProperty((row) + "_" +(column - 1)) == false)
+			{
+				nextpoint = new Point(row,column - 1);
+				return nextpoint;
+			}
+			
+			if(leftup == 0 && haspassRoute.hasOwnProperty((row-1) + "_" +(column-1)) == false)
+			{
+				nextpoint = new Point(row - 1,column - 1);
+				return nextpoint;
+			}
+			
+			
+			return null;
+			
+		}
+		
+		public static function getEightNeighbourSum(row:int,column:int,imgdata:Array,imgwidth:int,imgheight:int):int
+		{
+			var upcenter:int = -1;
+			var upright:int = -1;
+			var rightpx:int = -1;
+			var rightdown:int = -1;
+			var centerdown:int = -1;
+			var leftdown:int = -1;
+			var leftcenter:int = -1;
+			var leftup:int = -1;
+			
+			if(row > 0)
+			{
+				upcenter = imgdata[row-1][column];
+				if(column < imgwidth - 1)
+					upright = imgdata[row-1][column+1];
+				if(column > 0 )
+					leftup = imgdata[row-1][column - 1];
+			}
+			if(row < imgheight - 1)
+			{
+				centerdown = imgdata[row+1][column];
+				if(column < imgwidth - 1)
+					rightdown =  imgdata[row+1][column+1];
+				if(column > 0 )
+					leftdown = imgdata[row+1][column - 1];
+			}
+			
+			if(column > 0)
+				leftcenter = imgdata[row][column - 1];
+			
+			if(column < imgwidth - 1)
+				rightpx =  imgdata[row][column+1];
+			
+			return upcenter + rightdown + rightpx + leftcenter + leftdown + leftup + centerdown + upright;
+		}
+		public static function getEqualBlot(blotindexArr:Array,equalblot:Object):Array
+		{
+			var temp:Array = [];
+			for(var i:int=0;i < blotindexArr.length;i++)
+			{
+				temp.push(blotindexArr[i]);
+				if(equalblot.hasOwnProperty(blotindexArr[i]))
+				{
+					temp = temp.concat(getEqualBlot(equalblot[blotindexArr[i]],equalblot));
+				}
+				
+			}
+			
+			return temp;
+			
+		}
 }
