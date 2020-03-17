@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDispose');
@@ -1285,7 +1285,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="product/AdvertiseItem.scene";
+	GameConfig.startScene="usercenter/MyOrdersPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1373,6 +1373,50 @@ var Userdata=(function(){
 })()
 
 
+//class utils.TipsUtil
+var TipsUtil=(function(){
+	function TipsUtil(){
+		this.tipspanel=null;
+		this.tipsMsg="";
+		this.tipspanel=new TipPanelUI();
+	}
+
+	__class(TipsUtil,'utils.TipsUtil');
+	var __proto=TipsUtil.prototype;
+	__proto.addTips=function(container,tips){
+		container.on("mouseover",this,this.showTips);
+		container.on("mousemove",this,this.showTips);
+		container.on("mouseout",this,this.removeTips);
+		this.tipspanel.tips.text=tips;
+		this.tipspanel.backimg.width=this.tipspanel.tips.textField.textWidth+15;
+		this.tipspanel.backimg.height=this.tipspanel.tips.textField.textHeight+15;
+	}
+
+	__proto.showTips=function(e){
+		if(this.tipspanel.parent==null){
+			Laya.stage.addChild(this.tipspanel);
+		}
+		this.tipspanel.x=e.stageX+10;
+		this.tipspanel.y=e.stageY+10;
+	}
+
+	__proto.removeTips=function(e){
+		if(this.tipspanel.parent !=null){
+			this.tipspanel.removeSelf();
+		}
+	}
+
+	TipsUtil.getInstance=function(){
+		if(TipsUtil._instance==null)
+			TipsUtil._instance=new TipsUtil();
+		return TipsUtil._instance;
+	}
+
+	TipsUtil._instance=null;
+	return TipsUtil;
+})()
+
+
 //class model.orderModel.MaterialItemVo
 var MaterialItemVo=(function(){
 	function MaterialItemVo(data){
@@ -1408,7 +1452,6 @@ var MaterialItemVo=(function(){
 			};
 			var nextpro=data.procProcList;
 			this.nextMatList=[];
-			console.log(this.preProc_Name+","+this.preProc_attachmentTypeList);
 			if(nextpro && nextpro.length > 0){
 				for(var i=0;i < nextpro.length;i++){
 					if(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name)!=null){
@@ -1658,7 +1701,10 @@ var ViewManager=(function(){
 
 //class utils.UtilTool
 var UtilTool=(function(){
-	function UtilTool(){}
+	function UtilTool(){
+		this.tipspanel=null;
+	}
+
 	__class(UtilTool,'utils.UtilTool');
 	UtilTool.oneCutNineAdd=function(fnum){
 		var numstr=fnum.toFixed(1);
@@ -1931,7 +1977,7 @@ var UtilTool=(function(){
 					edgenum++;
 					var backtimes=0;
 					var pathroute=[];
-					var nextpoint=UtilTool.getNextCutPoint(i,j,temparr,imgwidth,imgheight,curRouteDic,new Point(i,j));
+					var nextpoint=UtilTool.getNextCutPoint(i,j,temparr,imgwidth,imgheight,curRouteDic);
 					while(nextpoint !=null && (nextpoint.x !=i || nextpoint.y !=j)){
 						if(curRouteDic[(nextpoint.x+"_"+nextpoint.y)]==null){
 							curRouteDic[(nextpoint.x+"_"+nextpoint.y)]=1;
@@ -2383,13 +2429,14 @@ var ProductVo=(function(){
 		(picwidth===void 0)&& (picwidth=0);
 		if(this.measure_unit=="平方米")
 			var prices=area*(this.unit_price+this.additional_unitfee);
-		else
-		prices=longside*(this.unit_price+this.additional_unitfee);
+		else{
+			prices=perimeter*(this.unit_price+this.additional_unitfee);
+		}
 		this.hasDoublePrint=1;
 		var allprices=[];
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
-				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth));
+				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
 			}
 		}
 		prices *=this.hasDoublePrint;
@@ -2415,7 +2462,7 @@ var ProductVo=(function(){
 		return 0;
 	}
 
-	__proto.getTechPrice=function(arr,area,perimeter,ignoreOther,picwidth){
+	__proto.getTechPrice=function(arr,area,perimeter,ignoreOther,picwidth,longside){
 		var prices=[];
 		if(arr==null)
 			return [];
@@ -2424,8 +2471,9 @@ var ProductVo=(function(){
 				var totalprice=0;
 				if(arr[i].preProc_Price > 0 && arr[i].measure_unit=="平方米")
 					totalprice=arr[i].preProc_Price *area;
-				else if(arr[i].preProc_Price > 0)
-				totalprice=arr[i].preProc_Price *perimeter;
+				else if(arr[i].preProc_Price > 0){
+					totalprice=arr[i].preProc_Price *perimeter;
+				}
 				if(arr[i].preProc_Price < 0)
 					this.hasDoublePrint=2;
 				if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
@@ -2443,7 +2491,7 @@ var ProductVo=(function(){
 					totalprice+=arr[i].selectAttachVoList[0].accessory_price;
 				}
 				prices.push(totalprice);
-				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth));
+				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
 			}
 		}
 		return prices;
@@ -2699,7 +2747,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//查询订单 date=201910 curpage=1
+	//修改公司名
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2742,12 +2790,14 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getAddressFromServer="group/get-addr-list?";
 	HttpRequestUtil.abortUpload="file/abortadd?";
 	HttpRequestUtil.getMerchandiseList="business/merchandiselist?client_code=CL10200&";
+	HttpRequestUtil.getManuFactureMatProcPrice="business/getmatprocprice?manufacturer_code=";
 	HttpRequestUtil.getCompanyInfo="group/get-info?";
 	HttpRequestUtil.chargeRequest="group/recharge?";
 	HttpRequestUtil.orderOnlinePay="group/recharge?";
 	HttpRequestUtil.payOrderByMoney="group/pay-order?";
 	HttpRequestUtil.checkOrderList="business/list-order?";
 	HttpRequestUtil.getOrderRecordList="account/listorder?";
+	HttpRequestUtil.changeCompanyName="group/update_group?";
 	return HttpRequestUtil;
 })()
 
@@ -2976,6 +3026,7 @@ var PaintOrderModel=(function(){
 		//选择的配送方式
 		this.curSelectProcList=null;
 		this.batchChangeMatItems=null;
+		this.allManuFacutreMatProcPrice={};
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -2988,6 +3039,7 @@ var PaintOrderModel=(function(){
 		this.productList=null;
 		this.deliveryList=null;
 		this.selectDelivery=null;
+		this.allManuFacutreMatProcPrice={};
 	}
 
 	__proto.initOutputAddr=function(addrobj){
@@ -3014,6 +3066,29 @@ var PaintOrderModel=(function(){
 				return this.curSelectProcList[i];
 		}
 		return null;
+	}
+
+	__proto.initManuFacuturePrice=function(orgcode,dataStr){
+		try{
+			this.allManuFacutreMatProcPrice[orgcode]=JSON.parse(dataStr);
+		}
+		catch(err){
+			ViewManager.showAlert("获取生产商材料工艺价格失败");
+		}
+	}
+
+	__proto.getProcePriceUnit=function(orgcode,procCode){
+		if(this.allManuFacutreMatProcPrice==null || this.allManuFacutreMatProcPrice[orgcode]==null)
+			return [];
+		else{
+			var list=this.allManuFacutreMatProcPrice[orgcode];
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode){
+					return [list[i].measure_unit,list[i].unit_procprice];
+				}
+			}
+			return [];
+		}
 	}
 
 	__getset(1,PaintOrderModel,'instance',function(){
@@ -37575,12 +37650,50 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.account.text=Userdata.instance.userAccount;
 		this.uiSkin.servicetxt.text=Userdata.instance.userAccount;
 		this.uiSkin.shortname.maxChars=6;
+		this.uiSkin.changenamePanel.visible=false;
+		this.uiSkin.changeNameBtn.visible=false;
+		this.uiSkin.changeokbtn.on("click",this,this.onChangeNameOk);
+		this.uiSkin.changeNameBtn.on("click",this,this.onShowChangeNamePanel);
+		this.uiSkin.closebtn.on("click",this,this.onCloseChangeNamePanel);
 		this.uiSkin.btn_uplicense.on("click",this,this.onUploadlicense);
 		Browser.window.uploadApp=this;
 		this.initFileOpen();
 		this.uiSkin.chargebtn.on("click",this,this.onCharge);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-request?" ,this,this.getCompanyInfo,null,"post");
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+	}
+
+	__proto.onChangeNameOk=function(){
+		if(this.uiSkin.newcompanyName.text==""){
+			ViewManager.showAlert("请填写企业名称");
+			return;
+		}
+		if(this.uiSkin.newShortName.text==""){
+			ViewManager.showAlert("请填写企业简称");
+			return;
+		};
+		var params="name="+this.uiSkin.newcompanyName.text+"&shortname="+this.uiSkin.newShortName.text;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/update_group?",this,this.changeCompanyInfoBack,params,"post");
+		this.uiSkin.changenamePanel.visible=false;
+	}
+
+	__proto.changeCompanyInfoBack=function(datastr){
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(datastr);
+		if(result.status==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+		}
+	}
+
+	__proto.onShowChangeNamePanel=function(){
+		this.uiSkin.newcompanyName.text=Userdata.instance.company;
+		this.uiSkin.newShortName.text=Userdata.instance.companyShort;
+		this.uiSkin.changenamePanel.visible=true;
+	}
+
+	__proto.onCloseChangeNamePanel=function(){
+		this.uiSkin.changenamePanel.visible=false;
 	}
 
 	__proto.getCompanyInfoBack=function(data){
@@ -37620,6 +37733,7 @@ var EnterPrizeInfoControl=(function(_super){
 				if(parseInt(result[0].result)==1){
 					this.uiSkin.btnsave.disabled=true;
 					this.uiSkin.btnsave.label="已审核";
+					this.uiSkin.changeNameBtn.visible=true;
 				}
 				else if(parseInt(result[0].result)==0){
 					this.uiSkin.btnsave.disabled=true;
@@ -38506,13 +38620,8 @@ var MyOrderControl=(function(_super){
 		EventCenter.instance.on("PAY_ORDER_SUCESS",this,this.onRefreshOrder);
 		this.uiSkin.yearCombox.labels="2019年,2020年,2021年,2022年,2023年,2024年,2025年";
 		this.uiSkin.monthCombox.labels=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"].join(",");
-		var curyear=(new Date()).getFullYear();
-		var curmonth=(new Date()).getMonth();
-		this.uiSkin.yearCombox.selectedIndex=curyear-2019;
-		this.uiSkin.monthCombox.selectedIndex=curmonth;
-		var param="date="+curyear+(curmonth+1)+"&curpage=1";
-		if(curmonth+1 < 10)
-			param="date="+curyear+"0"+(curmonth+1)+"&curpage=1";
+		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
+		var param="begindate="+UtilTool.formatFullDateTime(new Date(),false)+"&enddate="+UtilTool.formatFullDateTime(new Date(),false)+"&type=2&curpage=1";
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 		this.uiSkin.lastyearbtn.on("click",this,this.onLastYear);
 		this.uiSkin.nextyearbtn.on("click",this,this.onNextYear);
@@ -38522,17 +38631,19 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.nexttpage.on("click",this,this.onNextPage);
 		this.uiSkin.ordertotalNum.text="0";
 		this.uiSkin.ordertotalMoney.text="0元";
+		this.uiSkin.paytype.selectedIndex=2;
 		this.uiSkin.orderList.on("mousedown",this,this.onMouseDwons);
 		this.uiSkin.orderList.on("mouseup",this,this.onMouseUpHandler);
 		this.uiSkin.yearCombox.on("change",this,this.getOrderListAgain);
 		this.uiSkin.monthCombox.on("change",this,this.getOrderListAgain);
+		this.uiSkin.btnsearch.on("click",this,this.queryOrderList);
 		EventCenter.instance.on("COMMON_CLOSE_PANEL_VIEW",this,this.onshowInputDate);
 		EventCenter.instance.on("OPEN_PANEL_VIEW",this,this.onHideInputDate);
 		Laya.stage.on("mouseup",this,this.onMouseUpHandler);
 		EventCenter.instance.on("DELETE_ORDER_BACK",this,this.getOrderListAgain);
+		this.initDateSelector();
 	}
 
-	//this.initFileOpen();
 	__proto.onshowInputDate=function(){
 		if(this.dateInput !=null){
 			this.dateInput.hidden=false;
@@ -38547,7 +38658,7 @@ var MyOrderControl=(function(_super){
 		}
 	}
 
-	__proto.initFileOpen=function(){
+	__proto.initDateSelector=function(){
 		var _$this=this;
 		var curdate=new Date();
 		var nextmonth=new Date(curdate.getTime()+31 *24 *3600 *1000);
@@ -38650,11 +38761,15 @@ var MyOrderControl=(function(_super){
 		}
 	}
 
+	__proto.queryOrderList=function(){
+		this.curpage=1;
+		this.getOrderListAgain();
+	}
+
 	__proto.getOrderListAgain=function(){
-		if(this.uiSkin.monthCombox.selectedIndex+1 >=10)
-			var param="date="+(2019+this.uiSkin.yearCombox.selectedIndex)+(this.uiSkin.monthCombox.selectedIndex+1)+"&curpage="+this.curpage;
-		else
-		param="date="+(2019+this.uiSkin.yearCombox.selectedIndex)+"0"+(this.uiSkin.monthCombox.selectedIndex+1)+"&curpage="+this.curpage;
+		var curdata=new Date(this.dateInput2.value);
+		var lastdate=new Date(this.dateInput.value);
+		var param="begindate="+this.dateInput.value+"enddate="+this.dateInput2.value+"&type="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 	}
 
@@ -46287,6 +46402,8 @@ var MyOrdersPanelUI=(function(_super){
 		this.ordertime=null;
 		this.yearCombox=null;
 		this.monthCombox=null;
+		this.paytype=null;
+		this.btnsearch=null;
 		this.orderList=null;
 		this.lastyearbtn=null;
 		this.nextyearbtn=null;
@@ -52308,6 +52425,7 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.reditcode=null;
 		this.shortname=null;
 		this.input_companyname=null;
+		this.changeNameBtn=null;
 		this.btnSelProv=null;
 		this.province=null;
 		this.btnSelCity=null;
@@ -52328,6 +52446,11 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.towntxt=null;
 		this.townbox=null;
 		this.townList=null;
+		this.changenamePanel=null;
+		this.newcompanyName=null;
+		this.newShortName=null;
+		this.changeokbtn=null;
+		this.closebtn=null;
 		EnterPrizeInfoPaneUI.__super.call(this);
 	}
 
@@ -52755,6 +52878,26 @@ var UserMainPanelUI=(function(_super){
 
 	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"presetID":2,"y":0,"x":0,"texture":"commers/bgimg.jpg"},"compId":54},{"type":"Sprite","props":{"presetID":3,"y":18,"x":332,"texture":"commers/logotxt.png"},"compId":55},{"type":"Label","props":{"presetID":4,"y":28,"x":524,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":28,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":28,"x":1320,"isPresetRoot":true,"var":"myorder","text":"我的订单","name":"myorder","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":28,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":28,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":28,"x":1405,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":42},"compId":87,"child":[{"type":"Box","props":{},"compId":62,"child":[{"type":"Image","props":{"skin":"usercenter/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":26,"child":[{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Image","props":{"y":100,"width":190,"skin":"commers/cutline.png"},"compId":61}]}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/commonpopbg.png","usercenter/setting.png","commers/cutline.png","usercenter/accounticon.png","usercenter/ordericon.png","usercenter/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
 	return UserMainPanelUI;
+})(View)
+
+
+//class ui.common.TipPanelUI extends laya.ui.View
+var TipPanelUI=(function(_super){
+	function TipPanelUI(){
+		this.backimg=null;
+		this.tips=null;
+		TipPanelUI.__super.call(this);
+	}
+
+	__class(TipPanelUI,'ui.common.TipPanelUI',_super);
+	var __proto=TipPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TipPanelUI.uiView);
+	}
+
+	TipPanelUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"backimg","skin":"commers/choosebg.png","sizeGrid":"8,8,8,8","height":36},"compId":3,"child":[{"type":"Label","props":{"y":5,"x":5,"wordWrap":true,"width":150,"var":"tips","text":"这是一个tips,可以很长","fontSize":16,"font":"SimHei"},"compId":4}]}],"loadList":["commers/choosebg.png"],"loadList3D":[]};
+	return TipPanelUI;
 })(View)
 
 
@@ -53446,7 +53589,7 @@ var OrderListItemUI=(function(_super){
 		this.createView(OrderListItemUI.uiView);
 	}
 
-	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":747,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"17.88","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":508,"width":74,"var":"orderstatus","valign":"middle","text":"已支付","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":615,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"删除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":700,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":747,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"17.88","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":508,"width":74,"var":"orderstatus","valign":"middle","text":"已支付","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":615,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"撤回","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":700,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderListItemUI;
 })(View)
 
@@ -58753,6 +58896,7 @@ var OrderCheckListItem=(function(_super){
 		this.detailbtn.on("click",this,this.onShowDetail);
 		this.deletebtn.on("click",this,this.onClickDelete);
 		this.payagain.on("click",this,this.onClickPay);
+		TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 	}
 
 	__proto.onShowDetail=function(){
@@ -58760,13 +58904,15 @@ var OrderCheckListItem=(function(_super){
 	}
 
 	__proto.onClickDelete=function(){
-		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"订单删除之后将无法恢复，确定删除吗？",caller:this,callback:this.confirmDelete,ok:"确定",cancel:"取消"});
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"订单撤回之后将无法恢复，确定删除吗？",caller:this,callback:this.confirmDelete,ok:"确定",cancel:"取消"});
 	}
 
-	__proto.confirmDelete=function(){
-		var detail=JSON.parse(this.orderdata.or_text);
-		var orderdataStr={"orderid":this.orderdata.or_id,"client_code":"CL10200"};
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/cancelorder?",this,this.deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
+	__proto.confirmDelete=function(b){
+		if(b){
+			var detail=JSON.parse(this.orderdata.or_text);
+			var orderdataStr={"orderid":this.orderdata.or_id,"client_code":"CL10200"};
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/cancelorder?",this,this.deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
+		}
 	}
 
 	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.cancelOrder,this,deleteOrderBack,param,"post");
@@ -58780,7 +58926,7 @@ var OrderCheckListItem=(function(_super){
 			ViewManager.showAlert("订单已开始生产，请联系厂家取消订单，联系电话"+detail.contact_phone);
 		}
 		else{
-			ViewManager.showAlert("删除订单失败");
+			ViewManager.showAlert("撤回订单失败");
 		}
 	}
 

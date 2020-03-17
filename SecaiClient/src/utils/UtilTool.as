@@ -6,6 +6,8 @@ package utils
 	import laya.utils.Browser;
 	
 	import model.picmanagerModel.PicInfoVo;
+	
+	import ui.common.TipPanelUI;
 
 	public class UtilTool
 	{
@@ -22,6 +24,7 @@ package utils
 				return parseFloat(numstr);
 
 		}
+		private var tipspanel:TipPanelUI;
 		
 		private static var grayscaleMat:Array = [
 			0.3086, 0.6094, 0.0820, 0, 0, 
@@ -414,7 +417,7 @@ package utils
 						edgenum++;
 						var backtimes:int = 0;
 						var pathroute:Array = [];
-						var nextpoint:Point = getNextCutPoint(i,j,temparr,imgwidth,imgheight,curRouteDic,new Point(i,j));
+						var nextpoint:Point = getNextCutPoint(i,j,temparr,imgwidth,imgheight,curRouteDic);
 						
 						while(nextpoint != null && (nextpoint.x != i || nextpoint.y != j))
 						{
@@ -618,4 +621,5 @@ package utils
 			return temp;
 			
 		}
+	}
 }

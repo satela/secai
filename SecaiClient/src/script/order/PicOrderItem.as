@@ -297,6 +297,14 @@ package script.order
 		}
 		private function onShowMaterialView():void
 		{
+//			for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
+//			{
+//				if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code] == null)
+//				{
+//					ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
+//					return;
+//				}
+//			}
 			// TODO Auto Generated method stub
 			if(PaintOrderModel.instance.selectAddress == null)
 			{

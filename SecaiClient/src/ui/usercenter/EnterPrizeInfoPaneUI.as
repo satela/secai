@@ -12,6 +12,7 @@ package ui.usercenter {
 		public var reditcode:TextInput;
 		public var shortname:TextInput;
 		public var input_companyname:TextInput;
+		public var changeNameBtn:Button;
 		public var btnSelProv:Button;
 		public var province:Label;
 		public var btnSelCity:Button;
@@ -32,6 +33,11 @@ package ui.usercenter {
 		public var towntxt:Label;
 		public var townbox:Image;
 		public var townList:List;
+		public var changenamePanel:Box;
+		public var newcompanyName:TextInput;
+		public var newShortName:TextInput;
+		public var changeokbtn:Button;
+		public var closebtn:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

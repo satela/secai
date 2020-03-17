@@ -56,4 +56,5 @@
    <item name="product/TreeClip.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/AdvertiseItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/ProductCateItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="common/TipPanel.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

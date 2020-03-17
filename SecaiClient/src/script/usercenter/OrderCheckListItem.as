@@ -10,6 +10,8 @@ package script.usercenter
 	
 	import ui.usercenter.OrderListItemUI;
 	
+	import utils.TipsUtil;
+	
 	public class OrderCheckListItem extends OrderListItemUI
 	{
 		private var orderdata:Object;
@@ -60,6 +62,8 @@ package script.usercenter
 			this.detailbtn.on(Event.CLICK,this,onShowDetail);
 			this.deletebtn.on(Event.CLICK,this,onClickDelete);
 			this.payagain.on(Event.CLICK,this,onClickPay);
+			
+			TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 
 		}
 		
@@ -70,12 +74,14 @@ package script.usercenter
 		
 		private function onClickDelete():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"订单删除之后将无法恢复，确定删除吗？",caller:this,callback:confirmDelete,ok:"确定",cancel:"取消"});
+			ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"订单撤回之后将无法恢复，确定删除吗？",caller:this,callback:confirmDelete,ok:"确定",cancel:"取消"});
 
 		}
 		
-		private function confirmDelete():void
+		private function confirmDelete(b:Boolean):void
 		{
+			if(b)
+			{
 			var detail:Object = JSON.parse(orderdata.or_text);
 			
 			//var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
@@ -83,6 +89,7 @@ package script.usercenter
 			//var param:String = "orderid=" + orderdata.or_id;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
+			}
 			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,param,"post");
 
 		}
@@ -105,7 +112,7 @@ package script.usercenter
 				//var detail:Object = JSON.parse(orderdata.or_text);
 				
 				//ViewManager.showAlert("订单已开始生产，请联系厂家取消订单，联系电话" + detail.contact_phone);
-				ViewManager.showAlert("删除订单失败");
+				ViewManager.showAlert("撤回订单失败");
 			}
 		}
 		

@@ -7,6 +7,7 @@ package model.orderModel
 	import model.users.CityAreaVo;
 	import model.users.FactoryInfoVo;
 	
+	import script.ViewManager;
 	import script.order.PicOrderItem;
 
 	public class PaintOrderModel
@@ -43,6 +44,8 @@ package model.orderModel
 		
 		public var batchChangeMatItems:Vector.<PicOrderItem>;
 
+		public var allManuFacutreMatProcPrice:Object = {};
+		
 		public function PaintOrderModel()
 		{
 		}
@@ -55,7 +58,8 @@ package model.orderModel
 			outPutAddr = null;
 			productList = null;
 			deliveryList = null;
-			selectDelivery = null;			
+			selectDelivery = null;	
+			allManuFacutreMatProcPrice = {};
 			
 		}
 		public function initOutputAddr(addrobj:Array):void
@@ -93,6 +97,36 @@ package model.orderModel
 			return null;
 		}
 		
+		public function initManuFacuturePrice(orgcode:String,dataStr:*):void
+		{
+			try
+			{
+				allManuFacutreMatProcPrice[orgcode] = JSON.parse(dataStr);
+			}
+			catch(err:Error)
+			{
+				ViewManager.showAlert("获取生产商材料工艺价格失败");
+			}
+			
+		}
+		
+		public function getProcePriceUnit(orgcode:String,procCode:String):Array
+		{
+			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
+				return [];
+			else
+			{
+				var list:Array = allManuFacutreMatProcPrice[orgcode];
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode)
+					{
+						return [list[i].measure_unit,list[i].unit_procprice];
+					}
+				}
+				return [];
+			}
+		}
 		public static var VOCABURARY:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		public static function getOrderSn():String
 		{

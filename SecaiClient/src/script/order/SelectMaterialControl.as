@@ -225,12 +225,14 @@ package script.order
 		{
 			cell.setData(cell.dataSource);
 		}
+		
 		private function onSlecteMatClass(index:int):void
 		{
 			for each(var item:MaterialClassBtn in uiSkin.tablist.cells)
 			{
 				item.ShowSelected = item.matclassvo == uiSkin.tablist.array[index];
 			}
+			
 			
 			refreshMatList();
 		}

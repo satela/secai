@@ -80,6 +80,7 @@ package model
 		
 		public static const getMerchandiseList:String = "business/merchandiselist?client_code=CL10200&";
 
+		public static const getManuFactureMatProcPrice:String = "business/getmatprocprice?manufacturer_code=";
 		
 		//充值
 		public static const getCompanyInfo:String = "group/get-info?";//账户信息
@@ -94,6 +95,8 @@ package model
 		public static const checkOrderList:String = "business/list-order?";//查询订单
 
 		public static const getOrderRecordList:String = "account/listorder?";//查询订单 date = 201910 curpage=1
+
+		public static const changeCompanyName:String = "group/update_group?";//修改公司名
 
 		public static function get instance():HttpRequestUtil
 		{

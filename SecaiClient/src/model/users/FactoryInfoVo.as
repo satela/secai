@@ -1,5 +1,8 @@
 package model.users
 {
+	import model.HttpRequestUtil;
+	import model.orderModel.PaintOrderModel;
+
 	public class FactoryInfoVo
 	{
 		public var addr:String = "";
@@ -17,6 +20,14 @@ package model.users
 		{
 			for(var key in fvo)
 				this[key] = fvo[key];
+//			if(PaintOrderModel.instance.allManuFacutreMatProcPrice[org_code] == null)
+//			{
+//				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getManuFactureMatProcPrice + org_code,this,function(dataStr:*):void{
+//					
+//					PaintOrderModel.instance.initManuFacuturePrice(org_code,dataStr);
+//					
+//				},null,null);
+//			}
 		}
 	}
 }

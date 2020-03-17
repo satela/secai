@@ -8,6 +8,8 @@ package ui.usercenter {
 		public var ordertime:Label;
 		public var yearCombox:ComboBox;
 		public var monthCombox:ComboBox;
+		public var paytype:RadioGroup;
+		public var btnsearch:Button;
 		public var orderList:List;
 		public var lastyearbtn:Button;
 		public var nextyearbtn:Button;

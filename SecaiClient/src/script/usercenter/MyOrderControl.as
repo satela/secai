@@ -49,17 +49,18 @@ package script.usercenter
 			
 			//uiSkin.yearCombox.scrollBarSkin = "";
 			
-			//Laya.timer.frameLoop(1,this,updateDateInputPos);
+			Laya.timer.frameLoop(1,this,updateDateInputPos);
 
-			var curyear:int = (new Date()).getFullYear();
-			var curmonth:int = (new Date()).getMonth();
+			//var curyear:int = (new Date()).getFullYear();
+			//var curmonth:int = (new Date()).getMonth();
 			
-			uiSkin.yearCombox.selectedIndex = curyear - 2019;
-			uiSkin.monthCombox.selectedIndex = curmonth;
 			
-			var param:String = "date=" + curyear + (curmonth + 1) + "&curpage=1";
-			if(curmonth + 1 < 10 )
-				param = "date=" + curyear + "0" + (curmonth + 1) + "&curpage=1";
+			//uiSkin.yearCombox.selectedIndex = curyear - 2019;
+			//uiSkin.monthCombox.selectedIndex = curmonth;
+			
+			var param:String = "begindate=" + UtilTool.formatFullDateTime(new Date(),false) + "&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + "&type=2&curpage=1";
+			//if(curmonth + 1 < 10 )
+			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
 
@@ -77,12 +78,15 @@ package script.usercenter
 			uiSkin.ordertotalNum.text = "0";
 			uiSkin.ordertotalMoney.text = "0元";
 
+			uiSkin.paytype.selectedIndex = 2;
+			
 			uiSkin.orderList.on(Event.MOUSE_DOWN,this,onMouseDwons);
 			
 			uiSkin.orderList.on(Event.MOUSE_UP,this,onMouseUpHandler);
 			
 			uiSkin.yearCombox.on(Event.CHANGE,this,getOrderListAgain);
 			uiSkin.monthCombox.on(Event.CHANGE,this,getOrderListAgain);
+			uiSkin.btnsearch.on(Event.CLICK,this,queryOrderList);
 
 			EventCenter.instance.on(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);
 			EventCenter.instance.on(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);
@@ -91,7 +95,7 @@ package script.usercenter
 			
 			EventCenter.instance.on(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
 
-			//this.initFileOpen();
+			this.initDateSelector();
 		}
 		
 		private function onshowInputDate():void
@@ -114,7 +118,7 @@ package script.usercenter
 			}
 		}
 		
-		private function initFileOpen():void
+		private function initDateSelector():void
 		{
 			var curdate:Date = new Date();
 			
@@ -276,12 +280,25 @@ package script.usercenter
 				getOrderListAgain();
 			}
 		}
+		
+		private function queryOrderList():void
+		{
+			curpage = 1;
+			getOrderListAgain();
+		}
 		private function getOrderListAgain()
 		{
-			if(uiSkin.monthCombox.selectedIndex + 1 >= 10)
-				var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
-			else
-				 param = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) +  "0" + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			var curdata:Date = new Date(dateInput2.value);
+			var lastdate:Date = new Date(dateInput.value);
+			
+			var param:String = "begindate=" + dateInput.value + "enddate=" + dateInput2.value + "&type=" + uiSkin.paytype.selectedIndex + "&curpage=" + curpage;
+			//if(curmonth + 1 < 10 )
+			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
+			
+			//if(uiSkin.monthCombox.selectedIndex + 1 >= 10)
+			//	var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			//else
+			//	 param = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) +  "0" + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
 
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");

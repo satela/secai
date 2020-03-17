@@ -328,12 +328,16 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;
 						outputitem.holaday.text = "";
+						
+					}
+
+						
 //						if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("义乌物与") >= 0)
 //							outputitem.holaday.text = "2020年春节放假时间1月17日22时截稿，2月4日正式上班";
 //						else if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("无锡点") >= 0)
 //							outputitem.holaday.text = "2020年春节放假时间1月19日22时截稿，2月1日正式上班";
 						// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
-					}
+					
 					uiSkin.fengeimg.y = fengeoriginy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 					uiSkin.floatpt.y = floatpyy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 					uiSkin.mainvbox.y = mianvbox + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;

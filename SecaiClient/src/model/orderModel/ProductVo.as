@@ -124,8 +124,11 @@ package model.orderModel
 			if(measure_unit == OrderConstant.MEASURE_UNIT_AREA)
 				var prices:Number = area*(unit_price + additional_unitfee);
 			else
-				//prices = perimeter*(unit_price + additional_unitfee);
-				prices = longside*(unit_price + additional_unitfee);
+			{
+				
+				prices = perimeter*(unit_price + additional_unitfee);
+			}
+			
 			
 			hasDoublePrint = 1;
 			
@@ -134,7 +137,7 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));					
 				}
 				
 			}
@@ -176,7 +179,7 @@ package model.orderModel
 			return 0;
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther,picwidth:Number):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther,picwidth:Number,longside:Number):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -190,7 +193,9 @@ package model.orderModel
 					if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
 						totalprice = arr[i].preProc_Price * area;
 					else if(arr[i].preProc_Price > 0)
+					{						
 						totalprice = arr[i].preProc_Price * perimeter;
+					}
 					
 					if(arr[i].preProc_Price < 0)
 						hasDoublePrint = 2;
@@ -216,7 +221,7 @@ package model.orderModel
 					
 					prices.push(totalprice);
 					
-					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth));
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
 				}
 			}
 			return prices;

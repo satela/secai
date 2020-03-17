@@ -40,12 +40,15 @@ package model.orderModel
 				var nextpro:Array = data.procProcList;
 				nextMatList = new Vector.<MaterialItemVo>();
 
-				trace(preProc_Name + "," + preProc_attachmentTypeList);
-//				if(preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
+				//trace(preProc_Name + "," + preProc_attachmentTypeList);
+				
+//				var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(PaintOrderModel.instance.curSelectMat.manufacturer_code,this.preProc_Code);
+//				if(priceInfo != null && priceInfo.length == 2)
 //				{
-//					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.GetAccCatlist + "prod_code=" +PaintOrderModel.instance.curSelectMat.prod_code + "&proc_name=" + preProc_Name,this,onAccCatlistBack,null,null);
-//
+//					this.measure_unit = priceInfo[0];
+//					this.preProc_Price = priceInfo[1];
 //				}
+
 				if(nextpro && nextpro.length > 0)
 				{
 					for(var i:int=0;i < nextpro.length;i++)

@@ -107,6 +107,13 @@ package script.usercenter
 			
 			uiSkin.shortname.maxChars = 6;
 			
+			uiSkin.changenamePanel.visible = false;
+			uiSkin.changeNameBtn.visible = false;
+			
+			uiSkin.changeokbtn.on(Event.CLICK,this,onChangeNameOk);
+			uiSkin.changeNameBtn.on(Event.CLICK,this,onShowChangeNamePanel);
+			uiSkin.closebtn.on(Event.CLICK,this,onCloseChangeNamePanel);
+
 			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
 			Browser.window.uploadApp = this;
 			initFileOpen();
@@ -126,6 +133,50 @@ package script.usercenter
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
 			
 			
+		}
+		
+		private function onChangeNameOk():void
+		{
+			if(uiSkin.newcompanyName.text == "")
+			{
+				ViewManager.showAlert("请填写企业名称");
+				return;
+			}
+			if(uiSkin.newShortName.text == "")
+			{
+				ViewManager.showAlert("请填写企业简称");
+				return;
+			}
+			var params:String = "name=" + uiSkin.newcompanyName.text + "&shortname=" + uiSkin.newShortName.text;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.changeCompanyName,this,changeCompanyInfoBack,params,"post");
+
+			uiSkin.changenamePanel.visible = false;
+		}
+		
+		private function changeCompanyInfoBack(datastr:*):void
+		{
+			if(this.destroyed)
+				return;
+			
+			var result:Object = JSON.parse(datastr as String);
+			if(result.status == 0)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
+
+			}
+		}
+		private function onShowChangeNamePanel():void
+		{
+			uiSkin.newcompanyName.text = Userdata.instance.company;
+			uiSkin.newShortName.text = Userdata.instance.companyShort;
+
+			uiSkin.changenamePanel.visible = true;
+		}
+		
+		private function onCloseChangeNamePanel():void
+		{
+			uiSkin.changenamePanel.visible = false;
 		}
 		private function getCompanyInfoBack(data:Object):void
 		{
@@ -175,6 +226,7 @@ package script.usercenter
 					{
 						uiSkin.btnsave.disabled = true;
 						uiSkin.btnsave.label = "已审核";
+						uiSkin.changeNameBtn.visible = true;
 					}
 					else if(parseInt(result[0].result) == 0)
 					{
