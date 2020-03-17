@@ -10,6 +10,8 @@ package script.usercenter
 	
 	import model.HttpRequestUtil;
 	
+	import script.ViewManager;
+	
 	import ui.usercenter.MyOrdersPanelUI;
 	
 	import utils.UtilTool;
@@ -340,6 +342,8 @@ package script.usercenter
 				uiSkin.pagenum.text = curpage + "/" + totalPage;
 				uiSkin.orderList.array = (result.data as Array).reverse();
 			}
+			else
+				ViewManager.showAlert("获取订单失败");
 		}
 		public function updateOrderList(cell:OrderCheckListItem):void
 		{
