@@ -50,10 +50,24 @@ package script.usercenter
 				uiSkin.addlist.array = Userdata.instance.addressList;
 			
 			uiSkin.numAddress.text = "已经保存" + Userdata.instance.addressList.length + "条地址";
+			
+			uiSkin.addlist.on(Event.MOUSE_OVER,this,pauseParentScroll);
+			uiSkin.addlist.on(Event.MOUSE_OUT,this,resumeParentScroll);
+
 
 			EventCenter.instance.on(EventCenter.UPDATE_MYADDRESS_LIST,this,updateList);
 
 		}
+		
+		private function pauseParentScroll():void
+		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
+		}
+		private function resumeParentScroll():void
+		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+		}
+		
 		private function updateList():void
 		{
 			uiSkin.addlist.array = Userdata.instance.addressList;

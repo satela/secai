@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":4,
+    "selectedBox":4,
+    "selecteID":50,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":100,
+    "maxID":102,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -347,7 +347,7 @@
                     "x":30,
                     "type":"VBox",
                     "searchKey":"VBox",
-                    "props":{"y":138,"x":364,"space":42},
+                    "props":{"y":138,"x":364,"space":25},
                     "nodeParent":4,
                     "label":"VBox",
                     "isOpen":true,
@@ -401,7 +401,7 @@
                                 {
                                     "type":"VBox",
                                     "searchKey":"VBox",
-                                    "props":{"y":59,"x":29,"space":40},
+                                    "props":{"y":59,"x":29,"space":20},
                                     "nodeParent":62,
                                     "label":"VBox",
                                     "isOpen":true,
@@ -430,6 +430,7 @@
                                             "props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
                                             "nodeParent":26,
                                             "label":"btntxt1",
+                                            "isOpen":true,
                                             "isDirectory":false,
                                             "isAniNode":true,
                                             "hasChild":false,
@@ -439,9 +440,37 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "type":"Label",
+                                            "searchKey":"Label,btntxt9",
+                                            "props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
+                                            "nodeParent":26,
+                                            "label":"btntxt9",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":100,
+                                            "child":[
+                                                ],
+                                            "$HIDDEN":false
+                                        },
+                                        {
+                                            "type":"Label",
+                                            "searchKey":"Label,btntxt10",
+                                            "props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
+                                            "nodeParent":26,
+                                            "label":"btntxt10",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":101,
+                                            "child":[
+                                                ],
+                                            "$HIDDEN":false
+                                        },
+                                        {
                                             "type":"Image",
                                             "searchKey":"Image",
-                                            "props":{"y":100,"width":190,"skin":"commers/cutline.png"},
+                                            "props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},
                                             "nodeParent":26,
                                             "label":"Image",
                                             "isDirectory":false,
@@ -461,14 +490,13 @@
                             "props":{"y":506},
                             "nodeParent":87,
                             "label":"Box",
-                            "isOpen":true,
+                            "isOpen":false,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":72,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Image",
                                     "searchKey":"Image",
                                     "props":{"skin":"usercenter/accounticon.png"},
@@ -483,7 +511,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},
@@ -499,10 +526,9 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
-                                    "props":{"y":59,"x":29,"space":40},
+                                    "props":{"y":59,"x":29,"space":20},
                                     "nodeParent":72,
                                     "label":"VBox",
                                     "isOpen":true,
@@ -512,7 +538,6 @@
                                     "compId":75,
                                     "child":[
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt5",
                                             "props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
@@ -527,7 +552,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt6",
                                             "props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
@@ -542,7 +566,6 @@
                                             "$HIDDEN":false
                                         },
                                         {
-                                            "x":75,
                                             "type":"Image",
                                             "searchKey":"Image",
                                             "props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},
@@ -606,7 +629,7 @@
                                     "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
-                                    "props":{"y":59,"x":29,"space":40},
+                                    "props":{"y":59,"x":29,"space":20},
                                     "nodeParent":63,
                                     "label":"VBox",
                                     "isOpen":true,
@@ -725,7 +748,7 @@
                                     "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
-                                    "props":{"y":59,"x":29,"space":40},
+                                    "props":{"y":59,"x":29,"space":20},
                                     "nodeParent":80,
                                     "label":"VBox",
                                     "isOpen":true,

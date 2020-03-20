@@ -13,6 +13,7 @@ package ui.usercenter {
 		public var shortname:TextInput;
 		public var input_companyname:TextInput;
 		public var changeNameBtn:Button;
+		public var applybtn:Button;
 		public var btnSelProv:Button;
 		public var province:Label;
 		public var btnSelCity:Button;
@@ -38,6 +39,10 @@ package ui.usercenter {
 		public var newShortName:TextInput;
 		public var changeokbtn:Button;
 		public var closebtn:Button;
+		public var applyJoinPanel:Box;
+		public var createAccountInput:TextInput;
+		public var applyokbtn:Button;
+		public var closeapplybtn:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

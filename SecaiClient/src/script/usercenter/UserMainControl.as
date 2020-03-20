@@ -15,9 +15,11 @@ package script.usercenter
 	import script.ViewManager;
 	
 	import ui.usercenter.AddressMgrPanelUI;
+	import ui.usercenter.ApplyJoinMgrPanelUI;
 	import ui.usercenter.ChargePanelUI;
 	import ui.usercenter.EnterPrizeInfoPaneUI;
 	import ui.usercenter.MyOrdersPanelUI;
+	import ui.usercenter.OrganizeMgrPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 	
 	public class UserMainControl extends Script
@@ -48,13 +50,13 @@ package script.usercenter
 
 			//uiSkin.sp_container.autoSize = true;
 			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
-			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
+			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,null,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
 			
 			
 			
 			btntxtArr = [];
-			titleTxt = ["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单"];
-			for(var i:int=0;i < 9;i++)
+			titleTxt = ["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单","","","组织管理","申请列表"];
+			for(var i:int=0;i < 11;i++)
 			{
 				uiSkin["btntxt" + i].on(Event.CLICK,this,onShowEditView,[i]);
 				uiSkin["btntxt" + i].on(Event.MOUSE_OVER,this,onMouseOverHandler);

@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":153,
-    "selecteID":155,
+    "selectedBox":159,
+    "selecteID":160,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":900},
     "nodeParent":-1,
-    "maxID":159,
+    "maxID":173,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -369,6 +369,20 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":141,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,applybtn",
+                    "props":{"y":4,"x":600,"width":138,"var":"applybtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"申请加入","height":40},
+                    "nodeParent":13,
+                    "label":"applybtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":172,
                     "child":[
                         ]
                 }],
@@ -921,14 +935,13 @@
             "props":{"var":"changenamePanel","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"changenamePanel",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":147,
             "child":[
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
@@ -943,7 +956,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":300,"x":50,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":300,"alpha":1},
@@ -957,7 +969,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":320,"x":191},
@@ -970,7 +981,6 @@
                     "compId":148,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":17,"text":"企业名称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -985,7 +995,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,newcompanyName",
                             "props":{"y":-3,"x":187,"width":380,"var":"newcompanyName","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业全称","height":50,"fontSize":20,"font":"SimHei"},
@@ -1000,7 +1009,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -1017,7 +1025,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":400,"x":191},
@@ -1030,7 +1037,6 @@
                     "compId":153,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":17,"text":"企业简称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -1045,7 +1051,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,newShortName",
                             "props":{"y":-3,"x":187,"width":380,"var":"newShortName","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业简称（限6个子以内）","height":50,"fontSize":20,"font":"SimHei"},
@@ -1060,7 +1065,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -1077,7 +1081,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,changeokbtn",
                     "props":{"y":500,"x":406,"width":138,"var":"changeokbtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
@@ -1091,7 +1094,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,closebtn",
                     "props":{"y":311,"x":872,"var":"closebtn","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
@@ -1102,6 +1104,139 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":157,
+                    "child":[
+                        ]
+                }],
+            "$HIDDEN":true
+        },
+        {
+            "x":15,
+            "type":"Box",
+            "searchKey":"Box,applyJoinPanel",
+            "props":{"y":0,"x":0,"var":"applyJoinPanel","top":0,"right":0,"left":0,"bottom":0},
+            "nodeParent":2,
+            "label":"applyJoinPanel",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":159,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
+                    "nodeParent":159,
+                    "label":"Image",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":160,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":300,"width":850,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":186,"alpha":1},
+                    "nodeParent":159,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":161,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":320,"x":191},
+                    "nodeParent":159,
+                    "label":"Box",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":162,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":17,"text":"创建者账号：","fontSize":24,"font":"SimHei","color":"#262B2E"},
+                            "nodeParent":162,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":163,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "x":45,
+                            "type":"TextInput",
+                            "searchKey":"TextInput,createAccountInput",
+                            "props":{"y":-3,"x":187,"width":380,"var":"createAccountInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入公司创建者账号","height":50,"fontSize":20,"font":"SimHei"},
+                            "nodeParent":162,
+                            "label":"createAccountInput",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":164,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
+                            "nodeParent":162,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":165,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,applyokbtn",
+                    "props":{"y":415,"x":406,"width":138,"var":"applyokbtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
+                    "nodeParent":159,
+                    "label":"applyokbtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":170,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,closeapplybtn",
+                    "props":{"y":311,"x":872,"var":"closeapplybtn","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
+                    "nodeParent":159,
+                    "label":"closeapplybtn",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":171,
                     "child":[
                         ]
                 }],

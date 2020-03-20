@@ -29,11 +29,13 @@ package {
 	import script.product.ProductMainControl;
 	import script.picUpload.UpLoadAndOrderContrl;
 	import script.usercenter.AddressMgrControl;
+	import script.usercenter.ApplyJoinMgrControl;
 	import script.usercenter.ChargeControl;
 	import script.usercenter.EnterPrizeInfoControl;
 	import script.usercenter.MyOrderControl;
 	import script.usercenter.AddressEditControl;
 	import script.usercenter.OrderDetailControl;
+	import script.usercenter.OrganizeMrgControl;
 	import script.usercenter.UserMainControl;
 	/**
 	 * 游戏初始化配置
@@ -45,7 +47,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "usercenter/MyOrdersPanel.scene";
+		public static var startScene:* = "usercenter/OrganizeItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -81,11 +83,13 @@ package {
 			reg("script.product.ProductMainControl",ProductMainControl);
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 			reg("script.usercenter.AddressMgrControl",AddressMgrControl);
+			reg("script.usercenter.ApplyJoinMgrControl",ApplyJoinMgrControl);
 			reg("script.usercenter.ChargeControl",ChargeControl);
 			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
 			reg("script.usercenter.MyOrderControl",MyOrderControl);
 			reg("script.usercenter.AddressEditControl",AddressEditControl);
 			reg("script.usercenter.OrderDetailControl",OrderDetailControl);
+			reg("script.usercenter.OrganizeMrgControl",OrganizeMrgControl);
 			reg("script.usercenter.UserMainControl",UserMainControl);
 		}
 		GameConfig.init();
