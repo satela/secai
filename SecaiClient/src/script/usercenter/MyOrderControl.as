@@ -58,7 +58,7 @@ package script.usercenter
 			//uiSkin.yearCombox.selectedIndex = curyear - 2019;
 			//uiSkin.monthCombox.selectedIndex = curmonth;
 			
-			var param:String = "begindate=" + UtilTool.formatFullDateTime(new Date(),false) + "&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + "&type=2&curpage=1";
+			var param:String = "begindate=" + UtilTool.formatFullDateTime(new Date(),false) + " 00:00:00" + "&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59" + "&type=2&curpage=1";
 			//if(curmonth + 1 < 10 )
 			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
@@ -338,7 +338,7 @@ package script.usercenter
 					uiSkin.ordertotalMoney.text = "0元";
 
 				uiSkin.pagenum.text = curpage + "/" + totalPage;
-				uiSkin.orderList.array = (result.data as Array).reverse();
+				uiSkin.orderList.array = (result.data as Array);//.reverse();
 			}
 		}
 		public function updateOrderList(cell:OrderCheckListItem):void

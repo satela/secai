@@ -102,6 +102,16 @@ package model.orderModel
 			try
 			{
 				allManuFacutreMatProcPrice[orgcode] = JSON.parse(dataStr);
+				var arr:Array = allManuFacutreMatProcPrice[orgcode];
+				for(var i:int=0;i < arr.length;i++)
+				{
+					var matlist:Array = arr[i].mat_list;
+					arr[i].matlist = {};
+					for(var j:int=0;j < matlist.length;j++)
+					{
+						arr[i].matlist[matlist[j].mat_code] = matlist[j];
+					}
+				}
 			}
 			catch(err:Error)
 			{
@@ -110,18 +120,23 @@ package model.orderModel
 			
 		}
 		
-		public function getProcePriceUnit(orgcode:String,procCode:String):Array
+		public function getProcePriceUnit(orgcode:String,procCode:String,matcode:String):Array
 		{
 			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
 				return [];
 			else
 			{
 				var list:Array = allManuFacutreMatProcPrice[orgcode];
+				if(list == null)
+					return [];
 				for(var i:int=0;i < list.length;i++)
 				{
 					if(list[i].proc_code == procCode)
 					{
-						return [list[i].measure_unit,list[i].unit_procprice];
+						if(list[i].matlist[matcode] != null)
+							return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
+						else
+							return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 					}
 				}
 				return [];

@@ -1428,6 +1428,8 @@ var MaterialItemVo=(function(){
 		// 前置工艺附件类型
 		this.preProc_Price=0;
 		// 前置工艺价格
+		this.baseprice=0;
+		// 底价
 		this.is_mandatory=0;
 		// 是否必选工艺
 		this.measure_unit="";
@@ -2445,7 +2447,7 @@ var ProductVo=(function(){
 		}
 		if(prices < 0.1)
 			prices=0.1;
-		return parseFloat(prices.toFixed(1));
+		return parseFloat(prices.toFixed(2));
 	}
 
 	__proto.getDanjia=function(){
@@ -2469,27 +2471,35 @@ var ProductVo=(function(){
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
 				var totalprice=0;
-				if(arr[i].preProc_Price > 0 && arr[i].measure_unit=="平方米")
-					totalprice=arr[i].preProc_Price *area;
-				else if(arr[i].preProc_Price > 0){
-					totalprice=arr[i].preProc_Price *perimeter;
-				}
-				if(arr[i].preProc_Price < 0)
-					this.hasDoublePrint=2;
-				if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
-					if(arr[i].selectAttachVoList[0].measure_unit=="平方米"){
-						totalprice+=arr[i].selectAttachVoList[0].accessory_price *area;
+				var priceInfo=PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code);
+				if(priceInfo !=null && priceInfo.length==3){
+					arr[i].measure_unit=priceInfo[0];
+					arr[i].baseprice=priceInfo[1];
+					arr[i].preProc_Price=priceInfo[2];
+					if(arr[i].preProc_Price > 0 && arr[i].measure_unit=="平方米")
+						totalprice=arr[i].preProc_Price *area;
+					else if(arr[i].preProc_Price > 0){
+						totalprice=arr[i].preProc_Price *perimeter;
 					}
-					else if(arr[i].selectAttachVoList[0].measure_unit=="米"){
-						if("SPAS42110"==arr[i].selectAttachVoList[0].accessory_code){
-							totalprice+=arr[i].selectAttachVoList[0].accessory_price *picwidth*2;
+					if(arr[i].preProc_Price < 0)
+						this.hasDoublePrint=2;
+					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
+						if(arr[i].selectAttachVoList[0].measure_unit=="平方米"){
+							totalprice+=arr[i].selectAttachVoList[0].accessory_price *area;
 						}
-						else
-						totalprice+=arr[i].selectAttachVoList[0].accessory_price *perimeter;
+						else if(arr[i].selectAttachVoList[0].measure_unit=="米"){
+							if("SPAS42110"==arr[i].selectAttachVoList[0].accessory_code){
+								totalprice+=arr[i].selectAttachVoList[0].accessory_price *picwidth*2;
+							}
+							else
+							totalprice+=arr[i].selectAttachVoList[0].accessory_price *perimeter;
+						}
+						else if(arr[i].selectAttachVoList[0].measure_unit=="克" && !ignoreOther)
+						totalprice+=arr[i].selectAttachVoList[0].accessory_price;
 					}
-					else if(arr[i].selectAttachVoList[0].measure_unit=="克" && !ignoreOther)
-					totalprice+=arr[i].selectAttachVoList[0].accessory_price;
 				}
+				if(arr[i].baseprice !=0)
+					totalprice+=arr[i].baseprice;
 				prices.push(totalprice);
 				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
 			}
@@ -2865,7 +2875,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2888,8 +2897,14 @@ var FactoryInfoVo=(function(){
 		this.contactor="368525478";
 		this.contact_phone="18956589865";
 		this.manufacture_priority=0;
+		var _$this=this;
 		for(var key in fvo)
 		this[key]=fvo[key];
+		if(PaintOrderModel.instance.allManuFacutreMatProcPrice[this.org_code]==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getmatprocprice?manufacturer_code="+this.org_code,this,function(dataStr){
+				PaintOrderModel.instance.initManuFacuturePrice(_$this.org_code,dataStr);
+			},null,null);
+		}
 	}
 
 	__class(FactoryInfoVo,'model.users.FactoryInfoVo');
@@ -3071,20 +3086,33 @@ var PaintOrderModel=(function(){
 	__proto.initManuFacuturePrice=function(orgcode,dataStr){
 		try{
 			this.allManuFacutreMatProcPrice[orgcode]=JSON.parse(dataStr);
+			var arr=this.allManuFacutreMatProcPrice[orgcode];
+			for(var i=0;i < arr.length;i++){
+				var matlist=arr[i].mat_list;
+				arr[i].matlist={};
+				for(var j=0;j < matlist.length;j++){
+					arr[i].matlist[matlist[j].mat_code]=matlist[j];
+				}
+			}
 		}
 		catch(err){
 			ViewManager.showAlert("获取生产商材料工艺价格失败");
 		}
 	}
 
-	__proto.getProcePriceUnit=function(orgcode,procCode){
+	__proto.getProcePriceUnit=function(orgcode,procCode,matcode){
 		if(this.allManuFacutreMatProcPrice==null || this.allManuFacutreMatProcPrice[orgcode]==null)
 			return [];
 		else{
 			var list=this.allManuFacutreMatProcPrice[orgcode];
+			if(list==null)
+				return [];
 			for(var i=0;i < list.length;i++){
 				if(list[i].proc_code==procCode){
-					return [list[i].measure_unit,list[i].unit_procprice];
+					if(list[i].matlist[matcode] !=null)
+						return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
+					else
+					return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				}
 			}
 			return [];
@@ -37035,6 +37063,7 @@ var PaintOrderControl=(function(_super){
 	__class(PaintOrderControl,'script.order.PaintOrderControl',_super);
 	var __proto=PaintOrderControl.prototype;
 	__proto.onStart=function(){
+		PaintOrderModel.instance.resetData();
 		this.uiSkin=this.owner;
 		this.uiSkin.mainvbox.autoSize=true;
 		this.uiSkin.btnaddpic.on("click",this,this.onShowSelectPic);
@@ -37181,9 +37210,9 @@ var PaintOrderControl=(function(_super){
 				total+=(Number)((odata.order_amountStr).toFixed(2));
 			}
 		}
-		this.uiSkin.textTotalPrice.innerHTML="<span color='#262B2E' size='20'>折后总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(2)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
+		this.uiSkin.textTotalPrice.innerHTML="<span color='#262B2E' size='20'>折后总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
 		this.uiSkin.textDeliveryType.innerHTML="<span color='#262B2E' size='20'>运费总额：</span>"+"<span color='#FF4400' size='20'>"+"0"+"</span>"+"<span color='#262B2E' size='20'>元</span>";
-		this.uiSkin.textPayPrice.innerHTML="<span color='#262B2E' size='20'>应付总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(2)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
+		this.uiSkin.textPayPrice.innerHTML="<span color='#262B2E' size='20'>应付总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
 	}
 
 	__proto.onGetOutPutAddress=function(data){
@@ -37555,8 +37584,8 @@ var PaintOrderControl=(function(_super){
 					}
 				}
 			}
-			odata.money_paidStr=(odata.order_amountStr).toFixed(2);
-			odata.order_amountStr=(odata.order_amountStr).toFixed(2);
+			odata.money_paidStr=(odata.order_amountStr).toFixed(1);
+			odata.order_amountStr=(odata.order_amountStr).toFixed(1);
 			arr.push(odata);
 		}
 		return arr;
@@ -38621,7 +38650,7 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.yearCombox.labels="2019年,2020年,2021年,2022年,2023年,2024年,2025年";
 		this.uiSkin.monthCombox.labels=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"].join(",");
 		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
-		var param="begindate="+UtilTool.formatFullDateTime(new Date(),false)+"&enddate="+UtilTool.formatFullDateTime(new Date(),false)+"&type=2&curpage=1";
+		var param="begindate="+UtilTool.formatFullDateTime(new Date(),false)+" 00:00:00"+"&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59"+"&type=2&curpage=1";
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 		this.uiSkin.lastyearbtn.on("click",this,this.onLastYear);
 		this.uiSkin.nextyearbtn.on("click",this,this.onNextYear);
@@ -38800,10 +38829,11 @@ var MyOrderControl=(function(_super){
 			else
 			this.uiSkin.ordertotalMoney.text="0元";
 			this.uiSkin.pagenum.text=this.curpage+"/"+this.totalPage;
-			this.uiSkin.orderList.array=(result.data).reverse();
+			this.uiSkin.orderList.array=(result.data);
 		}
 	}
 
+	//.reverse();
 	__proto.updateOrderList=function(cell){
 		cell.setData(cell.dataSource);
 	}
@@ -53116,6 +53146,12 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.onShowMaterialView=function(){
+		for(var i=0;i < PaintOrderModel.instance.outPutAddr.length;i++){
+			if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code]==null){
+				ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
+				return;
+			}
+		}
 		if(PaintOrderModel.instance.selectAddress==null){
 			ViewManager.showAlert("请先选择收货地址");
 			return;
