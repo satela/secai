@@ -2869,7 +2869,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -38474,7 +38473,7 @@ var OrganizeMrgControl=(function(_super){
 			item=this.uiSkin.organizelist.cells[$each_item];
 			item.selected=false;
 		}
-		this.uiSkin.organizelist.cells[index].selected=true;
+		(this.uiSkin.organizelist.cells [index]).selected=true;
 	}
 
 	return OrganizeMrgControl;
