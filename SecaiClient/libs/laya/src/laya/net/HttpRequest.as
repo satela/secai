@@ -5,6 +5,8 @@ package laya.net {
 	import laya.utils.Browser;
 	import laya.utils.Utils;
 	
+	import model.Userdata;
+	
 	/**
 	 * 请求进度改变时调度。
 	 * @eventType Event.PROGRESS
@@ -59,6 +61,11 @@ package laya.net {
 			} else if (!Render.isConchApp) {
 				if (!data || data is String) http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 				else http.setRequestHeader("Content-Type", "application/json");
+			}
+			
+			if(Userdata.instance.isLogin)
+			{
+				http.setRequestHeader("UserAccount", Userdata.instance.userAccount);
 			}
 			http.responseType = responseType !== "arraybuffer" ? "text" : "arraybuffer";
 			http.onerror = function(e:*):void {

@@ -2,6 +2,8 @@ package script.usercenter
 {
 	import laya.events.Event;
 	
+	import model.HttpRequestUtil;
+	
 	import script.ViewManager;
 	
 	import ui.usercenter.OrderQuestItemUI;
@@ -12,17 +14,21 @@ package script.usercenter
 		public var caller:Object;
 
 		public var ordata:Object;
+		
+		private var ordersn:String;
+		private var hasgetState:Boolean = false;
 		public function QuestOrderItem()
 		{
 			super();
 		}
 		
-		public function setData(orderdata:Object):void
+		public function setData(orderdata:Object,orderid:String):void
 		{
 			this.itemseq.text = orderdata.item_seq;
 			this.picimg.skin = orderdata.thumbnails_path;
 			
 			ordata = orderdata;
+			ordersn = orderid;
 			//this.fileimg.skin = 
 			//this.txtMaterial.text = ;
 			this.matname.text = orderdata.prod_name;
@@ -33,8 +39,11 @@ package script.usercenter
 			
 			this.pronum.text = orderdata.item_number + "";
 			var techstr:String =  "";
-			for(var i:int=0;i < orderdata.procInfoList.length;i++)
-				techstr += orderdata.procInfoList[i].proc_description + "-";
+			if(orderdata.procInfoList != null)
+			{
+				for(var i:int=0;i < orderdata.procInfoList.length;i++)
+					techstr += orderdata.procInfoList[i].proc_description + "-";
+			}
 			
 			this.tech.text = techstr.substr(0,techstr.length - 1);
 			
@@ -62,6 +71,15 @@ package script.usercenter
 		private function onClickShowDetail():void
 		{
 			this.detailbox.visible = !this.detailbox.visible;
+			
+			if(this.detailbox.visible && hasgetState == false)
+			{
+				var requestdata:String = "order_sn=" + ordersn + "&item_seq=" + ordata.item_seq + "&prod_code=" + ordata.prod_code;
+				
+
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderState + requestdata,this,onGetStateBack,null,null);
+
+			}
 			if(this.detailbox.visible)
 				this.bgimg.height = 165;
 			else
@@ -69,6 +87,24 @@ package script.usercenter
 			adjustHeight.call(caller);
 		}
 		
+		private function onGetStateBack(data:*):void{
+			
+			try
+			{
+				var msg:Object = JSON.parse(data as String);
+				if(msg != null)
+				{
+					hasgetState = true;
+					this.txtDetailInfo.text = "产品状态：" + msg.item_status;
+	
+				}
+			}
+			catch(err:Error)
+			{
+				
+			}
+			
+		}
 		private function hideDetail():void
 		{
 			this.detailbox.visible = false;

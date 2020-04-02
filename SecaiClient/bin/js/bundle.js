@@ -1285,7 +1285,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/MyOrdersPanel.scene";
+	GameConfig.startScene="usercenter/OrderQuestItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1302,6 +1302,7 @@ var GameConfig=(function(){
 //class model.Userdata
 var Userdata=(function(){
 	function Userdata(){
+		this.version="";
 		this.userId=0;
 		this.userSession=null;
 		this.userAccount=null;
@@ -2719,7 +2720,7 @@ var HttpRequestUtil=(function(){
 					if(ErrorCode.ErrorTips.hasOwnProperty(result.status)){
 						ViewManager.showAlert(ErrorCode.ErrorTips[result.status]);
 					}
-					if(result.status==203){
+					if(result.status==203 || result.status==210){
 						ViewManager.instance.openView("VIEW_lOGPANEL",true);
 					}
 				}
@@ -2801,6 +2802,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.abortUpload="file/abortadd?";
 	HttpRequestUtil.getMerchandiseList="business/merchandiselist?client_code=CL10200&";
 	HttpRequestUtil.getManuFactureMatProcPrice="business/getmatprocprice?manufacturer_code=";
+	HttpRequestUtil.getOrderState="business/getorderitemstatus?";
 	HttpRequestUtil.getCompanyInfo="group/get-info?";
 	HttpRequestUtil.chargeRequest="group/recharge?";
 	HttpRequestUtil.orderOnlinePay="group/recharge?";
@@ -2861,7 +2863,9 @@ var Main=(function(){
 		Laya.stage.on("resize",this,this.onResizeBrower);
 	}
 
-	__proto.onVersionLoaded=function(){
+	__proto.onVersionLoaded=function(e){
+		Userdata.instance.version=Laya.loader.getRes('version.json');
+		console.log("版本号:"+Userdata.instance.version);
 		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas",type:"atlas"},{url:"res/atlas/order.atlas",type:"atlas"},{url:"res/atlas/upload.atlas",type:"atlas"},{url:"res/atlas/usercenter.atlas",type:"atlas"},{url:"res/atlas/mainpage.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
@@ -2875,6 +2879,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2997,6 +3002,7 @@ var ErrorCode=(function(){
 			207:"被邀请用户已加入公司",
 			208:"邀请已发送",
 			209:"更新失败",
+			210:"用户已退出，请重新登录",
 			301:"上传失败",
 			302:"目录已存在",
 			303:"文件不存在",
@@ -29653,6 +29659,9 @@ var HttpRequest=(function(_super){
 			if (!data || (typeof data=='string'))http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 			else http.setRequestHeader("Content-Type","application/json");
 		}
+		if(Userdata.instance.isLogin){
+			http.setRequestHeader("UserAccount",Userdata.instance.userAccount);
+		}
 		http.responseType=responseType!=="arraybuffer" ? "text" :"arraybuffer";
 		http.onerror=function (e){
 			_this._onError(e);
@@ -35275,6 +35284,7 @@ var MainPageControl=(function(_super){
 			Userdata.instance.isLogin=true;
 			this.txtLogin.text=account;
 			this.txtReg.text="[退出]";
+			console.log(Browser.document.cookie.split("; "));
 			Userdata.instance.loginTime=(new Date()).getTime();
 			UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
@@ -35960,6 +35970,7 @@ var LogPanelControl=(function(_super){
 			UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
 			ViewManager.instance.closeView("VIEW_lOGPANEL");
 			ViewManager.instance.openView("VIEW_FIRST_PAGE");
+			console.log(Browser.document.cookie.split("; "));
 		}
 	}
 
@@ -38649,8 +38660,11 @@ var MyOrderControl=(function(_super){
 		EventCenter.instance.on("PAY_ORDER_SUCESS",this,this.onRefreshOrder);
 		this.uiSkin.yearCombox.labels="2019年,2020年,2021年,2022年,2023年,2024年,2025年";
 		this.uiSkin.monthCombox.labels=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"].join(",");
+		this.uiSkin.orderList.mouseThrough=true;
 		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
-		var param="begindate="+UtilTool.formatFullDateTime(new Date(),false)+" 00:00:00"+"&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59"+"&type=2&curpage=1";
+		var curdate=new Date();
+		var lastday=new Date(curdate.getTime()-24 *3600 *1000);
+		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&status=1&curpage=1";
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 		this.uiSkin.lastyearbtn.on("click",this,this.onLastYear);
 		this.uiSkin.nextyearbtn.on("click",this,this.onNextYear);
@@ -38660,7 +38674,8 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.nexttpage.on("click",this,this.onNextPage);
 		this.uiSkin.ordertotalNum.text="0";
 		this.uiSkin.ordertotalMoney.text="0元";
-		this.uiSkin.paytype.selectedIndex=2;
+		this.uiSkin.paytype.selectedIndex=1;
+		this.uiSkin.paytype.on("change",this,this.queryOrderList);
 		this.uiSkin.orderList.on("mousedown",this,this.onMouseDwons);
 		this.uiSkin.orderList.on("mouseup",this,this.onMouseUpHandler);
 		this.uiSkin.yearCombox.on("change",this,this.getOrderListAgain);
@@ -38668,9 +38683,19 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.btnsearch.on("click",this,this.queryOrderList);
 		EventCenter.instance.on("COMMON_CLOSE_PANEL_VIEW",this,this.onshowInputDate);
 		EventCenter.instance.on("OPEN_PANEL_VIEW",this,this.onHideInputDate);
+		this.uiSkin.orderList.on("mouseover",this,this.pauseParentScroll);
+		this.uiSkin.orderList.on("mouseout",this,this.resumeParentScroll);
 		Laya.stage.on("mouseup",this,this.onMouseUpHandler);
 		EventCenter.instance.on("DELETE_ORDER_BACK",this,this.getOrderListAgain);
 		this.initDateSelector();
+	}
+
+	__proto.pauseParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
+	}
+
+	__proto.resumeParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
 	__proto.onshowInputDate=function(){
@@ -38689,8 +38714,8 @@ var MyOrderControl=(function(_super){
 
 	__proto.initDateSelector=function(){
 		var _$this=this;
-		var curdate=new Date();
-		var nextmonth=new Date(curdate.getTime()+31 *24 *3600 *1000);
+		var curdate=new Date((new Date()).getTime()-24 *3600 *1000);
+		var lastdate=new Date();
 		this.dateInput=Browser.document.createElement("input");
 		this.dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
 		this.dateInput.type="date";
@@ -38717,7 +38742,7 @@ var MyOrderControl=(function(_super){
 		this.dateInput2.style.position="absolute";
 		this.dateInput2.style.zIndex=999;
 		Browser.document.body.appendChild(this.dateInput2);
-		this.dateInput2.value=UtilTool.formatFullDateTime(nextmonth,false);
+		this.dateInput2.value=UtilTool.formatFullDateTime(lastdate,false);
 		this.dateInput2.onchange=function (datestr){
 			if(_$this.dateInput2.value=="")
 				return;
@@ -38798,7 +38823,7 @@ var MyOrderControl=(function(_super){
 	__proto.getOrderListAgain=function(){
 		var curdata=new Date(this.dateInput2.value);
 		var lastdate=new Date(this.dateInput.value);
-		var param="begindate="+this.dateInput.value+"enddate="+this.dateInput2.value+"&type="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
+		var param="begindate="+this.dateInput.value+" 00:00:00&enddate="+this.dateInput2.value+" 23:59:59&status="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 	}
 
@@ -38831,9 +38856,10 @@ var MyOrderControl=(function(_super){
 			this.uiSkin.pagenum.text=this.curpage+"/"+this.totalPage;
 			this.uiSkin.orderList.array=(result.data);
 		}
+		else
+		ViewManager.showAlert("获取订单失败");
 	}
 
-	//.reverse();
 	__proto.updateOrderList=function(cell){
 		cell.setData(cell.dataSource);
 	}
@@ -38881,7 +38907,7 @@ var OrderDetailControl=(function(_super){
 			var product=new QuestOrderItem();
 			this.uiSkin.orderbox.addChild(product);
 			product.y=product.height*i;
-			product.setData(allproduct[i]);
+			product.setData(allproduct[i],this.param.or_id);
 			product.adjustHeight=this.refrshVbox;
 			product.caller=this;
 		}
@@ -41867,7 +41893,7 @@ var Scene=(function(_super){
 	*@param path 场景地址。
 	*/
 	__proto.loadScene=function(path){
-		var url=path.indexOf(".")>-1 ? path :path+".scene"+"?"+(new Date()).getTime().toString();;
+		var url=path.indexOf(".")>-1 ? path :path+".scene"+"?"+Userdata.instance.version;
 		var view=Laya.loader.getRes(url);
 		if (view){
 			this.createView(view);
@@ -46486,7 +46512,7 @@ var OrderQuestItemUI=(function(_super){
 		this.createView(OrderQuestItemUI.uiView);
 	}
 
-	OrderQuestItemUI.uiView={"type":"Scene","props":{"width":1175,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1175,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":165},"compId":3,"child":[{"type":"Image","props":{"y":42,"x":140,"width":80,"var":"picimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":27},{"type":"Label","props":{"y":35,"x":41,"width":30,"var":"itemseq","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":28},{"type":"Label","props":{"y":26.5,"x":944,"width":58,"var":"money","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":30},{"type":"Box","props":{"y":26.5,"x":1034,"var":"comment"},"compId":31,"child":[{"type":"Text","props":{"text":"备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":35},{"type":"Label","props":{"y":-13,"x":36,"width":14,"var":"commentmark","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":37}]},{"type":"Box","props":{"y":12,"x":541},"compId":32,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":38},{"type":"Label","props":{"y":29,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":39},{"type":"Label","props":{"y":1,"x":58,"width":46,"var":"widthtxt","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":48},{"type":"Label","props":{"y":29,"x":58,"width":46,"var":"heighttxt","text":"10","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":49}]},{"type":"Sprite","props":{"y":15,"x":363,"width":158,"height":43},"compId":33,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":187,"var":"matname","valign":"middle","text":"展架专用布","height":42,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":42}]},{"type":"Label","props":{"y":21,"x":884,"width":53,"var":"pronum","valign":"middle","text":"10","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":50},{"type":"Text","props":{"y":27,"x":1105,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":51,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":52}]},{"type":"Label","props":{"y":5,"x":663,"wordWrap":true,"width":203,"var":"tech","valign":"middle","text":"10","height":60,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":53},{"type":"Label","props":{"y":0,"x":197,"wordWrap":true,"width":160,"var":"filename","valign":"middle","text":"展架专用布","height":74,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":55}]},{"type":"VBox","props":{"y":91,"var":"detailbox","space":0,"right":5,"left":2},"compId":13,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":991,"var":"txtDetailInfo","valign":"top","text":"产品状态","height":71,"fontSize":18,"align":"left"},"compId":21}]}],"loadList":["commers/inputbg.png","comp/image.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderQuestItemUI.uiView={"type":"Scene","props":{"width":1175,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1175,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":165},"compId":3,"child":[{"type":"Image","props":{"y":42,"x":140,"width":80,"var":"picimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":27},{"type":"Label","props":{"y":35,"x":41,"width":30,"var":"itemseq","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":28},{"type":"Label","props":{"y":26.5,"x":944,"width":58,"var":"money","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":30},{"type":"Box","props":{"y":26.5,"x":1034,"var":"comment"},"compId":31,"child":[{"type":"Text","props":{"text":"备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":35},{"type":"Label","props":{"y":-13,"x":36,"width":14,"var":"commentmark","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":37}]},{"type":"Box","props":{"y":12,"x":541},"compId":32,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":38},{"type":"Label","props":{"y":29,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":39},{"type":"Label","props":{"y":1,"x":58,"width":46,"var":"widthtxt","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":48},{"type":"Label","props":{"y":29,"x":58,"width":46,"var":"heighttxt","text":"10","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":49}]},{"type":"Sprite","props":{"y":15,"x":363,"width":158,"height":43},"compId":33,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":187,"var":"matname","valign":"middle","text":"展架专用布","height":42,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":42}]},{"type":"Label","props":{"y":21,"x":884,"width":53,"var":"pronum","valign":"middle","text":"10","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":50},{"type":"Text","props":{"y":27,"x":1105,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":51,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":52}]},{"type":"Label","props":{"y":5,"x":663,"wordWrap":true,"width":203,"var":"tech","valign":"middle","text":"10","height":60,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":53},{"type":"Label","props":{"y":0,"x":197,"wordWrap":true,"width":160,"var":"filename","valign":"middle","text":"展架专用布","height":74,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":55}]},{"type":"VBox","props":{"y":91,"var":"detailbox","space":0,"right":5,"left":2},"compId":13,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":1170,"var":"txtDetailInfo","valign":"top","text":"产品状态","height":71,"fontSize":18,"align":"left"},"compId":21}]}],"loadList":["commers/inputbg.png","comp/image.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderQuestItemUI;
 })(Scene)
 
@@ -53658,23 +53684,28 @@ var QuestOrderItem=(function(_super){
 		this.adjustHeight=null;
 		this.caller=null;
 		this.ordata=null;
+		this.ordersn=null;
+		this.hasgetState=false;
 		QuestOrderItem.__super.call(this);
 	}
 
 	__class(QuestOrderItem,'script.usercenter.QuestOrderItem',_super);
 	var __proto=QuestOrderItem.prototype;
-	__proto.setData=function(orderdata){
+	__proto.setData=function(orderdata,orderid){
 		this.itemseq.text=orderdata.item_seq;
 		this.picimg.skin=orderdata.thumbnails_path;
 		this.ordata=orderdata;
+		this.ordersn=orderid;
 		this.matname.text=orderdata.prod_name;
 		var sizearr=(orderdata.LWH).split("/");
 		this.widthtxt.text=sizearr[0];
 		this.heighttxt.text=sizearr[1];
 		this.pronum.text=orderdata.item_number+"";
 		var techstr="";
-		for(var i=0;i < orderdata.procInfoList.length;i++)
-		techstr+=orderdata.procInfoList[i].proc_description+"-";
+		if(orderdata.procInfoList !=null){
+			for(var i=0;i < orderdata.procInfoList.length;i++)
+			techstr+=orderdata.procInfoList[i].proc_description+"-";
+		}
 		this.tech.text=techstr.substr(0,techstr.length-1);
 		this.money.text=(Number(orderdata.item_priceStr)*Number(orderdata.item_number)).toFixed(2);
 		if(orderdata.filename !=null)
@@ -53694,11 +53725,27 @@ var QuestOrderItem=(function(_super){
 
 	__proto.onClickShowDetail=function(){
 		this.detailbox.visible=!this.detailbox.visible;
+		if(this.detailbox.visible && this.hasgetState==false){
+			var requestdata="order_sn="+this.ordersn+"&item_seq="+this.ordata.item_seq+"&prod_code="+this.ordata.prod_code;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getorderitemstatus?"+requestdata,this,this.onGetStateBack,null,null);
+		}
 		if(this.detailbox.visible)
 			this.bgimg.height=165;
 		else
 		this.bgimg.height=90;
 		this.adjustHeight.call(this.caller);
+	}
+
+	__proto.onGetStateBack=function(data){
+		try{
+			var msg=JSON.parse(data);
+			if(msg !=null){
+				this.hasgetState=true;
+				this.txtDetailInfo.text="产品状态："+msg.item_status;
+			}
+		}
+		catch(err){
+		}
 	}
 
 	__proto.hideDetail=function(){

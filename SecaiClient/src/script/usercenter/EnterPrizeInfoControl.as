@@ -119,6 +119,7 @@ package script.usercenter
 			initFileOpen();
 			
 			uiSkin.chargebtn.on(Event.CLICK,this,onCharge);
+			//uiSkin.testbox.visible = false;
 			//uiSkin.chongzhi1.on(Event.CLICK,this,onCharge);
 
 //			if(!ChinaAreaModel.hasInit)

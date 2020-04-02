@@ -10,6 +10,8 @@ package script.usercenter
 	
 	import model.HttpRequestUtil;
 	
+	import script.ViewManager;
+	
 	import ui.usercenter.MyOrdersPanelUI;
 	
 	import utils.UtilTool;
@@ -23,7 +25,7 @@ package script.usercenter
 		private var totalPage:int = 1;
 		private var dateInput:Object; 
 		private var dateInput2:Object; 
-
+		
 		public function MyOrderControl()
 		{
 			super();
@@ -49,21 +51,23 @@ package script.usercenter
 			
 			//uiSkin.yearCombox.scrollBarSkin = "";
 			
+			uiSkin.orderList.mouseThrough = true;
 			Laya.timer.frameLoop(1,this,updateDateInputPos);
-
-			//var curyear:int = (new Date()).getFullYear();
+			
+			var curdate:Date = new Date();
 			//var curmonth:int = (new Date()).getMonth();
 			
 			
 			//uiSkin.yearCombox.selectedIndex = curyear - 2019;
 			//uiSkin.monthCombox.selectedIndex = curmonth;
+			var lastday:Date = new Date(curdate.getTime() - 24 * 3600 * 1000);
 			
-			var param:String = "begindate=" + UtilTool.formatFullDateTime(new Date(),false) + " 00:00:00" + "&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59" + "&type=2&curpage=1";
+			var param:String = "begindate=" + UtilTool.formatFullDateTime(lastday,false) + " 00:00:00&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59&status=1&curpage=1";
 			//if(curmonth + 1 < 10 )
 			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
-
+			
 			uiSkin.lastyearbtn.on(Event.CLICK,this,onLastYear);
 			uiSkin.nextyearbtn.on(Event.CLICK,this,onNextYear);
 			
@@ -77,8 +81,10 @@ package script.usercenter
 			
 			uiSkin.ordertotalNum.text = "0";
 			uiSkin.ordertotalMoney.text = "0元";
-
-			uiSkin.paytype.selectedIndex = 2;
+			
+			uiSkin.paytype.selectedIndex = 1;
+			
+			uiSkin.paytype.on(Event.CHANGE,this,queryOrderList);
 			
 			uiSkin.orderList.on(Event.MOUSE_DOWN,this,onMouseDwons);
 			
@@ -87,24 +93,35 @@ package script.usercenter
 			uiSkin.yearCombox.on(Event.CHANGE,this,getOrderListAgain);
 			uiSkin.monthCombox.on(Event.CHANGE,this,getOrderListAgain);
 			uiSkin.btnsearch.on(Event.CLICK,this,queryOrderList);
-
+			
 			EventCenter.instance.on(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);
 			EventCenter.instance.on(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);
-
+			
+			uiSkin.orderList.on(Event.MOUSE_OVER,this,pauseParentScroll);
+			uiSkin.orderList.on(Event.MOUSE_OUT,this,resumeParentScroll);
+			
 			Laya.stage.on(Event.MOUSE_UP,this,onMouseUpHandler);
 			
 			EventCenter.instance.on(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
-
+			
 			this.initDateSelector();
 		}
 		
+		private function pauseParentScroll():void
+		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
+		}
+		private function resumeParentScroll():void
+		{
+			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
+		}
 		private function onshowInputDate():void
 		{
 			if(dateInput != null)
 			{
 				dateInput.hidden = false;
 				dateInput2.hidden = false;
-
+				
 			}
 		}
 		
@@ -120,13 +137,13 @@ package script.usercenter
 		
 		private function initDateSelector():void
 		{
-			var curdate:Date = new Date();
+			var curdate:Date = new Date((new Date()).getTime() -  24 * 3600 * 1000);
 			
-			var nextmonth:Date = new Date(curdate.getTime() + 31 * 24 * 3600 * 1000);
+			var lastdate:Date = new Date();
 			
 			//trace(UtilTool.formatFullDateTime(curdate,false));
 			//trace(UtilTool.formatFullDateTime(nextmonth,false));
-
+			
 			//var curyear:int = (new Date()).getFullYear();
 			//var curmonth:int = (new Date()).getMonth();
 			
@@ -161,11 +178,11 @@ package script.usercenter
 				else if(nextdate.getTime() - curdata.getTime() < 0 )
 				{
 					dateInput2.value = UtilTool.formatFullDateTime(curdata,false);
-
+					
 				}
 				//trace(UtilTool.formatFullDateTime(curdata,false));
 			}
-				
+			
 			dateInput2 = Browser.document.createElement("input");
 			
 			dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
@@ -178,8 +195,8 @@ package script.usercenter
 			dateInput2.style.position ="absolute";
 			dateInput2.style.zIndex = 999;
 			Browser.document.body.appendChild(dateInput2);//添加到舞台
-			dateInput2.value = UtilTool.formatFullDateTime(nextmonth,false);
-
+			dateInput2.value = UtilTool.formatFullDateTime(lastdate,false);
+			
 			dateInput2.onchange = function(datestr):void
 			{
 				if(dateInput2.value == "")
@@ -291,7 +308,7 @@ package script.usercenter
 			var curdata:Date = new Date(dateInput2.value);
 			var lastdate:Date = new Date(dateInput.value);
 			
-			var param:String = "begindate=" + dateInput.value + "enddate=" + dateInput2.value + "&type=" + uiSkin.paytype.selectedIndex + "&curpage=" + curpage;
+			var param:String = "begindate=" + dateInput.value + " 00:00:00&enddate=" + dateInput2.value + " 23:59:59&status=" + uiSkin.paytype.selectedIndex + "&curpage=" + curpage;
 			//if(curmonth + 1 < 10 )
 			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
@@ -299,14 +316,14 @@ package script.usercenter
 			//	var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
 			//else
 			//	 param = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) +  "0" + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
-
+			
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
 		}
 		private function onMouseDwons(e:Event):void{
 			
 			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,false);
-
+			
 		}
 		private function onMouseUpHandler(e:Event):void{
 			
@@ -336,10 +353,12 @@ package script.usercenter
 					uiSkin.ordertotalMoney.text = result.amount + "元";
 				else
 					uiSkin.ordertotalMoney.text = "0元";
-
+				
 				uiSkin.pagenum.text = curpage + "/" + totalPage;
-				uiSkin.orderList.array = (result.data as Array);//.reverse();
+				uiSkin.orderList.array = (result.data as Array);
 			}
+			else
+				ViewManager.showAlert("获取订单失败");
 		}
 		public function updateOrderList(cell:OrderCheckListItem):void
 		{
@@ -356,7 +375,7 @@ package script.usercenter
 				Browser.document.body.removeChild(dateInput2);//添加到舞台
 			}
 			EventCenter.instance.off(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
-
+			
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onRefreshOrder);
 			EventCenter.instance.off(EventCenter.COMMON_CLOSE_PANEL_VIEW,this,onshowInputDate);
 			EventCenter.instance.off(EventCenter.OPEN_PANEL_VIEW,this,onHideInputDate);

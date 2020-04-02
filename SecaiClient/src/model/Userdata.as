@@ -6,6 +6,7 @@ package model
 
 	public class Userdata
 	{
+		public var version:String = "";
 		private static var _instance:Userdata;
 		
 		public var userId:int;

@@ -129,6 +129,8 @@ package script.login
 				
 				ViewManager.instance.closeView(ViewManager.VIEW_lOGPANEL);
 				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
+				
+				console.log(Browser.document.cookie.split("; "));
 			}
 			
 		}

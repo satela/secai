@@ -45,7 +45,7 @@ package script.usercenter
 				var product:QuestOrderItem = new QuestOrderItem();
 				uiSkin.orderbox.addChild(product);
 				product.y = product.height*i ;
-				product.setData(allproduct[i]);
+				product.setData(allproduct[i],param.or_id);
 				product.adjustHeight = refrshVbox;
 				product.caller = this;
 								
