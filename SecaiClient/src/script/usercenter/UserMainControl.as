@@ -9,6 +9,7 @@ package script.usercenter
 	import laya.utils.Browser;
 	import laya.utils.Mouse;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
@@ -36,6 +37,7 @@ package script.usercenter
 		
 		public static const MY_ORDER:int = 3;
 		
+		private var curViewIndex:int = -1;
 		public function UserMainControl()
 		{
 			super();
@@ -70,6 +72,14 @@ package script.usercenter
 				onShowEditView(0);
 			(uiSkin.panel_main).height = Browser.height;// - 20;
 			(uiSkin.panel_main).width = Browser.width;// - 20;
+
+			if(Userdata.instance.accountType != Constast.ACCOUNT_CREATER)
+			{
+				uiSkin.btntxt9.removeSelf();
+				uiSkin.btntxt10.removeSelf();
+			}
+			//uiSkin.btntxt9.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;
+			//uiSkin.btntxt10.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
@@ -124,6 +134,11 @@ package script.usercenter
 				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
 				return;
 			}
+			
+			if(curViewIndex == index)
+				return;
+			curViewIndex = index;
+			
 			uiSkin.toptitle.text = titleTxt[index];
 			uiSkin.bannertitile.text= "/ " + titleTxt[index];
 			while(uiSkin.sp_container.numChildren > 0)

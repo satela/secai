@@ -1287,7 +1287,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/OrganizeItem.scene";
+	GameConfig.startScene="usercenter/OrganizeMgrPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1365,7 +1365,7 @@ var Userdata=(function(){
 		return this.addressList[0];
 	}
 
-	//0 公司创建者 1 公司职员
+	//1 公司创建者 0 公司职员
 	__getset(1,Userdata,'instance',function(){
 		if(Userdata._instance==null)
 			Userdata._instance=new Userdata();
@@ -2751,7 +2751,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//修改公司名
+	//移动组织里的人
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2802,6 +2802,14 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.checkOrderList="business/list-order?";
 	HttpRequestUtil.getOrderRecordList="account/listorder?";
 	HttpRequestUtil.changeCompanyName="group/update_group?";
+	HttpRequestUtil.getMyOrganize="group/get-dept?";
+	HttpRequestUtil.createOrganize="group/add-dept?";
+	HttpRequestUtil.deleteOrganize="group/delete-dept?";
+	HttpRequestUtil.joinOrganize="group/join-group?";
+	HttpRequestUtil.getJoinOrganizeRequest="group/get-req?";
+	HttpRequestUtil.handleJoinOrganizeRequest="group/handle-req?";
+	HttpRequestUtil.getOrganizeMembers="group/get-deptmember?";
+	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
 	return HttpRequestUtil;
 })()
 
@@ -2869,6 +2877,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -3000,7 +3009,12 @@ var ErrorCode=(function(){
 			666:"数据异常",
 			667:"数据异常",
 			701:"设置默认地址失败",
-			801:"订单正在支付中或已经支付成功，请勿重复支付"
+			801:"订单正在支付中或已经支付成功，请勿重复支付",
+			751:"名字重复",
+			211:"你已加入公司",
+			754:"该公司不存在",
+			753:"你已申请过加入公司",
+			758:"组织里有用户不能删除"
 	};}
 
 	]);
@@ -3112,6 +3126,16 @@ var PaintOrderModel=(function(){
 	PaintOrderModel._instance=null;
 	PaintOrderModel.VOCABURARY="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	return PaintOrderModel;
+})()
+
+
+//class model.Constast
+var Constast=(function(){
+	function Constast(){}
+	__class(Constast,'model.Constast');
+	Constast.ACCOUNT_CREATER=1;
+	Constast.ACCOUNT_EMPLOYEE=0;
+	return Constast;
 })()
 
 
@@ -27521,6 +27545,11 @@ var EventCenter=(function(_super){
 	EventCenter.PRODUCT_DELETE_GOODS="PRODUCT_DELETE_GOODS";
 	EventCenter.PRODUCT_ADD_GOODS="PRODUCT_ADD_GOODS";
 	EventCenter.DELETE_ORDER_BACK="DELETE_ORDER_BACK";
+	EventCenter.DELETE_ORGANIZE_BACK="DELETE_ORGANIZE_BACK";
+	EventCenter.AGREE_JOIN_REQUEST="AGREE_JOIN_REQUEST";
+	EventCenter.REFRESH_JOIN_REQUEST="REFRESH_JOIN_REQUEST";
+	EventCenter.MOVE_MEMBER_DEPT="MOVE_MEMBER_DEPT";
+	EventCenter.DELETE_DEPT_MEMBER="DELETE_DEPT_MEMBER";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -35248,6 +35277,7 @@ var MainPageControl=(function(_super){
 			var account=UtilTool.getLocalVar("useraccount","");
 			Userdata.instance.userAccount=account;
 			Userdata.instance.isLogin=true;
+			Userdata.instance.accountType=result.usertype;
 			this.txtLogin.text=account;
 			this.txtReg.text="[退出]";
 			Userdata.instance.loginTime=(new Date()).getTime();
@@ -35383,6 +35413,8 @@ var MainPageControl=(function(_super){
 var ApplyJoinMgrControl=(function(_super){
 	function ApplyJoinMgrControl(){
 		this.uiSkin=null;
+		this.curRequest=null;
+		this.allOrganize=null;
 		ApplyJoinMgrControl.__super.call(this);
 	}
 
@@ -35396,13 +35428,69 @@ var ApplyJoinMgrControl=(function(_super){
 		this.uiSkin.applylist.renderHandler=new Handler(this,this.updateApplyList);
 		this.uiSkin.applylist.selectEnable=false;
 		this.uiSkin.distributePanel.visible=false;
-		var temparr=new Array(20);
-		for(var i=0;i < 20;i++){
-			temparr[i]={"account":"zhangsan"+i};
-		}
-		this.uiSkin.applylist.array=temparr;
+		this.uiSkin.applylist.array=[];
 		this.uiSkin.applylist.on("mouseover",this,this.pauseParentScroll);
 		this.uiSkin.applylist.on("mouseout",this,this.resumeParentScroll);
+		this.uiSkin.closedistribute.on("click",this,this.onCloseDistributePanel);
+		this.uiSkin.confirmJoin.on("click",this,this.onAgreeJoin);
+		EventCenter.instance.on("AGREE_JOIN_REQUEST",this,this.showDistribute);
+		EventCenter.instance.on("REFRESH_JOIN_REQUEST",this,this.refreshRequest);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+	}
+
+	__proto.refreshRequest=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+	}
+
+	__proto.onGetJoinRequestBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.applylist.array=result.reqs;
+		}
+	}
+
+	__proto.showDistribute=function(data){
+		this.curRequest=data;
+		this.uiSkin.distributePanel.visible=true;
+		if(this.allOrganize==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		}
+	}
+
+	__proto.onGetAllOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.allOrganize=result.depts;
+			var arr=[];
+			for(var i=0;i < result.depts.length;i++){
+				arr.push(result.depts[i].dt_name);
+			}
+			this.uiSkin.deptbox.labels=arr.join(",");
+		}
+	}
+
+	__proto.onAgreeJoin=function(){
+		if(this.curRequest==null)
+			return;
+		if(this.uiSkin.deptbox.selectedIndex < 0){
+			ViewManager.showAlert("请选择要分配到的组织");
+			return;
+		};
+		var param="id="+this.curRequest.jp_id+"&opt=1&dept="+this.allOrganize[this.uiSkin.deptbox.selectedIndex].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/handle-req?",this,this.onhandleBack,param,"post");
+	}
+
+	__proto.onhandleBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+			this.uiSkin.distributePanel.visible=false;
+			ViewManager.showAlert("操作成功");
+		}
+	}
+
+	__proto.onCloseDistributePanel=function(){
+		this.uiSkin.distributePanel.visible=false;
 	}
 
 	__proto.pauseParentScroll=function(){
@@ -35415,6 +35503,11 @@ var ApplyJoinMgrControl=(function(_super){
 
 	__proto.updateApplyList=function(cell,index){
 		cell.setData(cell.dataSource);
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("AGREE_JOIN_REQUEST",this,this.showDistribute);
+		EventCenter.instance.off("REFRESH_JOIN_REQUEST",this,this.refreshRequest);
 	}
 
 	return ApplyJoinMgrControl;
@@ -35487,6 +35580,7 @@ var UserMainControl=(function(_super){
 		this.curView=null;
 		this.titleTxt=null;
 		this.param=null;
+		this.curViewIndex=-1;
 		UserMainControl.__super.call(this);
 	}
 
@@ -35511,6 +35605,10 @@ var UserMainControl=(function(_super){
 		this.onShowEditView(0);
 		(this.uiSkin.panel_main).height=Browser.height;
 		(this.uiSkin.panel_main).width=Browser.width;
+		if(Userdata.instance.accountType !=1){
+			this.uiSkin.btntxt9.removeSelf();
+			this.uiSkin.btntxt10.removeSelf();
+		}
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		EventCenter.instance.on("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
 		EventCenter.instance.on("SHOW_CHARGE_VIEW",this,this.showCharge);
@@ -35550,6 +35648,9 @@ var UserMainControl=(function(_super){
 			ViewManager.instance.openView("VIEW_PICMANAGER",true);
 			return;
 		}
+		if(this.curViewIndex==index)
+			return;
+		this.curViewIndex=index;
 		this.uiSkin.toptitle.text=this.titleTxt[index];
 		this.uiSkin.bannertitile.text="/ "+this.titleTxt[index];
 		while(this.uiSkin.sp_container.numChildren > 0){
@@ -35970,6 +36071,7 @@ var LogPanelControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.isLogin=true;
 			Userdata.instance.userAccount=this.uiSKin.input_account.text;
+			Userdata.instance.accountType=result.usertype;
 			EventCenter.instance.event("LOGIN_SUCESS",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("useraccount",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("userpwd",this.uiSKin.input_pwd.text);
@@ -37708,6 +37810,10 @@ var EnterPrizeInfoControl=(function(_super){
 		Browser.window.uploadApp=this;
 		this.initFileOpen();
 		this.uiSkin.chargebtn.on("click",this,this.onCharge);
+		this.uiSkin.createAccountInput.maxChars=11;
+		this.uiSkin.createAccountInput.restrict="0-9";
+		this.uiSkin.commentInput.maxChars=8;
+		this.uiSkin.applyokbtn.on("click",this,this.onJoinOrganize);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-request?" ,this,this.getCompanyInfo,null,"post");
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
 	}
@@ -37900,6 +38006,27 @@ var EnterPrizeInfoControl=(function(_super){
 		}
 		else{
 			ViewManager.showAlert("保存失败");
+		}
+	}
+
+	__proto.onJoinOrganize=function(){
+		if(this.uiSkin.createAccountInput.text.length < 11){
+			ViewManager.showAlert("请输入正确的企业创建者账号");
+			return;
+		}
+		if(this.uiSkin.commentInput.text==""){
+			ViewManager.showAlert("填写备注信息更容易通过申请");
+			return;
+		};
+		var param="phonenumber="+this.uiSkin.createAccountInput.text+"&msg="+this.uiSkin.commentInput.text;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-group?",this,this.onJoinOrganizeBack,param,"post");
+		this.uiSkin.applyJoinPanel.visible=false;
+	}
+
+	__proto.onJoinOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("申请成功，请等待管理者审核");
 		}
 	}
 
@@ -38422,6 +38549,7 @@ var SelectAttchesControl=(function(_super){
 var OrganizeMrgControl=(function(_super){
 	function OrganizeMrgControl(){
 		this.uiSkin=null;
+		this.curMemberdata=null;
 		OrganizeMrgControl.__super.call(this);
 	}
 
@@ -38444,11 +38572,57 @@ var OrganizeMrgControl=(function(_super){
 		this.uiSkin.memberlist.renderHandler=new Handler(this,this.updateMemberList);
 		this.uiSkin.memberlist.selectEnable=false;
 		this.uiSkin.distributePanel.visible=false;
-		var temparr=new Array(20);
+		var temparr=[];
 		this.uiSkin.memberlist.array=temparr;
 		this.uiSkin.organizelist.array=temparr;
+		this.uiSkin.createOrganizePanel.visible=false;
+		this.uiSkin.createOrganize.on("click",this,this.showCretePanel);
+		this.uiSkin.organizeNameInput.maxChars=20;
+		this.uiSkin.createBtnOk.on("click",this,this.onConfirmCreateOrganize);
 		this.uiSkin.memberlist.on("mouseover",this,this.pauseParentScroll);
 		this.uiSkin.memberlist.on("mouseout",this,this.resumeParentScroll);
+		this.uiSkin.moveOkbtn.on("click",this,this.onMoveMemberSure);
+		this.uiSkin.closeDist.on("click",this,this.onCloseDistribute);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		EventCenter.instance.on("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
+		EventCenter.instance.on("MOVE_MEMBER_DEPT",this,this.moveMember);
+		EventCenter.instance.on("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
+	}
+
+	__proto.onGetAllOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.organizelist.array=result.depts;
+			if(result.depts.length > 0){
+				this.uiSkin.organizelist.selectedIndex=0;
+				(this.uiSkin.organizelist.cells [0]).selected=true;
+			}
+		}
+	}
+
+	__proto.refreshOrganize=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+	}
+
+	__proto.showCretePanel=function(){
+		this.uiSkin.createOrganizePanel.visible=true;
+	}
+
+	__proto.onConfirmCreateOrganize=function(){
+		if(this.uiSkin.organizeNameInput.text==""){
+			ViewManager.showAlert("请输入组织名称");
+			return;
+		};
+		var param="name="+this.uiSkin.organizeNameInput.text;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/add-dept?",this,this.onCreateBack,param,"post");
+		this.uiSkin.createOrganizePanel.visible=false;
+	}
+
+	__proto.onCreateBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		}
 	}
 
 	__proto.pauseParentScroll=function(){
@@ -38471,9 +38645,70 @@ var OrganizeMrgControl=(function(_super){
 		var item;
 		for(var $each_item in this.uiSkin.organizelist.cells){
 			item=this.uiSkin.organizelist.cells[$each_item];
-			item.selected=false;
+			item.setselected(this.uiSkin.organizelist.array[index].dt_id);
+		};
+		var params="dept="+this.uiSkin.organizelist.array[index].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+	}
+
+	__proto.onGetOrganizeMembersBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.memberlist.array=result.members;
 		}
-		(this.uiSkin.organizelist.cells [index]).selected=true;
+	}
+
+	__proto.moveMember=function(data){
+		this.curMemberdata=data;
+		this.uiSkin.distributePanel.visible=true;
+		var allOrganize=this.uiSkin.organizelist.array;
+		var arr=[];
+		for(var i=0;i < allOrganize.length;i++){
+			arr.push(allOrganize[i].dt_name);
+		}
+		this.uiSkin.organizeCom.labels=arr.join(",");
+		this.uiSkin.organizeCom.selectedIndex=0;
+	}
+
+	//trace("arr:"+arr.length);
+	__proto.onCloseDistribute=function(){
+		this.uiSkin.distributePanel.visible=false;
+	}
+
+	__proto.onMoveMemberSure=function(){
+		if(this.curMemberdata==null)
+			return;
+		if(this.uiSkin.organizeCom.selectedIndex < 0){
+			ViewManager.showAlert("请选择要移动到的组织");
+			return;
+		};
+		var todept=this.uiSkin.organizelist.array[this.uiSkin.organizeCom.selectedIndex].dt_id;
+		if(this.curMemberdata.dept==todept){
+			ViewManager.showAlert("该用户已经在这个组织里");
+			return;
+		};
+		var params="dept="+todept+"&uid="+this.curMemberdata.uid;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-memberdept?",this,this.onMoveOrganizeMemberBack,params,"post");
+	}
+
+	__proto.onMoveOrganizeMemberBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var params="dept="+this.uiSkin.organizelist.array[this.uiSkin.organizelist.selectedIndex].dt_id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+		}
+		this.uiSkin.distributePanel.visible=false;
+	}
+
+	__proto.refreshOrganizeMemebers=function(){
+		var params="dept="+this.uiSkin.organizelist.array[this.uiSkin.organizelist.selectedIndex].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
+		EventCenter.instance.off("MOVE_MEMBER_DEPT",this,this.moveMember);
+		EventCenter.instance.off("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
 	}
 
 	return OrganizeMrgControl;
@@ -38800,6 +39035,8 @@ var MyOrderControl=(function(_super){
 		var lastdate=new Date();
 		this.dateInput=Browser.document.createElement("input");
 		this.dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
+		this.dateInput.style.width=150/Browser.pixelRatio;
+		this.dateInput.style.height=20/Browser.pixelRatio;
 		this.dateInput.type="date";
 		this.dateInput.style.position="absolute";
 		this.dateInput.style.zIndex=999;
@@ -38820,6 +39057,8 @@ var MyOrderControl=(function(_super){
 		}
 		this.dateInput2=Browser.document.createElement("input");
 		this.dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
+		this.dateInput2.style.width=150/Browser.pixelRatio;
+		this.dateInput2.style.height=20/Browser.pixelRatio;
 		this.dateInput2.type="date";
 		this.dateInput2.style.position="absolute";
 		this.dateInput2.style.zIndex=999;
@@ -38843,10 +39082,10 @@ var MyOrderControl=(function(_super){
 	__proto.updateDateInputPos=function(){
 		if(this.dateInput !=null){
 			var pt=this.uiSkin.ordertime.localToGlobal(new Point(this.uiSkin.ordertime.x,this.uiSkin.ordertime.y),true);
-			this.dateInput.style.top=(pt.y-15)+"px";
-			this.dateInput.style.left=(pt.x+15)+"px";
-			this.dateInput2.style.top=(pt.y-15)+"px";
-			this.dateInput2.style.left=(pt.x+205)+"px";
+			this.dateInput.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput.style.left=(pt.x+15/Browser.pixelRatio)/Browser.pixelRatio+"px";
+			this.dateInput2.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput2.style.left=(pt.x+205)/Browser.pixelRatio+"px";
 		}
 	}
 
@@ -39116,7 +39355,9 @@ var RegisterCntrol=(function(_super){
 		this.verifycode=Browser.document.createElement("div");
 		this.verifycode.id="v_container";
 		this.verifycode.style="width: 200px;height: 50px;left:950px;top:548";
-		this.verifycode.style.left=950-(1920-Browser.width)/2+"px";
+		this.verifycode.style.width=200/Browser.pixelRatio+"px";
+		this.verifycode.style.height=50/Browser.pixelRatio+"px";
+		this.verifycode.style.left=(950-(1920-Browser.width)/2)+"px";
 		this.verifycode.style.position="absolute";
 		this.verifycode.style.zIndex=999;
 		Browser.document.body.appendChild(this.verifycode);
@@ -39142,8 +39383,10 @@ var RegisterCntrol=(function(_super){
 	__proto.updateVerifyPos=function(){
 		if(this.verifycode !=null){
 			var pt=this.uiSkin.inputCode.localToGlobal(new Point(this.uiSkin.inputCode.x,this.uiSkin.inputCode.y),true);
-			this.verifycode.style.top=pt.y+"px";
-			this.verifycode.style.left=(pt.x+80)+"px";
+			this.verifycode.style.top=pt.y/Browser.pixelRatio+"px";
+			this.verifycode.style.left=(pt.x+80)/Browser.pixelRatio+"px";
+			this.verifycode.style.width=200/Browser.pixelRatio+"px";
+			this.verifycode.style.height=50/Browser.pixelRatio+"px";
 		}
 	}
 
@@ -52624,6 +52867,7 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.createAccountInput=null;
 		this.applyokbtn=null;
 		this.closeapplybtn=null;
+		this.commentInput=null;
 		EnterPrizeInfoPaneUI.__super.call(this);
 	}
 
@@ -52729,6 +52973,9 @@ var ApplyJoinMgrPanelUI=(function(_super){
 	function ApplyJoinMgrPanelUI(){
 		this.applylist=null;
 		this.distributePanel=null;
+		this.deptbox=null;
+		this.confirmJoin=null;
+		this.closedistribute=null;
 		ApplyJoinMgrPanelUI.__super.call(this);
 	}
 
@@ -53070,7 +53317,7 @@ var UserMainPanelUI=(function(_super){
 		this.createView(UserMainPanelUI.uiView);
 	}
 
-	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"presetID":2,"y":0,"x":0,"texture":"commers/bgimg.jpg"},"compId":54},{"type":"Sprite","props":{"presetID":3,"y":18,"x":332,"texture":"commers/logotxt.png"},"compId":55},{"type":"Label","props":{"presetID":4,"y":28,"x":524,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":28,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":28,"x":1320,"isPresetRoot":true,"var":"myorder","text":"我的订单","name":"myorder","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":28,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":28,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":28,"x":1405,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":25},"compId":87,"child":[{"type":"Box","props":{},"compId":62,"child":[{"type":"Image","props":{"skin":"usercenter/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":26,"child":[{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Label","props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":100},{"type":"Label","props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":101},{"type":"Image","props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":61}]}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/commonpopbg.png","usercenter/setting.png","commers/cutline.png","usercenter/accounticon.png","usercenter/ordericon.png","usercenter/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
+	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"presetID":2,"y":0,"x":0,"texture":"commers/bgimg.jpg"},"compId":54},{"type":"Sprite","props":{"presetID":3,"y":18,"x":332,"texture":"commers/logotxt.png"},"compId":55},{"type":"Label","props":{"presetID":4,"y":28,"x":524,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":28,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":28,"x":1320,"isPresetRoot":true,"var":"myorder","text":"我的订单","name":"myorder","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":28,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":28,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":28,"x":1405,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":25},"compId":87,"child":[{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":26,"child":[{"type":"Box","props":{"y":-59,"x":-29},"compId":102,"child":[{"type":"Image","props":{"skin":"usercenter/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17}]},{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Label","props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":100},{"type":"Label","props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":101},{"type":"Image","props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":61}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/commonpopbg.png","usercenter/setting.png","commers/cutline.png","usercenter/accounticon.png","usercenter/ordericon.png","usercenter/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
 	return UserMainPanelUI;
 })(View)
 
@@ -53564,9 +53811,9 @@ var ProductCateItemUI=(function(_super){
 //class ui.usercenter.ApplyJoinItemUI extends laya.ui.View
 var ApplyJoinItemUI=(function(_super){
 	function ApplyJoinItemUI(){
-		this.nickname=null;
 		this.account=null;
-		this.productnum=null;
+		this.msg=null;
+		this.reqdate=null;
 		this.refusebtn=null;
 		this.agreebtn=null;
 		ApplyJoinItemUI.__super.call(this);
@@ -53579,7 +53826,7 @@ var ApplyJoinItemUI=(function(_super){
 		this.createView(ApplyJoinItemUI.uiView);
 	}
 
-	ApplyJoinItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"productnum","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"refusebtn","text":"拒绝","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"agreebtn","text":"同意","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	ApplyJoinItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"account","valign":"middle","text":"13589898989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"msg","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"reqdate","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"refusebtn","text":"拒绝","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"agreebtn","text":"同意","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return ApplyJoinItemUI;
 })(View)
 
@@ -53589,9 +53836,9 @@ var OrganizeMemberItemUI=(function(_super){
 	function OrganizeMemberItemUI(){
 		this.nickname=null;
 		this.account=null;
-		this.productnum=null;
-		this.refusebtn=null;
-		this.agreebtn=null;
+		this.jointime=null;
+		this.deletebtn=null;
+		this.movebtn=null;
 		OrganizeMemberItemUI.__super.call(this);
 	}
 
@@ -53602,7 +53849,7 @@ var OrganizeMemberItemUI=(function(_super){
 		this.createView(OrganizeMemberItemUI.uiView);
 	}
 
-	OrganizeMemberItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"productnum","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"refusebtn","text":"踢除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"agreebtn","text":"移动","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrganizeMemberItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"jointime","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"踢除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"movebtn","text":"移动","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrganizeMemberItemUI;
 })(View)
 
@@ -53839,8 +54086,15 @@ var OrganizeMgrPanelUI=(function(_super){
 	function OrganizeMgrPanelUI(){
 		this.memberlist=null;
 		this.createOrganize=null;
-		this.distributePanel=null;
 		this.organizelist=null;
+		this.distributePanel=null;
+		this.organizeCom=null;
+		this.moveOkbtn=null;
+		this.closeDist=null;
+		this.createOrganizePanel=null;
+		this.organizeNameInput=null;
+		this.createBtnOk=null;
+		this.btncloseCreate=null;
 		OrganizeMgrPanelUI.__super.call(this);
 	}
 
@@ -58727,14 +58981,39 @@ var SelFactoryItem=(function(_super){
 //class script.usercenter.item.OrganizeItem extends ui.usercenter.OrganizeItemUI
 var OrganizeItem=(function(_super){
 	function OrganizeItem(){
+		this.orgData=null;
 		OrganizeItem.__super.call(this);
 		this.deltbn.visible=false;
 		this.on("mouseover",this,this.showDeltbn);
 		this.on("mouseout",this,this.hideDeltbn);
+		this.deltbn.on("click",this,this.ondeleteOrga);
 	}
 
 	__class(OrganizeItem,'script.usercenter.item.OrganizeItem',_super);
 	var __proto=OrganizeItem.prototype;
+	__proto.setselected=function(curdept){
+		if(this.orgData !=null)
+			this.selected=this.orgData.dt_id==curdept;
+	}
+
+	__proto.ondeleteOrga=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除"+this.orgData.dt_name+"吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(b){
+		if(b){
+			var param="id="+this.orgData.dt_id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/delete-dept?",this,this.onDeleteBack,param,"post");
+		}
+	}
+
+	__proto.onDeleteBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("DELETE_ORGANIZE_BACK");
+		}
+	}
+
 	__proto.showDeltbn=function(){
 		this.deltbn.visible=true;
 	}
@@ -58743,7 +59022,11 @@ var OrganizeItem=(function(_super){
 		this.deltbn.visible=false;
 	}
 
-	__proto.setData=function(data){}
+	__proto.setData=function(data){
+		this.orgData=data;
+		this.hotbtm.label=data.dt_name;
+	}
+
 	__getset(0,__proto,'selected',null,function(value){
 		this.hotbtm.selected=value;
 	});
@@ -58972,6 +59255,48 @@ var ProductCategoryItem=(function(_super){
 })(ProductCateItemUI)
 
 
+//class script.picUpload.DirectFolderItem extends ui.picManager.DirectItemUI
+var DirectFolderItem=(function(_super){
+	function DirectFolderItem(){
+		this.isSeleted=false;
+		this.directData=null;
+		DirectFolderItem.__super.call(this);
+	}
+
+	__class(DirectFolderItem,'script.picUpload.DirectFolderItem',_super);
+	var __proto=DirectFolderItem.prototype;
+	__proto.setData=function(filedata){
+		this.directData=filedata;
+		this.foldname.text=(filedata).directName;
+		this.on("mouseover",this,this.onMouseOver);
+		this.on("mouseout",this,this.onMouseOut);
+	}
+
+	__proto.onMouseOut=function(){
+		if(this.isSeleted)
+			return;
+		this.foldname.color="#FFFFFF";
+	}
+
+	__proto.onMouseOver=function(){
+		if(this.isSeleted)
+			return;
+		this.foldname.color="#FF0000";
+	}
+
+	//this.on(Event.CLICK,this,onMouseClick);
+	__getset(0,__proto,'ShowSelected',null,function(value){
+		this.isSeleted=value;
+		if(value)
+			this.foldname.color="#FF0000";
+		else
+		this.foldname.color="#FFFFFF";
+	});
+
+	return DirectFolderItem;
+})(DirectItemUI)
+
+
 //class script.order.MaterialItem extends ui.order.MaterialNameItemUI
 var MaterialItem=(function(_super){
 	function MaterialItem(){
@@ -59019,58 +59344,38 @@ var MaterialItem=(function(_super){
 })(MaterialNameItemUI)
 
 
-//class script.picUpload.DirectFolderItem extends ui.picManager.DirectItemUI
-var DirectFolderItem=(function(_super){
-	function DirectFolderItem(){
-		this.isSeleted=false;
-		this.directData=null;
-		DirectFolderItem.__super.call(this);
-	}
-
-	__class(DirectFolderItem,'script.picUpload.DirectFolderItem',_super);
-	var __proto=DirectFolderItem.prototype;
-	__proto.setData=function(filedata){
-		this.directData=filedata;
-		this.foldname.text=(filedata).directName;
-		this.on("mouseover",this,this.onMouseOver);
-		this.on("mouseout",this,this.onMouseOut);
-	}
-
-	__proto.onMouseOut=function(){
-		if(this.isSeleted)
-			return;
-		this.foldname.color="#FFFFFF";
-	}
-
-	__proto.onMouseOver=function(){
-		if(this.isSeleted)
-			return;
-		this.foldname.color="#FF0000";
-	}
-
-	//this.on(Event.CLICK,this,onMouseClick);
-	__getset(0,__proto,'ShowSelected',null,function(value){
-		this.isSeleted=value;
-		if(value)
-			this.foldname.color="#FF0000";
-		else
-		this.foldname.color="#FFFFFF";
-	});
-
-	return DirectFolderItem;
-})(DirectItemUI)
-
-
 //class script.usercenter.item.ApplyJoinItem extends ui.usercenter.ApplyJoinItemUI
 var ApplyJoinItem=(function(_super){
 	function ApplyJoinItem(){
+		this.joindata=null;
 		ApplyJoinItem.__super.call(this);
 	}
 
 	__class(ApplyJoinItem,'script.usercenter.item.ApplyJoinItem',_super);
 	var __proto=ApplyJoinItem.prototype;
 	__proto.setData=function(data){
-		this.nickname.text=data.account;
+		this.joindata=data;
+		this.account.text=data.ur_phonenumber;
+		this.msg.text=data.jp_msg;
+		this.reqdate.text=data.jp_date;
+		this.agreebtn.on("click",this,this.onAgreeJoin);
+		this.refusebtn.on("click",this,this.onRefuseJoin);
+	}
+
+	__proto.onAgreeJoin=function(){
+		EventCenter.instance.event("AGREE_JOIN_REQUEST",this.joindata);
+	}
+
+	__proto.onRefuseJoin=function(){
+		var param="id="+this.joindata.jp_id+"&opt=0";
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onhandleBack,param,"post");
+	}
+
+	__proto.onhandleBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("REFRESH_JOIN_REQUEST");
+		}
 	}
 
 	return ApplyJoinItem;
@@ -59162,12 +59467,43 @@ var FileUpLoadItem=(function(_super){
 //class script.usercenter.item.MemberItem extends ui.usercenter.OrganizeMemberItemUI
 var MemberItem=(function(_super){
 	function MemberItem(){
+		this.memberdata=null;
 		MemberItem.__super.call(this);
+		this.movebtn.on("click",this,this.onMoveMember);
+		this.deletebtn.on("click",this,this.onDeleteMember);
 	}
 
 	__class(MemberItem,'script.usercenter.item.MemberItem',_super);
 	var __proto=MemberItem.prototype;
-	__proto.setData=function(data){}
+	__proto.onDeleteMember=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除"+this.memberdata.phonenumber+"吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(b){
+		if(b){
+			var params="dept=0"+"&uid="+this.memberdata.uid;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-memberdept?",this,this.ondeleteMemberBack,params,"post");
+		}
+	}
+
+	__proto.ondeleteMemberBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("DELETE_DEPT_MEMBER");
+		}
+	}
+
+	__proto.onMoveMember=function(){
+		EventCenter.instance.event("MOVE_MEMBER_DEPT",this.memberdata);
+	}
+
+	__proto.setData=function(data){
+		this.memberdata=data;
+		this.nickname.text=data.uid;
+		this.account.text=data.phonenumber;
+		this.jointime.text=data.regdate;
+	}
+
 	return MemberItem;
 })(OrganizeMemberItemUI)
 

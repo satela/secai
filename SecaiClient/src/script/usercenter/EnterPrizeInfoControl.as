@@ -125,6 +125,13 @@ package script.usercenter
 			initFileOpen();
 			
 			uiSkin.chargebtn.on(Event.CLICK,this,onCharge);
+			
+			uiSkin.createAccountInput.maxChars = 11;
+			uiSkin.createAccountInput.restrict = "0-9";
+			
+			uiSkin.commentInput.maxChars = 8;
+			
+			uiSkin.applyokbtn.on(Event.CLICK,this,onJoinOrganize);
 			//uiSkin.chongzhi1.on(Event.CLICK,this,onCharge);
 
 //			if(!ChinaAreaModel.hasInit)
@@ -397,6 +404,35 @@ package script.usercenter
 			{
 				ViewManager.showAlert("保存失败");
 
+			}
+		}
+		
+		private function onJoinOrganize():void
+		{
+			if(uiSkin.createAccountInput.text.length < 11)
+			{
+				ViewManager.showAlert("请输入正确的企业创建者账号");
+				return;
+			}
+			
+			if(uiSkin.commentInput.text == "")
+			{
+				ViewManager.showAlert("填写备注信息更容易通过申请");
+				return;
+			}
+			var param:String = "phonenumber=" + uiSkin.createAccountInput.text + "&msg=" + uiSkin.commentInput.text;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.joinOrganize,this,onJoinOrganizeBack,param,"post");
+			uiSkin.applyJoinPanel.visible = false;
+			
+		}
+		
+		private function onJoinOrganizeBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				ViewManager.showAlert("申请成功，请等待管理者审核");
 			}
 		}
 		private function hideAddressPanel(e:Event):void

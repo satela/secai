@@ -29,7 +29,7 @@ package model
 		
 		public var loginTime:Number = 0;
 		
-		public var accountType:int = 0;//0 公司创建者  1 公司职员
+		public var accountType:int = 0;//1 公司创建者  0 公司职员
 
 		public static function get instance():Userdata
 		{

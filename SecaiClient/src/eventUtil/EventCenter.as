@@ -67,6 +67,16 @@ package eventUtil
 		public static const DELETE_ORDER_BACK:String = "DELETE_ORDER_BACK";//删除订单 返回
 
 
+		public static const DELETE_ORGANIZE_BACK:String = "DELETE_ORGANIZE_BACK";//删除组织 返回
+		
+		public static const AGREE_JOIN_REQUEST:String = "AGREE_JOIN_REQUEST";//同意加入组织
+
+		public static const REFRESH_JOIN_REQUEST:String = "REFRESH_JOIN_REQUEST";//刷新请求列表
+
+		public static const MOVE_MEMBER_DEPT:String = "MOVE_MEMBER_DEPT";//移动组织成员
+		public static const DELETE_DEPT_MEMBER:String = "DELETE_DEPT_MEMBER";//删除组织成员
+
+		
 		private static var _eventCenter:EventCenter;
 		
 	

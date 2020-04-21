@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":33,
+    "selecteID":9,
     "searchKey":"View",
     "props":{"width":900,"sceneColor":"#ffffff","height":800},
     "nodeParent":-1,
-    "maxID":34,
+    "maxID":62,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -64,7 +64,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label",
-            "props":{"y":211,"x":130,"text":"账号名","fontSize":14,"font":"SimHei","color":"#152320","bold":false},
+            "props":{"y":211,"x":143,"width":14,"text":"姓名","height":14,"fontSize":14,"font":"SimHei","color":"#152320","bold":false},
             "nodeParent":2,
             "label":"Label",
             "isDirectory":false,
@@ -128,7 +128,8 @@
             "hasChild":false,
             "compId":9,
             "child":[
-                ]
+                ],
+            "$HIDDEN":false
         },
         {
             "x":15,
@@ -146,18 +147,33 @@
         },
         {
             "x":15,
+            "type":"List",
+            "searchKey":"List,organizelist",
+            "props":{"y":49,"x":5,"width":888,"var":"organizelist","height":139},
+            "nodeParent":2,
+            "label":"organizelist",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":33,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
             "type":"Box",
             "searchKey":"Box,distributePanel",
             "props":{"y":0,"x":0,"var":"distributePanel","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"distributePanel",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":20,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
@@ -172,6 +188,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":300,"width":850,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":186,"alpha":1},
@@ -185,6 +202,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":320,"x":313},
@@ -197,6 +215,7 @@
                     "compId":23,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":17,"text":"移动到：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -211,6 +230,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -225,11 +245,12 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"ComboBox",
-                            "searchKey":"ComboBox",
-                            "props":{"y":0,"x":123,"width":150,"skin":"comp/combobox.png","labels":"组织1,组织2,组织3","labelSize":24,"labelFont":"SimHei","itemSize":20,"height":40},
+                            "searchKey":"ComboBox,organizeCom",
+                            "props":{"y":0,"x":123,"width":150,"var":"organizeCom","skin":"comp/combobox.png","labels":"组织1,组织2,组织3","labelSize":24,"labelFont":"SimHei","itemSize":20,"height":40},
                             "nodeParent":23,
-                            "label":"ComboBox",
+                            "label":"organizeCom",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -240,11 +261,12 @@
                     "$HIDDEN":false
                 },
                 {
+                    "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"y":415,"x":406,"width":138,"skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
+                    "searchKey":"Button,moveOkbtn",
+                    "props":{"y":415,"x":406,"width":138,"var":"moveOkbtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
                     "nodeParent":20,
-                    "label":"Button",
+                    "label":"moveOkbtn",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -253,16 +275,142 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"y":309,"x":825,"skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
+                    "searchKey":"Button,closeDist",
+                    "props":{"y":309,"x":825,"var":"closeDist","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
                     "nodeParent":20,
-                    "label":"Button",
+                    "label":"closeDist",
                     "isOpen":true,
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":28,
+                    "child":[
+                        ]
+                }],
+            "$HIDDEN":true
+        },
+        {
+            "x":15,
+            "type":"Box",
+            "searchKey":"Box,createOrganizePanel",
+            "props":{"y":0,"x":0,"var":"createOrganizePanel","top":0,"right":0,"left":0,"bottom":0},
+            "nodeParent":2,
+            "label":"createOrganizePanel",
+            "isOpen":false,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":52,
+            "child":[
+                {
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
+                    "nodeParent":52,
+                    "label":"Image",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":53,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":300,"width":850,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":186,"alpha":1},
+                    "nodeParent":52,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":54,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":320,"x":205},
+                    "nodeParent":52,
+                    "label":"Box",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":55,
+                    "child":[
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":17,"text":"组织名称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
+                            "nodeParent":55,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":56,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"TextInput",
+                            "searchKey":"TextInput,organizeNameInput",
+                            "props":{"y":-3,"x":187,"width":302,"var":"organizeNameInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入组织名称","height":50,"fontSize":20,"font":"SimHei"},
+                            "nodeParent":55,
+                            "label":"organizeNameInput",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":57,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
+                            "nodeParent":55,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":58,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "type":"Button",
+                    "searchKey":"Button,createBtnOk",
+                    "props":{"y":415,"x":406,"width":138,"var":"createBtnOk","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
+                    "nodeParent":52,
+                    "label":"createBtnOk",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":59,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Button",
+                    "searchKey":"Button,btncloseCreate",
+                    "props":{"y":308,"x":823,"var":"btncloseCreate","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
+                    "nodeParent":52,
+                    "label":"btncloseCreate",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":60,
                     "child":[
                         ]
                 }],
@@ -282,20 +430,6 @@
             "isAniNode":true,
             "hasChild":false,
             "compId":32,
-            "child":[
-                ]
-        },
-        {
-            "x":15,
-            "type":"List",
-            "searchKey":"List,organizelist",
-            "props":{"y":49,"x":5,"width":888,"var":"organizelist","height":139},
-            "nodeParent":2,
-            "label":"organizelist",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":33,
             "child":[
                 ]
         }],

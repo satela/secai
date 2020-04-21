@@ -222,8 +222,10 @@ package script.login
 			verifycode = Browser.document.createElement("div");
 			verifycode.id = "v_container";
 			verifycode.style="width: 200px;height: 50px;left:950px;top:548";
+			verifycode.style.width = 200/Browser.pixelRatio + "px";
+			verifycode.style.height = 50/Browser.pixelRatio + "px";
 			
-			verifycode.style.left = 950 - (1920 - Browser.width)/2 + "px";
+			verifycode.style.left = (950 - (1920 - Browser.width)/2) + "px";
 			
 			verifycode.style.position ="absolute";
 			verifycode.style.zIndex = 999;
@@ -266,8 +268,12 @@ package script.login
 				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
 				var pt:Point = uiSkin.inputCode.localToGlobal(new Point(uiSkin.inputCode.x,uiSkin.inputCode.y),true);
 				
-				verifycode.style.top = pt.y + "px";
-				verifycode.style.left = (pt.x +  80) +  "px";
+				verifycode.style.top = pt.y/Browser.pixelRatio + "px";
+				verifycode.style.left = (pt.x +  80)/Browser.pixelRatio +  "px";
+				
+				verifycode.style.width = 200/Browser.pixelRatio + "px";
+				verifycode.style.height = 50/Browser.pixelRatio + "px";
+
 				//trace("pos:" + pt.x + "," + pt.y);
 				//verifycode.style.left = 950 -  uiSkin.mainpanel.hScrollBar.value + "px";
 

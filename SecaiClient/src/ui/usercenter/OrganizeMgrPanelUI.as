@@ -7,8 +7,15 @@ package ui.usercenter {
 	public class OrganizeMgrPanelUI extends View {
 		public var memberlist:List;
 		public var createOrganize:Button;
-		public var distributePanel:Box;
 		public var organizelist:List;
+		public var distributePanel:Box;
+		public var organizeCom:ComboBox;
+		public var moveOkbtn:Button;
+		public var closeDist:Button;
+		public var createOrganizePanel:Box;
+		public var organizeNameInput:TextInput;
+		public var createBtnOk:Button;
+		public var btncloseCreate:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

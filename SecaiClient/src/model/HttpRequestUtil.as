@@ -98,6 +98,24 @@ package model
 
 		public static const changeCompanyName:String = "group/update_group?";//修改公司名
 
+		//组织相关
+		public static const getMyOrganize:String = "group/get-dept?";//获取所有组织
+
+		public static const createOrganize:String = "group/add-dept?";//创建组织
+
+		public static const deleteOrganize:String = "group/delete-dept?";//删除组织
+
+		public static const joinOrganize:String = "group/join-group?";//加入组织
+
+		public static const getJoinOrganizeRequest:String = "group/get-req?";//申请列表
+
+		public static const handleJoinOrganizeRequest:String = "group/handle-req?";//处理申请
+		
+		public static const getOrganizeMembers:String = "group/get-deptmember?";//获取组织里的人
+
+		public static const moveOrganizeMembers:String = "group/set-memberdept?";//移动组织里的人
+
+
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)

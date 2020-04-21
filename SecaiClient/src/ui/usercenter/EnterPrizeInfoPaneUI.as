@@ -43,6 +43,7 @@ package ui.usercenter {
 		public var createAccountInput:TextInput;
 		public var applyokbtn:Button;
 		public var closeapplybtn:Button;
+		public var commentInput:TextInput;
 
 		override protected function createChildren():void {
 			super.createChildren();
