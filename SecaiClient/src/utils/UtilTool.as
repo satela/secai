@@ -5,6 +5,7 @@ package utils
 	import laya.net.LocalStorage;
 	import laya.utils.Browser;
 	
+	import model.orderModel.OrderConstant;
 	import model.picmanagerModel.PicInfoVo;
 	
 	import ui.common.TipPanelUI;
@@ -620,6 +621,58 @@ package utils
 			
 			return temp;
 			
+		}
+		
+		public static function getProcessPrice(picwidth:Number,picheight:Number,unit:String,unitprice:Number,baseprice:Number):Number
+		{
+			if(unitprice < 0)
+				return 0;
+			
+			if(unit == OrderConstant.MEASURE_UNIT_FOUR_SIDE)
+			{
+				var perimeter:Number = 2 * (picwidth + picheight);
+				return baseprice + unitprice*perimeter;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_SIDE)
+			{
+				var longside:Number = Math.max(picwidth,picheight);
+				return baseprice + unitprice*longside;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_TOP_BOTTOM)
+			{
+				var btsum:Number = picwidth + picwidth;
+				return baseprice + unitprice*btsum;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LEFT_RIGHT)
+			{
+				var lrsum:Number = picheight + picheight;
+				return baseprice + unitprice*btsum;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE)
+			{
+				var longside:Number = Math.max(picwidth,picheight);
+				return baseprice + unitprice*longside*2;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_PERIMETER)
+			{
+				 perimeter = 2 * (picwidth + picheight);
+				return baseprice + unitprice*perimeter;
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_AREA)
+			{
+				var area:Number = picwidth * picheight;
+				return baseprice + unitprice*area;
+			}
+			else if(isMeasureUnitByNum(unit))
+			{				
+				return  unitprice;
+			}
+			else return 0;
+		}
+		
+		public static function isMeasureUnitByNum(unit:String):Boolean
+		{
+			return unit == OrderConstant.MEASURE_UNIT_SINGLE_NUM || unit == OrderConstant.MEASURE_UNIT_SINGLE_SUIT || unit == OrderConstant.MEASURE_UNIT_SINGLE_TAO;
 		}
 	}
 }
