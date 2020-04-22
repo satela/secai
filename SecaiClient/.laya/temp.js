@@ -2114,6 +2114,47 @@ var UtilTool=(function(){
 		return temp;
 	}
 
+	UtilTool.getProcessPrice=function(picwidth,picheight,unit,unitprice,baseprice){
+		if(unitprice < 0)
+			return 0;
+		if(unit=="周长米"){
+			var perimeter=2 *(picwidth+picheight);
+			return baseprice+unitprice*perimeter;
+		}
+		else if(unit=="长度米"){
+			var longside=Math.max(picwidth,picheight);
+			return baseprice+unitprice*longside;
+		}
+		else if(unit=="上下米"){
+			var btsum=picwidth+picwidth;
+			return baseprice+unitprice*btsum;
+		}
+		else if(unit=="左右米"){
+			var lrsum=picheight+picheight;
+			return baseprice+unitprice*btsum;
+		}
+		else if(unit=="宽边米"){
+			var longside=Math.max(picwidth,picheight);
+			return baseprice+unitprice*longside*2;
+		}
+		else if(unit=="米"){
+			perimeter=2 *(picwidth+picheight);
+			return baseprice+unitprice*perimeter;
+		}
+		else if(unit=="平方米"){
+			var area=picwidth *picheight;
+			return baseprice+unitprice*area;
+		}
+		else if(UtilTool.isMeasureUnitByNum(unit)){
+			return unitprice;
+		}
+		else return 0;
+	}
+
+	UtilTool.isMeasureUnitByNum=function(unit){
+		return unit=="个" || unit=="件" || unit=="套";
+	}
+
 	__static(UtilTool,
 	['grayscaleMat',function(){return this.grayscaleMat=[
 		0.3086,0.6094,0.0820,0,0,
@@ -2415,20 +2456,14 @@ var ProductVo=(function(){
 		return "";
 	}
 
-	__proto.getTotalPrice=function(area,perimeter,ignoreOther,longside,picwidth){
+	__proto.getTotalPrice=function(picwidth,picheight,ignoreOther){
 		(ignoreOther===void 0)&& (ignoreOther=false);
-		(longside===void 0)&& (longside=0);
-		(picwidth===void 0)&& (picwidth=0);
-		if(this.measure_unit=="平方米")
-			var prices=area*(this.unit_price+this.additional_unitfee);
-		else{
-			prices=perimeter*(this.unit_price+this.additional_unitfee);
-		}
+		var prices=UtilTool.getProcessPrice(picwidth,picheight,this.measure_unit,this.unit_price+this.additional_unitfee,0);
 		this.hasDoublePrint=1;
 		var allprices=[];
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
-				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
+				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther));
 			}
 		}
 		prices *=this.hasDoublePrint;
@@ -2454,7 +2489,7 @@ var ProductVo=(function(){
 		return 0;
 	}
 
-	__proto.getTechPrice=function(arr,area,perimeter,ignoreOther,picwidth,longside){
+	__proto.getTechPrice=function(arr,picwidth,picheight,ignoreOther){
 		var prices=[];
 		if(arr==null)
 			return [];
@@ -2466,32 +2501,16 @@ var ProductVo=(function(){
 					arr[i].measure_unit=priceInfo[0];
 					arr[i].baseprice=priceInfo[1];
 					arr[i].preProc_Price=priceInfo[2];
-					if(arr[i].preProc_Price > 0 && arr[i].measure_unit=="平方米")
-						totalprice=arr[i].preProc_Price *area;
-					else if(arr[i].preProc_Price > 0){
-						totalprice=arr[i].preProc_Price *perimeter;
-					}
-					if(arr[i].preProc_Price < 0)
-						this.hasDoublePrint=2;
+					totalprice=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
-						if(arr[i].selectAttachVoList[0].measure_unit=="平方米"){
-							totalprice+=arr[i].selectAttachVoList[0].accessory_price *area;
-						}
-						else if(arr[i].selectAttachVoList[0].measure_unit=="米"){
-							if("SPAS42110"==arr[i].selectAttachVoList[0].accessory_code){
-								totalprice+=arr[i].selectAttachVoList[0].accessory_price *picwidth*2;
-							}
-							else
-							totalprice+=arr[i].selectAttachVoList[0].accessory_price *perimeter;
-						}
-						else if(arr[i].selectAttachVoList[0].measure_unit=="克" && !ignoreOther)
-						totalprice+=arr[i].selectAttachVoList[0].accessory_price;
+						if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
+							totalprice+=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
+						else if(!ignoreOther)
+						totalprice+=UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
 					}
 				}
-				if(arr[i].baseprice !=0)
-					totalprice+=arr[i].baseprice;
 				prices.push(totalprice);
-				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
+				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther));
 			}
 		}
 		return prices;
@@ -2644,8 +2663,16 @@ var OrderConstant=(function(){
 	__class(OrderConstant,'model.orderModel.OrderConstant');
 	OrderConstant.MEASURE_UNIT_AREA="平方米";
 	OrderConstant.MEASURE_UNIT_PERIMETER="米";
+	OrderConstant.MEASURE_UNIT_LONG_SIDE="长度米";
+	OrderConstant.MEASURE_UNIT_TOP_BOTTOM="上下米";
+	OrderConstant.MEASURE_UNIT_LEFT_RIGHT="左右米";
+	OrderConstant.MEASURE_UNIT_FOUR_SIDE="周长米";
+	OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE="宽边米";
 	OrderConstant.MEASURE_UNIT_KILOMETER="千克";
 	OrderConstant.MEASURE_UNIT_KILO="克";
+	OrderConstant.MEASURE_UNIT_SINGLE_NUM="个";
+	OrderConstant.MEASURE_UNIT_SINGLE_SUIT="件";
+	OrderConstant.MEASURE_UNIT_SINGLE_TAO="套";
 	OrderConstant.ATTACH_NO="SPNO";
 	OrderConstant.ATTACH_JPG="SPJPG";
 	OrderConstant.ATTACH_PNG="SPPNG";
@@ -53143,12 +53170,11 @@ var PicOrderItem=(function(_super){
 			this.updateOrderData(this.curproductvo);
 			var area=(this.finalHeight *this.finalWidth)/10000;
 			var perimeter=(this.finalHeight+this.finalWidth)*2/100;
-			var longside=Math.max(this.finalHeight,this.finalWidth)/100;
 			if(this.curproductvo.measure_unit=="平方米")
-				this.price.text=(this.curproductvo.getTotalPrice(area,perimeter,true,longside,this.finalWidth/100)/area).toFixed(1);
+				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/area).toFixed(1);
 			else
-			this.price.text=(this.curproductvo.getTotalPrice(area,perimeter,true,longside,this.finalWidth/100)/perimeter).toFixed(1);
-			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(area,perimeter,false,longside,this.finalWidth/100)).toFixed(1)+"";
+			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/perimeter).toFixed(1);
+			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false)).toFixed(1)+"";
 			EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
 		}
 	}
@@ -53182,7 +53208,6 @@ var PicOrderItem=(function(_super){
 		this.updateOrderData(provo);
 		var area=(this.finalHeight *this.finalWidth)/10000;
 		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
-		var longside=Math.max(this.finalHeight,this.finalWidth)/100;
 		var hasSelectedTech=provo.getAllSelectedTech();
 		var doublesideImg="";
 		var yixingqiegeImg="";
@@ -53215,10 +53240,10 @@ var PicOrderItem=(function(_super){
 				this.yingxback.skin="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+yixingqiegeImg+".jpg";
 		}
 		if(provo.measure_unit=="平方米")
-			this.price.text=(provo.getTotalPrice(area,perimeter,true,longside,this.finalWidth/100)/area).toFixed(1);
+			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/area).toFixed(1);
 		else
-		this.price.text=(provo.getTotalPrice(area,perimeter,true,longside,this.finalWidth/100)/perimeter).toFixed(1);
-		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(area,perimeter,false,longside,this.finalWidth/100)).toFixed(1)+"";
+		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/perimeter).toFixed(1);
+		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false)).toFixed(1)+"";
 		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
 		this.architype.text=provo.getTechDes();
@@ -53242,8 +53267,7 @@ var PicOrderItem=(function(_super){
 	__proto.updateOrderData=function(productVo){
 		var area=(this.finalHeight *this.finalWidth)/10000;
 		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
-		var longside=Math.max(this.finalHeight,this.finalWidth)/100;
-		this.ordervo.orderPrice=productVo.getTotalPrice(area,perimeter,false,longside,this.finalWidth/100);
+		this.ordervo.orderPrice=productVo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false);
 		if(this.ordervo.orderPrice < 0.1)
 			this.ordervo.orderPrice=0.1;
 		this.ordervo.manufacturer_code=productVo.manufacturer_code;
