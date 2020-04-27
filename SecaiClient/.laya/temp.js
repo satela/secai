@@ -681,11 +681,13 @@ var GameConfig=(function(){
 		reg("script.product.ProductMainControl",ProductMainControl);
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 		reg("script.usercenter.AddressMgrControl",AddressMgrControl);
+		reg("script.usercenter.ApplyJoinMgrControl",ApplyJoinMgrControl);
 		reg("script.usercenter.ChargeControl",ChargeControl);
 		reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
 		reg("script.usercenter.MyOrderControl",MyOrderControl);
 		reg("script.usercenter.AddressEditControl",AddressEditControl);
 		reg("script.usercenter.OrderDetailControl",OrderDetailControl);
+		reg("script.usercenter.OrganizeMrgControl",OrganizeMrgControl);
 		reg("script.usercenter.UserMainControl",UserMainControl);
 	}
 
@@ -695,7 +697,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PicManagePanel.scene";
+	GameConfig.startScene="usercenter/MyOrdersPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1464,6 +1466,16 @@ var PartItemVo=(function(){
 })()
 
 
+//class model.Constast
+var Constast=(function(){
+	function Constast(){}
+	__class(Constast,'model.Constast');
+	Constast.ACCOUNT_CREATER=1;
+	Constast.ACCOUNT_EMPLOYEE=0;
+	return Constast;
+})()
+
+
 //class model.orderModel.AttchCatVo
 var AttchCatVo=(function(){
 	function AttchCatVo(data){
@@ -1634,6 +1646,7 @@ var Userdata=(function(){
 		this.isLogin=false;
 		this.defaultAddrid="0";
 		this.loginTime=0;
+		this.accountType=0;
 	}
 
 	__class(Userdata,'model.Userdata');
@@ -1681,6 +1694,7 @@ var Userdata=(function(){
 		return this.addressList[0];
 	}
 
+	//1 公司创建者 0 公司职员
 	__getset(1,Userdata,'instance',function(){
 		if(Userdata._instance==null)
 			Userdata._instance=new Userdata();
@@ -1949,7 +1963,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//修改公司名
+	//移动组织里的人
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2001,6 +2015,14 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.checkOrderList="business/list-order?";
 	HttpRequestUtil.getOrderRecordList="account/listorder?";
 	HttpRequestUtil.changeCompanyName="group/update_group?";
+	HttpRequestUtil.getMyOrganize="group/get-dept?";
+	HttpRequestUtil.createOrganize="group/add-dept?";
+	HttpRequestUtil.deleteOrganize="group/delete-dept?";
+	HttpRequestUtil.joinOrganize="group/join-group?";
+	HttpRequestUtil.getJoinOrganizeRequest="group/get-req?";
+	HttpRequestUtil.handleJoinOrganizeRequest="group/handle-req?";
+	HttpRequestUtil.getOrganizeMembers="group/get-deptmember?";
+	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
 	return HttpRequestUtil;
 })()
 
@@ -2932,7 +2954,12 @@ var ErrorCode=(function(){
 			666:"数据异常",
 			667:"数据异常",
 			701:"设置默认地址失败",
-			801:"订单正在支付中或已经支付成功，请勿重复支付"
+			801:"订单正在支付中或已经支付成功，请勿重复支付",
+			751:"名字重复",
+			211:"你已加入公司",
+			754:"该公司不存在",
+			753:"你已申请过加入公司",
+			758:"组织里有用户不能删除"
 	};}
 
 	]);
@@ -27601,6 +27628,11 @@ var EventCenter=(function(_super){
 	EventCenter.PRODUCT_DELETE_GOODS="PRODUCT_DELETE_GOODS";
 	EventCenter.PRODUCT_ADD_GOODS="PRODUCT_ADD_GOODS";
 	EventCenter.DELETE_ORDER_BACK="DELETE_ORDER_BACK";
+	EventCenter.DELETE_ORGANIZE_BACK="DELETE_ORGANIZE_BACK";
+	EventCenter.AGREE_JOIN_REQUEST="AGREE_JOIN_REQUEST";
+	EventCenter.REFRESH_JOIN_REQUEST="REFRESH_JOIN_REQUEST";
+	EventCenter.MOVE_MEMBER_DEPT="MOVE_MEMBER_DEPT";
+	EventCenter.DELETE_DEPT_MEMBER="DELETE_DEPT_MEMBER";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -28620,18 +28652,6 @@ var Sound=(function(_super){
 })(EventDispatcher)
 
 
-//class laya.webgl.shader.d2.value.PrimitiveSV extends laya.webgl.shader.d2.value.Value2D
-var PrimitiveSV=(function(_super){
-	function PrimitiveSV(args){
-		PrimitiveSV.__super.call(this,0x04,0);
-		this._attribLocation=['position',0,'attribColor',1];
-	}
-
-	__class(PrimitiveSV,'laya.webgl.shader.d2.value.PrimitiveSV',_super);
-	return PrimitiveSV;
-})(Value2D)
-
-
 /**
 *<p> <code>HttpRequest</code> 通过封装 HTML <code>XMLHttpRequest</code> 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。 <code>HttpRequest</code> 只提供以异步的形式返回 Web 服务器的响应，并且能够以文本或者二进制的形式返回内容。</p>
 *<p><b>注意：</b>建议每次请求都使用新的 <code>HttpRequest</code> 对象，因为每次调用该对象的send方法时，都会清空之前设置的数据，并重置 HTTP 请求的状态，这会导致之前还未返回响应的请求被重置，从而得不到之前请求的响应结果。</p>
@@ -28799,6 +28819,18 @@ var HttpRequest=(function(_super){
 
 	return HttpRequest;
 })(EventDispatcher)
+
+
+//class laya.webgl.shader.d2.value.PrimitiveSV extends laya.webgl.shader.d2.value.Value2D
+var PrimitiveSV=(function(_super){
+	function PrimitiveSV(args){
+		PrimitiveSV.__super.call(this,0x04,0);
+		this._attribLocation=['position',0,'attribColor',1];
+	}
+
+	__class(PrimitiveSV,'laya.webgl.shader.d2.value.PrimitiveSV',_super);
+	return PrimitiveSV;
+})(Value2D)
 
 
 /**
@@ -29894,55 +29926,6 @@ var MeshVG=(function(_super){
 })(Mesh2D)
 
 
-//class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
-var ShaderDefines2D=(function(_super){
-	function ShaderDefines2D(){
-		ShaderDefines2D.__super.call(this,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name,ShaderDefines2D.__int2nameMap);
-	}
-
-	__class(ShaderDefines2D,'laya.webgl.shader.d2.ShaderDefines2D',_super);
-	ShaderDefines2D.__init__=function(){
-		ShaderDefines2D.reg("TEXTURE2D",0x01);
-		ShaderDefines2D.reg("PRIMITIVE",0x04);
-		ShaderDefines2D.reg("GLOW_FILTER",0x08);
-		ShaderDefines2D.reg("BLUR_FILTER",0x10);
-		ShaderDefines2D.reg("COLOR_FILTER",0x20);
-		ShaderDefines2D.reg("COLOR_ADD",0x40);
-		ShaderDefines2D.reg("WORLDMAT",0x80);
-		ShaderDefines2D.reg("FILLTEXTURE",0x100);
-		ShaderDefines2D.reg("FSHIGHPRECISION",0x400);
-	}
-
-	ShaderDefines2D.reg=function(name,value){
-		ShaderDefinesBase._reg(name,value,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name);
-	}
-
-	ShaderDefines2D.toText=function(value,int2name,int2nameMap){
-		return ShaderDefinesBase._toText(value,int2name,int2nameMap);
-	}
-
-	ShaderDefines2D.toInt=function(names){
-		return ShaderDefinesBase._toInt(names,ShaderDefines2D.__name2int);
-	}
-
-	ShaderDefines2D.TEXTURE2D=0x01;
-	ShaderDefines2D.PRIMITIVE=0x04;
-	ShaderDefines2D.FILTERGLOW=0x08;
-	ShaderDefines2D.FILTERBLUR=0x10;
-	ShaderDefines2D.FILTERCOLOR=0x20;
-	ShaderDefines2D.COLORADD=0x40;
-	ShaderDefines2D.WORLDMAT=0x80;
-	ShaderDefines2D.FILLTEXTURE=0x100;
-	ShaderDefines2D.SKINMESH=0x200;
-	ShaderDefines2D.SHADERDEFINE_FSHIGHPRECISION=0x400;
-	ShaderDefines2D.NOOPTMASK=0x08|0x10|0x20|0x100;
-	ShaderDefines2D.__name2int={};
-	ShaderDefines2D.__int2name=[];
-	ShaderDefines2D.__int2nameMap=[];
-	return ShaderDefines2D;
-})(ShaderDefinesBase)
-
-
 /**
 *<code>Loader</code> 类可用来加载文本、JSON、XML、二进制、图像等资源。
 */
@@ -30428,90 +30411,6 @@ var Loader=(function(_super){
 })(EventDispatcher)
 
 
-//class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
-var SubmitTexture=(function(_super){
-	function SubmitTexture(renderType){
-		(renderType===void 0)&& (renderType=10000);
-		SubmitTexture.__super.call(this,renderType);
-	}
-
-	__class(SubmitTexture,'laya.webgl.submit.SubmitTexture',_super);
-	var __proto=SubmitTexture.prototype;
-	__proto.clone=function(context,mesh,pos){
-		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture();
-		this._cloneInit(o,context,mesh,pos);
-		return o;
-	}
-
-	__proto.releaseRender=function(){
-		if ((--this._ref)< 1){
-			SubmitTexture.POOL[SubmitTexture._poolSize++]=this;
-			this.shaderValue.release();
-			this._mesh=null;
-			this._parent && (this._parent.releaseRender(),this._parent=null);
-		}
-	}
-
-	__proto.renderSubmit=function(){
-		if (this._numEle===0)
-			return 1;
-		var tex=this.shaderValue.textureHost;
-		if(tex){
-			var source=tex?tex._getSource():null;
-			if (!source)return 1;
-		};
-		var gl=WebGL.mainContext;
-		this._mesh.useMesh(gl);
-		var lastSubmit=Submit.preRender;
-		var prekey=(Submit.preRender)._key;
-		if (this._key.blendShader===0 && (this._key.submitType===prekey.submitType && this._key.blendShader===prekey.blendShader)&& BaseShader.activeShader &&
-			(Submit.preRender).clipInfoID==this.clipInfoID &&
-		lastSubmit.shaderValue.defines._value===this.shaderValue.defines._value &&
-		(this.shaderValue.defines._value & ShaderDefines2D.NOOPTMASK)==0){
-			(BaseShader.activeShader).uploadTexture2D(source);
-		}
-		else{
-			if (BlendMode.activeBlendFunction!==this._blendFn){
-				WebGLContext.setBlend(gl,true);
-				this._blendFn(gl);
-				BlendMode.activeBlendFunction=this._blendFn;
-			}
-			this.shaderValue.texture=source;
-			this.shaderValue.upload();
-		}
-		gl.drawElements(0x0004,this._numEle,0x1403,this._startIdx);
-		Stat.drawCall++;
-		Stat.trianglesFaces+=this._numEle / 3;
-		return 1;
-	}
-
-	SubmitTexture.create=function(context,mesh,sv){
-		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture(10016);
-		o._mesh=mesh;
-		o._key.clear();
-		o._key.submitType=2;
-		o._ref=1;
-		o._startIdx=mesh.indexNum *CONST3D2D.BYTES_PIDX;
-		o._numEle=0;
-		var blendType=context._nBlendType;
-		o._key.blendShader=blendType;
-		o._blendFn=context._targets ? BlendMode.targetFns[blendType] :BlendMode.fns[blendType];
-		o.shaderValue=sv;
-		if (context._colorFiler){
-			var ft=context._colorFiler;
-			sv.defines.add(ft.type);
-			(sv).colorMat=ft._mat;
-			(sv).colorAlpha=ft._alpha;
-		}
-		return o;
-	}
-
-	SubmitTexture._poolSize=0;
-	SubmitTexture.POOL=[];
-	return SubmitTexture;
-})(Submit)
-
-
 /**
 *<code>Texture</code> 是一个纹理处理类。
 */
@@ -30839,6 +30738,139 @@ var Texture=(function(_super){
 	Texture._rect2=new Rectangle();
 	return Texture;
 })(EventDispatcher)
+
+
+//class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
+var ShaderDefines2D=(function(_super){
+	function ShaderDefines2D(){
+		ShaderDefines2D.__super.call(this,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name,ShaderDefines2D.__int2nameMap);
+	}
+
+	__class(ShaderDefines2D,'laya.webgl.shader.d2.ShaderDefines2D',_super);
+	ShaderDefines2D.__init__=function(){
+		ShaderDefines2D.reg("TEXTURE2D",0x01);
+		ShaderDefines2D.reg("PRIMITIVE",0x04);
+		ShaderDefines2D.reg("GLOW_FILTER",0x08);
+		ShaderDefines2D.reg("BLUR_FILTER",0x10);
+		ShaderDefines2D.reg("COLOR_FILTER",0x20);
+		ShaderDefines2D.reg("COLOR_ADD",0x40);
+		ShaderDefines2D.reg("WORLDMAT",0x80);
+		ShaderDefines2D.reg("FILLTEXTURE",0x100);
+		ShaderDefines2D.reg("FSHIGHPRECISION",0x400);
+	}
+
+	ShaderDefines2D.reg=function(name,value){
+		ShaderDefinesBase._reg(name,value,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name);
+	}
+
+	ShaderDefines2D.toText=function(value,int2name,int2nameMap){
+		return ShaderDefinesBase._toText(value,int2name,int2nameMap);
+	}
+
+	ShaderDefines2D.toInt=function(names){
+		return ShaderDefinesBase._toInt(names,ShaderDefines2D.__name2int);
+	}
+
+	ShaderDefines2D.TEXTURE2D=0x01;
+	ShaderDefines2D.PRIMITIVE=0x04;
+	ShaderDefines2D.FILTERGLOW=0x08;
+	ShaderDefines2D.FILTERBLUR=0x10;
+	ShaderDefines2D.FILTERCOLOR=0x20;
+	ShaderDefines2D.COLORADD=0x40;
+	ShaderDefines2D.WORLDMAT=0x80;
+	ShaderDefines2D.FILLTEXTURE=0x100;
+	ShaderDefines2D.SKINMESH=0x200;
+	ShaderDefines2D.SHADERDEFINE_FSHIGHPRECISION=0x400;
+	ShaderDefines2D.NOOPTMASK=0x08|0x10|0x20|0x100;
+	ShaderDefines2D.__name2int={};
+	ShaderDefines2D.__int2name=[];
+	ShaderDefines2D.__int2nameMap=[];
+	return ShaderDefines2D;
+})(ShaderDefinesBase)
+
+
+//class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
+var SubmitTexture=(function(_super){
+	function SubmitTexture(renderType){
+		(renderType===void 0)&& (renderType=10000);
+		SubmitTexture.__super.call(this,renderType);
+	}
+
+	__class(SubmitTexture,'laya.webgl.submit.SubmitTexture',_super);
+	var __proto=SubmitTexture.prototype;
+	__proto.clone=function(context,mesh,pos){
+		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture();
+		this._cloneInit(o,context,mesh,pos);
+		return o;
+	}
+
+	__proto.releaseRender=function(){
+		if ((--this._ref)< 1){
+			SubmitTexture.POOL[SubmitTexture._poolSize++]=this;
+			this.shaderValue.release();
+			this._mesh=null;
+			this._parent && (this._parent.releaseRender(),this._parent=null);
+		}
+	}
+
+	__proto.renderSubmit=function(){
+		if (this._numEle===0)
+			return 1;
+		var tex=this.shaderValue.textureHost;
+		if(tex){
+			var source=tex?tex._getSource():null;
+			if (!source)return 1;
+		};
+		var gl=WebGL.mainContext;
+		this._mesh.useMesh(gl);
+		var lastSubmit=Submit.preRender;
+		var prekey=(Submit.preRender)._key;
+		if (this._key.blendShader===0 && (this._key.submitType===prekey.submitType && this._key.blendShader===prekey.blendShader)&& BaseShader.activeShader &&
+			(Submit.preRender).clipInfoID==this.clipInfoID &&
+		lastSubmit.shaderValue.defines._value===this.shaderValue.defines._value &&
+		(this.shaderValue.defines._value & ShaderDefines2D.NOOPTMASK)==0){
+			(BaseShader.activeShader).uploadTexture2D(source);
+		}
+		else{
+			if (BlendMode.activeBlendFunction!==this._blendFn){
+				WebGLContext.setBlend(gl,true);
+				this._blendFn(gl);
+				BlendMode.activeBlendFunction=this._blendFn;
+			}
+			this.shaderValue.texture=source;
+			this.shaderValue.upload();
+		}
+		gl.drawElements(0x0004,this._numEle,0x1403,this._startIdx);
+		Stat.drawCall++;
+		Stat.trianglesFaces+=this._numEle / 3;
+		return 1;
+	}
+
+	SubmitTexture.create=function(context,mesh,sv){
+		var o=SubmitTexture._poolSize ? SubmitTexture.POOL[--SubmitTexture._poolSize] :new SubmitTexture(10016);
+		o._mesh=mesh;
+		o._key.clear();
+		o._key.submitType=2;
+		o._ref=1;
+		o._startIdx=mesh.indexNum *CONST3D2D.BYTES_PIDX;
+		o._numEle=0;
+		var blendType=context._nBlendType;
+		o._key.blendShader=blendType;
+		o._blendFn=context._targets ? BlendMode.targetFns[blendType] :BlendMode.fns[blendType];
+		o.shaderValue=sv;
+		if (context._colorFiler){
+			var ft=context._colorFiler;
+			sv.defines.add(ft.type);
+			(sv).colorMat=ft._mat;
+			(sv).colorAlpha=ft._alpha;
+		}
+		return o;
+	}
+
+	SubmitTexture._poolSize=0;
+	SubmitTexture.POOL=[];
+	return SubmitTexture;
+})(Submit)
 
 
 /**
@@ -35299,6 +35331,7 @@ var MainPageControl=(function(_super){
 			var account=UtilTool.getLocalVar("useraccount","");
 			Userdata.instance.userAccount=account;
 			Userdata.instance.isLogin=true;
+			Userdata.instance.accountType=result.usertype;
 			this.txtLogin.text=account;
 			this.txtReg.text="[退出]";
 			console.log(Browser.document.cookie.split("; "));
@@ -35431,6 +35464,176 @@ var MainPageControl=(function(_super){
 })(Script)
 
 
+//class script.usercenter.OrganizeMrgControl extends laya.components.Script
+var OrganizeMrgControl=(function(_super){
+	function OrganizeMrgControl(){
+		this.uiSkin=null;
+		this.curMemberdata=null;
+		OrganizeMrgControl.__super.call(this);
+	}
+
+	__class(OrganizeMrgControl,'script.usercenter.OrganizeMrgControl',_super);
+	var __proto=OrganizeMrgControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.organizelist.itemRender=OrganizeItem;
+		this.uiSkin.organizelist.vScrollBarSkin="";
+		this.uiSkin.organizelist.repeatX=7;
+		this.uiSkin.organizelist.spaceY=5;
+		this.uiSkin.organizelist.spaceX=15;
+		this.uiSkin.organizelist.renderHandler=new Handler(this,this.updateOrganizeList);
+		this.uiSkin.organizelist.selectEnable=true;
+		this.uiSkin.organizelist.selectHandler=new Handler(this,this.selectOrganize);
+		this.uiSkin.memberlist.itemRender=MemberItem;
+		this.uiSkin.memberlist.vScrollBarSkin="";
+		this.uiSkin.memberlist.repeatX=1;
+		this.uiSkin.memberlist.spaceY=5;
+		this.uiSkin.memberlist.renderHandler=new Handler(this,this.updateMemberList);
+		this.uiSkin.memberlist.selectEnable=false;
+		this.uiSkin.distributePanel.visible=false;
+		var temparr=[];
+		this.uiSkin.memberlist.array=temparr;
+		this.uiSkin.organizelist.array=temparr;
+		this.uiSkin.createOrganizePanel.visible=false;
+		this.uiSkin.createOrganize.on("click",this,this.showCretePanel);
+		this.uiSkin.organizeNameInput.maxChars=20;
+		this.uiSkin.createBtnOk.on("click",this,this.onConfirmCreateOrganize);
+		this.uiSkin.memberlist.on("mouseover",this,this.pauseParentScroll);
+		this.uiSkin.memberlist.on("mouseout",this,this.resumeParentScroll);
+		this.uiSkin.moveOkbtn.on("click",this,this.onMoveMemberSure);
+		this.uiSkin.closeDist.on("click",this,this.onCloseDistribute);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		EventCenter.instance.on("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
+		EventCenter.instance.on("MOVE_MEMBER_DEPT",this,this.moveMember);
+		EventCenter.instance.on("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
+	}
+
+	__proto.onGetAllOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.organizelist.array=result.depts;
+			if(result.depts.length > 0){
+				this.uiSkin.organizelist.selectedIndex=0;
+				(this.uiSkin.organizelist.cells [0]).selected=true;
+			}
+		}
+	}
+
+	__proto.refreshOrganize=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+	}
+
+	__proto.showCretePanel=function(){
+		this.uiSkin.createOrganizePanel.visible=true;
+	}
+
+	__proto.onConfirmCreateOrganize=function(){
+		if(this.uiSkin.organizeNameInput.text==""){
+			ViewManager.showAlert("请输入组织名称");
+			return;
+		};
+		var param="name="+this.uiSkin.organizeNameInput.text;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/add-dept?",this,this.onCreateBack,param,"post");
+		this.uiSkin.createOrganizePanel.visible=false;
+	}
+
+	__proto.onCreateBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		}
+	}
+
+	__proto.pauseParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
+	}
+
+	__proto.resumeParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
+	}
+
+	__proto.updateMemberList=function(cell,index){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.updateOrganizeList=function(cell,index){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.selectOrganize=function(index){
+		var item;
+		for(var $each_item in this.uiSkin.organizelist.cells){
+			item=this.uiSkin.organizelist.cells[$each_item];
+			item.setselected(this.uiSkin.organizelist.array[index].dt_id);
+		};
+		var params="dept="+this.uiSkin.organizelist.array[index].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+	}
+
+	__proto.onGetOrganizeMembersBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.memberlist.array=result.members;
+		}
+	}
+
+	__proto.moveMember=function(data){
+		this.curMemberdata=data;
+		this.uiSkin.distributePanel.visible=true;
+		var allOrganize=this.uiSkin.organizelist.array;
+		var arr=[];
+		for(var i=0;i < allOrganize.length;i++){
+			arr.push(allOrganize[i].dt_name);
+		}
+		this.uiSkin.organizeCom.labels=arr.join(",");
+		this.uiSkin.organizeCom.selectedIndex=0;
+	}
+
+	//trace("arr:"+arr.length);
+	__proto.onCloseDistribute=function(){
+		this.uiSkin.distributePanel.visible=false;
+	}
+
+	__proto.onMoveMemberSure=function(){
+		if(this.curMemberdata==null)
+			return;
+		if(this.uiSkin.organizeCom.selectedIndex < 0){
+			ViewManager.showAlert("请选择要移动到的组织");
+			return;
+		};
+		var todept=this.uiSkin.organizelist.array[this.uiSkin.organizeCom.selectedIndex].dt_id;
+		if(this.curMemberdata.dept==todept){
+			ViewManager.showAlert("该用户已经在这个组织里");
+			return;
+		};
+		var params="dept="+todept+"&uid="+this.curMemberdata.uid;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-memberdept?",this,this.onMoveOrganizeMemberBack,params,"post");
+	}
+
+	__proto.onMoveOrganizeMemberBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var params="dept="+this.uiSkin.organizelist.array[this.uiSkin.organizelist.selectedIndex].dt_id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+		}
+		this.uiSkin.distributePanel.visible=false;
+	}
+
+	__proto.refreshOrganizeMemebers=function(){
+		var params="dept="+this.uiSkin.organizelist.array[this.uiSkin.organizelist.selectedIndex].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-deptmember?",this,this.onGetOrganizeMembersBack,params,"post");
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
+		EventCenter.instance.off("MOVE_MEMBER_DEPT",this,this.moveMember);
+		EventCenter.instance.off("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
+	}
+
+	return OrganizeMrgControl;
+})(Script)
+
+
 //class script.usercenter.AddressMgrControl extends laya.components.Script
 var AddressMgrControl=(function(_super){
 	function AddressMgrControl(){
@@ -35456,7 +35659,17 @@ var AddressMgrControl=(function(_super){
 		else
 		this.uiSkin.addlist.array=Userdata.instance.addressList;
 		this.uiSkin.numAddress.text="已经保存"+Userdata.instance.addressList.length+"条地址";
+		this.uiSkin.addlist.on("mouseover",this,this.pauseParentScroll);
+		this.uiSkin.addlist.on("mouseout",this,this.resumeParentScroll);
 		EventCenter.instance.on("UPDATE_MYADDRESS_LIST",this,this.updateList);
+	}
+
+	__proto.pauseParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
+	}
+
+	__proto.resumeParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
 	__proto.updateList=function(){
@@ -35498,6 +35711,7 @@ var UserMainControl=(function(_super){
 		this.curView=null;
 		this.titleTxt=null;
 		this.param=null;
+		this.curViewIndex=-1;
 		UserMainControl.__super.call(this);
 	}
 
@@ -35507,10 +35721,10 @@ var UserMainControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.panel_main.hScrollBarSkin="";
-		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
+		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,null,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
 		this.btntxtArr=[];
-		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单"];
-		for(var i=0;i < 9;i++){
+		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单","","","组织管理","申请列表"];
+		for(var i=0;i < 11;i++){
 			this.uiSkin["btntxt"+i].on("click",this,this.onShowEditView,[i]);
 			this.uiSkin["btntxt"+i].on("mouseover",this,this.onMouseOverHandler);
 			this.uiSkin["btntxt"+i].on("mouseout",this,this.onMouseOutHandler);
@@ -35522,6 +35736,10 @@ var UserMainControl=(function(_super){
 		this.onShowEditView(0);
 		(this.uiSkin.panel_main).height=Browser.height;
 		(this.uiSkin.panel_main).width=Browser.width;
+		if(Userdata.instance.accountType !=1){
+			this.uiSkin.btntxt9.removeSelf();
+			this.uiSkin.btntxt10.removeSelf();
+		}
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		EventCenter.instance.on("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
 		EventCenter.instance.on("SHOW_CHARGE_VIEW",this,this.showCharge);
@@ -35561,6 +35779,9 @@ var UserMainControl=(function(_super){
 			ViewManager.instance.openView("VIEW_PICMANAGER",true);
 			return;
 		}
+		if(this.curViewIndex==index)
+			return;
+		this.curViewIndex=index;
 		this.uiSkin.toptitle.text=this.titleTxt[index];
 		this.uiSkin.bannertitile.text="/ "+this.titleTxt[index];
 		while(this.uiSkin.sp_container.numChildren > 0){
@@ -35677,6 +35898,7 @@ var LogPanelControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.isLogin=true;
 			Userdata.instance.userAccount=this.uiSKin.input_account.text;
+			Userdata.instance.accountType=result.usertype;
 			EventCenter.instance.event("LOGIN_SUCESS",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("useraccount",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("userpwd",this.uiSKin.input_pwd.text);
@@ -36013,7 +36235,9 @@ var RegisterCntrol=(function(_super){
 		this.verifycode=Browser.document.createElement("div");
 		this.verifycode.id="v_container";
 		this.verifycode.style="width: 200px;height: 50px;left:950px;top:548";
-		this.verifycode.style.left=950-(1920-Browser.width)/2+"px";
+		this.verifycode.style.width=200/Browser.pixelRatio+"px";
+		this.verifycode.style.height=50/Browser.pixelRatio+"px";
+		this.verifycode.style.left=(950-(1920-Browser.width)/2)+"px";
 		this.verifycode.style.position="absolute";
 		this.verifycode.style.zIndex=999;
 		Browser.document.body.appendChild(this.verifycode);
@@ -36039,8 +36263,13 @@ var RegisterCntrol=(function(_super){
 	__proto.updateVerifyPos=function(){
 		if(this.verifycode !=null){
 			var pt=this.uiSkin.inputCode.localToGlobal(new Point(this.uiSkin.inputCode.x,this.uiSkin.inputCode.y),true);
-			this.verifycode.style.top=pt.y+"px";
-			this.verifycode.style.left=(pt.x+80)+"px";
+			var offset=0;
+			if(Browser.width > Laya.stage.width)
+				offset=(Browser.width-Laya.stage.width)/2;
+			this.verifycode.style.top=pt.y/Browser.pixelRatio+"px";
+			this.verifycode.style.left=(pt.x+80+offset)/Browser.pixelRatio+"px";
+			this.verifycode.style.width=200/Browser.pixelRatio+"px";
+			this.verifycode.style.height=50/Browser.pixelRatio+"px";
 		}
 	}
 
@@ -36176,6 +36405,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.array=[];
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
 		this.initFileOpen();
+		this.uiSkin.selectNum.text=0+"";
 		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
 		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
@@ -39460,13 +39690,21 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.shortname.maxChars=6;
 		this.uiSkin.changenamePanel.visible=false;
 		this.uiSkin.changeNameBtn.visible=false;
+		this.uiSkin.applybtn.visible=false;
+		this.uiSkin.applyJoinPanel.visible=false;
 		this.uiSkin.changeokbtn.on("click",this,this.onChangeNameOk);
 		this.uiSkin.changeNameBtn.on("click",this,this.onShowChangeNamePanel);
 		this.uiSkin.closebtn.on("click",this,this.onCloseChangeNamePanel);
+		this.uiSkin.applybtn.on("click",this,this.onshowApplyPanel);
+		this.uiSkin.closeapplybtn.on("click",this,this.onhideApplyPanel);
 		this.uiSkin.btn_uplicense.on("click",this,this.onUploadlicense);
 		Browser.window.uploadApp=this;
 		this.initFileOpen();
 		this.uiSkin.chargebtn.on("click",this,this.onCharge);
+		this.uiSkin.createAccountInput.maxChars=11;
+		this.uiSkin.createAccountInput.restrict="0-9";
+		this.uiSkin.commentInput.maxChars=8;
+		this.uiSkin.applyokbtn.on("click",this,this.onJoinOrganize);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-request?" ,this,this.getCompanyInfo,null,"post");
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
 	}
@@ -39504,6 +39742,14 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.changenamePanel.visible=false;
 	}
 
+	__proto.onshowApplyPanel=function(){
+		this.uiSkin.applyJoinPanel.visible=true;
+	}
+
+	__proto.onhideApplyPanel=function(){
+		this.uiSkin.applyJoinPanel.visible=false;
+	}
+
 	__proto.getCompanyInfoBack=function(data){
 		if(this.destroyed)
 			return;
@@ -39524,6 +39770,9 @@ var EnterPrizeInfoControl=(function(_super){
 			this.townid=result.zone;
 			this.uiSkin.btnsave.disabled=true;
 			this.uiSkin.btnsave.label="已审核";
+		}
+		else if(result.status==205){
+			this.uiSkin.applybtn.visible=true;
 		}
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-addr-list?" ,this,this.initView,"parentid=0","post");
 	}
@@ -39648,6 +39897,27 @@ var EnterPrizeInfoControl=(function(_super){
 		}
 		else{
 			ViewManager.showAlert("保存失败");
+		}
+	}
+
+	__proto.onJoinOrganize=function(){
+		if(this.uiSkin.createAccountInput.text.length < 11){
+			ViewManager.showAlert("请输入正确的企业创建者账号");
+			return;
+		}
+		if(this.uiSkin.commentInput.text==""){
+			ViewManager.showAlert("填写备注信息更容易通过申请");
+			return;
+		};
+		var param="phonenumber="+this.uiSkin.createAccountInput.text+"&msg="+this.uiSkin.commentInput.text;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-group?",this,this.onJoinOrganizeBack,param,"post");
+		this.uiSkin.applyJoinPanel.visible=false;
+	}
+
+	__proto.onJoinOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("申请成功，请等待管理者审核");
 		}
 	}
 
@@ -39898,6 +40168,8 @@ var MyOrderControl=(function(_super){
 		var lastdate=new Date();
 		this.dateInput=Browser.document.createElement("input");
 		this.dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
+		this.dateInput.style.width=150/Browser.pixelRatio;
+		this.dateInput.style.height=20/Browser.pixelRatio;
 		this.dateInput.type="date";
 		this.dateInput.style.position="absolute";
 		this.dateInput.style.zIndex=999;
@@ -39918,6 +40190,8 @@ var MyOrderControl=(function(_super){
 		}
 		this.dateInput2=Browser.document.createElement("input");
 		this.dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
+		this.dateInput2.style.width=150/Browser.pixelRatio;
+		this.dateInput2.style.height=20/Browser.pixelRatio;
 		this.dateInput2.type="date";
 		this.dateInput2.style.position="absolute";
 		this.dateInput2.style.zIndex=999;
@@ -39941,10 +40215,13 @@ var MyOrderControl=(function(_super){
 	__proto.updateDateInputPos=function(){
 		if(this.dateInput !=null){
 			var pt=this.uiSkin.ordertime.localToGlobal(new Point(this.uiSkin.ordertime.x,this.uiSkin.ordertime.y),true);
-			this.dateInput.style.top=(pt.y-15)+"px";
-			this.dateInput.style.left=(pt.x+15)+"px";
-			this.dateInput2.style.top=(pt.y-15)+"px";
-			this.dateInput2.style.left=(pt.x+205)+"px";
+			var offset=0;
+			if(Browser.width > Laya.stage.width)
+				offset=(Browser.width-Laya.stage.width)/2;
+			this.dateInput.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput.style.left=(pt.x+15/Browser.pixelRatio+offset)/Browser.pixelRatio+"px";
+			this.dateInput2.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput2.style.left=(pt.x+205+offset)/Browser.pixelRatio+"px";
 		}
 	}
 
@@ -40058,6 +40335,111 @@ var MyOrderControl=(function(_super){
 	}
 
 	return MyOrderControl;
+})(Script)
+
+
+//class script.usercenter.ApplyJoinMgrControl extends laya.components.Script
+var ApplyJoinMgrControl=(function(_super){
+	function ApplyJoinMgrControl(){
+		this.uiSkin=null;
+		this.curRequest=null;
+		this.allOrganize=null;
+		ApplyJoinMgrControl.__super.call(this);
+	}
+
+	__class(ApplyJoinMgrControl,'script.usercenter.ApplyJoinMgrControl',_super);
+	var __proto=ApplyJoinMgrControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.applylist.itemRender=ApplyJoinItem;
+		this.uiSkin.applylist.repeatX=1;
+		this.uiSkin.applylist.spaceY=5;
+		this.uiSkin.applylist.renderHandler=new Handler(this,this.updateApplyList);
+		this.uiSkin.applylist.selectEnable=false;
+		this.uiSkin.distributePanel.visible=false;
+		this.uiSkin.applylist.array=[];
+		this.uiSkin.applylist.on("mouseover",this,this.pauseParentScroll);
+		this.uiSkin.applylist.on("mouseout",this,this.resumeParentScroll);
+		this.uiSkin.closedistribute.on("click",this,this.onCloseDistributePanel);
+		this.uiSkin.confirmJoin.on("click",this,this.onAgreeJoin);
+		EventCenter.instance.on("AGREE_JOIN_REQUEST",this,this.showDistribute);
+		EventCenter.instance.on("REFRESH_JOIN_REQUEST",this,this.refreshRequest);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+	}
+
+	__proto.refreshRequest=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+	}
+
+	__proto.onGetJoinRequestBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.uiSkin.applylist.array=result.reqs;
+		}
+	}
+
+	__proto.showDistribute=function(data){
+		this.curRequest=data;
+		this.uiSkin.distributePanel.visible=true;
+		if(this.allOrganize==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
+		}
+	}
+
+	__proto.onGetAllOrganizeBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			this.allOrganize=result.depts;
+			var arr=[];
+			for(var i=0;i < result.depts.length;i++){
+				arr.push(result.depts[i].dt_name);
+			}
+			this.uiSkin.deptbox.labels=arr.join(",");
+		}
+	}
+
+	__proto.onAgreeJoin=function(){
+		if(this.curRequest==null)
+			return;
+		if(this.uiSkin.deptbox.selectedIndex < 0){
+			ViewManager.showAlert("请选择要分配到的组织");
+			return;
+		};
+		var param="id="+this.curRequest.jp_id+"&opt=1&dept="+this.allOrganize[this.uiSkin.deptbox.selectedIndex].dt_id;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/handle-req?",this,this.onhandleBack,param,"post");
+	}
+
+	__proto.onhandleBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-req?",this,this.onGetJoinRequestBack,null,"post");
+			this.uiSkin.distributePanel.visible=false;
+			ViewManager.showAlert("操作成功");
+		}
+	}
+
+	__proto.onCloseDistributePanel=function(){
+		this.uiSkin.distributePanel.visible=false;
+	}
+
+	__proto.pauseParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
+	}
+
+	__proto.resumeParentScroll=function(){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
+	}
+
+	__proto.updateApplyList=function(cell,index){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("AGREE_JOIN_REQUEST",this,this.showDistribute);
+		EventCenter.instance.off("REFRESH_JOIN_REQUEST",this,this.refreshRequest);
+	}
+
+	return ApplyJoinMgrControl;
 })(Script)
 
 
@@ -52293,6 +52675,29 @@ var TabChooseBtnUI=(function(_super){
 })(View)
 
 
+//class ui.usercenter.OrganizeMemberItemUI extends laya.ui.View
+var OrganizeMemberItemUI=(function(_super){
+	function OrganizeMemberItemUI(){
+		this.nickname=null;
+		this.account=null;
+		this.jointime=null;
+		this.deletebtn=null;
+		this.movebtn=null;
+		OrganizeMemberItemUI.__super.call(this);
+	}
+
+	__class(OrganizeMemberItemUI,'ui.usercenter.OrganizeMemberItemUI',_super);
+	var __proto=OrganizeMemberItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(OrganizeMemberItemUI.uiView);
+	}
+
+	OrganizeMemberItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"jointime","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"踢除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"movebtn","text":"移动","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	return OrganizeMemberItemUI;
+})(View)
+
+
 //class ui.product.AdvertiseItemUI extends laya.ui.View
 var AdvertiseItemUI=(function(_super){
 	function AdvertiseItemUI(){
@@ -52364,6 +52769,26 @@ var SelectPicPanelUI=(function(_super){
 	}
 
 	return SelectPicPanelUI;
+})(View)
+
+
+//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
+var AddressMgrPanelUI=(function(_super){
+	function AddressMgrPanelUI(){
+		this.btnaddAddress=null;
+		this.addlist=null;
+		this.numAddress=null;
+		AddressMgrPanelUI.__super.call(this);
+	}
+
+	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
+	var __proto=AddressMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/AddressMgrPanel");
+	}
+
+	return AddressMgrPanelUI;
 })(View)
 
 
@@ -52446,23 +52871,51 @@ var QuestOrderItem=(function(_super){
 })(OrderQuestItemUI)
 
 
-//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
-var AddressMgrPanelUI=(function(_super){
-	function AddressMgrPanelUI(){
-		this.btnaddAddress=null;
-		this.addlist=null;
-		this.numAddress=null;
-		AddressMgrPanelUI.__super.call(this);
+//class ui.usercenter.OrganizeMgrPanelUI extends laya.ui.View
+var OrganizeMgrPanelUI=(function(_super){
+	function OrganizeMgrPanelUI(){
+		this.memberlist=null;
+		this.createOrganize=null;
+		this.organizelist=null;
+		this.distributePanel=null;
+		this.organizeCom=null;
+		this.moveOkbtn=null;
+		this.closeDist=null;
+		this.createOrganizePanel=null;
+		this.organizeNameInput=null;
+		this.createBtnOk=null;
+		this.btncloseCreate=null;
+		OrganizeMgrPanelUI.__super.call(this);
 	}
 
-	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
-	var __proto=AddressMgrPanelUI.prototype;
+	__class(OrganizeMgrPanelUI,'ui.usercenter.OrganizeMgrPanelUI',_super);
+	var __proto=OrganizeMgrPanelUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("usercenter/AddressMgrPanel");
+		this.loadScene("usercenter/OrganizeMgrPanel");
 	}
 
-	return AddressMgrPanelUI;
+	return OrganizeMgrPanelUI;
+})(View)
+
+
+//class ui.usercenter.OrganizeItemUI extends laya.ui.View
+var OrganizeItemUI=(function(_super){
+	function OrganizeItemUI(){
+		this.hotbtm=null;
+		this.deltbn=null;
+		OrganizeItemUI.__super.call(this);
+	}
+
+	__class(OrganizeItemUI,'ui.usercenter.OrganizeItemUI',_super);
+	var __proto=OrganizeItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(OrganizeItemUI.uiView);
+	}
+
+	OrganizeItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":112,"var":"hotbtm","staticCache":false,"skin":"commers/btn2.png","sizeGrid":"3,3,3,3","selected":false,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"浦东三点瑞普","height":40},"compId":3},{"type":"Button","props":{"y":1,"x":92,"var":"deltbn","skin":"commers/btnclose.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":4}],"loadList":["commers/btn2.png","commers/btnclose.png"],"loadList3D":[]};
+	return OrganizeItemUI;
 })(View)
 
 
@@ -52502,6 +52955,29 @@ var MaterialNameItemUI=(function(_super){
 
 	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":179,"var":"matbtn","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"户内PP背胶（户内写真）","height":40},"compId":8}],"loadList":["commers/btn2.png"],"loadList3D":[]};
 	return MaterialNameItemUI;
+})(View)
+
+
+//class ui.usercenter.ApplyJoinItemUI extends laya.ui.View
+var ApplyJoinItemUI=(function(_super){
+	function ApplyJoinItemUI(){
+		this.account=null;
+		this.msg=null;
+		this.reqdate=null;
+		this.refusebtn=null;
+		this.agreebtn=null;
+		ApplyJoinItemUI.__super.call(this);
+	}
+
+	__class(ApplyJoinItemUI,'ui.usercenter.ApplyJoinItemUI',_super);
+	var __proto=ApplyJoinItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(ApplyJoinItemUI.uiView);
+	}
+
+	ApplyJoinItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"account","valign":"middle","text":"13589898989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"msg","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"reqdate","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"refusebtn","text":"拒绝","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"agreebtn","text":"同意","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	return ApplyJoinItemUI;
 })(View)
 
 
@@ -52659,6 +53135,7 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.shortname=null;
 		this.input_companyname=null;
 		this.changeNameBtn=null;
+		this.applybtn=null;
 		this.btnSelProv=null;
 		this.province=null;
 		this.btnSelCity=null;
@@ -52684,6 +53161,11 @@ var EnterPrizeInfoPaneUI=(function(_super){
 		this.newShortName=null;
 		this.changeokbtn=null;
 		this.closebtn=null;
+		this.applyJoinPanel=null;
+		this.createAccountInput=null;
+		this.applyokbtn=null;
+		this.closeapplybtn=null;
+		this.commentInput=null;
 		EnterPrizeInfoPaneUI.__super.call(this);
 	}
 
@@ -52730,6 +53212,8 @@ var UserMainPanelUI=(function(_super){
 		this.sp_container=null;
 		this.btntxt0=null;
 		this.btntxt1=null;
+		this.btntxt9=null;
+		this.btntxt10=null;
 		this.btntxt5=null;
 		this.btntxt6=null;
 		this.btntxt2=null;
@@ -52748,7 +53232,7 @@ var UserMainPanelUI=(function(_super){
 		this.createView(UserMainPanelUI.uiView);
 	}
 
-	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"presetID":2,"y":0,"x":0,"texture":"commers/bgimg.jpg","height":50},"compId":54},{"type":"Sprite","props":{"presetID":3,"y":2,"x":332,"texture":"commers/logotxt.png"},"compId":55},{"type":"Label","props":{"presetID":4,"y":15,"x":524,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":15,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":15,"x":1320,"isPresetRoot":true,"var":"myorder","text":"我的订单","name":"myorder","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":15,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":15,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":15,"x":1405,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":42},"compId":87,"child":[{"type":"Box","props":{},"compId":62,"child":[{"type":"Image","props":{"skin":"usercenter/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":26,"child":[{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Image","props":{"y":100,"width":190,"skin":"commers/cutline.png"},"compId":61}]}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":40},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/commonpopbg.png","usercenter/setting.png","commers/cutline.png","usercenter/accounticon.png","usercenter/ordericon.png","usercenter/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
+	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"presetID":2,"y":0,"x":0,"texture":"commers/bgimg.jpg","height":50},"compId":54},{"type":"Sprite","props":{"presetID":3,"y":2,"x":332,"texture":"commers/logotxt.png"},"compId":55},{"type":"Label","props":{"presetID":4,"y":15,"x":524,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":15,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":15,"x":1320,"isPresetRoot":true,"var":"myorder","text":"我的订单","name":"myorder","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":15,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":20,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":15,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":15,"x":1405,"text":"|","fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":25},"compId":87,"child":[{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":26,"child":[{"type":"Box","props":{"y":-59,"x":-29},"compId":102,"child":[{"type":"Image","props":{"skin":"usercenter/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17}]},{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Label","props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":100},{"type":"Label","props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":101},{"type":"Image","props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":61}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/commonpopbg.png","usercenter/setting.png","commers/cutline.png","usercenter/accounticon.png","usercenter/ordericon.png","usercenter/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
 	return UserMainPanelUI;
 })(View)
 
@@ -52822,6 +53306,28 @@ var ConfirmOrderPanelUI=(function(_super){
 	}
 
 	return ConfirmOrderPanelUI;
+})(View)
+
+
+//class ui.usercenter.ApplyJoinMgrPanelUI extends laya.ui.View
+var ApplyJoinMgrPanelUI=(function(_super){
+	function ApplyJoinMgrPanelUI(){
+		this.applylist=null;
+		this.distributePanel=null;
+		this.deptbox=null;
+		this.confirmJoin=null;
+		this.closedistribute=null;
+		ApplyJoinMgrPanelUI.__super.call(this);
+	}
+
+	__class(ApplyJoinMgrPanelUI,'ui.usercenter.ApplyJoinMgrPanelUI',_super);
+	var __proto=ApplyJoinMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/ApplyJoinMgrPanel");
+	}
+
+	return ApplyJoinMgrPanelUI;
 })(View)
 
 
@@ -58232,6 +58738,50 @@ var MaterialClassBtn=(function(_super){
 })(TabChooseBtnUI)
 
 
+//class script.usercenter.item.MemberItem extends ui.usercenter.OrganizeMemberItemUI
+var MemberItem=(function(_super){
+	function MemberItem(){
+		this.memberdata=null;
+		MemberItem.__super.call(this);
+		this.movebtn.on("click",this,this.onMoveMember);
+		this.deletebtn.on("click",this,this.onDeleteMember);
+	}
+
+	__class(MemberItem,'script.usercenter.item.MemberItem',_super);
+	var __proto=MemberItem.prototype;
+	__proto.onDeleteMember=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除"+this.memberdata.phonenumber+"吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(b){
+		if(b){
+			var params="dept=0"+"&uid="+this.memberdata.uid;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-memberdept?",this,this.ondeleteMemberBack,params,"post");
+		}
+	}
+
+	__proto.ondeleteMemberBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("DELETE_DEPT_MEMBER");
+		}
+	}
+
+	__proto.onMoveMember=function(){
+		EventCenter.instance.event("MOVE_MEMBER_DEPT",this.memberdata);
+	}
+
+	__proto.setData=function(data){
+		this.memberdata=data;
+		this.nickname.text=data.uid;
+		this.account.text=data.phonenumber;
+		this.jointime.text=data.regdate;
+	}
+
+	return MemberItem;
+})(OrganizeMemberItemUI)
+
+
 //class script.order.FactoryChooseBtn extends ui.order.TabChooseBtnUI
 var FactoryChooseBtn=(function(_super){
 	function FactoryChooseBtn(){
@@ -58254,6 +58804,101 @@ var FactoryChooseBtn=(function(_super){
 
 	return FactoryChooseBtn;
 })(TabChooseBtnUI)
+
+
+//class script.usercenter.item.OrganizeItem extends ui.usercenter.OrganizeItemUI
+var OrganizeItem=(function(_super){
+	function OrganizeItem(){
+		this.orgData=null;
+		OrganizeItem.__super.call(this);
+		this.deltbn.visible=false;
+		this.on("mouseover",this,this.showDeltbn);
+		this.on("mouseout",this,this.hideDeltbn);
+		this.deltbn.on("click",this,this.ondeleteOrga);
+	}
+
+	__class(OrganizeItem,'script.usercenter.item.OrganizeItem',_super);
+	var __proto=OrganizeItem.prototype;
+	__proto.setselected=function(curdept){
+		if(this.orgData !=null)
+			this.selected=this.orgData.dt_id==curdept;
+	}
+
+	__proto.ondeleteOrga=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除"+this.orgData.dt_name+"吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(b){
+		if(b){
+			var param="id="+this.orgData.dt_id;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/delete-dept?",this,this.onDeleteBack,param,"post");
+		}
+	}
+
+	__proto.onDeleteBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("DELETE_ORGANIZE_BACK");
+		}
+	}
+
+	__proto.showDeltbn=function(){
+		this.deltbn.visible=true;
+	}
+
+	__proto.hideDeltbn=function(){
+		this.deltbn.visible=false;
+	}
+
+	__proto.setData=function(data){
+		this.orgData=data;
+		this.hotbtm.label=data.dt_name;
+	}
+
+	__getset(0,__proto,'selected',null,function(value){
+		this.hotbtm.selected=value;
+	});
+
+	return OrganizeItem;
+})(OrganizeItemUI)
+
+
+//class script.usercenter.item.ApplyJoinItem extends ui.usercenter.ApplyJoinItemUI
+var ApplyJoinItem=(function(_super){
+	function ApplyJoinItem(){
+		this.joindata=null;
+		ApplyJoinItem.__super.call(this);
+	}
+
+	__class(ApplyJoinItem,'script.usercenter.item.ApplyJoinItem',_super);
+	var __proto=ApplyJoinItem.prototype;
+	__proto.setData=function(data){
+		this.joindata=data;
+		this.account.text=data.ur_phonenumber;
+		this.msg.text=data.jp_msg;
+		this.reqdate.text=data.jp_date;
+		this.agreebtn.on("click",this,this.onAgreeJoin);
+		this.refusebtn.on("click",this,this.onRefuseJoin);
+	}
+
+	__proto.onAgreeJoin=function(){
+		EventCenter.instance.event("AGREE_JOIN_REQUEST",this.joindata);
+	}
+
+	__proto.onRefuseJoin=function(){
+		var param="id="+this.joindata.jp_id+"&opt=0";
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onhandleBack,param,"post");
+	}
+
+	__proto.onhandleBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("REFRESH_JOIN_REQUEST");
+		}
+	}
+
+	return ApplyJoinItem;
+})(ApplyJoinItemUI)
 
 
 //class script.order.SelFactoryItem extends ui.order.OrderAddressItemUI
@@ -58405,30 +59050,6 @@ var SelectAttachBtn=(function(_super){
 })(TabChooseBtnUI)
 
 
-//class script.order.DeliveryTypeItem extends ui.order.OrderAddressItemUI
-var DeliveryTypeItem=(function(_super){
-	function DeliveryTypeItem(){
-		this.deliveryVo=null;
-		DeliveryTypeItem.__super.call(this);
-	}
-
-	__class(DeliveryTypeItem,'script.order.DeliveryTypeItem',_super);
-	var __proto=DeliveryTypeItem.prototype;
-	__proto.setData=function(devo){
-		this.deliveryVo=devo;
-		this.addresstxt.text=this.deliveryVo.deliveryDesc;
-	}
-
-	//ShowSelected=deliveryVo==PaintOrderModel.instance.selectDelivery;
-	__getset(0,__proto,'ShowSelected',null,function(value){
-		this.btnsel.selected=value;
-		this.selCheck.selected=value;
-	});
-
-	return DeliveryTypeItem;
-})(OrderAddressItemUI)
-
-
 //class script.product.AdvertiseProItem extends ui.product.AdvertiseItemUI
 var AdvertiseProItem=(function(_super){
 	function AdvertiseProItem(){
@@ -58493,6 +59114,102 @@ var AdvertiseProItem=(function(_super){
 
 	return AdvertiseProItem;
 })(AdvertiseItemUI)
+
+
+//class script.order.DeliveryTypeItem extends ui.order.OrderAddressItemUI
+var DeliveryTypeItem=(function(_super){
+	function DeliveryTypeItem(){
+		this.deliveryVo=null;
+		DeliveryTypeItem.__super.call(this);
+	}
+
+	__class(DeliveryTypeItem,'script.order.DeliveryTypeItem',_super);
+	var __proto=DeliveryTypeItem.prototype;
+	__proto.setData=function(devo){
+		this.deliveryVo=devo;
+		this.addresstxt.text=this.deliveryVo.deliveryDesc;
+	}
+
+	//ShowSelected=deliveryVo==PaintOrderModel.instance.selectDelivery;
+	__getset(0,__proto,'ShowSelected',null,function(value){
+		this.btnsel.selected=value;
+		this.selCheck.selected=value;
+	});
+
+	return DeliveryTypeItem;
+})(OrderAddressItemUI)
+
+
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(){
+		this.techmainvo=null;
+		this.isSelected=false;
+		this.processCatVo=null;
+		this.attachVo=null;
+		TechBoxItem.__super.call(this);
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.processCatVo=null;
+		this.techmainvo=tvo;
+		this.initView();
+		if(this.techmainvo.preProc_Code=="SPTE10330" || this.techmainvo.preProc_Code=="SPTE10420"){
+			this.techBtn.disabled=PaintOrderModel.instance.batchChangeMatItems !=null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
+			this.mouseEnabled=!this.techBtn.disabled;
+			this.grayimg.visible=!this.mouseEnabled;
+		}
+		if(tvo.selected)
+			this.setSelected(true);
+		else
+		this.setSelected(false);
+	}
+
+	__proto.setAttachVo=function(attachvo){
+		this.processCatVo=null;
+		this.techmainvo=null;
+		this.attachVo=attachvo;
+		this.techBtn.label=this.attachVo.accessory_name;
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.techmainvo=null;
+		this.processCatVo=pvo;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
+	}
+
+	// setSelected(false);
+	__proto.initView=function(){
+		this.techBtn.label=this.techmainvo.preProc_Name;
+	}
+
+	__proto.setSelected=function(sel){
+		this.techBtn.selected=sel;;
+		this.isSelected=sel;
+	}
+
+	__proto.setTechSelected=function(sel){
+		if(this.techmainvo !=null){
+			this.techmainvo.selected=sel;
+			if(sel && this.techmainvo.preProc_attachmentTypeList !=null && this.techmainvo.preProc_attachmentTypeList !="" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPNO" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPPEIJIAN"){
+				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
+			}
+			else{
+				this.techmainvo.attchMentFileId="";
+				this.techmainvo.attchFileId="";
+				this.techmainvo.selectAttachVoList=null;
+			}
+		}
+		else
+		this.processCatVo.selected=sel;
+	}
+
+	__proto.onClickTech=function(index){}
+	return TechBoxItem;
+})(TechorItemUI)
 
 
 //class script.usercenter.OrderCheckListItem extends ui.usercenter.OrderListItemUI
@@ -58577,78 +59294,6 @@ var OrderCheckListItem=(function(_super){
 
 	return OrderCheckListItem;
 })(OrderListItemUI)
-
-
-//class script.order.TechBoxItem extends ui.order.TechorItemUI
-var TechBoxItem=(function(_super){
-	function TechBoxItem(){
-		this.techmainvo=null;
-		this.isSelected=false;
-		this.processCatVo=null;
-		this.attachVo=null;
-		TechBoxItem.__super.call(this);
-	}
-
-	__class(TechBoxItem,'script.order.TechBoxItem',_super);
-	var __proto=TechBoxItem.prototype;
-	__proto.setData=function(tvo){
-		this.processCatVo=null;
-		this.techmainvo=tvo;
-		this.initView();
-		if(this.techmainvo.preProc_Code=="SPTE10330" || this.techmainvo.preProc_Code=="SPTE10420"){
-			this.techBtn.disabled=PaintOrderModel.instance.batchChangeMatItems !=null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
-			this.mouseEnabled=!this.techBtn.disabled;
-			this.grayimg.visible=!this.mouseEnabled;
-		}
-		if(tvo.selected)
-			this.setSelected(true);
-		else
-		this.setSelected(false);
-	}
-
-	__proto.setAttachVo=function(attachvo){
-		this.processCatVo=null;
-		this.techmainvo=null;
-		this.attachVo=attachvo;
-		this.techBtn.label=this.attachVo.accessory_name;
-		this.setSelected(false);
-	}
-
-	__proto.setProcessData=function(pvo){
-		this.techmainvo=null;
-		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name.split("-")[0];
-	}
-
-	// setSelected(false);
-	__proto.initView=function(){
-		this.techBtn.label=this.techmainvo.preProc_Name;
-	}
-
-	__proto.setSelected=function(sel){
-		this.techBtn.selected=sel;;
-		this.isSelected=sel;
-	}
-
-	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null){
-			this.techmainvo.selected=sel;
-			if(sel && this.techmainvo.preProc_attachmentTypeList !=null && this.techmainvo.preProc_attachmentTypeList !="" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPNO" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPPEIJIAN"){
-				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
-			}
-			else{
-				this.techmainvo.attchMentFileId="";
-				this.techmainvo.attchFileId="";
-				this.techmainvo.selectAttachVoList=null;
-			}
-		}
-		else
-		this.processCatVo.selected=sel;
-	}
-
-	__proto.onClickTech=function(index){}
-	return TechBoxItem;
-})(TechorItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI

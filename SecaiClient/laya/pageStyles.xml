@@ -57,4 +57,9 @@
    <item name="product/AdvertiseItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/ProductCateItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="common/TipPanel.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/ApplyJoinMgrPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/ApplyJoinItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/OrganizeMgrPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/OrganizeItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/OrganizeMemberItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

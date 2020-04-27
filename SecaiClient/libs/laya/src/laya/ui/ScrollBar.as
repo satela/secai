@@ -420,6 +420,7 @@ package laya.ui {
 		
 		/**@private */
 		protected function onTargetMouseWheel(e:Event):void {
+			
 			value -= e.delta * _scrollSize;
 			target = _target;
 		}

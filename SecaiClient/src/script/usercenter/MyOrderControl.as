@@ -152,6 +152,9 @@ package script.usercenter
 			
 			dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
 			
+			dateInput.style.width = 150/Browser.pixelRatio;
+			dateInput.style.height = 20/Browser.pixelRatio;
+			
 			//			if(param && param.type == "License")
 			//				file.multiple="";
 			//			else			
@@ -186,6 +189,9 @@ package script.usercenter
 			dateInput2 = Browser.document.createElement("input");
 			
 			dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
+			
+			dateInput2.style.width = 150/Browser.pixelRatio;
+			dateInput2.style.height = 20/Browser.pixelRatio;
 			
 			//			if(param && param.type == "License")
 			//				file.multiple="";
@@ -227,11 +233,15 @@ package script.usercenter
 				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
 				var pt:Point = uiSkin.ordertime.localToGlobal(new Point(uiSkin.ordertime.x,uiSkin.ordertime.y),true);
 				
-				dateInput.style.top = (pt.y - 15) + "px";
-				dateInput.style.left = (pt.x + 15) +  "px";
+				var offset:Number = 0;
+				if(Browser.width > Laya.stage.width)
+					offset = (Browser.width - Laya.stage.width)/2;
 				
-				dateInput2.style.top = (pt.y - 15) + "px";
-				dateInput2.style.left = (pt.x + 205) +  "px";
+				dateInput.style.top = (pt.y - 15)/Browser.pixelRatio + "px";
+				dateInput.style.left = (pt.x + 15/Browser.pixelRatio + offset)/Browser.pixelRatio +  "px";
+				
+				dateInput2.style.top = (pt.y - 15)/Browser.pixelRatio + "px";
+				dateInput2.style.left = (pt.x + 205 + offset)/Browser.pixelRatio +  "px";
 				
 				//trace("pos:" + pt.x + "," + pt.y);
 				//verifycode.style.left = 950 -  uiSkin.mainpanel.hScrollBar.value + "px";

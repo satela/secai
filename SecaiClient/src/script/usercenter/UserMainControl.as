@@ -9,15 +9,18 @@ package script.usercenter
 	import laya.utils.Browser;
 	import laya.utils.Mouse;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
 	import script.ViewManager;
 	
 	import ui.usercenter.AddressMgrPanelUI;
+	import ui.usercenter.ApplyJoinMgrPanelUI;
 	import ui.usercenter.ChargePanelUI;
 	import ui.usercenter.EnterPrizeInfoPaneUI;
 	import ui.usercenter.MyOrdersPanelUI;
+	import ui.usercenter.OrganizeMgrPanelUI;
 	import ui.usercenter.UserMainPanelUI;
 	
 	public class UserMainControl extends Script
@@ -34,6 +37,7 @@ package script.usercenter
 		
 		public static const MY_ORDER:int = 3;
 		
+		private var curViewIndex:int = -1;
 		public function UserMainControl()
 		{
 			super();
@@ -48,13 +52,13 @@ package script.usercenter
 
 			//uiSkin.sp_container.autoSize = true;
 			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
-			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI];
+			viewArr = [EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,null,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
 			
 			
 			
 			btntxtArr = [];
-			titleTxt = ["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单"];
-			for(var i:int=0;i < 9;i++)
+			titleTxt = ["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单","","","组织管理","申请列表"];
+			for(var i:int=0;i < 11;i++)
 			{
 				uiSkin["btntxt" + i].on(Event.CLICK,this,onShowEditView,[i]);
 				uiSkin["btntxt" + i].on(Event.MOUSE_OVER,this,onMouseOverHandler);
@@ -68,6 +72,14 @@ package script.usercenter
 				onShowEditView(0);
 			(uiSkin.panel_main).height = Browser.height;// - 20;
 			(uiSkin.panel_main).width = Browser.width;// - 20;
+
+			if(Userdata.instance.accountType != Constast.ACCOUNT_CREATER)
+			{
+				uiSkin.btntxt9.removeSelf();
+				uiSkin.btntxt10.removeSelf();
+			}
+			//uiSkin.btntxt9.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;
+			//uiSkin.btntxt10.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;
 
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.PAUSE_SCROLL_VIEW,this,onPauseScroll);
@@ -122,6 +134,11 @@ package script.usercenter
 				ViewManager.instance.openView(ViewManager.VIEW_PICMANAGER,true);
 				return;
 			}
+			
+			if(curViewIndex == index)
+				return;
+			curViewIndex = index;
+			
 			uiSkin.toptitle.text = titleTxt[index];
 			uiSkin.bannertitile.text= "/ " + titleTxt[index];
 			while(uiSkin.sp_container.numChildren > 0)

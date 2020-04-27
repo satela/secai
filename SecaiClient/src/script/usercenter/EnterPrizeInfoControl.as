@@ -12,6 +12,7 @@ package script.usercenter
 	import laya.utils.Handler;
 	
 	import model.ChinaAreaModel;
+	import model.ErrorCode;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	import model.users.CityAreaVo;
@@ -109,17 +110,28 @@ package script.usercenter
 			
 			uiSkin.changenamePanel.visible = false;
 			uiSkin.changeNameBtn.visible = false;
+			uiSkin.applybtn.visible = false;
+			uiSkin.applyJoinPanel.visible = false;
 			
 			uiSkin.changeokbtn.on(Event.CLICK,this,onChangeNameOk);
 			uiSkin.changeNameBtn.on(Event.CLICK,this,onShowChangeNamePanel);
 			uiSkin.closebtn.on(Event.CLICK,this,onCloseChangeNamePanel);
+
+			uiSkin.applybtn.on(Event.CLICK,this,onshowApplyPanel);
+			uiSkin.closeapplybtn.on(Event.CLICK,this,onhideApplyPanel);
 
 			uiSkin.btn_uplicense.on(Event.CLICK,this,onUploadlicense);
 			Browser.window.uploadApp = this;
 			initFileOpen();
 			
 			uiSkin.chargebtn.on(Event.CLICK,this,onCharge);
-			//uiSkin.testbox.visible = false;
+			
+			uiSkin.createAccountInput.maxChars = 11;
+			uiSkin.createAccountInput.restrict = "0-9";
+			
+			uiSkin.commentInput.maxChars = 8;
+			
+			uiSkin.applyokbtn.on(Event.CLICK,this,onJoinOrganize);
 			//uiSkin.chongzhi1.on(Event.CLICK,this,onCharge);
 
 //			if(!ChinaAreaModel.hasInit)
@@ -179,6 +191,17 @@ package script.usercenter
 		{
 			uiSkin.changenamePanel.visible = false;
 		}
+		
+		private function onshowApplyPanel():void
+		{
+			uiSkin.applyJoinPanel.visible = true;
+		}
+		
+		private function onhideApplyPanel():void
+		{
+			uiSkin.applyJoinPanel.visible = false;
+
+		}
 		private function getCompanyInfoBack(data:Object):void
 		{
 			if(this.destroyed)
@@ -205,6 +228,10 @@ package script.usercenter
 				townid = result.zone;
 				uiSkin.btnsave.disabled = true;
 				uiSkin.btnsave.label = "已审核";
+			}
+			else if(result.status == 205)
+			{
+				uiSkin.applybtn.visible = true;
 			}
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getAddressFromServer ,this,initView,"parentid=0","post");
 
@@ -377,6 +404,35 @@ package script.usercenter
 			{
 				ViewManager.showAlert("保存失败");
 
+			}
+		}
+		
+		private function onJoinOrganize():void
+		{
+			if(uiSkin.createAccountInput.text.length < 11)
+			{
+				ViewManager.showAlert("请输入正确的企业创建者账号");
+				return;
+			}
+			
+			if(uiSkin.commentInput.text == "")
+			{
+				ViewManager.showAlert("填写备注信息更容易通过申请");
+				return;
+			}
+			var param:String = "phonenumber=" + uiSkin.createAccountInput.text + "&msg=" + uiSkin.commentInput.text;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.joinOrganize,this,onJoinOrganizeBack,param,"post");
+			uiSkin.applyJoinPanel.visible = false;
+			
+		}
+		
+		private function onJoinOrganizeBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				ViewManager.showAlert("申请成功，请等待管理者审核");
 			}
 		}
 		private function hideAddressPanel(e:Event):void

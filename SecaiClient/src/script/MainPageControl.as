@@ -126,6 +126,8 @@ package script {
 				var account:String = UtilTool.getLocalVar("useraccount","");
 				Userdata.instance.userAccount = account;
 				Userdata.instance.isLogin = true;
+				Userdata.instance.accountType = result.usertype;
+				
 				txtLogin.text =  account;
 				txtReg.text = "[退出]";
 				

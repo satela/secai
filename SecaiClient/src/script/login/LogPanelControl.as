@@ -117,8 +117,8 @@ package script.login
 			{
 				Userdata.instance.isLogin = true;
 				Userdata.instance.userAccount = uiSKin.input_account.text;
+				Userdata.instance.accountType = result.usertype;
 
-				
 				//ViewManager.showAlert("登陆成功");
 				EventCenter.instance.event(EventCenter.LOGIN_SUCESS, uiSKin.input_account.text);
 				UtilTool.setLocalVar("useraccount",uiSKin.input_account.text);
