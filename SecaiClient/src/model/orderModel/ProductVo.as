@@ -1,6 +1,8 @@
 package model.orderModel
 {
 	import script.ViewManager;
+	
+	import utils.UtilTool;
 
 	//产品列表 vo
 	public class ProductVo
@@ -119,16 +121,10 @@ package model.orderModel
 			return "";
 		}
 		
-		public function getTotalPrice(area:Number,perimeter:Number,ignoreOther:Boolean = false,longside:Number = 0,picwidth:Number = 0):Number
+		public function getTotalPrice(picwidth:Number,picheight:Number,ignoreOther:Boolean = false):Number
 		{
-			if(measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				var prices:Number = area*(unit_price + additional_unitfee);
-			else
-			{
 				
-				prices = perimeter*(unit_price + additional_unitfee);
-			}
-			
+			var prices:Number = UtilTool.getProcessPrice(picwidth,picheight,measure_unit,unit_price + additional_unitfee,0);			
 			
 			hasDoublePrint = 1;
 			
@@ -137,7 +133,7 @@ package model.orderModel
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther));					
 				}
 				
 			}
@@ -150,7 +146,7 @@ package model.orderModel
 			}
 			if(prices < 0.1)
 				prices = 0.1;
-			return parseFloat(prices.toFixed(1));
+			return parseFloat(prices.toFixed(2));
 		}
 		
 		public function getDanjia():Number
@@ -179,7 +175,7 @@ package model.orderModel
 			return 0;
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,area:Number,perimeter:Number,ignoreOther,picwidth:Number,longside:Number):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,picwidth:Number,picheight:Number,ignoreOther):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -189,39 +185,55 @@ package model.orderModel
 				if(arr[i].selected)
 				{
 					var totalprice:Number = 0;
-					
-					if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-						totalprice = arr[i].preProc_Price * area;
-					else if(arr[i].preProc_Price > 0)
-					{						
-						totalprice = arr[i].preProc_Price * perimeter;
-					}
-					
-					if(arr[i].preProc_Price < 0)
-						hasDoublePrint = 2;
-					if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+					var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code);
+					if(priceInfo != null && priceInfo.length == 3)
 					{
-						if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-						{
-							totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
-						}
-						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
-						{
-							if("SPAS42110" == arr[i].selectAttachVoList[0].accessory_code) //铝合金挂轴只计算宽
-							{
-								totalprice += arr[i].selectAttachVoList[0].accessory_price * picwidth*2;
-							}
-							else
-								totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
-						}
-						else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
-							totalprice += arr[i].selectAttachVoList[0].accessory_price;						
-							
-					}
 					
+						arr[i].measure_unit = priceInfo[0];
+						arr[i].baseprice = priceInfo[1];
+						arr[i].preProc_Price = priceInfo[2];
+//						if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+//							totalprice = arr[i].preProc_Price * area;
+//						else if(arr[i].preProc_Price > 0)
+//						{						
+//							totalprice = arr[i].preProc_Price * perimeter;
+//						}
+						
+						totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+
+						//if(arr[i].preProc_Price < 0)
+						//	hasDoublePrint = 2;
+						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+						{
+							//totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+							if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
+								totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
+							else if(!ignoreOther)
+								totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
+//							if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+//							{
+//								totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
+//							}
+//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
+//							{
+//								if("SPAS42110" == arr[i].selectAttachVoList[0].accessory_code) //铝合金挂轴只计算宽
+//								{
+//									totalprice += arr[i].selectAttachVoList[0].accessory_price * picwidth*2;
+//								}
+//								else
+//									totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+//							}
+//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
+//								totalprice += arr[i].selectAttachVoList[0].accessory_price;						
+								
+						}
+						
+					}
+					//if(arr[i].baseprice != 0)
+					//	totalprice += arr[i].baseprice;
 					prices.push(totalprice);
 					
-					prices = prices.concat(getTechPrice(arr[i].nextMatList,area,perimeter,ignoreOther,picwidth,longside));
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther));
 				}
 			}
 			return prices;

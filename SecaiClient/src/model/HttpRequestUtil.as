@@ -82,6 +82,9 @@ package model
 
 		public static const getManuFactureMatProcPrice:String = "business/getmatprocprice?manufacturer_code=";
 		
+		//获取订单状态
+		public static const getOrderState:String = "business/getorderitemstatus?";
+
 		//充值
 		public static const getCompanyInfo:String = "group/get-info?";//账户信息
 
@@ -191,7 +194,7 @@ package model
 						{
 							ViewManager.showAlert(ErrorCode.ErrorTips[result.status]);
 						}
-						if(result.status == 203)
+						if(result.status == 203 || result.status == 210)
 						{
 							ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL,true);
 						}

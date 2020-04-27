@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":48,
+    "selectedBox":2,
+    "selecteID":3,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
-    "maxID":90,
+    "maxID":93,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -47,7 +47,7 @@
                     "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"presetID":1,"preset":"laya/pages/prefabs/TopBanner.prefab"},
+                    "props":{"y":-1,"x":0,"presetID":1,"preset":"laya/pages/prefabs/TopBanner.prefab"},
                     "nodeParent":4,
                     "label":"Box(TopBanner)",
                     "isOpen":null,
@@ -288,182 +288,255 @@
                 },
                 {
                     "x":30,
-                    "type":"Image",
-                    "searchKey":"Image",
-                    "props":{"y":273,"x":0,"width":1920,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","height":62,"alpha":1},
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":51,"x":0},
                     "nodeParent":4,
-                    "label":"Image",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":77,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,btnUploadPic",
-                    "props":{"y":285,"x":336,"width":141,"var":"btnUploadPic","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"   上传文件","height":40},
-                    "nodeParent":4,
-                    "label":"btnUploadPic",
-                    "isOpen":true,
+                    "label":"Box",
+                    "isOpen":null,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
-                    "compId":82,
+                    "compId":91,
                     "child":[
                         {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button",
-                            "props":{"y":12,"x":21,"skin":"upload/upload.png","mouseEnabled":false},
-                            "nodeParent":82,
-                            "label":"Button",
-                            "isOpen":false,
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"width":1920,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","height":62,"alpha":1},
+                            "nodeParent":91,
+                            "label":"Image",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
-                            "compId":67,
+                            "compId":77,
                             "child":[
-                                ],
-                            "$HIDDEN":false
-                        }],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,btnNewFolder",
-                    "props":{"y":285,"x":495,"width":161,"var":"btnNewFolder","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"   新建文件夹","height":40},
-                    "nodeParent":4,
-                    "label":"btnNewFolder",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":83,
-                    "child":[
+                                ]
+                        },
                         {
                             "type":"Button",
-                            "searchKey":"Button",
-                            "props":{"y":12,"x":21,"skin":"upload/createbtn.png","mouseEnabled":false},
-                            "nodeParent":83,
-                            "label":"Button",
-                            "isOpen":false,
+                            "searchKey":"Button,btnUploadPic",
+                            "props":{"y":11,"x":336,"width":80,"var":"btnUploadPic","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"上传","height":40},
+                            "nodeParent":91,
+                            "label":"btnUploadPic",
+                            "isOpen":true,
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
-                            "compId":68,
+                            "compId":82,
                             "child":[
                                 ],
                             "$HIDDEN":false
-                        }],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,flder0",
-                    "props":{"y":298,"x":812,"var":"flder0","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
-                    "nodeParent":4,
-                    "label":"flder0",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":16,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"HTMLDivElement",
-                    "searchKey":"HTMLDivElement,htmltext",
-                    "props":{"y":161,"x":362,"width":170,"var":"htmltext","innerHTML":"htmlText","height":23},
-                    "nodeParent":4,
-                    "label":"htmltext",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":19,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"CheckBox",
-                    "searchKey":"CheckBox,radiosel",
-                    "props":{"y":164,"x":336,"var":"radiosel","skin":"commers/multicheck.png","labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center"},
-                    "nodeParent":4,
-                    "label":"radiosel",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":20,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Image",
-                    "searchKey":"Image",
-                    "props":{"y":210,"x":320,"width":1280,"skin":"commers/cutline.png"},
-                    "nodeParent":4,
-                    "label":"Image",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":65,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,freshbtn",
-                    "props":{"y":292,"x":1207,"width":80,"var":"freshbtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"刷新","height":30},
-                    "nodeParent":4,
-                    "label":"freshbtn",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":89,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"TextInput",
-                    "searchKey":"TextInput,searchInput",
-                    "props":{"y":289,"x":1331,"width":266,"var":"searchInput","skin":"comp/textinput.png","sizeGrid":"3,3,3,3","prompt":"输入文件名搜索","height":34,"fontSize":14,"font":"SimHei"},
-                    "nodeParent":4,
-                    "label":"searchInput",
-                    "isOpen":true,
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":59,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"y":299,"x":1570,"skin":"commers/searchicon.png"},
-                    "nodeParent":4,
-                    "label":"Button",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":78,
-                    "child":[
-                        ]
+                        },
+                        {
+                            "type":"Button",
+                            "searchKey":"Button,btnNewFolder",
+                            "props":{"y":11,"x":425,"width":80,"var":"btnNewFolder","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"新建","height":40},
+                            "nodeParent":91,
+                            "label":"btnNewFolder",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":83,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label,flder0",
+                            "props":{"y":19,"x":586,"var":"flder0","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
+                            "nodeParent":91,
+                            "label":"flder0",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":16,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"CheckBox",
+                            "searchKey":"CheckBox,radiosel",
+                            "props":{"y":23,"x":1297,"var":"radiosel","skin":"commers/multicheck.png","labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选"},
+                            "nodeParent":91,
+                            "label":"radiosel",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":20,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Button",
+                            "searchKey":"Button,freshbtn",
+                            "props":{"y":16,"x":1356,"width":80,"var":"freshbtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"刷新","height":30},
+                            "nodeParent":91,
+                            "label":"freshbtn",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":89,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"TextInput",
+                            "searchKey":"TextInput,searchInput",
+                            "props":{"y":10,"x":1071,"width":204,"var":"searchInput","skin":"comp/textinput.png","sizeGrid":"3,3,3,3","prompt":"输入文件名搜索","height":34,"fontSize":14,"font":"SimHei"},
+                            "nodeParent":91,
+                            "label":"searchInput",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":59,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Button",
+                            "searchKey":"Button",
+                            "props":{"y":22,"x":1248,"skin":"commers/searchicon.png"},
+                            "nodeParent":91,
+                            "label":"Button",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":78,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":19,"x":744,"text":"已用空间","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
+                            "nodeParent":91,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":87,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"ProgressBar",
+                            "searchKey":"ProgressBar,prgcap",
+                            "props":{"y":16,"x":818,"width":232,"var":"prgcap","skin":"comp/progress.png","sizeGrid":"2,2,2,2","height":20},
+                            "nodeParent":91,
+                            "label":"prgcap",
+                            "isOpen":true,
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":86,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label,leftcapacity",
+                            "props":{"y":17,"x":878,"width":106,"var":"leftcapacity","text":"0m/0G","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"center"},
+                            "nodeParent":91,
+                            "label":"leftcapacity",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":88,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Button",
+                            "searchKey":"Button,btnorder",
+                            "props":{"y":12,"x":1449,"width":152,"var":"btnorder","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"    喷印下单","height":40},
+                            "nodeParent":91,
+                            "label":"btnorder",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":21,
+                            "child":[
+                                {
+                                    "type":"Label",
+                                    "searchKey":"Label,selectNum",
+                                    "props":{"y":11,"x":2,"width":43,"var":"selectNum","text":"10","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#f9f9ef","bold":false,"align":"center"},
+                                    "nodeParent":21,
+                                    "label":"selectNum",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":90,
+                                    "child":[
+                                        ],
+                                    "$HIDDEN":false
+                                }],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label,btnroot",
+                            "props":{"y":19,"x":541,"width":44,"var":"btnroot","text":"全部>","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
+                            "nodeParent":91,
+                            "label":"btnroot",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":69,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":20,"x":529,"width":14,"text":"|","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
+                            "nodeParent":91,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":70,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label,flder1",
+                            "props":{"y":19,"x":636,"var":"flder1","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
+                            "nodeParent":91,
+                            "label":"flder1",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":73,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        },
+                        {
+                            "type":"Label",
+                            "searchKey":"Label,flder2",
+                            "props":{"y":19,"x":680,"var":"flder2","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
+                            "nodeParent":91,
+                            "label":"flder2",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":74,
+                            "child":[
+                                ],
+                            "$HIDDEN":false
+                        }]
                 },
                 {
                     "x":30,
@@ -482,83 +555,9 @@
                 },
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":234,"x":864,"text":"已用空间","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
-                    "nodeParent":4,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":87,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"ProgressBar",
-                    "searchKey":"ProgressBar,prgcap",
-                    "props":{"y":232,"x":938,"width":300,"var":"prgcap","skin":"comp/progress.png","sizeGrid":"2,2,2,2","height":20},
-                    "nodeParent":4,
-                    "label":"prgcap",
-                    "isOpen":true,
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":86,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,leftcapacity",
-                    "props":{"y":232,"x":1030,"width":106,"var":"leftcapacity","text":"0m/0G","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"center"},
-                    "nodeParent":4,
-                    "label":"leftcapacity",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":88,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Button",
-                    "searchKey":"Button,btnorder",
-                    "props":{"y":145,"x":1449,"width":152,"var":"btnorder","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"  喷印下单","height":40},
-                    "nodeParent":4,
-                    "label":"btnorder",
-                    "isOpen":false,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":21,
-                    "child":[
-                        {
-                            "type":"Button",
-                            "searchKey":"Button",
-                            "props":{"y":13,"x":19,"skin":"upload/printorder.png","mouseEnabled":false},
-                            "nodeParent":21,
-                            "label":"Button",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":66,
-                            "child":[
-                                ],
-                            "$HIDDEN":false
-                        }],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
                     "type":"List",
                     "searchKey":"List,picList",
-                    "props":{"y":365,"x":320,"width":1280,"var":"picList","vScrollBarSkin":"comp/vscroll.png","spaceY":10,"spaceX":60,"repeatX":7,"height":708},
+                    "props":{"y":125,"x":320,"width":1280,"var":"picList","vScrollBarSkin":"comp/vscroll.png","spaceY":10,"spaceX":60,"repeatX":7,"height":945},
                     "nodeParent":4,
                     "label":"picList",
                     "isOpen":true,
@@ -572,24 +571,9 @@
                 },
                 {
                     "x":30,
-                    "type":"Sprite",
-                    "searchKey":"Sprite",
-                    "props":{"y":111,"x":337,"texture":"commers/firstpagicon.png"},
-                    "nodeParent":4,
-                    "label":"Sprite",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":63,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":115,"x":365.5,"width":97,"text":"/  上传下单","height":14,"fontSize":14,"font":"SimHei","color":"#817a7a"},
+                    "props":{"y":25,"x":603,"width":97,"text":"/  上传下单","height":14,"fontSize":14,"font":"SimHei","color":"#f8eeee"},
                     "nodeParent":4,
                     "label":"Label",
                     "isDirectory":false,
@@ -602,79 +586,18 @@
                 },
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,btnroot",
-                    "props":{"y":298,"x":766,"width":44,"var":"btnroot","text":"全部>","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
-                    "nodeParent":4,
-                    "label":"btnroot",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":69,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":299,"x":754,"width":14,"text":"|","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
-                    "nodeParent":4,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":70,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,flder1",
-                    "props":{"y":298,"x":861,"var":"flder1","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
-                    "nodeParent":4,
-                    "label":"flder1",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":73,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,flder2",
-                    "props":{"y":298,"x":905,"var":"flder2","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
-                    "nodeParent":4,
-                    "label":"flder2",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":74,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box,boxNewFolder",
                     "props":{"y":0,"x":0,"width":1920,"var":"boxNewFolder","top":0,"left":0,"height":1080},
                     "nodeParent":4,
                     "label":"boxNewFolder",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":48,
                     "child":[
                         {
-                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},
@@ -690,7 +613,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"y":345,"x":710,"width":500,"skin":"commers/choosebg.png","sizeGrid":"10,10,10,10","height":200},
@@ -703,7 +625,6 @@
                             "compId":45,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"TextInput",
                                     "searchKey":"TextInput,input_folename",
                                     "props":{"y":65,"x":37,"width":312,"var":"input_folename","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","prompt":"请输入目录名称","height":46,"fontSize":20},
@@ -718,7 +639,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button,btnSureCreate",
                                     "props":{"y":67,"x":362,"width":100,"var":"btnSureCreate","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
@@ -733,7 +653,6 @@
                                     "$HIDDEN":false
                                 },
                                 {
-                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button,btnCloseInput",
                                     "props":{"y":9,"x":464,"var":"btnCloseInput","skin":"commers/btnclose.png","labelSize":24},
@@ -749,48 +668,7 @@
                                 }],
                             "$HIDDEN":false
                         }],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Text",
-                    "selectedBox":3,
-                    "searchKey":"Text,btnprevfolder",
-                    "props":{"y":298,"x":667,"width":83,"var":"btnprevfolder","text":"返回上一级","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":23,"fontSize":16,"font":"SimHei","color":"#262B2E"},
-                    "nodeParent":4,
-                    "maxID":5,
-                    "label":"btnprevfolder",
-                    "isOpen":null,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":84,
-                    "child":[
-                        {
-                            "type":"Script",
-                            "switchAble":true,
-                            "source":"src/script/prefabScript/LinkTextControl.as",
-                            "searchKey":"Script,LinkTextControl",
-                            "removeAble":true,
-                            "props":{"txttype":2,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
-                            "nodeParent":84,
-                            "label":"LinkTextControl",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":85,
-                            "child":[
-                                ]
-                        }],
-                    "animations":[
-                        {
-                            "nodes":[
-                                ],
-                            "name":"ani1",
-                            "id":1,
-                            "frameRate":24,
-                            "action":0
-                        }]
+                    "$HIDDEN":true
                 }],
             "$HIDDEN":false
         },

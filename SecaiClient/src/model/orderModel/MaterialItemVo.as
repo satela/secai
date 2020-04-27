@@ -9,6 +9,8 @@ package model.orderModel
 		public var preProc_attachmentTypeList:String = "";//  前置工艺附件类型
 		public var preProc_Price: Number = 0;//  前置工艺价格
 
+		public var baseprice: Number = 0;//  底价
+
 		public var is_mandatory:int = 0;// 是否必选工艺
 		public var measure_unit:String = "";//计价单位
 		public var procLvl:int = 0;//工艺层级

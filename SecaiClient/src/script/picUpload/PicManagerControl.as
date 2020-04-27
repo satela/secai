@@ -80,7 +80,7 @@ package script.picUpload
 			for(var i=0;i < 3;i++)
 			uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 
-			uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
+			//uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
 			
 			uiSkin.btnroot.on(Event.CLICK,this,backToRootDir);
 			uiSkin.btnUploadPic.on(Event.CLICK,this,onShowUploadView);
@@ -99,8 +99,9 @@ package script.picUpload
 			
 			initFileOpen();
 			
-			uiSkin.htmltext.style.fontSize = 20;
-			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
+			//uiSkin.htmltext.style.fontSize = 20;
+			//uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
+			uiSkin.selectNum.text = 0 + "";
 			uiSkin.btnSureCreate.on(Event.CLICK,this,onSureCreeate);
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
@@ -111,10 +112,15 @@ package script.picUpload
 			DirectoryFileModel.instance.haselectPic = {};
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
 			uiSkin.on(Event.REMOVED,this,onRemovedFromStage);
-			uiSkin.main_panel.height = Browser.height;
+			var fixedheight:Number = Browser.height;
+			if(Browser.height > Laya.stage.height)
+			{
+				fixedheight = Laya.stage.height;
+			}
+			uiSkin.main_panel.height = fixedheight;
 			uiSkin.main_panel.width = Browser.width;
 			uiSkin.main_panel.hScrollBarSkin = "";
-			uiSkin.picList.height =  Browser.height - 365;
+			uiSkin.picList.height =  fixedheight - 120;
 			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
@@ -124,8 +130,13 @@ package script.picUpload
 		private function onResizeBrower():void
 		{
 			// TODO Auto Generated method stub
-			uiSkin.main_panel.height = Browser.height;
-			uiSkin.picList.height =  Browser.height - 365;
+			var fixedheight:Number = Browser.height;
+			if(Browser.height > Laya.stage.height)
+			{
+				fixedheight = Laya.stage.height;
+			}
+			uiSkin.main_panel.height = fixedheight;
+			uiSkin.picList.height =  fixedheight - 120;
 			uiSkin.main_panel.width = Browser.width;
 
 		}
@@ -191,7 +202,7 @@ package script.picUpload
 			{
 				num++;
 			}
-			uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
+			uiSkin.selectNum.text =  num + "";
 
 			
 		}
@@ -283,7 +294,7 @@ package script.picUpload
 				{
 					num++;
 				}
-				uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>" + num + "</span>" + "<span color='#222222' size='20'>张图片</span>";
+				uiSkin.selectNum.text =  num + "";
 			}
 
 		}

@@ -16,6 +16,7 @@
 	
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
+	import model.Userdata;
 	
 	import org.osmf.layout.ScaleMode;
 	
@@ -115,8 +116,11 @@
 			
 			
 		}
-		private function onVersionLoaded():void {
+		private function onVersionLoaded(e:Event):void {
 			//激活大小图映射，加载小图的时候，如果发现小图在大图合集里面，则优先加载大图合集，而不是小图
+			
+			Userdata.instance.version = Laya.loader.getRes('version.json');
+			console.log("版本号:" + Userdata.instance.version);
 			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas",type:Loader.ATLAS},{url:"res/atlas/order.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}

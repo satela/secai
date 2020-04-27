@@ -267,9 +267,12 @@ package script.login
 			{
 				//verifycode.style.top = 548 - uiSkin.mainpanel.vScrollBar.value + "px";
 				var pt:Point = uiSkin.inputCode.localToGlobal(new Point(uiSkin.inputCode.x,uiSkin.inputCode.y),true);
+				var offset:Number = 0;
+				if(Browser.width > Laya.stage.width)
+					offset = (Browser.width - Laya.stage.width)/2;
 				
 				verifycode.style.top = pt.y/Browser.pixelRatio + "px";
-				verifycode.style.left = (pt.x +  80)/Browser.pixelRatio +  "px";
+				verifycode.style.left = (pt.x +  80 + offset)/Browser.pixelRatio +  "px";
 				
 				verifycode.style.width = 200/Browser.pixelRatio + "px";
 				verifycode.style.height = 50/Browser.pixelRatio + "px";

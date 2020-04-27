@@ -131,6 +131,9 @@ package script {
 				txtLogin.text =  account;
 				txtReg.text = "[退出]";
 				
+				console.log(Browser.document.cookie.split("; "));
+
+				
 				Userdata.instance.loginTime = (new Date()).getTime();
 				UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
 				

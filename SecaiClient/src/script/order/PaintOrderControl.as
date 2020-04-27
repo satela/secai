@@ -51,6 +51,7 @@ package script.order
 		
 		override public function onStart():void
 		{
+			PaintOrderModel.instance.resetData();
 			uiSkin = this.owner as PaintOrderPanelUI;
 			//uiSkin.firstpage.on(Event.CLICK,this,onClosePanel);
 			//uiSkin.panel_main.vScrollBarSkin = "";
@@ -300,10 +301,10 @@ package script.order
 			
 			
 			
-			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(1) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 
-			uiSkin.textPayPrice.innerHTML = "<span color='#262B2E' size='20'>应付总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(2) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
+			uiSkin.textPayPrice.innerHTML = "<span color='#262B2E' size='20'>应付总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(1) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			
 		}
 		private function onGetOutPutAddress(data:*):void
@@ -822,8 +823,8 @@ package script.order
 					}
 				}
 				
-				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(2);
-				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
+				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(1);
+				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(1);
 
 				arr.push(odata);
 			}

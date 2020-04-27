@@ -270,18 +270,18 @@ package script.order
 				updateOrderData(curproductvo);
 				var area:Number = (finalHeight * finalWidth)/10000;
 				var perimeter:Number = (finalHeight + finalWidth)*2/100;
-				var longside:Number = Math.max(finalHeight,finalWidth)/100;
+				//var longside:Number = Math.max(finalHeight,finalWidth)/100;
 
 //				if(area < 0.1)
 //					area = 0.1;
 //				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(area,perimeter,true,longside,finalWidth/100)/area).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(area,perimeter,true,longside,finalWidth/100)/perimeter).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(area,perimeter,false,longside,finalWidth/100)).toFixed(1) + "";
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
 				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
 
 			}
@@ -297,14 +297,14 @@ package script.order
 		}
 		private function onShowMaterialView():void
 		{
-//			for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
-//			{
-//				if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code] == null)
-//				{
-//					ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
-//					return;
-//				}
-//			}
+			for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
+			{
+				if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code] == null)
+				{
+					ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
+					return;
+				}
+			}
 			// TODO Auto Generated method stub
 			if(PaintOrderModel.instance.selectAddress == null)
 			{
@@ -324,7 +324,6 @@ package script.order
 			updateOrderData(provo);
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
-			var longside:Number = Math.max(finalHeight,finalWidth)/100;
 			
 			
 			var hasSelectedTech:Array = provo.getAllSelectedTech();
@@ -380,12 +379,12 @@ package script.order
 //				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(area,perimeter,true,longside,finalWidth/100)/area).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(area,perimeter,true,longside,finalWidth/100)/perimeter).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(area,perimeter,false,longside,finalWidth/100)).toFixed(1) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -418,12 +417,11 @@ package script.order
 			
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
-			var longside:Number = Math.max(finalHeight,finalWidth)/100;
 
 //			if(area < 0.1)
 //				area = 0.1;
 			
-			this.ordervo.orderPrice = productVo.getTotalPrice(area,perimeter,false,longside,finalWidth/100);
+			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false);
 			if(this.ordervo.orderPrice < 0.1)
 				this.ordervo.orderPrice = 0.1;
 			

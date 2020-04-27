@@ -13,6 +13,8 @@ package laya.display {
 	import laya.utils.SceneUtils;
 	import laya.utils.Timer;
 	
+	import model.Userdata;
+	
 	/**
 	 * 场景类，负责场景创建，加载，销毁等功能
 	 * 场景被从节点移除后，并不会被自动垃圾机制回收，如果想回收，请调用destroy接口，可以通过unDestroyedScenes属性查看还未被销毁的场景列表
@@ -72,7 +74,9 @@ package laya.display {
 		 * @param path 场景地址。
 		 */
 		public function loadScene(path:String):void {
-			var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + (new Date()).getTime().toString();;
+			//var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + (new Date()).getTime().toString();;
+			var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + Userdata.instance.version;
+
 			var view:Object = Laya.loader.getRes(url);
 			if (view) {
 				createView(view);
