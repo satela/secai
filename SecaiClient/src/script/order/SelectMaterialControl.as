@@ -288,15 +288,32 @@ package script.order
 				var matvo:MatetialClassVo = uiSkin.tablist.array[uiSkin.tablist.selectedIndex] as MatetialClassVo;
 				matvo.childMatList = [];
 				//var temp:Array = [];
-				
+				var allmaterial:Object = {};
 				for(var i:int=0;i < result.length;i++)
 				{
-					matvo.childMatList.push(new ProductVo(result[i]));
-					trace("产品类型：" + result[i].is_merchandise);
+					if(!allmaterial.hasOwnProperty(result[i].prod_code))
+					{
+						var proVo:ProductVo = new ProductVo(result[i]);
+							proVo.priority = PaintOrderModel.instance.getManuFacturePriority(proVo.manufacturer_code);
+						allmaterial[result[i].prod_code] = proVo;
+					}
+					else
+					{
+						if(allmaterial[result[i].prod_code].priority > PaintOrderModel.instance.getManuFacturePriority(result[i].prod_code))
+						{
+							proVo = new ProductVo(result[i]);
+							proVo.priority = PaintOrderModel.instance.getManuFacturePriority(proVo.manufacturer_code);
+							allmaterial[result[i].prod_code] = proVo;
+						}
+					}
+					///matvo.childMatList.push(new ProductVo(result[i]));
+					//trace("产品类型：" + result[i].is_merchandise);
 					//if(result[i].manufacturer_code == PaintOrderModel.instance.selectFactoryInMat.org_code)
 					//	temp.push(matvo.childMatList[matvo.childMatList.length - 1]);
 
 				}
+				for(var mate in allmaterial)
+					matvo.childMatList.push(allmaterial[mate])
 				matvo.childMatList.sort(sortMaterial);
 				
 				uiSkin.matlist.array = matvo.childMatList;

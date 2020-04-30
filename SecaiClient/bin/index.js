@@ -11,3 +11,4 @@ window.screenOrientation = "sensor_landscape";
 //loadLib("libs/box2d.js");
 //-----libs-end-------
 loadLib("js/bundle.js");
+//loadLib("js/bundle.min.js?" + Math.random());

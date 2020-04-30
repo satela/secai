@@ -141,7 +141,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
-			HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
+			//HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			//ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);
 			

@@ -14,7 +14,7 @@ package model.users
 
 		public var contact_phone:String = "18956589865";
 		
-		public var manufacture_priority:int = 0;//优先级
+		public var manu_priority:int = 0;//优先级
 		
 		public function FactoryInfoVo(fvo:Object)
 		{

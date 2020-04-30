@@ -154,5 +154,20 @@ package model.orderModel
 			}
 			return sn;
 		}
+		
+		public function getManuFacturePriority(manufacCode:String):int
+		{
+			var manuFacList:Array = outPutAddr;
+			if(manuFacList != null)
+			{
+				for(var i:int=0;i < manuFacList.length;i++)
+				{
+					if(manuFacList[i].org_code == manufacCode)
+						return manuFacList[i].manu_priority;
+				}
+			}
+			
+			return 0;
+		}
 	}
 }

@@ -31,6 +31,8 @@ package model.orderModel
 		private var hasDoublePrint:int = 1; //如果有双面打印的工艺，这个等于2，用于主材料计算价格
 		
 		public var merchanList:Array = [];
+		
+		public var priority:int = 0; //优先级，由所属输出中心优先级决定
 		public function ProductVo(data:Object)
 		{
 			for(var key in data)
