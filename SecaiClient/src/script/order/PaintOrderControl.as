@@ -134,6 +134,7 @@ package script.order
 			uiSkin.panelout.hScrollBarSkin = "";
 			
 			uiSkin.panelbottom.hScrollBarSkin = "";
+			uiSkin.panelout.hScrollBar.mouseWheelEnable = false;
 			
 
 			uiSkin.panelout.width = Browser.width;
@@ -355,10 +356,20 @@ package script.order
 					//this.uiSkin.factorytxt.text = "你选择的地址暂无生产商";
 				}
 			}
+			
+			for(var i:int=0; i < orderlist.length;i++)
+			{
+				var orderitem:PicOrderItem = orderlist[i];
+				orderitem.reset();
+			}
+			
+			this.resetOrderInfo();
 		}
 		
 		private function onGetDeliveryBack(data:Object):void
 		{
+			if(this.destroyed)
+				return;
 			var result:Object = JSON.parse(data as String);
 			while(uiSkin.deliverbox.numChildren > 0)
 				uiSkin.deliverbox.removeChildAt(0);
@@ -825,7 +836,8 @@ package script.order
 				
 				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(1);
 				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(1);
-
+				odata.order_amountStr = "0.01";
+				odata.money_paidStr = "0.01";
 				arr.push(odata);
 			}
 			return arr;

@@ -120,6 +120,21 @@ package script.order
 			alighComponet();
 		}
 		
+		public function reset():void
+		{
+			this.mattxt.text = "";
+			this.architype.text = "";
+			this.price.text = "0";
+			this.total.text = "0";
+			
+			this.ordervo.orderData = null;
+			
+			this.yixingimg.visible = false;
+			this.backimg.visible = false;
+			this.yingxback.visible = false;
+			
+			
+		}
 		private function onLockChange():void
 		{
 			if(locked)

@@ -697,7 +697,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PicManagePanel.scene";
+	GameConfig.startScene="order/OrderItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1402,6 +1402,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2771,8 +2772,22 @@ var UtilTool=(function(){
 		else return 0;
 	}
 
+	UtilTool.getYixingPrice=function(picinfo,lineNum,lineLength,basePrice,unitPrice){
+		var linemeter=(lineLength/picinfo.picWidth)*picinfo.picPhysicWidth;
+		return 0;
+	}
+
 	UtilTool.isMeasureUnitByNum=function(unit){
 		return unit=="个" || unit=="件" || unit=="套";
+	}
+
+	UtilTool.isValidPic=function(picInfo){
+		if(picInfo.colorspace.toUpperCase()!="CMYK")
+			return false;
+		var validClass=["JPG","JPEG","TIF","TIFF"];
+		if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase())< 0)
+			return false;
+		return true;
 	}
 
 	__static(UtilTool,
@@ -36217,6 +36232,7 @@ var RegisterCntrol=(function(_super){
 		this.uiSkin.input_phonecode.maxChars=6;
 		this.uiSkin.input_pwd.maxChars=20;
 		this.uiSkin.input_pwd.type="password";
+		this.uiSkin.nameInput.maxChars=20;
 		this.uiSkin.inputCode.maxChars=8;
 		this.uiSkin.sevicepro.leading=5;
 		this.uiSkin.sevicepro.text=this.serviceTxt;
@@ -36338,6 +36354,10 @@ var RegisterCntrol=(function(_super){
 				Browser.window.alert("请填写正确的手机号");
 				return;
 			}
+			if(this.uiSkin.nameInput.text.length==0){
+				Browser.window.alert("请输入用户名");
+				return;
+			}
 			if(this.uiSkin.input_pwd.text.length < 6){
 				Browser.window.alert("密码长度至少6位");
 				return;
@@ -36346,7 +36366,7 @@ var RegisterCntrol=(function(_super){
 				Browser.window.alert("密码确认不对");
 				return;
 			};
-			var param="phone="+this.uiSkin.input_phone.text+"&pwd="+this.uiSkin.input_pwd.text+"&code="+this.uiSkin.input_phonecode.text;
+			var param="phone="+this.uiSkin.input_phone.text+"&name="+this.uiSkin.nameInput.text+"&pwd="+this.uiSkin.input_pwd.text+"&code="+this.uiSkin.input_phonecode.text;
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/create?",this,this.onRegisterBack,param,"post");
 		}
 		else{
@@ -36523,15 +36543,11 @@ var PicManagerControl=(function(_super){
 		var pic;
 		for(var $each_pic in DirectoryFileModel.instance.haselectPic){
 			pic=DirectoryFileModel.instance.haselectPic[$each_pic];
-			if(pic.colorspace.toUpperCase()=="SRGB"){
-				hassrgb=true;
-				break ;
+			if(UtilTool.isValidPic(pic)==false){
+				ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
+				return;
 			}
 		}
-		if(hassrgb){
-			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:this.confirmOrderNow});
-		}
-		else
 		ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
 	}
 
@@ -36805,6 +36821,7 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.panelout.vScrollBarSkin="";
 		this.uiSkin.panelout.hScrollBarSkin="";
 		this.uiSkin.panelbottom.hScrollBarSkin="";
+		this.uiSkin.panelout.hScrollBar.mouseWheelEnable=false;
 		this.uiSkin.panelout.width=Browser.width;
 		this.uiSkin.panelbottom.width=Browser.width;
 		this.uiSkin.deliversp.autoSize=true;
@@ -36934,11 +36951,17 @@ var PaintOrderControl=(function(_super){
 				PaintOrderModel.instance.productList=[];
 			}
 		}
+		for(var i=0;i < this.orderlist.length;i++){
+			var orderitem=this.orderlist[i];
+			orderitem.reset();
+		}
+		this.resetOrderInfo();
 	}
 
-	//this.uiSkin.factorytxt.text="你选择的地址暂无生产商";
 	__proto.onGetDeliveryBack=function(data){
 		var _$this=this;
+		if(this.destroyed)
+			return;
 		var result=JSON.parse(data);
 		while(this.uiSkin.deliverbox.numChildren > 0)
 		this.uiSkin.deliverbox.removeChildAt(0);
@@ -37278,6 +37301,8 @@ var PaintOrderControl=(function(_super){
 			}
 			odata.money_paidStr=(odata.order_amountStr).toFixed(1);
 			odata.order_amountStr=(odata.order_amountStr).toFixed(1);
+			odata.order_amountStr="0.01";
+			odata.money_paidStr="0.01";
 			arr.push(odata);
 		}
 		return arr;
@@ -40586,20 +40611,14 @@ var SelectPicControl=(function(_super){
 
 	__proto.onConfirmSelect=function(){
 		if(!((this.param instanceof model.orderModel.MaterialItemVo ))){
-			var hassrgb=false;
 			var pic;
 			for(var $each_pic in DirectoryFileModel.instance.haselectPic){
 				pic=DirectoryFileModel.instance.haselectPic[$each_pic];
-				if(pic.colorspace.toUpperCase()=="SRGB"){
-					hassrgb=true;
-					break ;
+				if(UtilTool.isValidPic(pic)==false){
+					ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
+					return;
 				}
 			}
-			if(hassrgb){
-				ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:this.confirmOrderNow});
-				return;
-			}
-			else
 			EventCenter.instance.event("ADD_PIC_FOR_ORDER");
 		}
 		else if((this.param).attchFileId==null || (this.param).attchFileId==""){
@@ -53530,6 +53549,7 @@ var RegisterPanelUI=(function(_super){
 		this.btnGetCode=null;
 		this.btnClose=null;
 		this.btnReg=null;
+		this.nameInput=null;
 		this.contractpanel=null;
 		this.txtpanel=null;
 		this.sevicepro=null;
@@ -53944,6 +53964,17 @@ var PicOrderItem=(function(_super){
 		this.height=113;
 		this.bgimg.height=this.height;
 		this.alighComponet();
+	}
+
+	__proto.reset=function(){
+		this.mattxt.text="";
+		this.architype.text="";
+		this.price.text="0";
+		this.total.text="0";
+		this.ordervo.orderData=null;
+		this.yixingimg.visible=false;
+		this.backimg.visible=false;
+		this.yingxback.visible=false;
 	}
 
 	__proto.onLockChange=function(){

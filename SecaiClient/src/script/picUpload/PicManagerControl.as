@@ -253,19 +253,15 @@ package script.picUpload
 			
 			for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
 			{
-				if(pic.colorspace.toUpperCase() == "SRGB")
+				if(UtilTool.isValidPic(pic) == false)
 				{
-					hassrgb = true;
-					break;
+					ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
+					return;
 				}
 			}
 			
-			if(hassrgb)
-			{
-				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:confirmOrderNow});
-			}
-			else
-				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			
+			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
 		private function confirmOrderNow(b:Boolean):void

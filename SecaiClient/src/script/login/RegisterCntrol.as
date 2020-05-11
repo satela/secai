@@ -108,6 +108,8 @@ package script.login
 			uiSkin.input_pwd.maxChars = 20;
 			uiSkin.input_pwd.type = Input.TYPE_PASSWORD;
 			
+			uiSkin.nameInput.maxChars = 20;
+			
 //			uiSkin.input_receiver.maxChars = 10;
 //			uiSkin.input_receiverphone.maxChars = 11;
 //			uiSkin.input_receiverphone.restrict = "0-9";
@@ -353,6 +355,12 @@ package script.login
 					Browser.window.alert("请填写正确的手机号");
 					return;
 				}
+				if(uiSkin.nameInput.text.length == 0)
+				{
+					Browser.window.alert("请输入用户名");
+					return;
+				}
+				
 				if(uiSkin.input_pwd.text.length < 6)
 				{
 					Browser.window.alert("密码长度至少6位");
@@ -414,7 +422,7 @@ package script.login
 //					return;
 //				}
 				
-				var param:String = "phone=" + uiSkin.input_phone.text + "&pwd=" + uiSkin.input_pwd.text + "&code=" + uiSkin.input_phonecode.text;
+				var param:String = "phone=" + uiSkin.input_phone.text + "&name=" + uiSkin.nameInput.text + "&pwd=" + uiSkin.input_pwd.text + "&code=" + uiSkin.input_phonecode.text;
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.registerUrl,this,onRegisterBack,param,"post");
 
 			}

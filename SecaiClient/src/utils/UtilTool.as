@@ -670,9 +670,27 @@ package utils
 			else return 0;
 		}
 		
+		public static function getYixingPrice(picinfo:PicInfoVo,lineNum:int,lineLength:int,basePrice:Number,unitPrice:Number):Number
+		{			
+			var linemeter:Number = (lineLength/picinfo.picWidth) * picinfo.picPhysicWidth;
+			//var scales:Number = 
+			return 0;
+		}
 		public static function isMeasureUnitByNum(unit:String):Boolean
 		{
 			return unit == OrderConstant.MEASURE_UNIT_SINGLE_NUM || unit == OrderConstant.MEASURE_UNIT_SINGLE_SUIT || unit == OrderConstant.MEASURE_UNIT_SINGLE_TAO;
+		}
+		
+		public static function isValidPic(picInfo:PicInfoVo):Boolean
+		{
+			if(picInfo.colorspace.toUpperCase() != "CMYK")
+				return false;
+			
+			var validClass:Array = ["JPG","JPEG","TIF","TIFF"];
+			if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase()) < 0)
+				return false;
+			
+			return true;
 		}
 	}
 }

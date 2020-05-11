@@ -18,6 +18,7 @@ package ui.login {
 		public var btnGetCode:Button;
 		public var btnClose:Button;
 		public var btnReg:Button;
+		public var nameInput:TextInput;
 		public var contractpanel:Panel;
 		public var txtpanel:Panel;
 		public var sevicepro:Text;
