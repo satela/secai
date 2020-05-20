@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":93,
-    "selecteID":11,
+    "selectedBox":4,
+    "selecteID":96,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
-    "maxID":96,
+    "maxID":97,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -53,14 +53,13 @@
                     "nodeParent":4,
                     "maxID":17,
                     "label":"Box(TopBanner)",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":93,
                     "child":[
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"presetID":2,"preset":"laya/pages/prefabs/TopBanner.prefab"},
@@ -75,7 +74,6 @@
                             "$LOCKED":true
                         },
                         {
-                            "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
                             "props":{"presetID":3,"preset":"laya/pages/prefabs/TopBanner.prefab"},
@@ -89,7 +87,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":16,"presetID":4,"preset":"laya/pages/prefabs/TopBanner.prefab"},
@@ -103,7 +100,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text",
@@ -144,7 +140,6 @@
                                 }]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text",
@@ -185,7 +180,6 @@
                                 }]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text",
@@ -226,7 +220,6 @@
                                 }]
                         },
                         {
-                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text",
@@ -267,7 +260,6 @@
                                 }]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":16,"presetID":13,"preset":"laya/pages/prefabs/TopBanner.prefab"},
@@ -281,7 +273,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Script",
                             "switchAble":true,
                             "source":"src/script/prefabScript/TopBannerControl.as",
@@ -314,14 +305,13 @@
                     "props":{"y":51,"x":0},
                     "nodeParent":4,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":91,
                     "child":[
                         {
-                            "x":45,
                             "type":"Image",
                             "searchKey":"Image",
                             "props":{"width":1920,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","height":62,"alpha":1},
@@ -336,7 +326,6 @@
                             "$LOCKED":true
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnUploadPic",
                             "props":{"y":11,"x":336,"width":80,"var":"btnUploadPic","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"上传","height":40},
@@ -352,7 +341,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnNewFolder",
                             "props":{"y":11,"x":425,"width":80,"var":"btnNewFolder","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"新建","height":40},
@@ -368,7 +356,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,flder0",
                             "props":{"y":21,"x":586,"var":"flder0","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
@@ -383,7 +370,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"CheckBox",
                             "searchKey":"CheckBox,radiosel",
                             "props":{"y":23,"x":1297,"var":"radiosel","skin":"commers/multicheck.png","labelSize":16,"labelColors":"#0,#0,#0","labelAlign":"center","label":"全选"},
@@ -398,7 +384,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,freshbtn",
                             "props":{"y":16,"x":1356,"width":80,"var":"freshbtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"刷新","height":30},
@@ -412,7 +397,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,searchInput",
                             "props":{"y":14,"x":1131,"width":144,"var":"searchInput","skin":"comp/textinput.png","sizeGrid":"3,3,3,3","prompt":"输入文件名搜索","height":34,"fontSize":14,"font":"SimHei"},
@@ -428,7 +412,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button",
                             "props":{"y":23,"x":1248,"skin":"commers/searchicon.png"},
@@ -442,7 +425,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":21,"x":925,"text":"已用空间","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
@@ -457,7 +439,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"ProgressBar",
                             "searchKey":"ProgressBar,prgcap",
                             "props":{"y":21,"x":999,"width":126,"var":"prgcap","skin":"comp/progress.png","sizeGrid":"2,2,2,2","height":20},
@@ -472,7 +453,6 @@
                                 ]
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,leftcapacity",
                             "props":{"y":21,"x":1008,"width":106,"var":"leftcapacity","text":"0m/0G","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"center"},
@@ -487,7 +467,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnorder",
                             "props":{"y":11,"x":1449,"width":152,"var":"btnorder","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"    喷印下单","height":40},
@@ -500,7 +479,6 @@
                             "compId":21,
                             "child":[
                                 {
-                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label,selectNum",
                                     "props":{"y":11,"x":2,"width":43,"var":"selectNum","text":"10","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#f9f9ef","bold":false,"align":"center"},
@@ -517,7 +495,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,btnroot",
                             "props":{"y":22,"x":541,"width":44,"var":"btnroot","text":"全部>","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
@@ -532,7 +509,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":22,"x":529,"width":14,"text":"|","overflow":"scroll","mouseEnabled":true,"height":18,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":true,"align":"left"},
@@ -547,7 +523,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,flder1",
                             "props":{"y":21,"x":636,"var":"flder1","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
@@ -562,7 +537,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,flder2",
                             "props":{"y":21,"x":680,"var":"flder2","text":"南京>","overflow":"scroll","mouseEnabled":true,"height":19,"fontSize":16,"font":"SimHei","color":"#262b2e","bold":false,"align":"left"},
@@ -622,6 +596,20 @@
                     "child":[
                         ],
                     "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,seltips",
+                    "props":{"y":520,"x":560,"width":800,"var":"seltips","text":"选择异形切割图片中","mouseEnabled":false,"fontSize":40,"font":"SimSun","color":"#554949","align":"center"},
+                    "nodeParent":4,
+                    "label":"seltips",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":96,
+                    "child":[
+                        ]
                 },
                 {
                     "x":30,

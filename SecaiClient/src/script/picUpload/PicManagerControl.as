@@ -46,28 +46,17 @@ package script.picUpload
 			
 			directTree = [];
 			uiSkin = this.owner as PicManagePanelUI; 
-			//uiSkin.btnNewDir.on(Event.CLICK,this,onCreateNewDirect);
-			//uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
 			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
 
 			createbox = uiSkin.boxNewFolder;
 			createbox.visible = false;
-			//uiSkin.firstpage.underline = true;
-			//uiSkin.firstpage.underlineColor = "#121212";
-			
-			//uiSkin.firstpage.on(Event.CLICK,this,onBackToMain);
+		
 			
 			uiSkin.input_folename.maxChars = 10;
 			uiSkin.btnCloseInput.on(Event.CLICK,this,onCloseCreateFolder);
 
-//			uiSkin.folderList.itemRender = DirectFolderItem;
-//			uiSkin.folderList.vScrollBarSkin = "";
-//			uiSkin.folderList.selectEnable = true;
-//			uiSkin.folderList.spaceY = 2;
-//			uiSkin.folderList.renderHandler = new Handler(this, updateDirectItem);
-//			
-//			uiSkin.folderList.selectHandler = new Handler(this,onSlecteDirect);
+
 			
 			uiSkin.picList.itemRender = PicInfoItem;
 			//uiSkin.picList.scrollBar.autoHide = true;
@@ -88,19 +77,13 @@ package script.picUpload
 			uiSkin.filetypeRadio.visible = false;
 			uiSkin.radiosel.on(Event.CLICK,this,onSelectAllPic);
 			uiSkin.freshbtn.on(Event.CLICK,this,onFreshList);
-			//Laya.timer.once(10,this,function():void
-			//{
-				//uiSkin.folderList.array =  ["南京","武打片","日本","电视","你妹的"];
-				//uiSkin.folderList.array = [];
-				uiSkin.picList.array = [];
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
+			
+			uiSkin.picList.array = [];
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDirectoryList,this,onGetTopDirListBack,"path=0|","post");
 
-			//});
 			
 			initFileOpen();
 			
-			//uiSkin.htmltext.style.fontSize = 20;
-			//uiSkin.htmltext.innerHTML =  "<span color='#222222' size='20'>已选择</span>" + "<span color='#FF0000' size='20'>0</span>" + "<span color='#222222' size='20'>张图片</span>";
 			uiSkin.selectNum.text = 0 + "";
 			uiSkin.btnSureCreate.on(Event.CLICK,this,onSureCreeate);
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
@@ -108,6 +91,11 @@ package script.picUpload
 
 			EventCenter.instance.on(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+
+			EventCenter.instance.on(EventCenter.START_SELECT_YIXING_PIC,this,onStartSelectRelate);
+			EventCenter.instance.on(EventCenter.START_SELECT_BACK_PIC,this,onStartSelectBackRelate);
+
+			EventCenter.instance.on(EventCenter.STOP_SELECT_RELATE_PIC,this,stopSelectRelate);
 
 			DirectoryFileModel.instance.haselectPic = {};
 			uiSkin.searchInput.on(Event.INPUT,this,onSearchInput);
@@ -121,6 +109,8 @@ package script.picUpload
 			uiSkin.main_panel.width = Browser.width;
 			uiSkin.main_panel.hScrollBarSkin = "";
 			uiSkin.picList.height =  fixedheight - 120;
+			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
+			uiSkin.seltips.visible = false;
 			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
@@ -140,7 +130,34 @@ package script.picUpload
 			uiSkin.main_panel.width = Browser.width;
 
 		}
+		private function onStartSelectRelate():void
+		{
+			Laya.stage.on(Event.CLICK,this,stopSelectRelate);
+			uiSkin.seltips.visible = true;
+			uiSkin.seltips.text = "选择异形切割图片中";
+
+		}
+		private function onStartSelectBackRelate():void
+		{
+			Laya.stage.on(Event.CLICK,this,stopSelectRelate);
+			uiSkin.seltips.visible = true;
+			uiSkin.seltips.text = "选择反面图片中";
+
+		}
 		
+		
+		private function stopSelectRelate(e:Event):void
+		{
+			//trace(e.target);
+			
+			if(e != null && this.uiSkin.picList.hitTestPoint(e.stageX,e.stageY))
+				return;
+			Laya.stage.off(Event.CLICK,this,stopSelectRelate);
+			uiSkin.seltips.visible = false;
+			DirectoryFileModel.instance.curOperateFile = null;
+
+
+		}
 		private function onGetLeftCapacitBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -261,6 +278,7 @@ package script.picUpload
 			}
 			
 			
+			
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
@@ -374,7 +392,10 @@ package script.picUpload
 			EventCenter.instance.off(EventCenter.UPDATE_FILE_LIST,this,getFileList);
 			EventCenter.instance.off(EventCenter.SELECT_PIC_ORDER,this,seletPicToOrder);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			EventCenter.instance.off(EventCenter.START_SELECT_YIXING_PIC,this,onStartSelectRelate);
+			EventCenter.instance.off(EventCenter.START_SELECT_BACK_PIC,this,onStartSelectBackRelate);
 
+			EventCenter.instance.off(EventCenter.STOP_SELECT_RELATE_PIC,this,stopSelectRelate);
 			Browser.document.body.removeChild(file);//添加到舞台
 
 		}
@@ -426,50 +447,16 @@ package script.picUpload
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				//if(isCreateTopDir)
-				//{
-//					var picinfo:PicInfoVo = new PicInfoVo(result.dir,0);
-//					uiSkin.folderList.addItem(picinfo);
-//					if(DirectoryFileModel.instance.topDirectList.length == 1)
-//					{
-//						(uiSkin.folderList.cells[0] as DirectFolderItem).ShowSelected = true;
-//						DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.topDirectList[0];
-//						directTree.push(DirectoryFileModel.instance.curSelectDir);
-//
-//						updateCurDirectLabel();
-					//}
-				//}
-//				else
-//				{
+
 					 var picinfo:PicInfoVo = new PicInfoVo(result.dir,0);
 					uiSkin.picList.addItem(picinfo);
 					uiSkin.radiosel.selected = false;
 
 					curFileList = uiSkin.picList.array;
-//				}
 			}
 		}
 		
-		private function onSlecteDirect(index:int):void
-		{
-//			for each(var item:DirectFolderItem in uiSkin.folderList.cells)
-//			{
-//				item.ShowSelected = item.directData == uiSkin.folderList.array[index];
-//			}
-//			//(uiSkin.folderList.cells[index] as DirectFolderItem).ShowSelected = true;
-//			var picinfo:PicInfoVo =  uiSkin.folderList.array[index];
-//			//curDirect = picinfo.parentDirect + picinfo.directName + "|";
-//			DirectoryFileModel.instance.curSelectDir = picinfo;
-//			
-//			directTree = [];
-//			directTree.push(DirectoryFileModel.instance.curSelectDir);
-//
-//
-//			updateCurDirectLabel();
-//			getFileList();
-			
-		}
-		
+
 		private function onSelectChildFolder(filedata:PicInfoVo):void
 		{
 			DirectoryFileModel.instance.curSelectDir = filedata;

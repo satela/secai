@@ -1,5 +1,7 @@
 package model.orderModel
 {
+	import model.picmanagerModel.PicInfoVo;
+	
 	import script.ViewManager;
 	
 	import utils.UtilTool;
@@ -123,7 +125,7 @@ package model.orderModel
 			return "";
 		}
 		
-		public function getTotalPrice(picwidth:Number,picheight:Number,ignoreOther:Boolean = false):Number
+		public function getTotalPrice(picwidth:Number,picheight:Number,ignoreOther:Boolean = false,picinfovo:PicInfoVo = null):Number
 		{
 				
 			var prices:Number = UtilTool.getProcessPrice(picwidth,picheight,measure_unit,unit_price + additional_unitfee,0);			
@@ -131,11 +133,12 @@ package model.orderModel
 			hasDoublePrint = 1;
 			
 			var allprices:Array = [];
+			var haselectTech:Array = getAllSelectedTech();
 			for(var i:int=0;i < prcessCatList.length;i++)
 			{
 				if(prcessCatList[i].selected)
 				{
-					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther));					
+					allprices = allprices.concat(getTechPrice(prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther,picinfovo,haselectTech));					
 				}
 				
 			}
@@ -177,7 +180,7 @@ package model.orderModel
 			return 0;
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,picwidth:Number,picheight:Number,ignoreOther):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,picwidth:Number,picheight:Number,ignoreOther,picinfovo:PicInfoVo,techlist:Array):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -187,7 +190,8 @@ package model.orderModel
 				if(arr[i].selected)
 				{
 					var totalprice:Number = 0;
-					var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code);
+					
+					var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
 					if(priceInfo != null && priceInfo.length == 3)
 					{
 					
@@ -200,8 +204,10 @@ package model.orderModel
 //						{						
 //							totalprice = arr[i].preProc_Price * perimeter;
 //						}
-						
-						totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+						if(arr[i].preProc_Code != OrderConstant.UNNORMAL_CUT_TECHNO)
+							totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+						else
+							totalprice = UtilTool.getYixingPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price);
 
 						//if(arr[i].preProc_Price < 0)
 						//	hasDoublePrint = 2;
@@ -235,13 +241,13 @@ package model.orderModel
 					//	totalprice += arr[i].baseprice;
 					prices.push(totalprice);
 					
-					prices = prices.concat(getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther));
+					prices = prices.concat(getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther,picinfovo,techlist));
 				}
 			}
 			return prices;
 		}
 		
-		private function getMaterialProInfoList(arr:Vector.<MaterialItemVo>):Array
+		private function getMaterialProInfoList(arr:Vector.<MaterialItemVo>,picinfo:PicInfoVo):Array
 		{
 			var prolist:Array = [];
 			if(arr == null)
@@ -253,9 +259,15 @@ package model.orderModel
 					var procname:String = arr[i].preProc_Name;
 					if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
 						procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
-					
-					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
-					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList));
+					if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
+					else if(arr[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
+					else
+						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+
+						
+					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList,picinfo));
 					
 				}
 				
@@ -263,7 +275,7 @@ package model.orderModel
 			return prolist;
 		}
 		
-		public function getProInfoList():Array
+		public function getProInfoList(picinfo:PicInfoVo):Array
 		{
 			var arr:Array = [];
 			
@@ -272,7 +284,7 @@ package model.orderModel
 				if(prcessCatList[i].selected)
 				{
 					//arr.push({proc_Code:prcessCatList[i].procCat_Name,proc_description:prcessCatList[i].procCat_Name,proc_attachpath:""});
-					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList));
+					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList,picinfo));
 				}
 			}
 			return arr;

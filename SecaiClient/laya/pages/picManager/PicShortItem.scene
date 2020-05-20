@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":11,
+    "selecteID":17,
     "searchKey":"View",
     "props":{"width":128,"sceneColor":"#ece3e2","height":214},
     "nodeParent":-1,
-    "maxID":13,
+    "maxID":18,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -14,6 +14,20 @@
     "hasChild":true,
     "compId":2,
     "child":[
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image,frame",
+            "props":{"y":0,"x":0,"width":128,"var":"frame","skin":"commers/inputfocus.png","sizeGrid":"5,5,5,5","height":208},
+            "nodeParent":2,
+            "label":"frame",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":15,
+            "child":[
+                ]
+        },
         {
             "x":15,
             "type":"Image",
@@ -30,9 +44,37 @@
         },
         {
             "x":15,
+            "type":"Image",
+            "searchKey":"Image,yixingimg",
+            "props":{"y":49.5,"x":100,"width":50,"var":"yixingimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},
+            "nodeParent":2,
+            "label":"yixingimg",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":16,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Image",
+            "searchKey":"Image,backimg",
+            "props":{"y":105,"x":100,"width":50,"var":"backimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},
+            "nodeParent":2,
+            "label":"backimg",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":17,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
             "type":"Label",
             "searchKey":"Label,filename",
-            "props":{"y":130,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},
+            "props":{"y":131,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},
             "nodeParent":2,
             "label":"filename",
             "isDirectory":false,
@@ -74,7 +116,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,picClassTxt",
-            "props":{"y":107,"x":0,"wordWrap":false,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},
+            "props":{"y":107,"x":0,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},
             "nodeParent":2,
             "label":"picClassTxt",
             "isDirectory":false,
@@ -88,7 +130,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,colorspacetxt",
-            "props":{"y":107,"wordWrap":false,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},
+            "props":{"y":50,"x":0,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},
             "nodeParent":2,
             "label":"colorspacetxt",
             "isDirectory":false,
@@ -109,6 +151,34 @@
             "isAniNode":true,
             "hasChild":false,
             "compId":12,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Button",
+            "searchKey":"Button,selYixingBtn",
+            "props":{"y":32,"width":55,"var":"selYixingBtn","skin":"commers/btn1.png","sizeGrid":"4,4,4,4","right":0,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"选择异形","height":18},
+            "nodeParent":2,
+            "label":"selYixingBtn",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":13,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Button",
+            "searchKey":"Button,selBackBtn",
+            "props":{"y":99.5,"width":55,"var":"selBackBtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","right":0,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"选择反面","height":18},
+            "nodeParent":2,
+            "label":"selBackBtn",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":14,
             "child":[
                 ]
         }],

@@ -43,7 +43,7 @@ package script.order
 			this.subtn.on(Event.CLICK,this,onSubItemNum);
 			this.addbtn.on(Event.CLICK,this,onAddItemNum);
 			this.hascomment.visible = false;
-			this.addmsg.visible = false;
+			this.addmsg.visible = true;
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 80;					
@@ -291,12 +291,12 @@ package script.order
 //					area = 0.1;
 //				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/area).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/perimeter).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo)).toFixed(1) + "";
 				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
 
 			}
@@ -355,13 +355,13 @@ package script.order
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
 				{
-					doublesideImg = hasSelectedTech[i].attchFileId;
+					doublesideImg = ordervo.picinfo.backFid; //hasSelectedTech[i].attchFileId;
 					fanmianFid = doublesideImg;
 					
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
 				{
-					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+					yixingqiegeImg =  ordervo.picinfo.yixingFid;//hasSelectedTech[i].attchFileId;
 				}
 			}
 			
@@ -394,12 +394,12 @@ package script.order
 //				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/area).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/perimeter).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo)).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -436,7 +436,7 @@ package script.order
 //			if(area < 0.1)
 //				area = 0.1;
 			
-			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false);
+			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo);
 			if(this.ordervo.orderPrice < 0.1)
 				this.ordervo.orderPrice = 0.1;
 			
@@ -461,7 +461,7 @@ package script.order
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.filename = this.ordervo.picinfo.directName;
 			
-			orderitemdata.procInfoList = productVo.getProInfoList();
+			orderitemdata.procInfoList = productVo.getProInfoList(this.ordervo.picinfo);
 			
 
 			this.ordervo.orderData =  orderitemdata;
@@ -487,10 +487,10 @@ package script.order
 				return false;
 			}
 			
-			if(curproductvo != null)
-				return curproductvo.checkCurTechValid();
-			else
-				return false;
+//			if(curproductvo != null)
+//				return curproductvo.checkCurTechValid();
+//			else
+				return true;
 			
 		}
 	}

@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":2,
-    "selecteID":40,
+    "selectedBox":21,
+    "selecteID":18,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff"},
     "nodeParent":-1,
@@ -163,7 +163,7 @@
                     "x":30,
                     "type":"Text",
                     "searchKey":"Text,addmsg",
-                    "props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E"},
+                    "props":{"y":8,"x":0,"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E"},
                     "nodeParent":21,
                     "label":"addmsg",
                     "isDirectory":false,
@@ -172,13 +172,13 @@
                     "compId":18,
                     "child":[
                         ],
-                    "$HIDDEN":true
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
                     "type":"Text",
                     "searchKey":"Text,deleteorder",
-                    "props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E"},
+                    "props":{"y":35,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E"},
                     "nodeParent":21,
                     "label":"deleteorder",
                     "isDirectory":false,

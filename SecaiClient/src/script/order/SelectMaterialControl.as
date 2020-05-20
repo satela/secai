@@ -24,6 +24,8 @@ package script.order
 	import ui.order.SelectMaterialPanelUI;
 	import ui.order.TechorItemUI;
 	
+	import utils.UtilTool;
+	
 	public class SelectMaterialControl extends Script
 	{
 		private var uiSkin:SelectMaterialPanelUI;
@@ -507,6 +509,24 @@ package script.order
 				
 				return;
 			}
+			
+			if(matvo is MaterialItemVo && (matvo as MaterialItemVo).preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+			{
+				if(!PaintOrderModel.instance.checkCanSelYixing())
+				{
+					ViewManager.showAlert("图片未关联异形切割图片或者关联的异形切割图片不符合下单要求，请重新关联异形切割图片");
+					return;
+				}
+			}
+			if(matvo is MaterialItemVo && (matvo as MaterialItemVo).preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+			{
+				if(!PaintOrderModel.instance.checkCanDoubleSide())
+				{
+					ViewManager.showAlert("图片未关联反面图片，请关联后再下单");
+					return;
+				}
+			}
+			
 			hasFinishAllFlow = false;
 
 			if(parentitem.isSelected)
@@ -785,6 +805,10 @@ package script.order
 			if(param == null)
 				return;
 			
+			if(PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 0)
+			{
+				return;
+			}
 			var hasSelectedTech:Array = PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
 			var doublesideImg:String = "";
 			var yixingqiegeImg:String = "";
@@ -797,12 +821,12 @@ package script.order
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
 				{
-					doublesideImg = hasSelectedTech[i].attchFileId;
+					doublesideImg = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.backFid; //hasSelectedTech[i].attchFileId;
 
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
 				{
-					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+					yixingqiegeImg = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.yixingFid; //hasSelectedTech[i].attchFileId;
 				}
 			}
 			

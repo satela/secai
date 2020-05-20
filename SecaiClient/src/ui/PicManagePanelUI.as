@@ -28,6 +28,7 @@ package ui {
 		public var flder2:Label;
 		public var filetypeRadio:RadioGroup;
 		public var picList:List;
+		public var seltips:Label;
 		public var boxNewFolder:Box;
 		public var input_folename:TextInput;
 		public var btnSureCreate:Button;

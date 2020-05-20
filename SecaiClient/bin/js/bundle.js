@@ -708,7 +708,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="picManager/PicPaintItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1600,13 +1600,15 @@ var PaintOrderModel=(function(){
 		}
 	}
 
-	__proto.getProcePriceUnit=function(orgcode,procCode,matcode){
+	__proto.getProcePriceUnit=function(orgcode,procCode,matcode,processList){
 		if(this.allManuFacutreMatProcPrice==null || this.allManuFacutreMatProcPrice[orgcode]==null)
 			return [];
 		else{
 			var list=this.allManuFacutreMatProcPrice[orgcode];
 			if(list==null)
 				return [];
+			if(procCode=="SPTE10420")
+				return this.getYixingProcPrice(orgcode,procCode,matcode,processList);
 			for(var i=0;i < list.length;i++){
 				if(list[i].proc_code==procCode){
 					if(list[i].matlist[matcode] !=null)
@@ -1619,6 +1621,32 @@ var PaintOrderModel=(function(){
 		}
 	}
 
+	__proto.getYixingProcPrice=function(orgcode,procCode,matcode,processList){
+		var allprice=[];
+		var hasselectMat=[];
+		hasselectMat.push(matcode);
+		for(var i=0;i < processList.length;i++){
+			var attchvo=processList[i].selectAttachVoList;
+			if(attchvo !=null && attchvo.length > 0){
+				hasselectMat.push(attchvo[0].accessory_code);
+			}
+		};
+		var list=this.allManuFacutreMatProcPrice[orgcode];
+		if(list==null)
+			return [];
+		for(var i=0;i < list.length;i++){
+			if(list[i].proc_code==procCode){
+				allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				for(var j=0;j < hasselectMat.length;j++){
+					if(list[i].matlist[hasselectMat[j]] !=null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
+						allprice=[list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+				}
+				return allprice;
+			}
+		}
+		return [];
+	}
+
 	__proto.getManuFacturePriority=function(manufacCode){
 		var manuFacList=this.outPutAddr;
 		if(manuFacList !=null){
@@ -1628,6 +1656,36 @@ var PaintOrderModel=(function(){
 			}
 		}
 		return 0;
+	}
+
+	__proto.checkCanSelYixing=function(){
+		var picitems=this.batchChangeMatItems;
+		if(picitems !=null && picitems.length > 0){
+			for(var i=0;i < picitems.length;i++){
+				var picinfo=picitems[i].ordervo.picinfo;
+				if(picinfo.relatedRoadNum <=0 || picinfo.yixingFid=="0")
+					return false;
+			}
+			return true;
+		}
+		else if(this.curSelectOrderItem !=null && this.curSelectOrderItem.ordervo.picinfo.relatedRoadNum > 0 && this.curSelectOrderItem.ordervo.picinfo.yixingFid !="0")
+		return true;
+		return false;
+	}
+
+	__proto.checkCanDoubleSide=function(){
+		var picitems=this.batchChangeMatItems;
+		if(picitems !=null && picitems.length > 0){
+			for(var i=0;i < picitems.length;i++){
+				var picinfo=picitems[i].ordervo.picinfo;
+				if(picinfo.backFid=="0")
+					return false;
+			}
+			return true;
+		}
+		else if(this.curSelectOrderItem !=null && this.curSelectOrderItem.ordervo.picinfo.backFid !="0")
+		return true;
+		return false;
 	}
 
 	__getset(1,PaintOrderModel,'instance',function(){
@@ -1791,6 +1849,12 @@ var PicInfoVo=(function(){
 		this.dpi=NaN;
 		this.isProcessing=false;
 		this.isCdr=false;
+		this.roadNum=0;
+		this.roadLength=0;
+		this.yixingFid="";
+		this.backFid="";
+		this.relatedRoadNum=0;
+		this.relatedRoadLength=0;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1807,6 +1871,14 @@ var PicInfoVo=(function(){
 				this.dpi=UtilTool.oneCutNineAdd(fattr.dpi);
 				this.picPhysicWidth=UtilTool.oneCutNineAdd(this.picWidth/this.dpi*2.54);
 				this.picPhysicHeight=UtilTool.oneCutNineAdd(this.picHeight/this.dpi*2.54);
+				this.yixingFid=fileinfo.fmaskid;
+				this.backFid=fileinfo.fbackid;
+				if(fattr.hasOwnProperty("roadnum")){
+					this.roadNum=fattr.roadnum;
+					var longside=Math.max(this.picWidth,this.picHeight);
+					this.roadLength=Math.floor(fattr.totallen *longside/1000);
+					console.log("raodNum:"+this.roadNum+","+this.roadLength);
+				}
 				if(fattr !=null && fattr.flag==1){
 					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
 					this.picHeight=Math.round(Number(fattr.height)*this.dpi);
@@ -1835,6 +1907,15 @@ var PicInfoVo=(function(){
 
 	__class(PicInfoVo,'model.picmanagerModel.PicInfoVo');
 	var __proto=PicInfoVo.prototype;
+	__proto.initYixingData=function(){
+		if(this.yixingFid !="0"){
+			var info=DirectoryFileModel.instance.getQiegeData(this.yixingFid);
+			this.relatedRoadNum=info[0];
+			this.relatedRoadLength=info[1];
+			console.log("切割 信息:"+this.relatedRoadNum+","+this.relatedRoadLength);
+		}
+	}
+
 	__getset(0,__proto,'dpath',function(){
 		return this.parentDirect+this.directId+"|";
 	});
@@ -1985,7 +2066,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//移动组织里的人
+	//设置反面关联图片
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2045,6 +2126,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.handleJoinOrganizeRequest="group/handle-req?";
 	HttpRequestUtil.getOrganizeMembers="group/get-deptmember?";
 	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
+	HttpRequestUtil.setYixingRelated="file/set-mask-image?";
+	HttpRequestUtil.setFanmianRelated="file/set-back-image?";
 	return HttpRequestUtil;
 })()
 
@@ -2212,14 +2295,15 @@ var ProductVo=(function(){
 		return "";
 	}
 
-	__proto.getTotalPrice=function(picwidth,picheight,ignoreOther){
+	__proto.getTotalPrice=function(picwidth,picheight,ignoreOther,picinfovo){
 		(ignoreOther===void 0)&& (ignoreOther=false);
 		var prices=UtilTool.getProcessPrice(picwidth,picheight,this.measure_unit,this.unit_price+this.additional_unitfee,0);
 		this.hasDoublePrint=1;
 		var allprices=[];
+		var haselectTech=this.getAllSelectedTech();
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
-				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther));
+				allprices=allprices.concat(this.getTechPrice(this.prcessCatList[i].nextMatList,picwidth,picheight,ignoreOther,picinfovo,haselectTech));
 			}
 		}
 		prices *=this.hasDoublePrint;
@@ -2245,19 +2329,22 @@ var ProductVo=(function(){
 		return 0;
 	}
 
-	__proto.getTechPrice=function(arr,picwidth,picheight,ignoreOther){
+	__proto.getTechPrice=function(arr,picwidth,picheight,ignoreOther,picinfovo,techlist){
 		var prices=[];
 		if(arr==null)
 			return [];
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
 				var totalprice=0;
-				var priceInfo=PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code);
+				var priceInfo=PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
 				if(priceInfo !=null && priceInfo.length==3){
 					arr[i].measure_unit=priceInfo[0];
 					arr[i].baseprice=priceInfo[1];
 					arr[i].preProc_Price=priceInfo[2];
-					totalprice=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+					if(arr[i].preProc_Code !="SPTE10420")
+						totalprice=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+					else
+					totalprice=UtilTool.getYixingPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price);
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
 						if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
 							totalprice+=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
@@ -2266,13 +2353,13 @@ var ProductVo=(function(){
 					}
 				}
 				prices.push(totalprice);
-				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther));
+				prices=prices.concat(this.getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther,picinfovo,techlist));
 			}
 		}
 		return prices;
 	}
 
-	__proto.getMaterialProInfoList=function(arr){
+	__proto.getMaterialProInfoList=function(arr,picinfo){
 		var prolist=[];
 		if(arr==null)
 			return [];
@@ -2281,18 +2368,23 @@ var ProductVo=(function(){
 				var procname=arr[i].preProc_Name;
 				if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 					procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
+				if(arr[i].preProc_Code=="SPTE10420")
+					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
+				else if(arr[i].preProc_Code=="SPTE10330")
+				prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
+				else
 				prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
-				prolist=prolist.concat(this.getMaterialProInfoList(arr[i].nextMatList));
+				prolist=prolist.concat(this.getMaterialProInfoList(arr[i].nextMatList,picinfo));
 			}
 		}
 		return prolist;
 	}
 
-	__proto.getProInfoList=function(){
+	__proto.getProInfoList=function(picinfo){
 		var arr=[];
 		for(var i=0;i < this.prcessCatList.length;i++){
 			if(this.prcessCatList[i].selected){
-				arr=arr.concat(this.getMaterialProInfoList(this.prcessCatList[i].nextMatList));
+				arr=arr.concat(this.getMaterialProInfoList(this.prcessCatList[i].nextMatList,picinfo));
 			}
 		}
 		return arr;
@@ -2783,9 +2875,9 @@ var UtilTool=(function(){
 		else return 0;
 	}
 
-	UtilTool.getYixingPrice=function(picinfo,lineNum,lineLength,basePrice,unitPrice){
-		var linemeter=(lineLength/picinfo.picWidth)*picinfo.picPhysicWidth;
-		return 0;
+	UtilTool.getYixingPrice=function(picinfo,basePrice,unitPrice){
+		var linemeter=(picinfo.relatedRoadLength /picinfo.picWidth)*picinfo.picPhysicWidth/100;
+		return basePrice *picinfo.relatedRoadNum+linemeter*unitPrice;
 	}
 
 	UtilTool.isMeasureUnitByNum=function(unit){
@@ -2799,6 +2891,36 @@ var UtilTool=(function(){
 		if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase())< 0)
 			return false;
 		return true;
+	}
+
+	UtilTool.isFitYixing=function(sourcefile,selfile){
+		if(sourcefile !=null && selfile !=null){
+			if(selfile.roadNum <=0){
+				ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"该图片不符合异形切割图片要求"});
+				return false;
+			};
+			var xdif=Math.abs(sourcefile.picPhysicWidth-selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+			var ydif=Math.abs(sourcefile.picPhysicHeight-selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+			if(xdif >0.01 || ydif > 0.01){
+				ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"图片尺寸不匹配"});
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	UtilTool.isFitFanmain=function(sourcefile,selfile){
+		if(sourcefile !=null && selfile !=null){
+			var xdif=Math.abs(sourcefile.picPhysicWidth-selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+			var ydif=Math.abs(sourcefile.picPhysicHeight-selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+			if(xdif >0.01 || ydif > 0.01){
+				ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"图片尺寸不匹配"});
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	__static(UtilTool,
@@ -3014,6 +3136,8 @@ var DirectoryFileModel=(function(){
 		this.curSelectDir=null;
 		this.haselectPic={};
 		this.rootDir=null;
+		this.curOperateFile=null;
+		this.curOperateSelType=0;
 		this.rootDir=new PicInfoVo({dname:"根目录",dpath:"",did:"0"},0);
 	}
 
@@ -3046,8 +3170,30 @@ var DirectoryFileModel=(function(){
 		for(i=0;i < picList.length;i++){
 			this.curFileList.push(new PicInfoVo(picList[i],1));
 		}
+		for(i=0;i < this.curFileList.length;i++){
+			this.curFileList[i].initYixingData();
+		}
+		for(var picfid in this.haselectPic){
+			for(var j=0;j < this.curFileList.length;j++){
+				if(this.curFileList[j].fid==picfid)
+					this.haselectPic[picfid]=this.curFileList[j];
+			}
+		}
 	}
 
+	__proto.getQiegeData=function(fid){
+		var curfiles=this.curFileList;
+		if(curfiles !=null){
+			for(var i=0;i < curfiles.length;i++){
+				if(curfiles[i].fid==fid){
+					return [curfiles[i].roadNum,curfiles[i].roadLength];
+				}
+			}
+		}
+		return [0,0];
+	}
+
+	//0选择异形 1 选择反面
 	__getset(1,DirectoryFileModel,'instance',function(){
 		if(DirectoryFileModel._instance==null)
 			DirectoryFileModel._instance=new DirectoryFileModel();
@@ -3089,6 +3235,8 @@ var MaterialItemVo=(function(){
 		this.attchFileId="";
 		this.attachList=null;
 		this.selectAttachVoList=null;
+		//选择的配件
+		this.picInfoVo=null;
 		if(data !=null){
 			for(var key in data){
 				if(this.hasOwnProperty(key))
@@ -27670,6 +27818,9 @@ var EventCenter=(function(_super){
 	EventCenter.REFRESH_JOIN_REQUEST="REFRESH_JOIN_REQUEST";
 	EventCenter.MOVE_MEMBER_DEPT="MOVE_MEMBER_DEPT";
 	EventCenter.DELETE_DEPT_MEMBER="DELETE_DEPT_MEMBER";
+	EventCenter.START_SELECT_YIXING_PIC="START_SELECT_YIXING_PIC";
+	EventCenter.STOP_SELECT_RELATE_PIC="STOP_SELECT_RELATE_PIC";
+	EventCenter.START_SELECT_BACK_PIC="START_SELECT_BACK_PIC";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -36453,6 +36604,9 @@ var PicManagerControl=(function(_super){
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.on("SELECT_PIC_ORDER",this,this.seletPicToOrder);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.on("START_SELECT_YIXING_PIC",this,this.onStartSelectRelate);
+		EventCenter.instance.on("START_SELECT_BACK_PIC",this,this.onStartSelectBackRelate);
+		EventCenter.instance.on("STOP_SELECT_RELATE_PIC",this,this.stopSelectRelate);
 		DirectoryFileModel.instance.haselectPic={};
 		this.uiSkin.searchInput.on("input",this,this.onSearchInput);
 		this.uiSkin.on("removed",this,this.onRemovedFromStage);
@@ -36464,6 +36618,8 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.main_panel.width=Browser.width;
 		this.uiSkin.main_panel.hScrollBarSkin="";
 		this.uiSkin.picList.height=fixedheight-120;
+		this.uiSkin.main_panel.hScrollBar.mouseWheelEnable=false;
+		this.uiSkin.seltips.visible=false;
 		DirectoryFileModel.instance.curFileList=[];
 		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
 	}
@@ -36476,6 +36632,26 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.main_panel.height=fixedheight;
 		this.uiSkin.picList.height=fixedheight-120;
 		this.uiSkin.main_panel.width=Browser.width;
+	}
+
+	__proto.onStartSelectRelate=function(){
+		Laya.stage.on("click",this,this.stopSelectRelate);
+		this.uiSkin.seltips.visible=true;
+		this.uiSkin.seltips.text="选择异形切割图片中";
+	}
+
+	__proto.onStartSelectBackRelate=function(){
+		Laya.stage.on("click",this,this.stopSelectRelate);
+		this.uiSkin.seltips.visible=true;
+		this.uiSkin.seltips.text="选择反面图片中";
+	}
+
+	__proto.stopSelectRelate=function(e){
+		if(e !=null && this.uiSkin.picList.hitTestPoint(e.stageX,e.stageY))
+			return;
+		Laya.stage.off("click",this,this.stopSelectRelate);
+		this.uiSkin.seltips.visible=false;
+		DirectoryFileModel.instance.curOperateFile=null;
 	}
 
 	__proto.onGetLeftCapacitBack=function(data){
@@ -36638,6 +36814,9 @@ var PicManagerControl=(function(_super){
 		EventCenter.instance.off("UPDATE_FILE_LIST",this,this.getFileList);
 		EventCenter.instance.off("SELECT_PIC_ORDER",this,this.seletPicToOrder);
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("START_SELECT_YIXING_PIC",this,this.onStartSelectRelate);
+		EventCenter.instance.off("START_SELECT_BACK_PIC",this,this.onStartSelectBackRelate);
+		EventCenter.instance.off("STOP_SELECT_RELATE_PIC",this,this.stopSelectRelate);
 		Browser.document.body.removeChild(this.file);
 	}
 
@@ -36684,9 +36863,6 @@ var PicManagerControl=(function(_super){
 		}
 	}
 
-	// }
-	__proto.onSlecteDirect=function(index){}
-	// getFileList();
 	__proto.onSelectChildFolder=function(filedata){
 		DirectoryFileModel.instance.curSelectDir=filedata;
 		this.directTree.push(DirectoryFileModel.instance.curSelectDir);
@@ -36791,6 +36967,10 @@ var PaintOrderControl=(function(_super){
 		var totalheight=0;
 		this.uiSkin.commentall.visible=false;
 		this.uiSkin.batchcomment.visible=false;
+		this.uiSkin.copynum.text="1";
+		this.uiSkin.copynum.restrict="0-9";
+		this.uiSkin.copynum.maxChars=3;
+		this.uiSkin.copynum.on("input",this,this.onNumChange);
 		this.fengeoriginy=this.uiSkin.fengeimg.y;
 		this.floatpyy=this.uiSkin.floatpt.y;
 		this.mianvbox=this.uiSkin.mainvbox.y;
@@ -36865,6 +37045,19 @@ var PaintOrderControl=(function(_super){
 		}
 	}
 
+	__proto.onNumChange=function(){
+		if(this.uiSkin.copynum.text=="")
+			this.uiSkin.copynum.text="1";
+		var num=parseInt(this.uiSkin.copynum.text);
+		if(num < 1){
+			this.uiSkin.copynum.text="1";
+		}
+		if(num > 100){
+			this.uiSkin.copynum.text="100";
+		}
+		this.resetOrderInfo();
+	}
+
 	__proto.onDragMove=function(){
 		if(this.uiSkin.floatpt.localToGlobal(new Point(this.uiSkin.floatpt.x,this.uiSkin.floatpt.y),false).y-294 <=0){
 			if(this.uiSkin.floatdocker.parent !=this.uiSkin){
@@ -36929,7 +37122,10 @@ var PaintOrderControl=(function(_super){
 					odata.order_amountStr=2.00;
 				total+=(Number)((odata.order_amountStr).toFixed(2));
 			}
-		}
+		};
+		var copy=parseInt(this.uiSkin.copynum.text);
+		total=parseFloat(total.toFixed(1));
+		total=total *copy;
 		this.uiSkin.textTotalPrice.innerHTML="<span color='#262B2E' size='20'>折后总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
 		this.uiSkin.textDeliveryType.innerHTML="<span color='#262B2E' size='20'>运费总额：</span>"+"<span color='#FF4400' size='20'>"+"0"+"</span>"+"<span color='#262B2E' size='20'>元</span>";
 		this.uiSkin.textPayPrice.innerHTML="<span color='#262B2E' size='20'>应付总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
@@ -37312,10 +37508,18 @@ var PaintOrderControl=(function(_super){
 			}
 			odata.money_paidStr=(odata.order_amountStr).toFixed(1);
 			odata.order_amountStr=(odata.order_amountStr).toFixed(1);
-			odata.order_amountStr="0.01";
-			odata.money_paidStr="0.01";
 			arr.push(odata);
+		};
+		var copy=parseInt(this.uiSkin.copynum.text);
+		var copyarr=[];
+		for(i=1;i < copy;i++){
+			for(var j=0;j < arr.length;j++){
+				var copydata=JSON.parse(JSON.stringify(arr[j]));
+				copyarr.push(copydata);
+			}
 		}
+		if(copyarr.length > 0)
+			arr=arr.concat(copyarr);
 		return arr;
 	}
 
@@ -39431,6 +39635,18 @@ var SelectMaterialControl=(function(_super){
 			this.onGetProFlowt(parentitem,matvo);
 			return;
 		}
+		if((matvo instanceof model.orderModel.MaterialItemVo )&& (matvo).preProc_Code=="SPTE10420"){
+			if(!PaintOrderModel.instance.checkCanSelYixing()){
+				ViewManager.showAlert("图片未关联异形切割图片或者关联的异形切割图片不符合下单要求，请重新关联异形切割图片");
+				return;
+			}
+		}
+		if((matvo instanceof model.orderModel.MaterialItemVo )&& (matvo).preProc_Code=="SPTE10330"){
+			if(!PaintOrderModel.instance.checkCanDoubleSide()){
+				ViewManager.showAlert("图片未关联反面图片，请关联后再下单");
+				return;
+			}
+		}
 		this.hasFinishAllFlow=false;
 		if(parentitem.isSelected){
 			this.refreshHashowItem(parentitem.techmainvo,parentitem.x);
@@ -39600,6 +39816,9 @@ var SelectMaterialControl=(function(_super){
 	__proto.checkShowEffectImg=function(){
 		if(this.param==null)
 			return;
+		if(PaintOrderModel.instance.batchChangeMatItems !=null && PaintOrderModel.instance.batchChangeMatItems.length > 0){
+			return;
+		};
 		var hasSelectedTech=PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
 		var doublesideImg="";
 		var yixingqiegeImg="";
@@ -39609,10 +39828,10 @@ var SelectMaterialControl=(function(_super){
 				doublesame=true;
 			}
 			else if(hasSelectedTech[i].preProc_Code=="SPTE10330"){
-				doublesideImg=hasSelectedTech[i].attchFileId;
+				doublesideImg=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.backFid;
 			}
 			else if(hasSelectedTech[i].preProc_Code=="SPTE10420"){
-				yixingqiegeImg=hasSelectedTech[i].attchFileId;
+				yixingqiegeImg=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.yixingFid;
 			}
 		}
 		this.uiSkin.backimg.visible=doublesideImg !="" || doublesame;
@@ -40589,7 +40808,7 @@ var SelectPicControl=(function(_super){
 		this.uiSkin.mainpanel.hScrollBarSkin="";
 		this.uiSkin.mainpanel.height=Browser.height;
 		this.uiSkin.mainpanel.width=Browser.width;
-		this.uiSkin.picList.itemRender=PicInfoItem;
+		this.uiSkin.picList.itemRender=PicPaintItem;
 		this.uiSkin.picList.vScrollBarSkin="";
 		this.uiSkin.picList.selectEnable=false;
 		this.uiSkin.picList.spaceY=0;
@@ -40743,6 +40962,8 @@ var SelectPicControl=(function(_super){
 				}
 				(this.param).attchMentFileId="http://original-image.oss-cn-hangzhou.aliyuncs.com/"+fvo.fid+"."+fvo.picClass;
 				(this.param).attchFileId=fvo.fid;
+				if(this.param.preProc_Code=="SPTE10420")
+					(this.param).picInfoVo=fvo;
 			}
 			return;
 		};
@@ -46680,7 +46901,7 @@ var OrderItemUI=(function(_super){
 		this.createView(OrderItemUI.uiView);
 	}
 
-	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Image","props":{"y":42,"x":206,"width":80,"var":"backimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":38},{"type":"Image","props":{"y":42,"x":206,"width":80,"var":"yingxback","skin":"comp/image.png","scaleX":-1,"mouseEnabled":false,"height":80,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":40},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"yixingimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":39},{"type":"Label","props":{"y":34,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":258,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":35.5,"x":916,"width":58,"visible":false,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1109,"width":50,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":15,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":560,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11},{"type":"Image","props":{"y":17,"x":142,"width":20,"var":"lockratio","skin":"commers/lock.png","height":20},"compId":37}]},{"type":"VBox","props":{"y":29.5,"x":733,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":394,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":998,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/lock.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	OrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Image","props":{"y":42,"x":206,"width":80,"var":"backimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":38},{"type":"Image","props":{"y":42,"x":206,"width":80,"var":"yingxback","skin":"comp/image.png","scaleX":-1,"mouseEnabled":false,"height":80,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":40},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"yixingimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":39},{"type":"Label","props":{"y":34,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":258,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":35.5,"x":916,"width":58,"visible":false,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1109,"width":50,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"y":8,"x":0,"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":35,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":560,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11},{"type":"Image","props":{"y":17,"x":142,"width":20,"var":"lockratio","skin":"commers/lock.png","height":20},"compId":37}]},{"type":"VBox","props":{"y":29.5,"x":733,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":394,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换材料","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":998,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/lock.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
 	return OrderItemUI;
 })(Scene)
 
@@ -53234,6 +53455,33 @@ var EnterPrizeInfoPaneUI=(function(_super){
 })(View)
 
 
+//class ui.picManager.PicPaintItemUI extends laya.ui.View
+var PicPaintItemUI=(function(_super){
+	function PicPaintItemUI(){
+		this.img=null;
+		this.yixingimg=null;
+		this.backimg=null;
+		this.filename=null;
+		this.btndelete=null;
+		this.fileinfo=null;
+		this.picClassTxt=null;
+		this.colorspacetxt=null;
+		this.sel=null;
+		PicPaintItemUI.__super.call(this);
+	}
+
+	__class(PicPaintItemUI,'ui.picManager.PicPaintItemUI',_super);
+	var __proto=PicPaintItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(PicPaintItemUI.uiView);
+	}
+
+	PicPaintItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":49.5,"x":100,"width":50,"var":"yixingimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":105,"x":100,"width":50,"var":"backimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":130,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"var":"btndelete","stateNum":1,"skin":"upload/deletebtn.png","label":"X"},"compId":7},{"type":"Label","props":{"y":162,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":52,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":50,"x":0,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/imgselect.png"},"compId":12}],"loadList":["upload/fold.png","upload/deletebtn.png","upload/imgselect.png"],"loadList3D":[]};
+	return PicPaintItemUI;
+})(View)
+
+
 //class ui.picManager.DirectItemUI extends laya.ui.View
 var DirectItemUI=(function(_super){
 	function DirectItemUI(){
@@ -53524,13 +53772,18 @@ var SelectDeliveryPanelUI=(function(_super){
 //class ui.picManager.PicShortItemUI extends laya.ui.View
 var PicShortItemUI=(function(_super){
 	function PicShortItemUI(){
+		this.frame=null;
 		this.img=null;
+		this.yixingimg=null;
+		this.backimg=null;
 		this.filename=null;
 		this.btndelete=null;
 		this.fileinfo=null;
 		this.picClassTxt=null;
 		this.colorspacetxt=null;
 		this.sel=null;
+		this.selYixingBtn=null;
+		this.selBackBtn=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -53541,7 +53794,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":130,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"var":"btndelete","stateNum":1,"skin":"upload/deletebtn.png","label":"X"},"compId":7},{"type":"Label","props":{"y":162,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":52,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":false,"width":48,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":107,"wordWrap":false,"width":48,"var":"colorspacetxt","valign":"middle","text":"CMYK","right":0,"overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/imgselect.png"},"compId":12}],"loadList":["upload/fold.png","upload/deletebtn.png","upload/imgselect.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":128,"height":214},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":128,"var":"frame","skin":"commers/inputfocus.png","sizeGrid":"5,5,5,5","height":208},"compId":15},{"type":"Image","props":{"y":64,"x":64,"width":108,"var":"img","skin":"upload/fold.png","height":101,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":49.5,"x":100,"width":50,"var":"yixingimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":105,"x":100,"width":50,"var":"backimg","skin":"upload/fold.png","height":50,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":131,"wordWrap":true,"width":124,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"hidden","left":2,"height":28,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":2,"x":103,"var":"btndelete","stateNum":1,"skin":"upload/deletebtn.png","label":"X"},"compId":7},{"type":"Label","props":{"y":162,"wordWrap":true,"width":128,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":52,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":107,"x":0,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":50,"x":0,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":0,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":11},{"type":"Button","props":{"y":5,"x":9,"var":"sel","skin":"upload/imgselect.png"},"compId":12},{"type":"Button","props":{"y":32,"width":55,"var":"selYixingBtn","skin":"commers/btn1.png","sizeGrid":"4,4,4,4","right":0,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"选择异形","height":18},"compId":13},{"type":"Button","props":{"y":99.5,"width":55,"var":"selBackBtn","skin":"commers/btn1.png","sizeGrid":"2,2,2,2","right":0,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"选择反面","height":18},"compId":14}],"loadList":["commers/inputfocus.png","upload/fold.png","upload/deletebtn.png","upload/imgselect.png","commers/btn1.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -53603,6 +53856,7 @@ var PicManagePanelUI=(function(_super){
 		this.flder2=null;
 		this.filetypeRadio=null;
 		this.picList=null;
+		this.seltips=null;
 		this.boxNewFolder=null;
 		this.input_folename=null;
 		this.btnSureCreate=null;
@@ -53919,7 +54173,7 @@ var PicOrderItem=(function(_super){
 		this.subtn.on("click",this,this.onSubItemNum);
 		this.addbtn.on("click",this,this.onAddItemNum);
 		this.hascomment.visible=false;
-		this.addmsg.visible=false;
+		this.addmsg.visible=true;
 		if(this.ordervo.picinfo.picWidth > this.ordervo.picinfo.picHeight){
 			this.fileimg.width=80;
 			this.fileimg.height=80/this.ordervo.picinfo.picWidth *this.ordervo.picinfo.picHeight;
@@ -54106,10 +54360,10 @@ var PicOrderItem=(function(_super){
 			var area=(this.finalHeight *this.finalWidth)/10000;
 			var perimeter=(this.finalHeight+this.finalWidth)*2/100;
 			if(this.curproductvo.measure_unit=="平方米")
-				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/area).toFixed(1);
+				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo.picinfo)/area).toFixed(1);
 			else
-			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/perimeter).toFixed(1);
-			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false)).toFixed(1)+"";
+			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo.picinfo)/perimeter).toFixed(1);
+			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo.picinfo)).toFixed(1)+"";
 			EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
 		}
 	}
@@ -54153,11 +54407,11 @@ var PicOrderItem=(function(_super){
 				this.fanmianFid=this.ordervo.picinfo.fid;
 			}
 			else if(hasSelectedTech[i].preProc_Code=="SPTE10330"){
-				doublesideImg=hasSelectedTech[i].attchFileId;
+				doublesideImg=this.ordervo.picinfo.backFid;
 				this.fanmianFid=doublesideImg;
 			}
 			else if(hasSelectedTech[i].preProc_Code=="SPTE10420"){
-				yixingqiegeImg=hasSelectedTech[i].attchFileId;
+				yixingqiegeImg=this.ordervo.picinfo.yixingFid;
 			}
 		}
 		this.backimg.visible=doublesideImg !="" || doublesame;
@@ -54175,10 +54429,10 @@ var PicOrderItem=(function(_super){
 				this.yingxback.skin="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+yixingqiegeImg+".jpg";
 		}
 		if(provo.measure_unit=="平方米")
-			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/area).toFixed(1);
+			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo.picinfo)/area).toFixed(1);
 		else
-		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true)/perimeter).toFixed(1);
-		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false)).toFixed(1)+"";
+		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo.picinfo)/perimeter).toFixed(1);
+		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo.picinfo)).toFixed(1)+"";
 		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
 		this.architype.text=provo.getTechDes();
@@ -54202,7 +54456,7 @@ var PicOrderItem=(function(_super){
 	__proto.updateOrderData=function(productVo){
 		var area=(this.finalHeight *this.finalWidth)/10000;
 		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
-		this.ordervo.orderPrice=productVo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false);
+		this.ordervo.orderPrice=productVo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo.picinfo);
 		if(this.ordervo.orderPrice < 0.1)
 			this.ordervo.orderPrice=0.1;
 		this.ordervo.manufacturer_code=productVo.manufacturer_code;
@@ -54222,7 +54476,7 @@ var PicOrderItem=(function(_super){
 		orderitemdata.previewImage_path="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
 		orderitemdata.thumbnails_path="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
 		orderitemdata.filename=this.ordervo.picinfo.directName;
-		orderitemdata.procInfoList=productVo.getProInfoList();
+		orderitemdata.procInfoList=productVo.getProInfoList(this.ordervo.picinfo);
 		this.ordervo.orderData=orderitemdata;
 	}
 
@@ -54231,10 +54485,7 @@ var PicOrderItem=(function(_super){
 			ViewManager.showAlert("未选择材料工艺");
 			return false;
 		}
-		if(this.curproductvo !=null)
-			return this.curproductvo.checkCurTechValid();
-		else
-		return false;
+		return true;
 	}
 
 	return PicOrderItem;
@@ -54313,6 +54564,7 @@ var PaintOrderPanelUI=(function(_super){
 		this.textTotalPrice=null;
 		this.textDeliveryType=null;
 		this.textPayPrice=null;
+		this.copynum=null;
 		this.btnsaveorder=null;
 		this.btnordernow=null;
 		PaintOrderPanelUI.__super.call(this);
@@ -57125,6 +57377,111 @@ var Tree=(function(_super){
 
 
 /**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
+
+
+/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -58076,111 +58433,6 @@ var List=(function(_super){
 
 	return List;
 })(Box)
-
-
-/**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
 
 
 /**
@@ -59222,11 +59474,6 @@ var TechBoxItem=(function(_super){
 		this.processCatVo=null;
 		this.techmainvo=tvo;
 		this.initView();
-		if(this.techmainvo.preProc_Code=="SPTE10330" || this.techmainvo.preProc_Code=="SPTE10420"){
-			this.techBtn.disabled=PaintOrderModel.instance.batchChangeMatItems !=null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
-			this.mouseEnabled=!this.techBtn.disabled;
-			this.grayimg.visible=!this.mouseEnabled;
-		}
 		if(tvo.selected)
 			this.setSelected(true);
 		else
@@ -59260,14 +59507,9 @@ var TechBoxItem=(function(_super){
 	__proto.setTechSelected=function(sel){
 		if(this.techmainvo !=null){
 			this.techmainvo.selected=sel;
-			if(sel && this.techmainvo.preProc_attachmentTypeList !=null && this.techmainvo.preProc_attachmentTypeList !="" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPNO" && this.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase()!="SPPEIJIAN"){
-				ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,this.techmainvo);
-			}
-			else{
-				this.techmainvo.attchMentFileId="";
-				this.techmainvo.attchFileId="";
-				this.techmainvo.selectAttachVoList=null;
-			}
+			this.techmainvo.attchMentFileId="";
+			this.techmainvo.attchFileId="";
+			this.techmainvo.selectAttachVoList=null;
 		}
 		else
 		this.processCatVo.selected=sel;
@@ -59477,10 +59719,17 @@ var PicInfoItem=(function(_super){
 		this.on("mouseover",this,this.onMouseOverHandler);
 		this.on("mouseout",this,this.onMouseOutHandler);
 		this.btndelete.visible=false;
+		this.frame.visible=false;
+		this.selYixingBtn.visible=false;
+		this.selBackBtn.visible=false;
+		this.selYixingBtn.on("click",this,this.onSelectYixingImg);
+		this.selBackBtn.on("click",this,this.onSelectBackImg);
 		this.btndelete.on("click",this,this.onDeleteHandler);
 		this.trytime=0;
-		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid);
+		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)|| DirectoryFileModel.instance.curOperateFile==this.picInfo;
 		this.sel.selected=this.sel.visible;
+		this.yixingimg.visible=false;
+		this.backimg.visible=false;
 		if(this.picInfo.picType==0 || !UtilTool.checkFileIsImg(this.picInfo)){
 			this.img.skin="upload/fold.png";
 			this.filename.text=this.picInfo.directName;
@@ -59503,12 +59752,20 @@ var PicInfoItem=(function(_super){
 				return;
 			}
 			if(this.picInfo.picWidth > this.picInfo.picHeight){
-				this.img.width=128;
-				this.img.height=128/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.img.width=124;
+				this.img.height=124/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.yixingimg.width=50;
+				this.yixingimg.height=50/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.backimg.width=50;
+				this.backimg.height=this.yixingimg.height;
 			}
 			else{
-				this.img.height=128;
-				this.img.width=128/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.img.height=124;
+				this.img.width=124/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.yixingimg.height=50;
+				this.yixingimg.width=50/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.backimg.height=50;
+				this.backimg.width=this.yixingimg.width;
 			}
 			if(this.img.skin !="upload/fold.png")
 				Laya.loader.clearTextureRes(this.img.skin);
@@ -59521,6 +59778,273 @@ var PicInfoItem=(function(_super){
 				this.picClassTxt.text="CDR";
 			else
 			this.picClassTxt.text=this.picInfo.picClass.toLocaleUpperCase();
+			if(this.picInfo.yixingFid !="" && this.picInfo.yixingFid !="0"){
+				this.yixingimg.visible=true;
+				this.yixingimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.yixingFid+".jpg";
+			}
+			if(this.picInfo.backFid !="" && this.picInfo.backFid !="0"){
+				this.backimg.visible=true;
+				this.backimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.backFid+".jpg";
+			}
+			this.picClassTxt.visible=true;
+			this.colorspacetxt.text=this.picInfo.colorspace.toLocaleUpperCase();
+			this.colorspacetxt.visible=true;
+		}
+	}
+
+	//this.fileinfo.text=picInfo.directName;
+	__proto.onDeleteHandler=function(e){
+		e.stopPropagation();
+		if(this.picInfo.picType==1)
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该图片吗？",caller:this,callback:this.confirmDelete});
+		else
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该目录吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(result){
+		if(result){
+			if(this.sel.visible){
+				var datainfo=[];
+				datainfo.push(this.picInfo);
+				datainfo.push(this.img);
+				datainfo.push(this);
+				EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
+			}
+			if(this.picInfo.picType==1)
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+			else
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+		}
+	}
+
+	__proto.onDeleteFileBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
+	}
+
+	__proto.onMouseOutHandler=function(){
+		this.btndelete.visible=false;
+		this.frame.visible=false;
+		this.selYixingBtn.visible=false;
+		this.selBackBtn.visible=false;
+	}
+
+	__proto.canCelSelected=function(){
+		this.sel.visible=false;
+		this.sel.selected=false;
+	}
+
+	__proto.onMouseOverHandler=function(){
+		this.btndelete.visible=true;
+		this.frame.visible=true;
+		if(this.picInfo.picType==1){
+			this.selYixingBtn.visible=true;
+			if(this.picInfo.yixingFid=="0")
+				this.selYixingBtn.label="选择异形";
+			else
+			this.selYixingBtn.label="取消异形";
+			this.selBackBtn.visible=true;
+			if(this.picInfo.backFid=="0")
+				this.selBackBtn.label="选择反面";
+			else
+			this.selBackBtn.label="取消反面";
+		}
+	}
+
+	__proto.showYixingImg=function(fid){
+		this.yixingimg.visible=true;
+		this.yixingimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+fid+".jpg";
+	}
+
+	__proto.onClickHandler=function(){
+		if(this.picInfo.picType==1 && this.picInfo.picClass.toLocaleUpperCase()=="PNG")
+			return;
+		if(this.picInfo.picType==1 && this.picInfo.picPhysicWidth > 0){
+			if(DirectoryFileModel.instance.curOperateFile !=null){
+				if(DirectoryFileModel.instance.curOperateFile.fid==this.picInfo.fid){
+					return;
+				}
+				if(DirectoryFileModel.instance.curOperateSelType==0 && UtilTool.isFitYixing(DirectoryFileModel.instance.curOperateFile,this.picInfo)){
+					var params="fid="+DirectoryFileModel.instance.curOperateFile.fid+"&fmaskid="+this.picInfo.fid;
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-mask-image?",this,this.onSetYixingBack,params,"post");
+					DirectoryFileModel.instance.curOperateFile=null;
+					EventCenter.instance.event("STOP_SELECT_RELATE_PIC");
+				}
+				else if(DirectoryFileModel.instance.curOperateSelType==1 && UtilTool.isFitFanmain(DirectoryFileModel.instance.curOperateFile,this.picInfo)){
+					var params="fid="+DirectoryFileModel.instance.curOperateFile.fid+"&fbackid="+this.picInfo.fid;
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-back-image?",this,this.onSetFanmianBack,params,"post");
+					DirectoryFileModel.instance.curOperateFile=null;
+					EventCenter.instance.event("STOP_SELECT_RELATE_PIC");
+				}
+				return;
+			}
+			if(!DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)){
+				this.sel.visible=true;
+				this.sel.selected=true;
+			}
+			else{
+				this.sel.visible=false;
+				this.sel.selected=false;
+			};
+			var datainfo=[];
+			datainfo.push(this.picInfo);
+			datainfo.push(this.img);
+			datainfo.push(this);
+			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
+		}
+	}
+
+	//UtilTool.getYixingImageCount("circle.jpg",this);
+	__proto.onSetYixingBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
+	}
+
+	__proto.onSetFanmianBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
+	}
+
+	__proto.onSelectYixingImg=function(e){
+		if(DirectoryFileModel.instance.curOperateFile !=null)
+			return;
+		if(this.picInfo.yixingFid=="0"){
+			DirectoryFileModel.instance.curOperateFile=this.picInfo;
+			DirectoryFileModel.instance.curOperateSelType=0;
+			this.sel.selected=true;
+			this.sel.visible=true;
+			EventCenter.instance.event("START_SELECT_YIXING_PIC");
+		}
+		else{
+			this.yixingimg.visible=false;
+			var params="fid="+this.picInfo.fid+"&fmaskid=0";
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-mask-image?",this,this.onSetYixingBack,params,"post");
+		}
+		e.stopPropagation();
+	}
+
+	__proto.onSelectBackImg=function(e){
+		if(DirectoryFileModel.instance.curOperateFile !=null)
+			return;
+		if(this.picInfo.backFid=="0"){
+			DirectoryFileModel.instance.curOperateFile=this.picInfo;
+			DirectoryFileModel.instance.curOperateSelType=1;
+			this.sel.selected=true;
+			this.sel.visible=true;
+			EventCenter.instance.event("START_SELECT_BACK_PIC");
+		}
+		else{
+			this.backimg.visible=false;
+			var params="fid="+this.picInfo.fid+"&fbackid=0";
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-back-image?",this,this.onSetFanmianBack,params,"post");
+		}
+		e.stopPropagation();
+	}
+
+	__proto.getPixelInfo=function(pixel){
+		var imgdata=pixel;
+		UtilTool.getCutCountLength(imgdata);
+	}
+
+	__proto.onDoubleClick=function(){
+		if(this.picInfo.picType==0){
+			EventCenter.instance.event("SELECT_FOLDER",this.picInfo);
+		}
+		else{
+			ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.picInfo);
+		}
+	}
+
+	return PicInfoItem;
+})(PicShortItemUI)
+
+
+//class script.picUpload.PicPaintItem extends ui.picManager.PicPaintItemUI
+var PicPaintItem=(function(_super){
+	function PicPaintItem(){
+		this.picInfo=null;
+		this.trytime=0;
+		PicPaintItem.__super.call(this);
+	}
+
+	__class(PicPaintItem,'script.picUpload.PicPaintItem',_super);
+	var __proto=PicPaintItem.prototype;
+	__proto.setData=function(filedata){
+		this.picInfo=filedata;
+		this.offAll();
+		this.on("doubleclick",this,this.onDoubleClick);
+		this.on("click",this,this.onClickHandler);
+		this.on("mouseover",this,this.onMouseOverHandler);
+		this.on("mouseout",this,this.onMouseOutHandler);
+		this.btndelete.visible=false;
+		this.btndelete.on("click",this,this.onDeleteHandler);
+		this.trytime=0;
+		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)|| DirectoryFileModel.instance.curOperateFile==this.picInfo;
+		this.sel.selected=this.sel.visible;
+		this.yixingimg.visible=false;
+		this.backimg.visible=false;
+		if(this.picInfo.picType==0 || !UtilTool.checkFileIsImg(this.picInfo)){
+			this.img.skin="upload/fold.png";
+			this.filename.text=this.picInfo.directName;
+			this.fileinfo.visible=false;
+			this.picClassTxt.visible=false;
+			this.colorspacetxt.visible=false;
+			this.img.width=108;
+			this.img.height=101;
+		}
+		else{
+			this.fileinfo.visible=true;
+			this.filename.text=this.picInfo.directName;
+			if(this.picInfo.isProcessing){
+				this.fileinfo.text="处理中...";
+				this.img.skin="upload/fold.png";
+				this.picClassTxt.visible=false;
+				this.colorspacetxt.visible=false;
+				this.img.width=108;
+				this.img.height=101;
+				return;
+			}
+			if(this.picInfo.picWidth > this.picInfo.picHeight){
+				this.img.width=124;
+				this.img.height=124/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.yixingimg.width=50;
+				this.yixingimg.height=50/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.backimg.width=50;
+				this.backimg.height=this.yixingimg.height;
+			}
+			else{
+				this.img.height=124;
+				this.img.width=124/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.yixingimg.height=50;
+				this.yixingimg.width=50/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.backimg.height=50;
+				this.backimg.width=this.yixingimg.width;
+			}
+			if(this.img.skin !="upload/fold.png")
+				Laya.loader.clearTextureRes(this.img.skin);
+			this.img.skin=null;
+			this.img.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.fid+".jpg";
+			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
+			str+="dpi:"+this.picInfo.dpi;
+			this.fileinfo.text=str;
+			if(this.picInfo.isCdr)
+				this.picClassTxt.text="CDR";
+			else
+			this.picClassTxt.text=this.picInfo.picClass.toLocaleUpperCase();
+			if(this.picInfo.yixingFid !="" && this.picInfo.yixingFid !="0"){
+				this.yixingimg.visible=true;
+				this.yixingimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.yixingFid+".jpg";
+			}
+			if(this.picInfo.backFid !="" && this.picInfo.backFid !="0"){
+				this.backimg.visible=true;
+				this.backimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.backFid+".jpg";
+			}
 			this.picClassTxt.visible=true;
 			this.colorspacetxt.text=this.picInfo.colorspace.toLocaleUpperCase();
 			this.colorspacetxt.visible=true;
@@ -59576,8 +60100,14 @@ var PicInfoItem=(function(_super){
 		if(this.picInfo.picType==1 && this.picInfo.picClass.toLocaleUpperCase()=="PNG")
 			return;
 		if(this.picInfo.picType==1 && this.picInfo.picPhysicWidth > 0){
-			this.sel.visible=!this.sel.visible;
-			this.sel.selected=this.sel.visible;
+			if(!DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)){
+				this.sel.visible=true;
+				this.sel.selected=true;
+			}
+			else{
+				this.sel.visible=false;
+				this.sel.selected=false;
+			};
 			var datainfo=[];
 			datainfo.push(this.picInfo);
 			datainfo.push(this.img);
@@ -59601,8 +60131,8 @@ var PicInfoItem=(function(_super){
 		}
 	}
 
-	return PicInfoItem;
-})(PicShortItemUI)
+	return PicPaintItem;
+})(PicPaintItemUI)
 
 
 //class script.picUpload.DirectFolderItem extends ui.picManager.DirectItemUI

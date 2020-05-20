@@ -62,4 +62,5 @@
    <item name="usercenter/OrganizeMgrPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/OrganizeItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/OrganizeMemberItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="picManager/PicPaintItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

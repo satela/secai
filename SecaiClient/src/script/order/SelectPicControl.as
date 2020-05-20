@@ -23,6 +23,7 @@ package script.order
 	import script.ViewManager;
 	import script.picUpload.DirectFolderItem;
 	import script.picUpload.PicInfoItem;
+	import script.picUpload.PicPaintItem;
 	
 	import ui.order.SelectPicPanelUI;
 	
@@ -64,7 +65,7 @@ package script.order
 			uiSkin.mainpanel.height = Browser.height;
 			uiSkin.mainpanel.width = Browser.width;
 
-			uiSkin.picList.itemRender = PicInfoItem;
+			uiSkin.picList.itemRender = PicPaintItem;
 			uiSkin.picList.vScrollBarSkin = "";
 			uiSkin.picList.selectEnable = false;
 			uiSkin.picList.spaceY = 0;
@@ -332,7 +333,8 @@ package script.order
 					(param as MaterialItemVo).attchMentFileId = HttpRequestUtil.originPicPicUrl + fvo.fid + "." + fvo.picClass;
 					(param as MaterialItemVo).attchFileId = fvo.fid;
 					
-
+					if(param.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+						(param as MaterialItemVo).picInfoVo = fvo;
 				}
 				return;
 			}

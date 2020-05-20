@@ -1,5 +1,6 @@
 package utils
 {
+	
 	import laya.filters.ColorFilter;
 	import laya.maths.Point;
 	import laya.net.LocalStorage;
@@ -7,6 +8,8 @@ package utils
 	
 	import model.orderModel.OrderConstant;
 	import model.picmanagerModel.PicInfoVo;
+	
+	import script.ViewManager;
 	
 	import ui.common.TipPanelUI;
 
@@ -670,11 +673,11 @@ package utils
 			else return 0;
 		}
 		
-		public static function getYixingPrice(picinfo:PicInfoVo,lineNum:int,lineLength:int,basePrice:Number,unitPrice:Number):Number
+		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number):Number
 		{			
-			var linemeter:Number = (lineLength/picinfo.picWidth) * picinfo.picPhysicWidth;
-			//var scales:Number = 
-			return 0;
+			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.picWidth) * picinfo.picPhysicWidth/100;
+			
+			return basePrice * picinfo.relatedRoadNum + linemeter*unitPrice;
 		}
 		public static function isMeasureUnitByNum(unit:String):Boolean
 		{
@@ -691,6 +694,49 @@ package utils
 				return false;
 			
 			return true;
+		}
+		
+		public static function isFitYixing(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
+		{
+			if(sourcefile != null && selfile != null)
+			{
+				if(selfile.roadNum <= 0)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"该图片不符合异形切割图片要求"});
+					return false;
+
+				}
+				var xdif:Number = Math.abs(sourcefile.picPhysicWidth - selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+				var ydif:Number = Math.abs(sourcefile.picPhysicHeight - selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+				if(xdif >0.01 || ydif > 0.01)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸不匹配"});
+					
+					return false;
+				}
+				return true;
+				
+			}
+			return false;
+		}
+		
+		public static function isFitFanmain(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
+		{
+			if(sourcefile != null && selfile != null)
+			{
+				
+				var xdif:Number = Math.abs(sourcefile.picPhysicWidth - selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+				var ydif:Number = Math.abs(sourcefile.picPhysicHeight - selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+				if(xdif >0.01 || ydif > 0.01)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸不匹配"});
+					
+					return false;
+				}
+				return true;
+				
+			}
+			return false;
 		}
 	}
 }

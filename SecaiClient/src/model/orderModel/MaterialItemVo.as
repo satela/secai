@@ -1,6 +1,7 @@
 package model.orderModel
 {
 	import model.HttpRequestUtil;
+	import model.picmanagerModel.PicInfoVo;
 
 	public class MaterialItemVo
 	{
@@ -30,6 +31,7 @@ package model.orderModel
 		public var attachList:Array;
 		public var selectAttachVoList:Vector.<AttchCatVo>;//选择的配件
 		
+		public var picInfoVo:PicInfoVo;//异形切割工艺计价需要图片信息
 		public function MaterialItemVo(data:Object)
 		{
 			if(data != null)

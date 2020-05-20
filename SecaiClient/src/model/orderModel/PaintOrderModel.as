@@ -120,7 +120,7 @@ package model.orderModel
 			
 		}
 		
-		public function getProcePriceUnit(orgcode:String,procCode:String,matcode:String):Array
+		public function getProcePriceUnit(orgcode:String,procCode:String,matcode:String,processList:Array):Array
 		{
 			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
 				return [];
@@ -129,6 +129,10 @@ package model.orderModel
 				var list:Array = allManuFacutreMatProcPrice[orgcode];
 				if(list == null)
 					return [];
+				
+				if(procCode == OrderConstant.UNNORMAL_CUT_TECHNO)
+					return getYixingProcPrice(orgcode,procCode,matcode,processList);
+				
 				for(var i:int=0;i < list.length;i++)
 				{
 					if(list[i].proc_code == procCode)
@@ -141,6 +145,42 @@ package model.orderModel
 				}
 				return [];
 			}
+		}
+		
+		public function getYixingProcPrice(orgcode:String,procCode:String,matcode:String,processList:Array):Array
+		{
+			var allprice:Array = [];
+			var hasselectMat:Array = [];
+			hasselectMat.push(matcode);
+			for(var i:int=0;i < processList.length;i++)
+			{
+				var attchvo:Vector.<AttchCatVo> = processList[i].selectAttachVoList;
+				if(attchvo != null && attchvo.length > 0)
+				{
+					hasselectMat.push(attchvo[0].accessory_code);
+				}
+			}
+			
+			var list:Array = allManuFacutreMatProcPrice[orgcode];
+			if(list == null)
+				return [];
+			for(var i:int=0;i < list.length;i++)
+			{
+				if(list[i].proc_code == procCode)
+				{
+					allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					for(var j:int=0;j < hasselectMat.length;j++)
+					{
+						if(list[i].matlist[hasselectMat[j]] != null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
+							allprice = [list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+						
+					}
+					
+					return allprice;
+				}
+			}
+			return [];
+			
 		}
 		public static var VOCABURARY:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		public static function getOrderSn():String
@@ -169,5 +209,44 @@ package model.orderModel
 			
 			return 0;
 		}
+		
+		public function checkCanSelYixing():Boolean
+		{
+			var picitems:Vector.<PicOrderItem> = this.batchChangeMatItems;
+			if(picitems != null && picitems.length > 0)
+			{
+				for(var i:int=0;i < picitems.length;i++)
+				{
+					var picinfo:PicInfoVo = picitems[i].ordervo.picinfo;
+					if(picinfo.relatedRoadNum <= 0 || picinfo.yixingFid == "0")
+						return false;
+				}
+				return true;
+			}
+			else if(curSelectOrderItem != null && curSelectOrderItem.ordervo.picinfo.relatedRoadNum > 0 && curSelectOrderItem.ordervo.picinfo.yixingFid != "0")
+				return true;
+			
+			return false;
+		}
+		
+		public function checkCanDoubleSide():Boolean
+		{
+			var picitems:Vector.<PicOrderItem> = this.batchChangeMatItems;
+			if(picitems != null && picitems.length > 0)
+			{
+				for(var i:int=0;i < picitems.length;i++)
+				{
+					var picinfo:PicInfoVo = picitems[i].ordervo.picinfo;
+					if(picinfo.backFid == "0")
+						return false;
+				}
+				return true;
+			}
+			else if(curSelectOrderItem != null && curSelectOrderItem.ordervo.picinfo.backFid != "0")
+				return true;
+			
+			return false;
+		}
+		
 	}
 }

@@ -35,13 +35,12 @@ package script.order
 			techmainvo = tvo;
 			initView();
 			
-			if(techmainvo.preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO || techmainvo.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-			{
-				this.techBtn.disabled = PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
-				this.mouseEnabled = !this.techBtn.disabled;
-				this.grayimg.visible = !this.mouseEnabled;
-			}
-			//PaintOrderModel.instance.batchChangeMatItems
+//			if(techmainvo.preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO || techmainvo.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+//			{
+//				this.techBtn.disabled = PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
+//				this.mouseEnabled = !this.techBtn.disabled;
+//				this.grayimg.visible = !this.mouseEnabled;
+//			}
 			if(tvo.selected)
 				setSelected(true);
 			else
@@ -88,16 +87,16 @@ package script.order
 			if(techmainvo != null)
 			{
 				techmainvo.selected = sel;
-				if(sel && techmainvo.preProc_attachmentTypeList != null && techmainvo.preProc_attachmentTypeList != "" && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_NO && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_PEIJIAN)
-				{
-					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,techmainvo);
-				}
-				else
-				{
+//				if(sel && techmainvo.preProc_attachmentTypeList != null && techmainvo.preProc_attachmentTypeList != "" && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_NO && techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() != OrderConstant.ATTACH_PEIJIAN)
+//				{
+//					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,techmainvo);
+//				}
+//				else
+//				{
 					techmainvo.attchMentFileId = "";
 					techmainvo.attchFileId = "";
 					techmainvo.selectAttachVoList = null;
-				}
+				//}
 			}
 			else
 				processCatVo.selected = sel;
