@@ -29,11 +29,19 @@ package model.orderModel
 		public static const ATTACH_PNG:String = "SPPNG";
 		public static const ATTACH_PEIJIAN:String = "SPPEIJIAN";
 		
+		public static const CUTOFF_H_V:String = "SPPJ"; //横向竖直拼接
+		public static const AVERAGE_CUTOFF:String = "SPDFCQ"; //等份裁切
+
+		
 		public static const DOUBLE_SIDE_SAME_TECHNO:String = "SPTE10320";//双面相同
 		public static const DOUBLE_SIDE_UNSAME_TECHNO:String = "SPTE10330";//双面不同
 
 		public static const UNNORMAL_CUT_TECHNO:String = "SPTE10420";//异性切割
-		
+		public static const AVGCUT_TECHNO:String = "SPTE10170";//等份裁切
+
+		public static const HORIZANTAL_CUT_COMBINE:String = "SPTE10160";//横向拼接
+		public static const VERTICAL_CUT_COMBINE:String = "SPTE10150";//竖向拼接
+
 		public static const MANUFACTURE_TYPE_PAINT:int = 2;//喷印输出中心
 		public static const MANUFACTURE_TYPE_TEXT_PAINT:int = 5;//字牌
 

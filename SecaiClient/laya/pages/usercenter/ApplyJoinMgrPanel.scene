@@ -120,7 +120,7 @@
             "x":15,
             "type":"List",
             "searchKey":"List,applylist",
-            "props":{"y":62,"x":94,"width":729,"var":"applylist","vScrollBarSkin":"comp/vscroll.png","height":571},
+            "props":{"y":62,"x":94,"width":729,"var":"applylist","vScrollBarSkin":"upload/vscroll.png","height":571},
             "nodeParent":2,
             "label":"applylist",
             "isDirectory":false,

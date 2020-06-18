@@ -7,6 +7,7 @@ package utils
 	import laya.utils.Browser;
 	
 	import model.orderModel.OrderConstant;
+	import model.orderModel.PicOrderItemVo;
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
@@ -649,7 +650,7 @@ package utils
 			else if(unit == OrderConstant.MEASURE_UNIT_LEFT_RIGHT)
 			{
 				var lrsum:Number = picheight + picheight;
-				return baseprice + unitprice*btsum;
+				return baseprice + unitprice*lrsum;
 			}
 			else if(unit == OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE)
 			{
@@ -673,12 +674,20 @@ package utils
 			else return 0;
 		}
 		
-		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number):Number
+		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
 		{			
-			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.picWidth) * picinfo.picPhysicWidth/100;
+			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.picWidth) * picinfo.picPhysicWidth * finalwidth/picinfo.picPhysicWidth;
 			
 			return basePrice * picinfo.relatedRoadNum + linemeter*unitPrice;
 		}
+		
+		public static function getAvgCutPrice(orderitem:PicOrderItemVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
+		{			
+			var linemeter:Number = orderitem.horiCutNum * finalwidth + orderitem.verCutNum * finalheight;
+			
+			return basePrice * orderitem.horiCutNum * orderitem.verCutNum + linemeter*unitPrice;
+		}
+		
 		public static function isMeasureUnitByNum(unit:String):Boolean
 		{
 			return unit == OrderConstant.MEASURE_UNIT_SINGLE_NUM || unit == OrderConstant.MEASURE_UNIT_SINGLE_SUIT || unit == OrderConstant.MEASURE_UNIT_SINGLE_TAO;

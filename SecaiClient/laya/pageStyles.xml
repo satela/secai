@@ -43,7 +43,7 @@
    <item name="usercenter/MyOrdersPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/ChargePanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="TopBanner.scene" props="" ifExport="内嵌模式" aName=""/>
-   <item name="order/SelectAttchPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SelectAttchPanel.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/ProductOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="product/ProductItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="product/BuyProductPanel.scene" props="" ifExport="分离模式" aName=""/>
@@ -63,4 +63,8 @@
    <item name="usercenter/OrganizeItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="usercenter/OrganizeMemberItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="picManager/PicPaintItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/InputCutNumPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/CutImageItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/AvgCutImageItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/AverageCutPanel.scene" props="" ifExport="分离模式" aName=""/>
 </page>

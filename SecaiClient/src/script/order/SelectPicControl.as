@@ -66,9 +66,9 @@ package script.order
 			uiSkin.mainpanel.width = Browser.width;
 
 			uiSkin.picList.itemRender = PicPaintItem;
-			uiSkin.picList.vScrollBarSkin = "";
+			//uiSkin.picList.vScrollBarSkin = "";
 			uiSkin.picList.selectEnable = false;
-			uiSkin.picList.spaceY = 0;
+			uiSkin.picList.spaceY = 10;
 			uiSkin.picList.renderHandler = new Handler(this, updatePicInfoItem);
 			uiSkin.flder0.visible = false;
 			uiSkin.flder1.visible = false;

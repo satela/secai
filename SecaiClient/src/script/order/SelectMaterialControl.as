@@ -655,6 +655,13 @@ package script.order
 
 			if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_ATTACH,false,matvo);
+			
+			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.CUTOFF_H_V)
+				ViewManager.instance.openView(ViewManager.INPUT_CUT_NUM,false,matvo);
+			
+			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.AVERAGE_CUTOFF)
+				ViewManager.instance.openView(ViewManager.AVG_CUT_VIEW,false,matvo);
+			
 			updateSelectedTech();
 		}
 		
@@ -774,7 +781,7 @@ package script.order
 		private function updateSelectedTech():void
 		{
 			
-			this.uiSkin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes();
+			this.uiSkin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes(true);
 			checkShowEffectImg();
 		}
 		
@@ -878,7 +885,7 @@ package script.order
 				//ViewManager.showAlert("未选择完整工艺");
 				//return;
 			}
-			if(PaintOrderModel.instance.curSelectMat == null || PaintOrderModel.instance.curSelectMat.getTechDes() == "")
+			if(PaintOrderModel.instance.curSelectMat == null || PaintOrderModel.instance.curSelectMat.getTechDes(true) == "")
 			{
 				ViewManager.showAlert("请选择一个工艺");
 				return;
@@ -912,7 +919,17 @@ package script.order
 		private function onUpdateTechDes(viewname:String):void
 		{
 			if(viewname == ViewManager.VIEW_SELECT_ATTACH)
+			{
+				if(curclickItem.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
+				{
+					if(curclickItem.techmainvo.attachList == null || curclickItem.techmainvo.attachList.length == 0)
+					{
+						hideItems(curclickItem.x,true);
+					}
+				}
 				updateSelectedTech();
+				
+			}
 		}
 		private function onCloseView():void
 		{

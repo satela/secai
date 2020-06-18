@@ -16,7 +16,9 @@ package script
 	import ui.login.RegisterPanelUI;
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.AddCommentPanelUI;
+	import ui.order.AverageCutPanelUI;
 	import ui.order.ConfirmOrderPanelUI;
+	import ui.order.InputCutNumPanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectAttchPanelUI;
 	import ui.order.SelectDeliveryPanelUI;
@@ -66,7 +68,9 @@ package script
 		public static const VIEW_SELECT_DELIVERY_TYPE:String = "VIEW_SELECT_DELIVERY_TYPE";//选择配送方式 快递
 		public static const VIEW_SELECT_ATTACH:String = "VIEW_SELECT_ATTACH";//选择配件界面
 
-		
+		public static const INPUT_CUT_NUM:String = "INPUT_CUT_NUM";//输入裁切数
+		public static const AVG_CUT_VIEW:String = "AVG_CUT_VIEW";//等份裁切
+
 		public static const VIEW_PRODUCT_VIEW:String = "VIEW_PRODUCT_VIEW";//商品界面
 		public static const VIEW_BUY_PRODUCT_VIEW:String = "VIEW_BUY_PRODUCT_VIEW";//购买商品界面
 
@@ -131,6 +135,8 @@ package script
 			viewDict[VIEW_SELECT_MATERIAL] = SelectMaterialPanelUI;
 			viewDict[VIEW_SELECT_DELIVERY_TYPE] = SelectDeliveryPanelUI;
 			viewDict[VIEW_SELECT_ATTACH] = SelectAttchPanelUI;
+			viewDict[INPUT_CUT_NUM] = InputCutNumPanelUI;
+			viewDict[AVG_CUT_VIEW] = AverageCutPanelUI;
 
 			viewDict[VIEW_ADD_MESSAGE] = AddCommentPanelUI;
 			viewDict[VIEW_ADD_NEW_ADDRESS] = NewAddressPanelUI;

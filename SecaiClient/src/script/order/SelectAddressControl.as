@@ -48,7 +48,7 @@ package script.order
 			uiSkin.mainpanel.width = Browser.width;
 
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
-			uiSkin.list_address.array = Userdata.instance.addressList;
+			uiSkin.list_address.array = Userdata.instance.passedAddress;
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			tempaddress = PaintOrderModel.instance.selectAddress;
@@ -87,21 +87,28 @@ package script.order
 		}
 		private function onShowAddAdress():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			if(Userdata.instance.canAddNewAddress())
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			}
+			else
+			{
+				ViewManager.showAlert("有地址在等待审核状态，禁止添加新地址，你可删除待审核地址或等待审核通过后重新添加");
+			}
 		}
 		private function onSearchAddress():void
 		{
 			if(uiSkin.inputsearch.text == "")
 			{
-				uiSkin.list_address.array = Userdata.instance.addressList;
+				uiSkin.list_address.array = Userdata.instance.passedAddress;
 				return;
 			}
 			var tempadd:Array = [];
-			for(var i:int=0;i < Userdata.instance.addressList.length;i++)
+			for(var i:int=0;i < Userdata.instance.passedAddress.length;i++)
 			{
-				if((Userdata.instance.addressList[i].addressDetail as String).indexOf(uiSkin.inputsearch.text) >= 0)
+				if((Userdata.instance.passedAddress[i].addressDetail as String).indexOf(uiSkin.inputsearch.text) >= 0)
 				{
-					tempadd.push(Userdata.instance.addressList[i]);
+					tempadd.push(Userdata.instance.passedAddress[i]);
 				}
 			}
 			uiSkin.list_address.array = tempadd;

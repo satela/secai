@@ -63,8 +63,9 @@ package script.order
 			var num:int = 0;
 			var totalheight:int= 0;
 			
-			uiSkin.commentall.visible = false;
-			uiSkin.batchcomment.visible = false;
+			//uiSkin.commentall.visible = false;
+			//uiSkin.batchcomment.visible = false;
+			uiSkin.commentall.maxChars = 10;
 			
 			uiSkin.copynum.text = "1";
 			uiSkin.copynum.restrict = "0-9";

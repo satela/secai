@@ -43,7 +43,7 @@ package script.order
 			this.subtn.on(Event.CLICK,this,onSubItemNum);
 			this.addbtn.on(Event.CLICK,this,onAddItemNum);
 			this.hascomment.visible = false;
-			this.addmsg.visible = true;
+			this.addmsg.visible = false;
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 80;					
@@ -129,6 +129,8 @@ package script.order
 			
 			this.ordervo.orderData = null;
 			
+			this.curproductvo = null;
+			
 			this.yixingimg.visible = false;
 			this.backimg.visible = false;
 			this.yingxback.visible = false;
@@ -160,6 +162,8 @@ package script.order
 				
 				this.editheight.text = heightration.toFixed(2);
 			}
+			reset();
+
 			updatePrice();
 		}
 		private function onHeightSizeChange():void
@@ -174,6 +178,8 @@ package script.order
 
 				this.editwidth.text = widthration.toFixed(2);
 			}
+			
+			reset();
 			updatePrice();
 		}
 		
@@ -291,15 +297,16 @@ package script.order
 //					area = 0.1;
 //				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/area).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/perimeter).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo)).toFixed(1) + "";
-				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
 
 			}
+			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+
 		}
 		private function onNumChange():void
 		{
@@ -394,18 +401,23 @@ package script.order
 //				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/area).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo.picinfo)/perimeter).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo)).toFixed(1) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
 
-			this.architype.text = provo.getTechDes();
+			var tech:String = provo.getTechDes(false,finalWidth,finalHeight);
+			tech = tech.replace("超幅裁切",["竖拼裁切","横拼裁切"][this.ordervo.cuttype] + "(" + this.ordervo.cutnum+")");
 			
+			tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
+			
+			this.architype.text = tech;
+
 			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
 			else
@@ -436,7 +448,7 @@ package script.order
 //			if(area < 0.1)
 //				area = 0.1;
 			
-			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo.picinfo);
+			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo);
 			if(this.ordervo.orderPrice < 0.1)
 				this.ordervo.orderPrice = 0.1;
 			
@@ -461,7 +473,7 @@ package script.order
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.filename = this.ordervo.picinfo.directName;
 			
-			orderitemdata.procInfoList = productVo.getProInfoList(this.ordervo.picinfo);
+			orderitemdata.procInfoList = productVo.getProInfoList(this.ordervo.picinfo,finalWidth,finalHeight,this.ordervo);
 			
 
 			this.ordervo.orderData =  orderitemdata;
@@ -484,6 +496,12 @@ package script.order
 			if(ordervo.orderData == null)
 			{
 				ViewManager.showAlert("未选择材料工艺");
+				return false;
+			}
+			
+			if(this.ordervo.orderData.procInfoList == null ||  this.ordervo.orderData.procInfoList.length == 0)
+			{
+				ViewManager.showAlert("未选择工艺");
 				return false;
 			}
 			

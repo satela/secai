@@ -44,10 +44,10 @@ package script.usercenter
 			
 			uiSkin.btnaddAddress.on(Event.CLICK,this,onClickAdd);
 			
-			if(Userdata.instance.addressList.length <= 0)
+			//if(Userdata.instance.addressList.length <= 0)
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
-			else
-				uiSkin.addlist.array = Userdata.instance.addressList;
+			//else
+			//	uiSkin.addlist.array = Userdata.instance.addressList;
 			
 			uiSkin.numAddress.text = "已经保存" + Userdata.instance.addressList.length + "条地址";
 			
@@ -82,14 +82,41 @@ package script.usercenter
 				Userdata.instance.initMyAddress(result.data as Array);
 				Userdata.instance.defaultAddId = result["default"];
 
+				var tempAdd:Array = Userdata.instance.addressList;
+				tempAdd.sort(compareAddress);
 				uiSkin.addlist.array = Userdata.instance.addressList;
 				
 			}
 		}
+		
+		private function compareAddress(a:AddressVo,b:AddressVo):int
+		{
+			if(a.status != b.status)
+			{
+				if(a.status == 1)
+					return -1;
+				else if(b.status == 1)
+					return 1;
+				else if(a.status < b.status)
+					return -1;
+				else
+					return 1;
+					
+			}
+			else
+				return parseInt(a.id) < parseInt(b.id) ? -1:1;
+		}
 		private function onClickAdd():void
 		{
 			// TODO Auto Generated method stub
-			ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			if(Userdata.instance.canAddNewAddress())
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			}
+			else
+			{
+				ViewManager.showAlert("有地址在等待审核状态，禁止添加新地址，你可删除待审核地址或等待审核通过后重新添加");
+			}
 		}
 		
 		private function updateAddressList(cell:CompanyAddressItem,index:int):void

@@ -115,6 +115,7 @@ package script.picUpload
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
 			
+			
 
 		}
 		private function onResizeBrower():void
@@ -135,6 +136,9 @@ package script.picUpload
 			Laya.stage.on(Event.CLICK,this,stopSelectRelate);
 			uiSkin.seltips.visible = true;
 			uiSkin.seltips.text = "选择异形切割图片中";
+			
+			Laya.stage.on(Event.RIGHT_CLICK,this,stopRightSelectRelate);
+
 
 		}
 		private function onStartSelectBackRelate():void
@@ -142,9 +146,23 @@ package script.picUpload
 			Laya.stage.on(Event.CLICK,this,stopSelectRelate);
 			uiSkin.seltips.visible = true;
 			uiSkin.seltips.text = "选择反面图片中";
+			Laya.stage.on(Event.RIGHT_CLICK,this,stopRightSelectRelate);
 
 		}
 		
+		private function stopRightSelectRelate(e:Event):void
+		{
+			//trace(e.target);
+			
+			//if(e != null && this.uiSkin.picList.hitTestPoint(e.stageX,e.stageY))
+			//	return;
+			Laya.stage.off(Event.CLICK,this,stopSelectRelate);
+			uiSkin.seltips.visible = false;
+			DirectoryFileModel.instance.curOperateFile = null;
+			Laya.stage.off(Event.RIGHT_CLICK,this,stopSelectRelate);
+			
+			
+		}
 		
 		private function stopSelectRelate(e:Event):void
 		{
@@ -155,6 +173,7 @@ package script.picUpload
 			Laya.stage.off(Event.CLICK,this,stopSelectRelate);
 			uiSkin.seltips.visible = false;
 			DirectoryFileModel.instance.curOperateFile = null;
+			Laya.stage.off(Event.RIGHT_CLICK,this,stopSelectRelate);
 
 
 		}
@@ -397,6 +416,8 @@ package script.picUpload
 
 			EventCenter.instance.off(EventCenter.STOP_SELECT_RELATE_PIC,this,stopSelectRelate);
 			Browser.document.body.removeChild(file);//添加到舞台
+			//uiSkin.seltips.visible = false;
+			DirectoryFileModel.instance.curOperateFile = null;
 
 		}
 		private function onRemovedFromStage():void

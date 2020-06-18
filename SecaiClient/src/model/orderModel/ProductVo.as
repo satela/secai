@@ -3,6 +3,7 @@ package model.orderModel
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
+	import script.order.PicOrderItem;
 	
 	import utils.UtilTool;
 
@@ -41,7 +42,7 @@ package model.orderModel
 				this[key] = data[key];
 		}
 		
-		public function getTechDes():String
+		public function getTechDes(ignoreWidth:Boolean,picwidth:Number=0,picheight:Number=0):String
 		{
 			if(prcessCatList == null)
 				return "";
@@ -51,7 +52,7 @@ package model.orderModel
 				if(prcessCatList[i].selected)
 				{
 					//techstr += prcessCatList[i].procCat_Name;
-					var childtech:String = getTechStr(prcessCatList[i].nextMatList);
+					var childtech:String = getTechStr(prcessCatList[i].nextMatList,ignoreWidth,picwidth,picheight);
 					if(childtech != "")
 						techstr +=  childtech.substr(0,childtech.length - 1);
 					techstr += "-";
@@ -100,32 +101,37 @@ package model.orderModel
 			}
 			return temp;
 		}
-		private function getTechStr(arr:Vector.<MaterialItemVo>):String
+		private function getTechStr(arr:Vector.<MaterialItemVo>,ignoreWidth:Boolean,picwidth:Number,picheight:Number):String
 		{
 			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
 			for(var i:int=0;i < arr.length;i++)
 			{
 				if(arr[i].selected)
 				{
-					var peijian:String = "";
-					if(arr[i].selectAttachVoList != null)
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
 					{
-						for(var j:int=0;j < arr[i].selectAttachVoList.length;j++)
+						var peijian:String = "";
+						if(arr[i].selectAttachVoList != null)
 						{
-							peijian += arr[i].selectAttachVoList[j].accessory_name + ",";
+							for(var j:int=0;j < arr[i].selectAttachVoList.length;j++)
+							{
+								peijian += arr[i].selectAttachVoList[j].accessory_name + ",";
+							}
 						}
+						if(peijian != "")
+							return arr[i].preProc_Name + "(" + peijian.substr(0,peijian.length-1) + ")" +  "-" + getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
+						else 
+							return arr[i].preProc_Name +  "-" + getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 					}
-					if(peijian != "")
-						return arr[i].preProc_Name + "(" + peijian.substr(0,peijian.length-1) + ")" +  "-" + getTechStr(arr[i].nextMatList);
-					else 
-						return arr[i].preProc_Name +  "-" + getTechStr(arr[i].nextMatList);
+					else
+						return  getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 						
 				}
 			}
 			return "";
 		}
 		
-		public function getTotalPrice(picwidth:Number,picheight:Number,ignoreOther:Boolean = false,picinfovo:PicInfoVo = null):Number
+		public function getTotalPrice(picwidth:Number,picheight:Number,ignoreOther:Boolean = false,picinfovo:PicOrderItemVo = null):Number
 		{
 				
 			var prices:Number = UtilTool.getProcessPrice(picwidth,picheight,measure_unit,unit_price + additional_unitfee,0);			
@@ -180,7 +186,7 @@ package model.orderModel
 			return 0;
 		}
 		
-		private function getTechPrice(arr:Vector.<MaterialItemVo>,picwidth:Number,picheight:Number,ignoreOther,picinfovo:PicInfoVo,techlist:Array):Array
+		private function getTechPrice(arr:Vector.<MaterialItemVo>,picwidth:Number,picheight:Number,ignoreOther,picinfovo:PicOrderItemVo,techlist:Array):Array
 		{
 			var prices:Array = [];
 			if(arr == null)
@@ -189,57 +195,62 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					var totalprice:Number = 0;
-					
-					var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
-					if(priceInfo != null && priceInfo.length == 3)
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
 					{
-					
-						arr[i].measure_unit = priceInfo[0];
-						arr[i].baseprice = priceInfo[1];
-						arr[i].preProc_Price = priceInfo[2];
-//						if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-//							totalprice = arr[i].preProc_Price * area;
-//						else if(arr[i].preProc_Price > 0)
-//						{						
-//							totalprice = arr[i].preProc_Price * perimeter;
-//						}
-						if(arr[i].preProc_Code != OrderConstant.UNNORMAL_CUT_TECHNO)
-							totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
-						else
-							totalprice = UtilTool.getYixingPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price);
-
-						//if(arr[i].preProc_Price < 0)
-						//	hasDoublePrint = 2;
-						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
-						{
-							//totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
-							if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
-								totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
-							else if(!ignoreOther)
-								totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
-//							if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-//							{
-//								totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
-//							}
-//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
-//							{
-//								if("SPAS42110" == arr[i].selectAttachVoList[0].accessory_code) //铝合金挂轴只计算宽
-//								{
-//									totalprice += arr[i].selectAttachVoList[0].accessory_price * picwidth*2;
-//								}
-//								else
-//									totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
-//							}
-//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
-//								totalprice += arr[i].selectAttachVoList[0].accessory_price;						
-								
-						}
+						var totalprice:Number = 0;
 						
-					}
+						var priceInfo:Array = PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
+						if(priceInfo != null && priceInfo.length == 3)
+						{
+							
+							arr[i].measure_unit = priceInfo[0];
+							arr[i].baseprice = priceInfo[1];
+							arr[i].preProc_Price = priceInfo[2];
+							//						if(arr[i].preProc_Price > 0 && arr[i].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+							//							totalprice = arr[i].preProc_Price * area;
+							//						else if(arr[i].preProc_Price > 0)
+							//						{						
+							//							totalprice = arr[i].preProc_Price * perimeter;
+							//						}
+							if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+								totalprice = UtilTool.getYixingPrice(picinfovo.picinfo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+							else if(arr[i].preProc_Code == OrderConstant.AVGCUT_TECHNO)
+								totalprice = UtilTool.getAvgCutPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+							else
+								totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+							
+							//if(arr[i].preProc_Price < 0)
+							//	hasDoublePrint = 2;
+							if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+							{
+								//totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+								if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
+									totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
+								else if(!ignoreOther)
+									totalprice += UtilTool.getProcessPrice(picwidth,picheight,arr[i].selectAttachVoList[0].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
+								//							if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_AREA)
+								//							{
+								//								totalprice += arr[i].selectAttachVoList[0].accessory_price * area;
+								//							}
+								//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_PERIMETER)
+								//							{
+								//								if("SPAS42110" == arr[i].selectAttachVoList[0].accessory_code) //铝合金挂轴只计算宽
+								//								{
+								//									totalprice += arr[i].selectAttachVoList[0].accessory_price * picwidth*2;
+								//								}
+								//								else
+								//									totalprice += arr[i].selectAttachVoList[0].accessory_price * perimeter;
+								//							}
+								//							else if(arr[i].selectAttachVoList[0].measure_unit == OrderConstant.MEASURE_UNIT_KILO && !ignoreOther)
+								//								totalprice += arr[i].selectAttachVoList[0].accessory_price;						
+								
+							}
+							
+						}
 					//if(arr[i].baseprice != 0)
 					//	totalprice += arr[i].baseprice;
-					prices.push(totalprice);
+						prices.push(totalprice);
+					}
 					
 					prices = prices.concat(getTechPrice(arr[i].nextMatList,picwidth,picheight,ignoreOther,picinfovo,techlist));
 				}
@@ -247,7 +258,7 @@ package model.orderModel
 			return prices;
 		}
 		
-		private function getMaterialProInfoList(arr:Vector.<MaterialItemVo>,picinfo:PicInfoVo):Array
+		private function getMaterialProInfoList(arr:Vector.<MaterialItemVo>,picinfo:PicInfoVo,picwidth:Number,picheight:Number,orderitemvo:PicOrderItemVo):Array
 		{
 			var prolist:Array = [];
 			if(arr == null)
@@ -256,18 +267,31 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					var procname:String = arr[i].preProc_Name;
-					if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
-						procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
-					if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
-					else if(arr[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
-						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
-					else
-						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
+					{
+						var procname:String = arr[i].preProc_Name;
+						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
+							procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
+						if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
+						else if(arr[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
+						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
+						{
+							var procname:String = ["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+						}
+						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)
+						{
+							var procname:String = procname + "(H-" + orderitemvo.horiCutNum+ ",V-" + orderitemvo.verCutNum + ")";
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+						}
+						else
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+					}
 
 						
-					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList,picinfo));
+					prolist = prolist.concat(getMaterialProInfoList(arr[i].nextMatList,picinfo,picwidth,picheight,orderitemvo));
 					
 				}
 				
@@ -275,7 +299,7 @@ package model.orderModel
 			return prolist;
 		}
 		
-		public function getProInfoList(picinfo:PicInfoVo):Array
+		public function getProInfoList(picinfo:PicInfoVo,picwidth:Number,picheight:Number,orderitemvo:PicOrderItemVo):Array
 		{
 			var arr:Array = [];
 			
@@ -284,7 +308,7 @@ package model.orderModel
 				if(prcessCatList[i].selected)
 				{
 					//arr.push({proc_Code:prcessCatList[i].procCat_Name,proc_description:prcessCatList[i].procCat_Name,proc_attachpath:""});
-					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList,picinfo));
+					arr = arr.concat(getMaterialProInfoList(prcessCatList[i].nextMatList,picinfo,picwidth,picheight,orderitemvo));
 				}
 			}
 			return arr;

@@ -37,7 +37,8 @@ package script.picUpload
 			
 			this.btndelete.visible = false;
 		
-			
+			this.frame.visible = false;
+
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
 			trytime = 0;
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid) || DirectoryFileModel.instance.curOperateFile == picInfo;
@@ -52,15 +53,16 @@ package script.picUpload
 				this.fileinfo.visible = false;
 				this.picClassTxt.visible = false;
 				this.colorspacetxt.visible = false;
-				
-				this.img.width = 108;
-				this.img.height = 101;
+				this.img.x = 126;
+				this.img.width = 156;
+				this.img.height = 156;
 			}
 			else
 			{
 				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
-				
+				this.img.x = 126;
+
 				if( picInfo.isProcessing)
 				{
 					this.fileinfo.text = "处理中...";
@@ -68,33 +70,33 @@ package script.picUpload
 					this.picClassTxt.visible = false;
 					this.colorspacetxt.visible = false;
 					
-					this.img.width = 108;
-					this.img.height = 101;
+					this.img.width = 156;
+					this.img.height = 156;
 					return;
 				}
 				if(picInfo.picWidth > picInfo.picHeight)
 				{
-					this.img.width = 124;					
-					this.img.height = 124/picInfo.picWidth * picInfo.picHeight;
+					this.img.width = 156;					
+					this.img.height = 156/picInfo.picWidth * picInfo.picHeight;
 					
-					this.yixingimg.width = 50;
+					this.yixingimg.width = 78;
 					
-					this.yixingimg.height = 50/picInfo.picWidth * picInfo.picHeight;
+					this.yixingimg.height = 78/picInfo.picWidth * picInfo.picHeight;
 					
-					this.backimg.width = 50;
+					this.backimg.width = 78;
 					this.backimg.height = this.yixingimg.height;
 					
 				}
 				else
 				{
-					this.img.height = 124;
-					this.img.width = 124/picInfo.picHeight * picInfo.picWidth;
+					this.img.height = 156;
+					this.img.width = 156/picInfo.picHeight * picInfo.picWidth;
 					
-					this.yixingimg.height = 50;
+					this.yixingimg.height = 78;
 					
-					this.yixingimg.width = 50/picInfo.picHeight * picInfo.picWidth;
+					this.yixingimg.width = 78/picInfo.picHeight * picInfo.picWidth;
 					
-					this.backimg.height = 50;
+					this.backimg.height = 78;
 					this.backimg.width = this.yixingimg.width;
 					
 					
@@ -121,13 +123,16 @@ package script.picUpload
 				{
 					this.yixingimg.visible = true;
 					this.yixingimg.skin = HttpRequestUtil.smallerrPicUrl + picInfo.yixingFid + ".jpg";
+					this.img.x = 87;
+
 					
 				}
 				if(picInfo.backFid != "" && picInfo.backFid != "0")
 				{
 					this.backimg.visible = true;
 					this.backimg.skin = HttpRequestUtil.smallerrPicUrl + picInfo.backFid + ".jpg";
-					
+					this.img.x = 87;
+
 				}
 				this.picClassTxt.visible = true;
 				//if(this.picInfo.colorspace)
@@ -184,7 +189,8 @@ package script.picUpload
 		{
 			// TODO Auto Generated method stub
 			this.btndelete.visible = false;
-			
+			this.frame.visible = false;
+
 			
 		}
 		
@@ -199,7 +205,8 @@ package script.picUpload
 			// TODO Auto Generated method stub
 			this.btndelete.visible = true;
 						
-			
+			this.frame.visible = true;
+
 		}
 		
 		

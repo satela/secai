@@ -38,8 +38,6 @@ package script.picUpload
 			this.btndelete.visible = false;
 			this.frame.visible = false;
 
-			this.selYixingBtn.visible = false;
-			this.selBackBtn.visible = false;
 			
 			this.selYixingBtn.on(Event.CLICK,this,onSelectYixingImg);
 			this.selBackBtn.on(Event.CLICK,this,onSelectBackImg);
@@ -60,14 +58,21 @@ package script.picUpload
 				this.picClassTxt.visible = false;
 				this.colorspacetxt.visible = false;
 
-				this.img.width = 108;
-				this.img.height = 101;
+				this.img.width = 156;
+				this.img.height = 156;
+				
+				this.selYixingBtn.visible = false;
+				this.selBackBtn.visible = false;
+				
+				this.img.x = 126;
+				
 			}
 			else
 			{
 				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
-				
+				this.img.x = 87;
+
 				if( picInfo.isProcessing)
 				{
 					this.fileinfo.text = "处理中...";
@@ -75,33 +80,33 @@ package script.picUpload
 					this.picClassTxt.visible = false;
 					this.colorspacetxt.visible = false;
 					
-					this.img.width = 108;
-					this.img.height = 101;
+					this.img.width = 156;
+					this.img.height = 156;
 					return;
 				}
 				if(picInfo.picWidth > picInfo.picHeight)
 				{
-					this.img.width = 124;					
-					this.img.height = 124/picInfo.picWidth * picInfo.picHeight;
+					this.img.width = 156;					
+					this.img.height = 156/picInfo.picWidth * picInfo.picHeight;
 					
-					this.yixingimg.width = 50;
+					this.yixingimg.width = 78;
 					
-					this.yixingimg.height = 50/picInfo.picWidth * picInfo.picHeight;
+					this.yixingimg.height = 78/picInfo.picWidth * picInfo.picHeight;
 					
-					this.backimg.width = 50;
+					this.backimg.width = 78;
 					this.backimg.height = this.yixingimg.height;
 
 				}
 				else
 				{
-					this.img.height = 124;
-					this.img.width = 124/picInfo.picHeight * picInfo.picWidth;
+					this.img.height = 156;
+					this.img.width = 156/picInfo.picHeight * picInfo.picWidth;
 					
-					this.yixingimg.height = 50;
+					this.yixingimg.height = 78;
 					
-					this.yixingimg.width = 50/picInfo.picHeight * picInfo.picWidth;
+					this.yixingimg.width = 78/picInfo.picHeight * picInfo.picWidth;
 					
-					this.backimg.height = 50;
+					this.backimg.height = 78;
 					this.backimg.width = this.yixingimg.width;
 					
 
@@ -128,13 +133,39 @@ package script.picUpload
 				{
 					this.yixingimg.visible = true;
 					this.yixingimg.skin = HttpRequestUtil.smallerrPicUrl + picInfo.yixingFid + ".jpg";
+					
+					this.selYixingBtn.visible = false;
+					this.selYixingBtn.skin = "upload/deletbtn.png";
+					this.btnyxtxt.text = "取消异形";
+					this.btnyxtxt.color = "#FFFFFF";
+
+				}
+				else
+				{
+					this.selYixingBtn.visible = true;
+					this.btnyxtxt.text = "选择异形";
+					this.selYixingBtn.skin = "upload/addimg.png";
+					this.btnyxtxt.color = "#444A4E";
 
 				}
 				if(picInfo.backFid != "" && picInfo.backFid != "0")
 				{
 					this.backimg.visible = true;
 					this.backimg.skin = HttpRequestUtil.smallerrPicUrl + picInfo.backFid + ".jpg";
+					this.selBackBtn.visible = false;
+					this.btnfmtxt.text = "取消反面";
 					
+					this.selBackBtn.skin = "upload/deletbtn.png";
+					this.btnfmtxt.color = "#FFFFFF";
+
+				}
+				else
+				{
+					this.selBackBtn.visible = true;
+					this.btnfmtxt.text = "选择反面";
+					
+					this.selBackBtn.skin = "upload/addimg.png";
+					this.btnfmtxt.color = "#444A4E";
 				}
 				
 				this.picClassTxt.visible = true;
@@ -194,8 +225,21 @@ package script.picUpload
 			this.btndelete.visible = false;
 			this.frame.visible = false;
 
-			this.selYixingBtn.visible = false;
-			this.selBackBtn.visible = false;
+			//this.selYixingBtn.visible = false;
+			//this.selBackBtn.visible = false;
+			
+			if(picInfo.yixingFid != "" && picInfo.yixingFid != "0")
+			{			
+				
+				this.selYixingBtn.visible = false;
+				
+			}
+			
+			if(picInfo.backFid != "" && picInfo.backFid != "0")
+			{
+				this.selBackBtn.visible = false;
+			}
+			
 
 		}
 		
@@ -213,16 +257,16 @@ package script.picUpload
 			if(this.picInfo.picType == 1)
 			{
 				this.selYixingBtn.visible = true;
-				if(this.picInfo.yixingFid == "0")
-					this.selYixingBtn.label = "选择异形";
-				else
-					this.selYixingBtn.label = "取消异形";
+//				if(this.picInfo.yixingFid == "0")
+//					this.selYixingBtn.label = "选择异形";
+//				else
+//					this.selYixingBtn.label = "取消异形";
 				
 				this.selBackBtn.visible = true;
-				if(this.picInfo.backFid == "0")
-					this.selBackBtn.label = "选择反面";
-				else
-					this.selBackBtn.label = "取消反面";
+//				if(this.picInfo.backFid == "0")
+//					this.selBackBtn.label = "选择反面";
+//				else
+//					this.selBackBtn.label = "取消反面";
 					
 			}
 

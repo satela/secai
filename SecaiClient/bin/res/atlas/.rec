@@ -77,10 +77,13 @@ P 245C366E selection.png
 P E6BD083E subtbn.png
 P 8CF86666 vipbg.png
 D upload
+P 28C55A8D addimg.png
 P BB801AE3 btnclose.png
 P 2D32FABB cancelbtn.png
+P 759FC3D4 closebutton.png
 P E9632F02 createbg.png
 P 630F7EEA createbtn.png
+P D2DDAB42 deletbtn.png
 P 26E9800F deletebtn.png
 P 1BC80107 finishicon.png
 P DD063440 fold.png
@@ -88,15 +91,24 @@ P 29C001FB folderimg.png
 P 16C8659E highlightup.png
 P 85D1652B imgicon.png
 P F58F91BD imgselect.png
+P 335F37EA inoutbg.png
 P 8EE9890C leftimg.png
 P ED93210D okimg.png
 P 9203327A pausebtn.png
+P EF295F1B picimg.png
+P 3B37E52B popbg.png
 P 5FA6E498 prgbg.png
 P E9A6C86C printorder.png
+P 241B4325 progress$bar.png
+P 0A1BC5FF progress.png
 P D5CCDF71 restart.png
 P AAACBDC2 sliderimg.png
 P 63A8E768 startbtn.png
 P A9F10A6A upload.png
+P 06305704 vscroll$bar.png
+P 67F20BD0 vscroll$down.png
+P 690CA0F6 vscroll$up.png
+P 553F78F6 vscroll.png
 D usercenter
 P 4F03AD22 accounticon.png
 P 63CE03FF ordericon.png
