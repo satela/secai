@@ -37,6 +37,9 @@ package model.picmanagerModel
 		public var relatedRoadNum:int = 0;
 		public var relatedRoadLength:int = 0;
 		
+		public var relatedPicWidth:int = 0;
+		public var relatedDpi:int = 0;
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -68,7 +71,7 @@ package model.picmanagerModel
 						roadNum = fattr.roadnum;
 						var longside:Number = Math.max(picWidth,picHeight);
 						roadLength = Math.floor( fattr.totallen * longside/1000);
-						trace("raodNum:" + roadNum + "," + roadLength);
+						//trace("raodNum:" + roadNum + "," + roadLength);
 					}
 					
 					if(fattr != null && fattr.flag == 1)
@@ -110,10 +113,13 @@ package model.picmanagerModel
 			if(yixingFid != "0")
 			{
 				var info:Array = DirectoryFileModel.instance.getQiegeData(yixingFid);
+				
 				this.relatedRoadNum = info[0];
 				this.relatedRoadLength = info[1];
-				
-				trace("切割 信息:" + this.relatedRoadNum + "," + this.relatedRoadLength);
+				this.relatedPicWidth = info[2];
+				this.relatedDpi = info[3];
+
+				//trace("切割 信息:" + this.relatedRoadNum + "," + this.relatedRoadLength);
 			}
 		}
 		public function get dpath():String

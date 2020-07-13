@@ -319,6 +319,16 @@ package script.order
 		}
 		private function onShowMaterialView():void
 		{
+			if(PaintOrderModel.instance.selectAddress == null)
+			{
+				ViewManager.showAlert("请选择收货地址");
+				return;
+			}
+			if(PaintOrderModel.instance.outPutAddr == null || PaintOrderModel.instance.outPutAddr.length == 0)
+			{
+				ViewManager.showAlert("当前的收货地址没有输出中心，请重新选择收货地址");
+				return;
+			}
 			for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
 			{
 				if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code] == null)
@@ -412,9 +422,12 @@ package script.order
 			var lastheight:int = this.height;
 
 			var tech:String = provo.getTechDes(false,finalWidth,finalHeight);
-			tech = tech.replace("超幅裁切",["竖拼裁切","横拼裁切"][this.ordervo.cuttype] + "(" + this.ordervo.cutnum+")");
 			
-			tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
+			if(tech.indexOf("超幅裁切") >= 0)
+				tech = tech.replace("超幅裁切","超幅裁切" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
+			
+			if(tech.indexOf("等份裁切") >= 0)
+				tech = tech.replace("等份裁切","等份裁切"+ "(V-" + this.ordervo.horiCutNum+ ",H-" + this.ordervo.verCutNum + ")");
 			
 			this.architype.text = tech;
 

@@ -1,5 +1,6 @@
 package model.orderModel
 {
+	import model.HttpRequestUtil;
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.ViewManager;
@@ -10,8 +11,8 @@ package model.orderModel
 	//产品列表 vo
 	public class ProductVo
 	{
-		public var prod_code:String = "";//  产品编码
-		public var prod_name:String = "";// 产品名称
+		public var  prod_code:String = "";//  产品编码
+		public var  prod_name:String = "";// 产品名称
 		public var  min_length:Number = 0;//  最小长度
 		public var  max_length: Number = 0;//  最大长度
 		public var  min_width: Number = 0;//  最小宽度
@@ -273,17 +274,17 @@ package model.orderModel
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
 							procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
 						if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.yixingFid + "." + picinfo.picClass});
 						else if(arr[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
-							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.backFid + "." + picinfo.picClass});
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
 						{
-							var procname:String = ["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
+							var procname:String = "超幅裁切" + "(" + ["V","H"][orderitemvo.cuttype] + "-" +  orderitemvo.cutnum+ "-" + orderitemvo.eachCutLength.join(";") +")";//["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 						}
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)
 						{
-							var procname:String = procname + "(H-" + orderitemvo.horiCutNum+ ",V-" + orderitemvo.verCutNum + ")";
+							var procname:String = procname + "(H-" + orderitemvo.verCutNum + ",V-" + orderitemvo.horiCutNum+  ")";
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 						}
 						else

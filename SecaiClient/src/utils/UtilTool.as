@@ -676,7 +676,12 @@ package utils
 		
 		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
 		{			
-			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.picWidth) * picinfo.picPhysicWidth * finalwidth/picinfo.picPhysicWidth;
+			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.relatedPicWidth)  * finalwidth;
+			
+			var linemeter1:Number = (picinfo.relatedRoadLength / picinfo.relatedDpi * 2.54) * (finalwidth/picinfo.picPhysicWidth);
+			
+			//trace("line1:" + linemeter + "," + linemeter1);
+
 			
 			return basePrice * picinfo.relatedRoadNum + linemeter*unitPrice;
 		}
@@ -698,8 +703,10 @@ package utils
 			if(picInfo.colorspace.toUpperCase() != "CMYK")
 				return false;
 			
-			var validClass:Array = ["JPG","JPEG","TIF","TIFF"];
+			var validClass:Array = ["JPG","JPEG","TIF","TIFF","ZIP"];
 			if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase()) < 0)
+				return false;
+			if(picInfo.picClass.toLocaleUpperCase() == "ZIP" && picInfo.directName.indexOf(".cdr") < 0)
 				return false;
 			
 			return true;

@@ -93,7 +93,7 @@ package model.picmanagerModel
 				{
 					if(curfiles[i].fid == fid)
 					{
-						return [curfiles[i].roadNum,curfiles[i].roadLength];
+						return [curfiles[i].roadNum,curfiles[i].roadLength,curfiles[i].picWidth,curfiles[i].dpi];
 					}
 				}
 			}

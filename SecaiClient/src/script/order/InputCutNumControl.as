@@ -54,9 +54,9 @@ package script.order
 			uiSkin.productlist.itemRender = ImageCutItem;
 			
 			uiSkin.productlist.vScrollBarSkin = "";
-			uiSkin.productlist.repeatX = 3;
-			uiSkin.productlist.spaceY = 10;
-			uiSkin.productlist.spaceX = 10;
+			uiSkin.productlist.repeatX = 2;
+			uiSkin.productlist.spaceY = 20;
+			uiSkin.productlist.spaceX = 340;
 			
 			
 			uiSkin.productlist.renderHandler = new Handler(this, updateProductList);
@@ -65,6 +65,7 @@ package script.order
 			var arr:Array = [];
 			var curmat:ProductVo = PaintOrderModel.instance.curSelectMat;
 
+			uiSkin.maxtips.text = "（单份最大裁切宽度：" + (curmat.max_width-3) + "cm）";
 			if(PaintOrderModel.instance.curSelectOrderItem != null)
 			{
 				var cutdata:Object = {};
@@ -74,8 +75,13 @@ package script.order
 				
 				cutdata.orderitemvo = PaintOrderModel.instance.curSelectOrderItem.ordervo;
 				cutdata.orderitemvo.cuttype = 0;
-				cutdata.orderitemvo.cutnum = Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3)) - 1;
+				cutdata.orderitemvo.cutnum = Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3));
 				
+				var cutlen:Number = PaintOrderModel.instance.curSelectOrderItem.finalWidth/cutdata.orderitemvo.cutnum;
+				cutlen = parseFloat(cutlen.toFixed(2));
+				cutdata.orderitemvo.eachCutLength = [];
+				for(var j:int=0;j < cutdata.orderitemvo.cutnum;j++)
+					cutdata.orderitemvo.eachCutLength.push(cutlen);
 				arr.push(cutdata);
 			}
 			else
@@ -92,7 +98,13 @@ package script.order
 						
 						cutdata.orderitemvo = batchlist[i].ordervo;
 						cutdata.orderitemvo.cuttype = 0;
-						cutdata.orderitemvo.cutnum = Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3)) - 1;
+						cutdata.orderitemvo.cutnum = Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3));
+						
+						var cutlen:Number = batchlist[i].finalWidth/cutdata.orderitemvo.cutnum;
+						cutlen = parseFloat(cutlen.toFixed(2));
+						cutdata.orderitemvo.eachCutLength = [];
+						for(var j:int=0;j < cutdata.orderitemvo.cutnum;j++)
+							cutdata.orderitemvo.eachCutLength.push(cutlen);
 						arr.push(cutdata);
 					}
 				}

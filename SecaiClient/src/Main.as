@@ -121,7 +121,7 @@
 			
 			Userdata.instance.version = Laya.loader.getRes('version.json');
 			console.log("版本号:" + Userdata.instance.version);
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas",type:Loader.ATLAS},{url:"res/atlas/order.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas?" + (new Date()).getTime().toString(),type:Loader.ATLAS},{url:"res/atlas/order.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas?" + (new Date()).getTime().toString(),type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}
 		
@@ -141,7 +141,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
-			HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
+			//HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			//ViewManager.instance.openView(ViewManager.VIEW_LOADING_PRO);
 			

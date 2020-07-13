@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":6,
+    "selectedBox":6,
+    "selecteID":24,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":25,
+    "maxID":27,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -156,6 +156,34 @@
                                     "child":[
                                         ]
                                 }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,maxtips",
+                            "props":{"y":16,"x":134,"width":300,"var":"maxtips","text":"（单份最大裁切宽度：149cm）","fontSize":18,"color":"#f32d2d","bold":true,"align":"left"},
+                            "nodeParent":6,
+                            "label":"maxtips",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":25,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":16,"x":410,"width":578,"text":"注意：非等份裁切会导致少量长度误差，如非必要，请尽量等份裁切","height":18,"fontSize":18,"color":"#f32d2d","bold":true,"align":"left"},
+                            "nodeParent":6,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":26,
+                            "child":[
+                                ]
                         }],
                     "$HIDDEN":false
                 }],

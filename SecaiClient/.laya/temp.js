@@ -699,7 +699,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/CutImageItem.scene";
+	GameConfig.startScene="common/TipPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1395,7 +1395,7 @@ var Main=(function(){
 	__proto.onVersionLoaded=function(e){
 		Userdata.instance.version=Laya.loader.getRes('version.json');
 		console.log("版本号:"+Userdata.instance.version);
-		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas",type:"atlas"},{url:"res/atlas/order.atlas",type:"atlas"},{url:"res/atlas/upload.atlas",type:"atlas"},{url:"res/atlas/usercenter.atlas",type:"atlas"},{url:"res/atlas/mainpage.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
+		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas?"+(new Date()).getTime().toString(),type:"atlas"},{url:"res/atlas/order.atlas",type:"atlas"},{url:"res/atlas/upload.atlas?"+(new Date()).getTime().toString(),type:"atlas"},{url:"res/atlas/usercenter.atlas",type:"atlas"},{url:"res/atlas/mainpage.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
 	__proto.onLoadedComp=function(){
@@ -1408,7 +1408,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1581,6 +1580,11 @@ var PaintOrderModel=(function(){
 	__proto.initManuFacuturePrice=function(orgcode,dataStr){
 		try{
 			this.allManuFacutreMatProcPrice[orgcode]=JSON.parse(dataStr);
+			if(this.allManuFacutreMatProcPrice[orgcode].code !=null){
+				ViewManager.showAlert("获取生产商工艺价格出错！");
+				ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+				return;
+			};
 			var arr=this.allManuFacutreMatProcPrice[orgcode];
 			for(var i=0;i < arr.length;i++){
 				var matlist=arr[i].mat_list;
@@ -1726,6 +1730,13 @@ var Userdata=(function(){
 
 	__class(Userdata,'model.Userdata');
 	var __proto=Userdata.prototype;
+	__proto.resetData=function(){
+		this.addressList=[];
+		this.isLogin=false;
+		this.money=0;
+		this.accountType=0;
+	}
+
 	__proto.initMyAddress=function(adddata){
 		this.addressList=[];
 		for(var i=0;i < adddata.length;i++){
@@ -1872,6 +1883,8 @@ var PicInfoVo=(function(){
 		this.backFid="";
 		this.relatedRoadNum=0;
 		this.relatedRoadLength=0;
+		this.relatedPicWidth=0;
+		this.relatedDpi=0;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1894,7 +1907,6 @@ var PicInfoVo=(function(){
 					this.roadNum=fattr.roadnum;
 					var longside=Math.max(this.picWidth,this.picHeight);
 					this.roadLength=Math.floor(fattr.totallen *longside/1000);
-					console.log("raodNum:"+this.roadNum+","+this.roadLength);
 				}
 				if(fattr !=null && fattr.flag==1){
 					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
@@ -1929,10 +1941,12 @@ var PicInfoVo=(function(){
 			var info=DirectoryFileModel.instance.getQiegeData(this.yixingFid);
 			this.relatedRoadNum=info[0];
 			this.relatedRoadLength=info[1];
-			console.log("切割 信息:"+this.relatedRoadNum+","+this.relatedRoadLength);
+			this.relatedPicWidth=info[2];
+			this.relatedDpi=info[3];
 		}
 	}
 
+	//trace("切割 信息:"+this.relatedRoadNum+","+this.relatedRoadLength);
 	__getset(0,__proto,'dpath',function(){
 		return this.parentDirect+this.directId+"|";
 	});
@@ -2180,6 +2194,7 @@ var PicOrderItemVo=(function(){
 		//裁切类型
 		this.cutnum=0;
 		//裁切数
+		this.eachCutLength=null;
 		this.horiCutNum=1;
 		this.verCutNum=1;
 		this.picinfo=picvo;
@@ -2403,15 +2418,15 @@ var ProductVo=(function(){
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 						procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
 					if(arr[i].preProc_Code=="SPTE10420")
-						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.yixingFid});
+						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.yixingFid+"."+picinfo.picClass});
 					else if(arr[i].preProc_Code=="SPTE10330")
-					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:picinfo.backFid});
+					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.backFid+"."+picinfo.picClass});
 					else if(arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ"){
-						var procname=["竖拼裁切","横拼裁切"][orderitemvo.cuttype]+"("+orderitemvo.cutnum+")";
+						var procname="超幅裁切"+"("+["V","H"][orderitemvo.cuttype]+"-"+orderitemvo.cutnum+"-"+orderitemvo.eachCutLength.join(";")+")";
 						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 					}
 					else if(arr[i].preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
-						var procname=procname+"(H-"+orderitemvo.horiCutNum+",V-"+orderitemvo.verCutNum+")";
+						var procname=procname+"(H-"+orderitemvo.verCutNum+",V-"+orderitemvo.horiCutNum+")";
 						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 					}
 					else
@@ -2919,7 +2934,8 @@ var UtilTool=(function(){
 	}
 
 	UtilTool.getYixingPrice=function(picinfo,basePrice,unitPrice,finalwidth,finalheight){
-		var linemeter=(picinfo.relatedRoadLength /picinfo.picWidth)*picinfo.picPhysicWidth *finalwidth/picinfo.picPhysicWidth;
+		var linemeter=(picinfo.relatedRoadLength /picinfo.relatedPicWidth)*finalwidth;
+		var linemeter1=(picinfo.relatedRoadLength / picinfo.relatedDpi *2.54)*(finalwidth/picinfo.picPhysicWidth);
 		return basePrice *picinfo.relatedRoadNum+linemeter*unitPrice;
 	}
 
@@ -2935,8 +2951,10 @@ var UtilTool=(function(){
 	UtilTool.isValidPic=function(picInfo){
 		if(picInfo.colorspace.toUpperCase()!="CMYK")
 			return false;
-		var validClass=["JPG","JPEG","TIF","TIFF"];
+		var validClass=["JPG","JPEG","TIF","TIFF","ZIP"];
 		if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase())< 0)
+			return false;
+		if(picInfo.picClass.toLocaleUpperCase()=="ZIP" && picInfo.directName.indexOf(".cdr")< 0)
 			return false;
 		return true;
 	}
@@ -3241,7 +3259,7 @@ var DirectoryFileModel=(function(){
 		if(curfiles !=null){
 			for(var i=0;i < curfiles.length;i++){
 				if(curfiles[i].fid==fid){
-					return [curfiles[i].roadNum,curfiles[i].roadLength];
+					return [curfiles[i].roadNum,curfiles[i].roadLength,curfiles[i].picWidth,curfiles[i].dpi];
 				}
 			}
 		}
@@ -38561,6 +38579,9 @@ var SelectAddressControl=(function(_super){
 		this.uiSkin.mainpanel.width=Browser.width;
 		this.uiSkin.inputsearch.on("input",this,this.onSearchAddress);
 		this.uiSkin.list_address.array=Userdata.instance.passedAddress;
+		if(Userdata.instance.passedAddress.length==0){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
+		}
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		this.tempaddress=PaintOrderModel.instance.selectAddress;
 		Laya.timer.once(10,null,function(){
@@ -38573,6 +38594,18 @@ var SelectAddressControl=(function(_super){
 	}
 
 	//PaintOrderModel.instance.selectAddress=null;
+	__proto.getMyAddressBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.initMyAddress(result.data);
+			Userdata.instance.defaultAddId=result["default"];
+			this.uiSkin.list_address.array=Userdata.instance.passedAddress;
+		}
+		else if(result.status==205 || result.status　==404){
+			ViewManager.instance.openView("VIEW_USERCENTER",true);
+		}
+	}
+
 	__proto.onResizeBrower=function(){
 		this.uiSkin.mainpanel.height=Browser.height;
 		this.uiSkin.mainpanel.width=Browser.width;
@@ -39516,6 +39549,7 @@ var TopBannerControl=(function(_super){
 			UtilTool.setLocalVar("useraccount","");
 			UtilTool.setLocalVar("userpwd","");
 			Userdata.instance.isLogin=false;
+			Userdata.instance.resetData();
 			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 		}
 	}
@@ -41026,13 +41060,14 @@ var InputCutNumControl=(function(_super){
 		this.uiSkin.okbtn.on("click",this,this.closeView);
 		this.uiSkin.productlist.itemRender=ImageCutItem;
 		this.uiSkin.productlist.vScrollBarSkin="";
-		this.uiSkin.productlist.repeatX=3;
-		this.uiSkin.productlist.spaceY=10;
-		this.uiSkin.productlist.spaceX=10;
+		this.uiSkin.productlist.repeatX=2;
+		this.uiSkin.productlist.spaceY=20;
+		this.uiSkin.productlist.spaceX=340;
 		this.uiSkin.productlist.renderHandler=new Handler(this,this.updateProductList);
 		this.uiSkin.productlist.selectEnable=false;
 		var arr=[];
 		var curmat=PaintOrderModel.instance.curSelectMat;
+		this.uiSkin.maxtips.text="（单份最大裁切宽度："+(curmat.max_width-3)+"cm）";
 		if(PaintOrderModel.instance.curSelectOrderItem !=null){
 			var cutdata={};
 			cutdata.finalWidth=PaintOrderModel.instance.curSelectOrderItem.finalWidth;
@@ -41040,7 +41075,12 @@ var InputCutNumControl=(function(_super){
 			cutdata.fid=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.fid;
 			cutdata.orderitemvo=PaintOrderModel.instance.curSelectOrderItem.ordervo;
 			cutdata.orderitemvo.cuttype=0;
-			cutdata.orderitemvo.cutnum=Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3))-1;
+			cutdata.orderitemvo.cutnum=Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3));
+			var cutlen=PaintOrderModel.instance.curSelectOrderItem.finalWidth/cutdata.orderitemvo.cutnum;
+			cutlen=parseFloat(cutlen.toFixed(2));
+			cutdata.orderitemvo.eachCutLength=[];
+			for(var j=0;j < cutdata.orderitemvo.cutnum;j++)
+			cutdata.orderitemvo.eachCutLength.push(cutlen);
 			arr.push(cutdata);
 		}
 		else{
@@ -41053,7 +41093,12 @@ var InputCutNumControl=(function(_super){
 					cutdata.fid=batchlist[i].ordervo.picinfo.fid;
 					cutdata.orderitemvo=batchlist[i].ordervo;
 					cutdata.orderitemvo.cuttype=0;
-					cutdata.orderitemvo.cutnum=Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3))-1;
+					cutdata.orderitemvo.cutnum=Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3));
+					var cutlen=batchlist[i].finalWidth/cutdata.orderitemvo.cutnum;
+					cutlen=parseFloat(cutlen.toFixed(2));
+					cutdata.orderitemvo.eachCutLength=[];
+					for(var j=0;j < cutdata.orderitemvo.cutnum;j++)
+					cutdata.orderitemvo.eachCutLength.push(cutlen);
 					arr.push(cutdata);
 				}
 			}
@@ -47462,7 +47507,7 @@ var LoginViewUI=(function(_super){
 		this.createView(LoginViewUI.uiView);
 	}
 
-	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":661,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":781,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":901,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1021,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.com.cn All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-1","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage/mainbg.jpg","commers/logotxt.png","prefabs/LinksText.prefab","commers/blackbg.png","commers/lz2.jpg"],"loadList3D":[]};
+	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":661,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":781,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":901,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1021,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage/mainbg.jpg","commers/logotxt.png","prefabs/LinksText.prefab","commers/blackbg.png","commers/lz2.jpg"],"loadList3D":[]};
 	return LoginViewUI;
 })(Scene)
 
@@ -53566,7 +53611,22 @@ var CutImageItemUI=(function(_super){
 		this.paintimg=null;
 		this.cuttyperad=null;
 		this.cutnumrad=null;
-		this.widthnum=null;
+		this.hbox=null;
+		this.hinput0=null;
+		this.hinput1=null;
+		this.hinput2=null;
+		this.hinput3=null;
+		this.hinput4=null;
+		this.hinput5=null;
+		this.hinput6=null;
+		this.vbox=null;
+		this.vinput0=null;
+		this.vinput1=null;
+		this.vinput2=null;
+		this.vinput3=null;
+		this.vinput4=null;
+		this.vinput5=null;
+		this.vinput6=null;
 		CutImageItemUI.__super.call(this);
 	}
 
@@ -53577,7 +53637,7 @@ var CutImageItemUI=(function(_super){
 		this.createView(CutImageItemUI.uiView);
 	}
 
-	CutImageItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":3,"x":5,"text":"裁切方向：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"RadioGroup","props":{"y":7,"x":95,"var":"cuttyperad","skin":"commers/checksingle.png","labels":"竖拼裁切 ,横拼裁切","labelSize":18,"labelFont":"SimHei"},"compId":7},{"type":"Label","props":{"y":34,"x":5,"text":"裁切数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"RadioGroup","props":{"y":38,"x":95,"var":"cutnumrad","skin":"commers/checksingle.png","labels":"3 ,4 ,5 , 6","labelSize":18,"labelFont":"SimHei"},"compId":9},{"type":"Label","props":{"y":35,"x":341,"var":"widthnum","text":"120","fontSize":18,"font":"SimHei","align":"left"},"compId":10},{"type":"Label","props":{"y":35,"x":313,"text":"宽:","fontSize":18,"font":"SimHei"},"compId":11}],"loadList":["upload/inoutbg.png","comp/image.png","commers/checksingle.png"],"loadList3D":[]};
+	CutImageItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":3,"x":5,"text":"裁切方向：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"RadioGroup","props":{"y":7,"x":95,"var":"cuttyperad","skin":"commers/checksingle.png","labels":"竖拼裁切 ,横拼裁切","labelSize":18,"labelFont":"SimHei"},"compId":7},{"type":"Label","props":{"y":34,"x":5,"text":"裁切份数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"RadioGroup","props":{"y":38,"x":95,"var":"cutnumrad","skin":"commers/checksingle.png","labels":"3 ,4 ,5 , 6","labelSize":18,"labelFont":"SimHei"},"compId":9},{"type":"HBox","props":{"y":469,"x":5,"width":400,"var":"hbox","height":30},"compId":20,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":13},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":15},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":17},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":22},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":24},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":25},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":33}]},{"type":"VBox","props":{"y":65,"x":405,"width":50,"var":"vbox","height":400},"compId":26,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":27},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":28},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":29},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":30},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":31},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":32},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":34}]}],"loadList":["upload/inoutbg.png","comp/image.png","commers/checksingle.png","comp/textinput.png"],"loadList3D":[]};
 	return CutImageItemUI;
 })(View)
 
@@ -54004,7 +54064,7 @@ var AvgCutImageItemUI=(function(_super){
 		this.createView(AvgCutImageItemUI.uiView);
 	}
 
-	AvgCutImageItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":3,"x":5,"text":"竖向份数：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"Label","props":{"y":34,"x":5,"text":"横向份数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"Sprite","props":{"y":3,"x":100},"compId":12,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"horiInput","valign":"middle","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":13},{"type":"Button","props":{"x":60,"var":"horiAdd","skin":"order/addbtn.png"},"compId":14},{"type":"Button","props":{"var":"horiSub","skin":"order/subtbn.png"},"compId":15}]},{"type":"Sprite","props":{"y":33,"x":100},"compId":16,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"vertInput","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":17},{"type":"Button","props":{"x":60,"var":"verAdd","skin":"order/addbtn.png"},"compId":18},{"type":"Button","props":{"var":"verSub","skin":"order/subtbn.png"},"compId":19}]},{"type":"Label","props":{"y":3,"x":219,"var":"heightNum","text":"120","fontSize":18,"font":"SimHei","align":"left"},"compId":20},{"type":"Label","props":{"y":35,"x":219,"var":"widthNum","text":"120","fontSize":18,"font":"SimHei","align":"left"},"compId":21},{"type":"Label","props":{"y":3,"x":190,"text":"宽:","fontSize":18,"font":"SimHei"},"compId":22},{"type":"Label","props":{"y":35,"x":190,"text":"宽:","fontSize":18,"font":"SimHei"},"compId":23}],"loadList":["upload/inoutbg.png","comp/image.png","commers/inputbg.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	AvgCutImageItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":33,"x":5,"text":"竖向份数：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"Label","props":{"y":4,"x":5,"text":"横向份数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"Sprite","props":{"y":33,"x":100},"compId":12,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"horiInput","valign":"middle","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":13},{"type":"Button","props":{"x":60,"var":"horiAdd","skin":"order/addbtn.png"},"compId":14},{"type":"Button","props":{"var":"horiSub","skin":"order/subtbn.png"},"compId":15}]},{"type":"Sprite","props":{"y":3,"x":100},"compId":16,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"vertInput","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":17},{"type":"Button","props":{"x":60,"var":"verAdd","skin":"order/addbtn.png"},"compId":18},{"type":"Button","props":{"var":"verSub","skin":"order/subtbn.png"},"compId":19}]},{"type":"Label","props":{"y":33,"x":219,"var":"heightNum","text":"120","fontSize":18,"font":"SimHei","align":"left"},"compId":20},{"type":"Label","props":{"y":5,"x":219,"var":"widthNum","text":"120","fontSize":18,"font":"SimHei","align":"left"},"compId":21},{"type":"Label","props":{"y":33,"x":190,"text":"宽:","fontSize":18,"font":"SimHei"},"compId":22},{"type":"Label","props":{"y":5,"x":190,"text":"宽:","fontSize":18,"font":"SimHei"},"compId":23}],"loadList":["upload/inoutbg.png","comp/image.png","commers/inputbg.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
 	return AvgCutImageItemUI;
 })(View)
 
@@ -54781,6 +54841,14 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.onShowMaterialView=function(){
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请选择收货地址");
+			return;
+		}
+		if(PaintOrderModel.instance.outPutAddr==null || PaintOrderModel.instance.outPutAddr.length==0){
+			ViewManager.showAlert("当前的收货地址没有输出中心，请重新选择收货地址");
+			return;
+		}
 		for(var i=0;i < PaintOrderModel.instance.outPutAddr.length;i++){
 			if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code]==null){
 				ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
@@ -54841,8 +54909,10 @@ var PicOrderItem=(function(_super){
 		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
 		var tech=provo.getTechDes(false,this.finalWidth,this.finalHeight);
-		tech=tech.replace("超幅裁切",["竖拼裁切","横拼裁切"][this.ordervo.cuttype]+"("+this.ordervo.cutnum+")");
-		tech=tech.replace("等份裁切","等份裁切"+"(H-"+this.ordervo.horiCutNum+",V-"+this.ordervo.verCutNum+")");
+		if(tech.indexOf("超幅裁切")>=0)
+			tech=tech.replace("超幅裁切","超幅裁切"+"("+["V","H"][this.ordervo.cuttype]+"-"+this.ordervo.cutnum+"-"+this.ordervo.eachCutLength.join(";")+")");
+		if(tech.indexOf("等份裁切")>=0)
+			tech=tech.replace("等份裁切","等份裁切"+"(V-"+this.ordervo.horiCutNum+",H-"+this.ordervo.verCutNum+")");
 		this.architype.text=tech;
 		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
@@ -54931,6 +55001,7 @@ var InputCutNumPanelUI=(function(_super){
 		this.productlist=null;
 		this.okbtn=null;
 		this.btnok=null;
+		this.maxtips=null;
 		InputCutNumPanelUI.__super.call(this);
 	}
 
@@ -59639,8 +59710,22 @@ var ImageCutItem=(function(_super){
 		this.color1="#000000";
 		this.color2="#ffffff";
 		this.linethick=2;
+		this.curColorIndex=0;
+		this.hinputlist=null;
+		this.vinputlist=null;
+		this.inputCount=7;
 		this.linelist=[];
 		ImageCutItem.__super.call(this);
+		this.hinputlist=[];
+		this.vinputlist=[];
+		for(var i=0;i < this.inputCount;i++){
+			this.hinputlist.push(this["hinput"+i]);
+			this.vinputlist.push(this["vinput"+i]);
+			this.hinputlist[i].on("input",this,this.onHoriInput,[i]);
+			this.vinputlist[i].on("input",this,this.onVertInput,[i]);
+			this.hinputlist[i].type="number";
+			this.vinputlist[i].type="number";
+		}
 	}
 
 	__class(ImageCutItem,'script.order.ImageCutItem',_super);
@@ -59652,6 +59737,13 @@ var ImageCutItem=(function(_super){
 		this.cutnumrad.on("change",this,this.onCutNumChange);
 		this.cuttype=this.cutdata.orderitemvo.cuttype;
 		this.initView();
+		Laya.timer.clearAll(this);
+		Laya.timer.loop(500,this,this.onReDrawLine);
+	}
+
+	__proto.onReDrawLine=function(){
+		this.drawLines();
+		this.curColorIndex=(this.curColorIndex+1)%2;
 	}
 
 	__proto.onCutTypeChange=function(){
@@ -59661,15 +59753,16 @@ var ImageCutItem=(function(_super){
 		var product=PaintOrderModel.instance.curSelectMat;
 		var maxwidth=product.max_width-3;
 		if(this.cuttype==1){
-			this.leastCutNum=Math.ceil(finalheight/maxwidth)-1;
+			this.leastCutNum=Math.ceil(finalheight/maxwidth);
 		}
 		else{
-			this.leastCutNum=Math.ceil(finalwidth/maxwidth)-1;
+			this.leastCutNum=Math.ceil(finalwidth/maxwidth);
 		}
 		this.cutdata.orderitemvo.cutnum=this.leastCutNum;
-		this.initCutNum();
 		this.cutdata.orderitemvo.cuttype=this.cuttype;
-		this.cutdata.orderitemvo.cutnum=this.leastCutNum;
+		this.initCutNum();
+		this.resetCutlen();
+		this.updateInputText();
 	}
 
 	__proto.initView=function(){
@@ -59683,21 +59776,134 @@ var ImageCutItem=(function(_super){
 			this.paintimg.height=400;
 			this.paintimg.width=400 *finalwidth/finalheight;
 		}
+		this.hbox.width=this.paintimg.width;
+		this.vbox.height=this.paintimg.height;
+		this.hbox.x=(400-this.hbox.width)/2;
+		this.vbox.y=65+(400-this.vbox.height)/2;
 		this.paintimg.skin="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.cutdata.fid+".jpg";
+		if(this.cuttype==0){
+			for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+				if(this.hinputlist.length > i)
+					this.hinputlist[i].text=this.cutdata.orderitemvo.eachCutLength[i]+"";
+			}
+		}
+		else{
+			for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+				if(this.vinputlist.length > i)
+					this.vinputlist[i].text=this.cutdata.orderitemvo.eachCutLength[i]+"";
+			}
+		}
+		this.updateInputText();
 		this.initCutNum();
 	}
 
 	// cuttype=0;
+	__proto.onHoriInput=function(index){
+		if(index==this.cutdata.orderitemvo.cutnum-1){
+			this.hinputlist[index].text=this.cutdata.orderitemvo.eachCutLength[index]+"";
+			return;
+		}
+		if(this.hinputlist[index].text=="")
+			return;
+		var product=PaintOrderModel.instance.curSelectMat;
+		var maxwidth=product.max_width-3;
+		var hascutlen=0;
+		for(var i=0;i < index;i++){
+			hascutlen+=this.cutdata.orderitemvo.eachCutLength[i];
+		};
+		var curnum=parseFloat(this.hinputlist[index].text);
+		var maxlen=Math.min(maxwidth,this.cutdata.finalWidth-hascutlen-this.cutdata.orderitemvo.cutnum+index+1);
+		if(curnum <=0)
+			this.hinputlist[index].text="1";
+		if(curnum > maxlen)
+			this.hinputlist[index].text=maxlen+"";
+		hascutlen+=parseFloat(this.hinputlist[index].text);
+		var leftAvg=(this.cutdata.finalWidth-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
+		for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++){
+			if(i < this.vinputlist.length)
+				this.hinputlist[i].text=leftAvg.toFixed(2);
+		}
+		for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+			if(i < this.vinputlist.length)
+				this.cutdata.orderitemvo.eachCutLength[i]=parseFloat(this.hinputlist[i].text);
+		}
+		this.drawLines();
+	}
+
+	__proto.onVertInput=function(index){
+		if(index==this.cutdata.orderitemvo.cutnum-1){
+			this.vinputlist[index].text=this.cutdata.orderitemvo.eachCutLength[index]+"";
+			return;
+		}
+		if(this.vinputlist[index].text=="")
+			return;
+		var hascutlen=0;
+		for(var i=0;i < index;i++){
+			hascutlen+=this.cutdata.orderitemvo.eachCutLength[i];
+		};
+		var curnum=parseFloat(this.vinputlist[index].text);
+		if(curnum <=0)
+			this.vinputlist[index].text="1";
+		if(curnum > this.cutdata.finalWidth-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)
+			this.vinputlist[index].text=(this.cutdata.finalHeight-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)+"";
+		hascutlen+=parseFloat(this.vinputlist[index].text);
+		var leftAvg=(this.cutdata.finalHeight-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
+		for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++){
+			if(i < this.vinputlist.length)
+				this.vinputlist[i].text=leftAvg.toFixed(2);
+		}
+		for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+			if(i < this.vinputlist.length)
+				this.cutdata.orderitemvo.eachCutLength[i]=parseFloat(this.vinputlist[i].text);
+		}
+		this.drawLines();
+	}
+
+	__proto.resetCutlen=function(){
+		var cutlen=0;
+		if(this.cuttype==0)
+			cutlen=this.cutdata.finalWidth/this.cutdata.orderitemvo.cutnum;
+		else
+		cutlen=this.cutdata.finalHeight/this.cutdata.orderitemvo.cutnum;
+		cutlen=parseFloat(cutlen.toFixed(2));
+		this.cutdata.orderitemvo.eachCutLength=[];
+		for(var j=0;j < this.cutdata.orderitemvo.cutnum;j++)
+		this.cutdata.orderitemvo.eachCutLength.push(cutlen);
+		if(this.cuttype==0){
+			for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+				if(this.hinputlist.length > i)
+					this.hinputlist[i].text=this.cutdata.orderitemvo.eachCutLength[i]+"";
+			}
+		}
+		else{
+			for(var i=0;i < this.cutdata.orderitemvo.cutnum;i++){
+				if(this.hinputlist.length > i)
+					this.vinputlist[i].text=this.cutdata.orderitemvo.eachCutLength[i]+"";
+			}
+		}
+	}
+
+	__proto.updateInputText=function(){
+		this.hbox.visible=this.cuttype==0;
+		this.vbox.visible=this.cuttype==1;
+		for(var i=0;i < this.hinputlist.length;i++){
+			this.hinputlist[i].visible=i < this.cutdata.orderitemvo.cutnum;
+			this.vinputlist[i].visible=i < this.cutdata.orderitemvo.cutnum;
+		}
+		this.hbox.space=(this.hbox.width-this.hinput0.width*this.cutdata.orderitemvo.cutnum)/(this.cutdata.orderitemvo.cutnum-1);
+		this.vbox.space=(this.vbox.height-this.vinput0.height*this.cutdata.orderitemvo.cutnum)/(this.cutdata.orderitemvo.cutnum-1);
+	}
+
 	__proto.initCutNum=function(){
 		var finalwidth=this.cutdata.finalWidth;
 		var finalheight=this.cutdata.finalHeight;
 		var product=PaintOrderModel.instance.curSelectMat;
 		var maxwidth=product.max_width-3;
 		if(this.cuttype==1){
-			this.leastCutNum=Math.ceil(finalheight/maxwidth)-1;
+			this.leastCutNum=Math.ceil(finalheight/maxwidth);
 		}
 		else{
-			this.leastCutNum=Math.ceil(finalwidth/maxwidth)-1;
+			this.leastCutNum=Math.ceil(finalwidth/maxwidth);
 		};
 		var labes="";
 		for(var i=0;i < 5;i++){
@@ -59706,73 +59912,86 @@ var ImageCutItem=(function(_super){
 		labes=labes.substr(0,labes.length-1);
 		this.cutnumrad.labels=labes;
 		this.cutnumrad.selectedIndex=this.cutdata.orderitemvo.cutnum-this.leastCutNum;
-		this.onCutNumChange();
+		this.drawLines();
 	}
 
 	__proto.onCutNumChange=function(){
+		var lineNum=this.cutnumrad.selectedIndex+this.leastCutNum;
+		this.cutdata.orderitemvo.cutnum=lineNum;
+		this.updateInputText();
+		this.resetCutlen();
+		this.drawLines();
+	}
+
+	__proto.drawLines=function(){
 		for(var i=0;i < this.linelist.length;i++){
 			this.linelist[i].graphics.clear(true);
 			this.linelist[i].removeSelf();
 			this.linelist.splice(i,1);
 			i--;
-		};
-		var lineNum=this.cutnumrad.selectedIndex+this.leastCutNum;
+		}
 		if(this.cutdata.orderitemvo==null){
 			console.log("null");
-		}
-		this.cutdata.orderitemvo.cutnum=lineNum;
+		};
+		var lineNum=this.cutnumrad.selectedIndex+this.leastCutNum;
 		var stepdist=0;
 		if(this.cuttype==0){
-			stepdist=this.paintimg.width/(lineNum+1);
-			this.widthnum.text=(this.cutdata.finalWidth/(lineNum+1)).toFixed(2);
+			stepdist=this.paintimg.width/lineNum;
 			for(var i=0;i < 2;i++){
 				var sp=new Sprite();
 				this.paintimg.addChild(sp);
 				var linelen=this.paintimg.width/this.linenum;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.color1,this.linethick);
+						sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.color2,this.linethick);
+					sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 				this.linelist.push(sp);
 			}
 		}
 		else{
-			stepdist=this.paintimg.height/(lineNum+1);
-			this.widthnum.text=(this.cutdata.finalHeight/(lineNum+1)).toFixed(2);
+			stepdist=this.paintimg.height/lineNum;
 			for(var i=0;i < 2;i++){
 				var sp=new Sprite();
 				this.paintimg.addChild(sp);
 				var linelen=this.paintimg.height/this.linenum;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.color1,this.linethick);
+						sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.color2,this.linethick);
+					sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 				this.linelist.push(sp);
 			}
 		}
-		for(var i=0;i < lineNum+2;i++){
+		for(var i=0;i < lineNum+1;i++){
 			var sp=new Sprite();
 			this.paintimg.addChild(sp);
 			if(this.cuttype==0){
 				var linelen=this.paintimg.height/this.linenum;
+				var beforewidth=0;
+				for(var k=0;k < i;k++)
+				beforewidth+=this.cutdata.orderitemvo.eachCutLength[k];
+				var startpos=(beforewidth/this.cutdata.finalWidth)*this.paintimg.width;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.color1,this.linethick);
+						sp.graphics.drawLine(startpos,j *linelen,startpos,(j+1)*linelen,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.color2,this.linethick);
+					sp.graphics.drawLine(startpos,j *linelen,startpos,(j+1)*linelen,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 			}
 			else{
 				var linelen=this.paintimg.width/this.linenum;
+				var beforewidth=0;
+				for(var k=0;k < i;k++)
+				beforewidth+=this.cutdata.orderitemvo.eachCutLength[k];
+				var startpos=(beforewidth/this.cutdata.finalHeight)*this.paintimg.height;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.color1,this.linethick);
+						sp.graphics.drawLine(j *linelen,startpos,(j+1)*linelen,startpos,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.color2,this.linethick);
+					sp.graphics.drawLine(j *linelen,startpos,(j+1)*linelen,startpos,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 			}
 			this.linelist.push(sp);
@@ -59942,6 +60161,7 @@ var AvgCutImage=(function(_super){
 		this.color1="#000000";
 		this.color2="#ffffff";
 		this.linethick=2;
+		this.curColorIndex=0;
 		AvgCutImage.__super.call(this);
 		this.horilinelist=[];
 		this.verlinelist=[];
@@ -60002,6 +60222,14 @@ var AvgCutImage=(function(_super){
 		this.horiInput.text=this.cutdata.orderitemvo.horiCutNum;
 		this.vertInput.text=this.cutdata.orderitemvo.verCutNum;
 		this.initView();
+		Laya.timer.clearAll(this);
+		Laya.timer.loop(500,this,this.onReDrawLine);
+	}
+
+	__proto.onReDrawLine=function(){
+		this.onHoriNumChange();
+		this.onVerNumChange();
+		this.curColorIndex=(this.curColorIndex+1)%2;
 	}
 
 	__proto.onHoriInput=function(){
@@ -60055,9 +60283,9 @@ var AvgCutImage=(function(_super){
 			var linelen=this.paintimg.height/this.linenum;
 			for(var j=0;j < this.linenum;j++){
 				if(j % 2==0)
-					sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.color1,this.linethick);
+					sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.curColorIndex==0?this.color1:this.color2,this.linethick);
 				else
-				sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.color2,this.linethick);
+				sp.graphics.drawLine(i *stepdist,j *linelen,i *stepdist,(j+1)*linelen,this.curColorIndex==0?this.color2:this.color1,this.linethick);
 			}
 			this.verlinelist.push(sp);
 		}
@@ -60079,9 +60307,9 @@ var AvgCutImage=(function(_super){
 			var linelen=this.paintimg.width/this.linenum;
 			for(var j=0;j < this.linenum;j++){
 				if(j % 2==0)
-					sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.color1,this.linethick);
+					sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.curColorIndex==0?this.color1:this.color2,this.linethick);
 				else
-				sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.color2,this.linethick);
+				sp.graphics.drawLine(j *linelen,i *stepdist,(j+1)*linelen,i *stepdist,this.curColorIndex==0?this.color2:this.color1,this.linethick);
 			}
 			this.horilinelist.push(sp);
 		}

@@ -44,6 +44,14 @@ package model
 			
 		}
 		
+		public function resetData():void
+		{
+			addressList = [];
+			isLogin = false;
+			money = 0;
+			accountType = 0;
+			
+		}
 		public function initMyAddress(adddata:Array):void
 		{
 			addressList = [];

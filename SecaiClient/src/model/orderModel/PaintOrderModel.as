@@ -102,6 +102,12 @@ package model.orderModel
 			try
 			{
 				allManuFacutreMatProcPrice[orgcode] = JSON.parse(dataStr);
+				if(allManuFacutreMatProcPrice[orgcode].code != null)
+				{
+					ViewManager.showAlert("获取生产商工艺价格出错！");
+					ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
+					return;
+				}
 				var arr:Array = allManuFacutreMatProcPrice[orgcode];
 				for(var i:int=0;i < arr.length;i++)
 				{

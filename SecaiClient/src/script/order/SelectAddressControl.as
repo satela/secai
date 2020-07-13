@@ -8,6 +8,7 @@ package script.order
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
+	import model.HttpRequestUtil;
 	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
 	import model.users.AddressVo;
@@ -49,6 +50,12 @@ package script.order
 
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
 			uiSkin.list_address.array = Userdata.instance.passedAddress;
+			
+			if(Userdata.instance.passedAddress.length == 0)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
+
+			}
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			tempaddress = PaintOrderModel.instance.selectAddress;
@@ -65,6 +72,24 @@ package script.order
 
 			//PaintOrderModel.instance.selectAddress = null;
 		}
+		
+		private function getMyAddressBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Userdata.instance.initMyAddress(result.data as Array);
+				Userdata.instance.defaultAddId = result["default"];
+				
+				uiSkin.list_address.array = Userdata.instance.passedAddress;
+
+			}
+			else if(result.status == 205 || result.status　== 404)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
+			}
+		}
+		
 		private function onResizeBrower():void
 		{
 			uiSkin.mainpanel.height = Browser.height;

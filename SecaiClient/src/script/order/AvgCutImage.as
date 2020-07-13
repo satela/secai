@@ -24,9 +24,9 @@ package script.order
 		private var color1:String = "#000000";
 		
 		private var color2:String = "#ffffff";
-		
 		private var linethick:int = 2;
 
+		private var curColorIndex:int = 0;
 		public function AvgCutImage()
 		{
 			super();
@@ -119,9 +119,20 @@ package script.order
 			this.horiInput.text = cutdata.orderitemvo.horiCutNum;
 			this.vertInput.text = cutdata.orderitemvo.verCutNum;
 			initView();
+			
+			Laya.timer.clearAll(this);
+
+			Laya.timer.loop(500,this,onReDrawLine);
 		}
 		
-		
+		private function onReDrawLine():void
+		{
+			
+			onHoriNumChange();
+			onVerNumChange();
+
+			curColorIndex = (curColorIndex+1)%2;
+		}
 		private function onHoriInput():void
 		{
 			if(this.horiInput.text == "")
@@ -198,23 +209,17 @@ package script.order
 				this.paintimg.addChild(sp);
 				
 				
-				//if(cuttype == 0)
 				var linelen:Number = this.paintimg.height/linenum;
 				for(var j:int=0;j < linenum;j++)
 				{
-					//if(j == linenum - 1)
-					//	sp.graphics.drawLine((i+1) * stepdist,j * 2 * linelen, (i+1) * stepdist,this.paintimg.height,color2, 1);
+					
 					if(j % 2 == 0)
-						sp.graphics.drawLine(i * stepdist,j * linelen, i * stepdist,(j +1)* linelen,color1, linethick);
+						sp.graphics.drawLine(i * stepdist,j * linelen, i * stepdist,(j +1)* linelen,curColorIndex==0?color1:color2, linethick);
 					else
-						sp.graphics.drawLine(i * stepdist,j * linelen, i * stepdist,(j +1)* linelen,color2, linethick);
+						sp.graphics.drawLine(i * stepdist,j * linelen, i * stepdist,(j +1)* linelen,curColorIndex==0?color2:color1, linethick);
 					
 				}
-				//else
-					
-					//sp.graphics.drawLine(0,(i+1) * stepdist, this.paintimg.width,(i+1) * stepdist,"#ff4400", 1);
-				
-				
+										
 				
 				verlinelist.push(sp);
 			}
@@ -245,22 +250,17 @@ package script.order
 				this.paintimg.addChild(sp);
 				
 				
-				//if(cuttype == 0)
 				var linelen:Number = this.paintimg.width/linenum;
 				for(var j:int=0;j < linenum;j++)
 				{
-					//if(j == linenum - 1)
-					//	sp.graphics.drawLine(j * 2 * linelen,(i+1) * stepdist, this.paintimg.width,(i+1) * stepdist,color2, 1);
+					
 					 if(j % 2 == 0)
-						sp.graphics.drawLine(j  * linelen,i * stepdist, (j + 1) * linelen,i * stepdist,color1, linethick);
+						sp.graphics.drawLine(j  * linelen,i * stepdist, (j + 1) * linelen,i * stepdist,curColorIndex==0?color1:color2, linethick);
 					else
-						sp.graphics.drawLine(j * linelen,i * stepdist, (j + 1) * linelen,i * stepdist,color2, linethick);
+						sp.graphics.drawLine(j * linelen,i * stepdist, (j + 1) * linelen,i * stepdist,curColorIndex==0?color2:color1, linethick);
 					
 				}
-				//else
-				
-				//sp.graphics.drawLine(0,(i+1) * stepdist, this.paintimg.width,(i+1) * stepdist,"#ff4400", 1);
-				
+								
 				
 				
 				horilinelist.push(sp);

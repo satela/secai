@@ -9,6 +9,7 @@ package ui.order {
 		public var productlist:List;
 		public var okbtn:Sprite;
 		public var btnok:Button;
+		public var maxtips:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

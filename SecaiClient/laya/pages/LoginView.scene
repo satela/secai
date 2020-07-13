@@ -2,11 +2,11 @@
     "x":0,
     "type":"Scene",
     "selectedBox":65,
-    "selecteID":68,
+    "selecteID":62,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
-    "maxID":69,
+    "maxID":70,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -48,13 +48,14 @@
             "props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
             "nodeParent":2,
             "label":"panel_main",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":3,
             "child":[
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":0,"width":1920,"texture":"mainpage/mainbg.jpg","height":1080},
@@ -68,6 +69,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},
@@ -81,6 +83,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},
@@ -94,6 +97,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUpload",
@@ -134,6 +138,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,paintOrderBtn",
@@ -174,6 +179,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnproduct",
@@ -214,6 +220,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text",
@@ -254,6 +261,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUserCenter",
@@ -294,6 +302,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_login",
@@ -334,6 +343,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_reg",
@@ -374,6 +384,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},
@@ -387,6 +398,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},
@@ -449,7 +461,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.com.cn All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},
+                    "props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},
                     "nodeParent":65,
                     "label":"Label",
                     "isDirectory":false,
@@ -493,7 +505,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,linkicp",
-                    "props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-1","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"font":"Arial","color":"#f6eeee"},
+                    "props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":20,"font":"Arial","color":"#f6eeee"},
                     "nodeParent":65,
                     "maxID":5,
                     "label":"linkicp",
