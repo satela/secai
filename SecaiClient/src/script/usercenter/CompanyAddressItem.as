@@ -29,9 +29,18 @@ package script.usercenter
 			
 			this.detailaddr.text = add.proCityArea;
 			
+			this.statustxt.text = ["待审核","审核通过","审核拒绝"][addvo.status];
+			this.statustxt.color = ["#0000FF","#00DE00","#FF0000"][addvo.status];
+			
+			//this.btnEdit.visible = addvo.status != 0;
+			
+
+			this.btndefault.visible = addvo.status == 1;
+
 			this.btnDel.on(Event.CLICK,this,onDeleteAddr);
-			this.btnEdit.on(Event.CLICK,this,onEditAddr);
+			//this.btnEdit.on(Event.CLICK,this,onEditAddr);
 			this.btndefault.on(Event.CLICK,this,onSetDefaultAddr);
+			if(addvo.status == 1)
 			this.btndefault.visible = Userdata.instance.defaultAddId != addvo.id;
 
 		}

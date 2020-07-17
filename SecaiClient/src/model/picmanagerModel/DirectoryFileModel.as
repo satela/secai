@@ -16,6 +16,9 @@ package model.picmanagerModel
 		
 		public var rootDir:PicInfoVo;
 		
+		public var curOperateFile:PicInfoVo;
+		public var curOperateSelType:int = 0; //0选择异形 1 选择反面
+
 		public static function get instance():DirectoryFileModel
 		{
 			if(_instance == null)
@@ -64,6 +67,38 @@ package model.picmanagerModel
 			{
 				curFileList.push(new PicInfoVo(picList[i],1));
 			}
+			
+			for( i=0;i < curFileList.length;i++)
+			{
+				curFileList[i].initYixingData();
+			}
+			for(var picfid in haselectPic)
+			{
+				for( var j:int=0;j < curFileList.length;j++)
+				{
+					if(curFileList[j].fid == picfid)
+						haselectPic[picfid] = curFileList[j];
+				}
+				
+			}
+			
+		}
+		
+		public function getQiegeData(fid:String):Array
+		{
+			var curfiles:Array = this.curFileList;
+			if(curfiles != null)
+			{
+				for(var i:int=0;i < curfiles.length;i++)
+				{
+					if(curfiles[i].fid == fid)
+					{
+						return [curfiles[i].roadNum,curfiles[i].roadLength,curfiles[i].picWidth,curfiles[i].picClass];
+					}
+				}
+			}
+			
+			return [0,0];
 		}
 		
 	}

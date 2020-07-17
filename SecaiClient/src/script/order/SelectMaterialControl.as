@@ -24,6 +24,8 @@ package script.order
 	import ui.order.SelectMaterialPanelUI;
 	import ui.order.TechorItemUI;
 	
+	import utils.UtilTool;
+	
 	public class SelectMaterialControl extends Script
 	{
 		private var uiSkin:SelectMaterialPanelUI;
@@ -288,15 +290,32 @@ package script.order
 				var matvo:MatetialClassVo = uiSkin.tablist.array[uiSkin.tablist.selectedIndex] as MatetialClassVo;
 				matvo.childMatList = [];
 				//var temp:Array = [];
-				
+				var allmaterial:Object = {};
 				for(var i:int=0;i < result.length;i++)
 				{
-					matvo.childMatList.push(new ProductVo(result[i]));
-					trace("产品类型：" + result[i].is_merchandise);
+					if(!allmaterial.hasOwnProperty(result[i].prod_code))
+					{
+						var proVo:ProductVo = new ProductVo(result[i]);
+							proVo.priority = PaintOrderModel.instance.getManuFacturePriority(proVo.manufacturer_code);
+						allmaterial[result[i].prod_code] = proVo;
+					}
+					else
+					{
+						if(allmaterial[result[i].prod_code].priority > PaintOrderModel.instance.getManuFacturePriority(result[i].prod_code))
+						{
+							proVo = new ProductVo(result[i]);
+							proVo.priority = PaintOrderModel.instance.getManuFacturePriority(proVo.manufacturer_code);
+							allmaterial[result[i].prod_code] = proVo;
+						}
+					}
+					///matvo.childMatList.push(new ProductVo(result[i]));
+					//trace("产品类型：" + result[i].is_merchandise);
 					//if(result[i].manufacturer_code == PaintOrderModel.instance.selectFactoryInMat.org_code)
 					//	temp.push(matvo.childMatList[matvo.childMatList.length - 1]);
 
 				}
+				for(var mate in allmaterial)
+					matvo.childMatList.push(allmaterial[mate])
 				matvo.childMatList.sort(sortMaterial);
 				
 				uiSkin.matlist.array = matvo.childMatList;
@@ -490,6 +509,24 @@ package script.order
 				
 				return;
 			}
+			
+			if(matvo is MaterialItemVo && (matvo as MaterialItemVo).preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+			{
+				if(!PaintOrderModel.instance.checkCanSelYixing())
+				{
+					ViewManager.showAlert("图片未关联异形切割图片或者关联的异形切割图片不符合下单要求，请重新关联异形切割图片");
+					return;
+				}
+			}
+			if(matvo is MaterialItemVo && (matvo as MaterialItemVo).preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
+			{
+				if(!PaintOrderModel.instance.checkCanDoubleSide())
+				{
+					ViewManager.showAlert("图片未关联反面图片，请关联后再下单");
+					return;
+				}
+			}
+			
 			hasFinishAllFlow = false;
 
 			if(parentitem.isSelected)
@@ -618,6 +655,13 @@ package script.order
 
 			if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_ATTACH,false,matvo);
+			
+			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.CUTOFF_H_V)
+				ViewManager.instance.openView(ViewManager.INPUT_CUT_NUM,false,matvo);
+			
+			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.AVERAGE_CUTOFF)
+				ViewManager.instance.openView(ViewManager.AVG_CUT_VIEW,false,matvo);
+			
 			updateSelectedTech();
 		}
 		
@@ -737,7 +781,7 @@ package script.order
 		private function updateSelectedTech():void
 		{
 			
-			this.uiSkin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes();
+			this.uiSkin.selecttech.text = PaintOrderModel.instance.curSelectMat.getTechDes(true);
 			checkShowEffectImg();
 		}
 		
@@ -768,6 +812,10 @@ package script.order
 			if(param == null)
 				return;
 			
+			if(PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 0)
+			{
+				return;
+			}
 			var hasSelectedTech:Array = PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
 			var doublesideImg:String = "";
 			var yixingqiegeImg:String = "";
@@ -780,12 +828,12 @@ package script.order
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
 				{
-					doublesideImg = hasSelectedTech[i].attchFileId;
+					doublesideImg = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.backFid; //hasSelectedTech[i].attchFileId;
 
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
 				{
-					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+					yixingqiegeImg = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.yixingFid; //hasSelectedTech[i].attchFileId;
 				}
 			}
 			
@@ -837,7 +885,7 @@ package script.order
 				//ViewManager.showAlert("未选择完整工艺");
 				//return;
 			}
-			if(PaintOrderModel.instance.curSelectMat == null || PaintOrderModel.instance.curSelectMat.getTechDes() == "")
+			if(PaintOrderModel.instance.curSelectMat == null || PaintOrderModel.instance.curSelectMat.getTechDes(true) == "")
 			{
 				ViewManager.showAlert("请选择一个工艺");
 				return;
@@ -871,7 +919,17 @@ package script.order
 		private function onUpdateTechDes(viewname:String):void
 		{
 			if(viewname == ViewManager.VIEW_SELECT_ATTACH)
+			{
+				if(curclickItem.techmainvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
+				{
+					if(curclickItem.techmainvo.attachList == null || curclickItem.techmainvo.attachList.length == 0)
+					{
+						hideItems(curclickItem.x,true);
+					}
+				}
 				updateSelectedTech();
+				
+			}
 		}
 		private function onCloseView():void
 		{

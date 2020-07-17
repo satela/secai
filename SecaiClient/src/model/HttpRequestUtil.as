@@ -118,7 +118,10 @@ package model
 
 		public static const moveOrganizeMembers:String = "group/set-memberdept?";//移动组织里的人
 
-
+		
+		public static const setYixingRelated:String = "file/set-mask-image?";//设置异形关联图片
+		public static const setFanmianRelated:String = "file/set-back-image?";//设置反面关联图片
+		
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)

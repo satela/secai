@@ -63,8 +63,15 @@ package script.order
 			var num:int = 0;
 			var totalheight:int= 0;
 			
-			uiSkin.commentall.visible = false;
-			uiSkin.batchcomment.visible = false;
+			//uiSkin.commentall.visible = false;
+			//uiSkin.batchcomment.visible = false;
+			uiSkin.commentall.maxChars = 10;
+			
+			uiSkin.copynum.text = "1";
+			uiSkin.copynum.restrict = "0-9";
+			uiSkin.copynum.maxChars = 3;
+			uiSkin.copynum.on(Event.INPUT,this,onNumChange);
+
 			
 			fengeoriginy = uiSkin.fengeimg.y;
 			floatpyy = uiSkin.floatpt.y;
@@ -134,6 +141,7 @@ package script.order
 			uiSkin.panelout.hScrollBarSkin = "";
 			
 			uiSkin.panelbottom.hScrollBarSkin = "";
+			uiSkin.panelout.hScrollBar.mouseWheelEnable = false;
 			
 
 			uiSkin.panelout.width = Browser.width;
@@ -188,6 +196,22 @@ package script.order
 				Userdata.instance.companyShort = result.shortname;
 			}
 			
+		}
+		
+		private function onNumChange():void
+		{
+			if(uiSkin.copynum.text == "")
+				uiSkin.copynum.text = "1";
+			var num:int = parseInt(uiSkin.copynum.text);
+			if(num < 1)
+			{
+				uiSkin.copynum.text = "1";
+			}
+			if(num > 100)
+			{
+				uiSkin.copynum.text = "100";
+			}
+			this.resetOrderInfo();
 		}
 		private function onDragMove():void
 		{
@@ -299,7 +323,9 @@ package script.order
 				
 			}
 			
-			
+			var copy:int = parseInt(uiSkin.copynum.text);
+			total = parseFloat(total.toFixed(1));
+			total = total * copy;
 			
 			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(1) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
@@ -355,10 +381,20 @@ package script.order
 					//this.uiSkin.factorytxt.text = "你选择的地址暂无生产商";
 				}
 			}
+			
+			for(var i:int=0; i < orderlist.length;i++)
+			{
+				var orderitem:PicOrderItem = orderlist[i];
+				orderitem.reset();
+			}
+			
+			this.resetOrderInfo();
 		}
 		
 		private function onGetDeliveryBack(data:Object):void
 		{
+			if(this.destroyed)
+				return;
 			var result:Object = JSON.parse(data as String);
 			while(uiSkin.deliverbox.numChildren > 0)
 				uiSkin.deliverbox.removeChildAt(0);
@@ -825,9 +861,23 @@ package script.order
 				
 				odata.money_paidStr = (odata.order_amountStr as Number).toFixed(1);
 				odata.order_amountStr = (odata.order_amountStr as Number).toFixed(1);
-
+				//odata.order_amountStr = "0.01";
+				//odata.money_paidStr = "0.01";
 				arr.push(odata);
 			}
+			
+			var copy:int = parseInt(uiSkin.copynum.text);
+			var copyarr:Array = [];
+			for(i=1;i < copy;i++)
+			{
+				for(var j:int=0;j < arr.length;j++)
+				{
+					var copydata:Object =  JSON.parse(JSON.stringify(arr[j]));
+					copyarr.push(copydata);
+				}
+			}
+			if(copyarr.length > 0)
+				arr = arr.concat(copyarr);
 			return arr;
 		}
 	

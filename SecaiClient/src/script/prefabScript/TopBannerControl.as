@@ -73,6 +73,7 @@ package script.prefabScript
 				UtilTool.setLocalVar("userpwd","");
 
 				Userdata.instance.isLogin = false;
+				Userdata.instance.resetData();
 				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 				
 			}

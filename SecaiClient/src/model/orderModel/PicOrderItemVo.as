@@ -37,6 +37,14 @@ package model.orderModel
 		
 		public var comment:String = "";
 		
+		public var cuttype:int = 0;//裁切类型
+		public var cutnum:int = 0;//裁切数
+		
+		public var eachCutLength:Array;
+		
+		public var horiCutNum:int = 1;
+		public var verCutNum:int = 1;
+		
 		public function PicOrderItemVo(picvo:PicInfoVo)
 		{
 			picinfo = picvo;

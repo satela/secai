@@ -23,6 +23,7 @@ package script.order
 	import script.ViewManager;
 	import script.picUpload.DirectFolderItem;
 	import script.picUpload.PicInfoItem;
+	import script.picUpload.PicPaintItem;
 	
 	import ui.order.SelectPicPanelUI;
 	
@@ -64,10 +65,10 @@ package script.order
 			uiSkin.mainpanel.height = Browser.height;
 			uiSkin.mainpanel.width = Browser.width;
 
-			uiSkin.picList.itemRender = PicInfoItem;
-			uiSkin.picList.vScrollBarSkin = "";
+			uiSkin.picList.itemRender = PicPaintItem;
+			//uiSkin.picList.vScrollBarSkin = "";
 			uiSkin.picList.selectEnable = false;
-			uiSkin.picList.spaceY = 0;
+			uiSkin.picList.spaceY = 10;
 			uiSkin.picList.renderHandler = new Handler(this, updatePicInfoItem);
 			uiSkin.flder0.visible = false;
 			uiSkin.flder1.visible = false;
@@ -116,24 +117,21 @@ package script.order
 			// TODO Auto Generated method stub
 			if(!(param is MaterialItemVo))
 			{
-				var hassrgb:Boolean = false;
+				//var hassrgb:Boolean = false;
+				
 				
 				for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
 				{
-					if(pic.colorspace.toUpperCase() == "SRGB")
+					if(UtilTool.isValidPic(pic) == false)
 					{
-						hassrgb = true;
-						break;
+						ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
+						return;
 					}
 				}
 				
-				if(hassrgb)
-				{
-					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"RGB格式的图片直接生产会产生色差，是否继续?",caller:this,callback:confirmOrderNow});
-					return;
-				}
-				else
-					EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
+				
+				
+				EventCenter.instance.event(EventCenter.ADD_PIC_FOR_ORDER);
 			}
 			else if((param as MaterialItemVo).attchFileId == null || (param as MaterialItemVo).attchFileId == "")
 			{
@@ -335,7 +333,8 @@ package script.order
 					(param as MaterialItemVo).attchMentFileId = HttpRequestUtil.originPicPicUrl + fvo.fid + "." + fvo.picClass;
 					(param as MaterialItemVo).attchFileId = fvo.fid;
 					
-
+					if(param.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+						(param as MaterialItemVo).picInfoVo = fvo;
 				}
 				return;
 			}

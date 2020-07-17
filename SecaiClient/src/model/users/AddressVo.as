@@ -26,6 +26,9 @@ package model.users
 		public var id:String;
 		
 		public var preAddName:String;
+		
+		public var status:int = 0;
+		
 		public function AddressVo(data:Object)
 		{
 			receiverName = data.cnee;
@@ -34,6 +37,8 @@ package model.users
 			id = data.id;
 			
 			preAddName = data.zonename;
+			status = data.status;
+			
 			var addid:Array = data.zone.split("|");
 			zoneid = addid[0];
 			searchZoneid = addid[1];

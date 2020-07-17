@@ -9,9 +9,10 @@ package ui.order {
 		public var attachList:List;
 		public var btnok:Button;
 
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"y":10,"x":10,"top":0,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"mainpanel","height":1080},"compId":4,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","height":1080,"alpha":0.5},"compId":19},{"type":"Image","props":{"y":186,"x":380,"width":1160,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":655},"compId":6},{"type":"Image","props":{"y":258,"x":380,"width":1160,"skin":"commers/cutline.png","height":1,"alpha":1},"compId":7},{"type":"Label","props":{"y":210,"x":416,"text":"配件选择","fontSize":24,"color":"#756e6e","bold":true},"compId":9},{"type":"List","props":{"y":278,"x":416,"width":1100,"var":"attachList","spaceX":10,"repeatX":8,"height":426},"compId":13},{"type":"Image","props":{"y":738,"x":440,"width":1040,"skin":"commers/cutline.png","height":1,"alpha":1},"compId":14},{"type":"Sprite","props":{"y":773,"x":890},"compId":15,"child":[{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"btnok","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF,","label":"确定","height":42},"compId":16}]}]},{"type":"Script","props":{"runtime":"script.order.SelectAttchesControl"},"compId":18}],"loadList":["commers/blackbg.png","commers/commonpopbg.png","commers/cutline.png","commers/btn1.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
-			loadScene("order/SelectAttchPanel");
+			createView(uiView);
 
 		}
 

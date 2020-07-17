@@ -28,6 +28,21 @@ package model.picmanagerModel
 		
 		public var isCdr:Boolean = false;
 		
+		public var roadNum:int = 0;
+		public var roadLength:int = 0;
+		
+		public var yixingFid:String = "";
+		public var backFid:String = "";
+		
+		public var yixingPicClass:String = "";
+		public var backPicClass:String = "";
+		
+		
+		public var relatedRoadNum:int = 0;
+		public var relatedRoadLength:int = 0;
+		
+		public var relatedPicWidth:int = 0;
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -49,6 +64,18 @@ package model.picmanagerModel
 					dpi = UtilTool.oneCutNineAdd(fattr.dpi);
 					picPhysicWidth = UtilTool.oneCutNineAdd(picWidth/dpi*2.54);
 					picPhysicHeight = UtilTool.oneCutNineAdd(picHeight/dpi*2.54);
+					
+					yixingFid = fileinfo.fmaskid;
+					backFid = fileinfo.fbackid;
+					
+					
+					if(fattr.hasOwnProperty("roadnum"))
+					{
+						roadNum = fattr.roadnum;
+						var longside:Number = Math.max(picWidth,picHeight);
+						roadLength = Math.floor( fattr.totallen * longside/1000);
+						//trace("raodNum:" + roadNum + "," + roadLength);
+					}
 					
 					if(fattr != null && fattr.flag == 1)
 					{
@@ -84,6 +111,27 @@ package model.picmanagerModel
 			}
 		}
 		
+		public function initYixingData():void
+		{
+			if(yixingFid != "0")
+			{
+				var info:Array = DirectoryFileModel.instance.getQiegeData(yixingFid);
+				
+				this.relatedRoadNum = info[0];
+				this.relatedRoadLength = info[1];
+				this.relatedPicWidth = info[2];
+				this.yixingPicClass = info[3];
+
+			}
+			
+			if(backFid != "0")
+			{
+				var info:Array = DirectoryFileModel.instance.getQiegeData(backFid);
+								
+				this.backPicClass = info[3];
+				
+			}
+		}
 		public function get dpath():String
 		{
 			return parentDirect + directId + "|";

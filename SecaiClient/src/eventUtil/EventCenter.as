@@ -77,6 +77,10 @@ package eventUtil
 		public static const DELETE_DEPT_MEMBER:String = "DELETE_DEPT_MEMBER";//删除组织成员
 
 		
+		public static const START_SELECT_YIXING_PIC:String = "START_SELECT_YIXING_PIC";//开始选择异形切割图
+		public static const STOP_SELECT_RELATE_PIC:String = "STOP_SELECT_RELATE_PIC";//结束选择关联图
+		public static const START_SELECT_BACK_PIC:String = "START_SELECT_BACK_PIC";//开始选择反面图
+
 		private static var _eventCenter:EventCenter;
 		
 	

@@ -1,6 +1,9 @@
 package model.orderModel
 {
 	import model.HttpRequestUtil;
+	import model.picmanagerModel.PicInfoVo;
+	
+	import script.order.PicOrderItem;
 
 	public class MaterialItemVo
 	{
@@ -18,7 +21,7 @@ package model.orderModel
 		public var is_startProc:int = 0;//是否起始工艺
 		public var is_endProc:int = 0;//是否结束工艺
 
-		public var nextMatList:Vector.<MaterialItemVo>;
+		private var _nextMatList:Vector.<MaterialItemVo>;
 		
 		public var selected:Boolean = false;
 		
@@ -30,6 +33,7 @@ package model.orderModel
 		public var attachList:Array;
 		public var selectAttachVoList:Vector.<AttchCatVo>;//选择的配件
 		
+		public var picInfoVo:PicInfoVo;//异形切割工艺计价需要图片信息
 		public function MaterialItemVo(data:Object)
 		{
 			if(data != null)
@@ -40,7 +44,7 @@ package model.orderModel
 						this[key] = data[key];
 				}
 				var nextpro:Array = data.procProcList;
-				nextMatList = new Vector.<MaterialItemVo>();
+				_nextMatList = new Vector.<MaterialItemVo>();
 
 				//trace(preProc_Name + "," + preProc_attachmentTypeList);
 				
@@ -57,7 +61,7 @@ package model.orderModel
 					{
 						if(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name) != null)
 						{
-							nextMatList.push(new MaterialItemVo(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name)));
+							_nextMatList.push(new MaterialItemVo(PaintOrderModel.instance.getProcDataByProcName(nextpro[i].postProc_name)));
 						}
 						else
 						{
@@ -69,7 +73,7 @@ package model.orderModel
 							matvo.procLvl = 2;
 							matvo.preProc_Price = nextpro[i].postProc_price;
 							matvo.measure_unit = nextpro[i].measure_unit;
-							nextMatList.push(matvo);
+							_nextMatList.push(matvo);
 												
 
 						}
@@ -78,6 +82,45 @@ package model.orderModel
 			}
 		}
 		
+		public function get nextMatList():Vector.<MaterialItemVo>
+		{
+			var curselectProduct:ProductVo = PaintOrderModel.instance.curSelectMat;
+			var curSelectPic:PicOrderItem = PaintOrderModel.instance.curSelectOrderItem;
+			var allpics:Vector.<PicOrderItem> = new Vector.<PicOrderItem>();
+			if(curSelectPic != null)
+				allpics.push(curSelectPic);
+			else
+				allpics = PaintOrderModel.instance.batchChangeMatItems;
+			
+			if(curselectProduct != null && allpics.length > 0)
+			{				
+				
+				if(this._nextMatList.length > 0)
+				{
+					if(this._nextMatList[0].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
+					{
+						var hasBeyongd:Boolean = false;
+						for(var i:int=0;i < allpics.length;i++)
+						{
+							if(allpics[i].finalWidth > curselectProduct.max_width && allpics[i].finalHeight > curselectProduct.max_width)
+							{
+								hasBeyongd = true;
+								break;
+							}
+						}
+						if(hasBeyongd == true)
+							return this._nextMatList;
+						var tempmat:Vector.<MaterialItemVo> = new Vector.<MaterialItemVo>();
+						
+						return this._nextMatList[0].nextMatList;
+					}					
+				}
+			}
+			
+			return this._nextMatList;
+			
+			
+		}
 		private function onAccCatlistBack(data:String):void
 		{
 			var result:Object = JSON.parse(data as String);

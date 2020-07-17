@@ -74,8 +74,8 @@ package laya.display {
 		 * @param path 场景地址。
 		 */
 		public function loadScene(path:String):void {
-			//var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + (new Date()).getTime().toString();;
-			var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + Userdata.instance.version;
+			var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + (new Date()).getTime().toString();
+			//var url:String = path.indexOf(".") > -1 ? path : path + ".scene" + "?" + Userdata.instance.version;
 
 			var view:Object = Laya.loader.getRes(url);
 			if (view) {

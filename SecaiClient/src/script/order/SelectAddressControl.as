@@ -8,6 +8,7 @@ package script.order
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
+	import model.HttpRequestUtil;
 	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
 	import model.users.AddressVo;
@@ -48,7 +49,13 @@ package script.order
 			uiSkin.mainpanel.width = Browser.width;
 
 			uiSkin.inputsearch.on(Event.INPUT,this,onSearchAddress);
-			uiSkin.list_address.array = Userdata.instance.addressList;
+			uiSkin.list_address.array = Userdata.instance.passedAddress;
+			
+			if(Userdata.instance.passedAddress.length == 0)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
+
+			}
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 
 			tempaddress = PaintOrderModel.instance.selectAddress;
@@ -65,6 +72,24 @@ package script.order
 
 			//PaintOrderModel.instance.selectAddress = null;
 		}
+		
+		private function getMyAddressBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Userdata.instance.initMyAddress(result.data as Array);
+				Userdata.instance.defaultAddId = result["default"];
+				
+				uiSkin.list_address.array = Userdata.instance.passedAddress;
+
+			}
+			else if(result.status == 205 || result.status　== 404)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
+			}
+		}
+		
 		private function onResizeBrower():void
 		{
 			uiSkin.mainpanel.height = Browser.height;
@@ -87,21 +112,28 @@ package script.order
 		}
 		private function onShowAddAdress():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			if(Userdata.instance.canAddNewAddress())
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_ADD_NEW_ADDRESS);
+			}
+			else
+			{
+				ViewManager.showAlert("有地址在等待审核状态，禁止添加新地址，你可删除待审核地址或等待审核通过后重新添加");
+			}
 		}
 		private function onSearchAddress():void
 		{
 			if(uiSkin.inputsearch.text == "")
 			{
-				uiSkin.list_address.array = Userdata.instance.addressList;
+				uiSkin.list_address.array = Userdata.instance.passedAddress;
 				return;
 			}
 			var tempadd:Array = [];
-			for(var i:int=0;i < Userdata.instance.addressList.length;i++)
+			for(var i:int=0;i < Userdata.instance.passedAddress.length;i++)
 			{
-				if((Userdata.instance.addressList[i].addressDetail as String).indexOf(uiSkin.inputsearch.text) >= 0)
+				if((Userdata.instance.passedAddress[i].addressDetail as String).indexOf(uiSkin.inputsearch.text) >= 0)
 				{
-					tempadd.push(Userdata.instance.addressList[i]);
+					tempadd.push(Userdata.instance.passedAddress[i]);
 				}
 			}
 			uiSkin.list_address.array = tempadd;

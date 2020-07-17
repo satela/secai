@@ -33,6 +33,7 @@ package ui {
 		public var textTotalPrice:HTMLDivElement;
 		public var textDeliveryType:HTMLDivElement;
 		public var textPayPrice:HTMLDivElement;
+		public var copynum:TextInput;
 		public var btnsaveorder:Button;
 		public var btnordernow:Button;
 

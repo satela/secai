@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":100,
-    "selecteID":103,
+    "selectedBox":2,
+    "selecteID":3,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":105,
+    "maxID":109,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -37,13 +37,14 @@
             "props":{"y":0,"x":0,"width":1920,"var":"mainpanel","height":1080},
             "nodeParent":2,
             "label":"mainpanel",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":3,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image,bgimg",
                     "props":{"y":0,"x":0,"width":1920,"var":"bgimg","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":1080},
@@ -59,6 +60,7 @@
                     "$LOCKED":true
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":0,"skin":"mainpage/registerbg.jpg","right":0,"left":0,"height":1080},
@@ -71,10 +73,11 @@
                     "compId":85,
                     "child":[
                         ],
-                    "$LOCKED":false,
+                    "$LOCKED":true,
                     "$HIDDEN":false
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":102,"x":467,"width":986,"skin":"commers/commonpopbg.png","height":790},
@@ -86,9 +89,11 @@
                     "hasChild":false,
                     "compId":95,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":true
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":100,"x":467,"width":986,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":791},
@@ -99,9 +104,11 @@
                     "hasChild":false,
                     "compId":93,
                     "child":[
-                        ]
+                        ],
+                    "$LOCKED":true
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":46,"x":905,"skin":"mainpage/halfcirc.png"},
@@ -116,6 +123,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":71,"x":929,"skin":"mainpage/shiliang.png"},
@@ -129,6 +137,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":184,"x":570},
@@ -141,6 +150,7 @@
                     "compId":9,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":13,"width":88,"text":"手机号码","height":32,"fontSize":22,"font":"Microsoft YaHei","color":"#262B2E"},
@@ -154,6 +164,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_phone",
                             "props":{"x":160,"width":384,"var":"input_phone","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
@@ -167,6 +178,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":66,"x":160,"text":"请输入11位手机号码","fontSize":20,"font":"Arial","color":"#878988"},
@@ -181,9 +193,10 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":306,"x":570},
+                    "props":{"y":404,"x":570},
                     "nodeParent":3,
                     "label":"Box",
                     "isOpen":true,
@@ -193,6 +206,7 @@
                     "compId":10,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":13,"text":"密码","fontSize":22,"font":"Microsoft YaHei","align":"right"},
@@ -206,6 +220,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_pwd",
                             "props":{"x":160,"width":384,"var":"input_pwd","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
@@ -219,6 +234,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":66,"x":157,"text":"6-20位字母开头的字母、数字的组合","fontSize":20,"font":"Arial","color":"#878988"},
@@ -233,9 +249,10 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":428,"x":570},
+                    "props":{"y":526,"x":570},
                     "nodeParent":3,
                     "label":"Box",
                     "isOpen":true,
@@ -245,6 +262,7 @@
                     "compId":15,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":13,"text":"确认密码","fontSize":22,"font":"Microsoft YaHei"},
@@ -258,6 +276,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_conpwd",
                             "props":{"x":160,"width":384,"var":"input_conpwd","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
@@ -271,6 +290,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":66,"x":160,"text":"请再次输入密码","fontSize":20,"font":"Arial","color":"#5f5353"},
@@ -285,9 +305,10 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":549,"x":570},
+                    "props":{"y":647,"x":570},
                     "nodeParent":3,
                     "label":"Box",
                     "isOpen":true,
@@ -297,6 +318,7 @@
                     "compId":40,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":13,"text":"图片验证码","fontSize":22,"font":"Microsoft YaHei"},
@@ -310,6 +332,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,inputCode",
                             "props":{"y":0,"x":160,"width":215,"var":"inputCode","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
@@ -323,6 +346,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":619,"text":"看不清？","fontSize":20,"font":"Arial","color":"#121212"},
@@ -336,6 +360,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Text",
                             "selectedBox":3,
                             "searchKey":"Text,txtRefresh",
@@ -377,9 +402,10 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
-                    "props":{"y":635,"x":570},
+                    "props":{"y":733,"x":570},
                     "nodeParent":3,
                     "label":"Box",
                     "isOpen":true,
@@ -389,6 +415,7 @@
                     "compId":45,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":13,"text":"手机验证码","fontSize":22,"font":"Microsoft YaHei"},
@@ -402,6 +429,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,input_phonecode",
                             "props":{"x":160,"width":384,"var":"input_phonecode","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
@@ -415,6 +443,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,btnGetCode",
                             "props":{"y":3.5,"x":568,"width":150,"var":"btnGetCode","skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"获取验证码","height":40},
@@ -429,6 +458,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnClose",
                     "props":{"y":123,"x":1413,"var":"btnClose","stateNum":"3","skin":"commers/btnclose.png"},
@@ -442,9 +472,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btnReg",
-                    "props":{"y":734,"x":880,"width":160,"var":"btnReg","skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"注册","height":48},
+                    "props":{"y":832,"x":880,"width":160,"var":"btnReg","skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"注册","height":48},
                     "nodeParent":3,
                     "label":"btnReg",
                     "isDirectory":false,
@@ -453,9 +484,65 @@
                     "compId":77,
                     "child":[
                         ]
+                },
+                {
+                    "x":30,
+                    "type":"Box",
+                    "searchKey":"Box",
+                    "props":{"y":294,"x":570},
+                    "nodeParent":3,
+                    "label":"Box",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":105,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":10,"x":13,"width":88,"text":"用户名","height":32,"fontSize":22,"font":"Microsoft YaHei","color":"#262B2E"},
+                            "nodeParent":105,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":106,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"TextInput",
+                            "searchKey":"TextInput,nameInput",
+                            "props":{"x":160,"width":384,"var":"nameInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":50,"fontSize":20},
+                            "nodeParent":105,
+                            "label":"nameInput",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":107,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":66,"x":160,"text":"请输入用户名","fontSize":20,"font":"Arial","color":"#878988"},
+                            "nodeParent":105,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":108,
+                            "child":[
+                                ]
+                        }]
                 }],
             "$LOCKED":false,
-            "$HIDDEN":true
+            "$HIDDEN":false
         },
         {
             "x":15,
@@ -555,7 +642,7 @@
                     "child":[
                         ]
                 }],
-            "$HIDDEN":false
+            "$HIDDEN":true
         },
         {
             "x":15,

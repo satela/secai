@@ -31,7 +31,8 @@ package model
 		public var loginTime:Number = 0;
 		
 		public var accountType:int = 0;//1 公司创建者  0 公司职员
-
+		
+	
 		public static function get instance():Userdata
 		{
 			if(_instance == null)
@@ -43,15 +44,34 @@ package model
 			
 		}
 		
+		public function resetData():void
+		{
+			addressList = [];
+			isLogin = false;
+			money = 0;
+			accountType = 0;
+			
+		}
 		public function initMyAddress(adddata:Array):void
 		{
 			addressList = [];
 			for(var i:int=0;i < adddata.length;i++)
 			{
 				addressList.push(new AddressVo(adddata[i]));
-			}
+			}			
+			
 		}
 		
+		public function canAddNewAddress():Boolean
+		{
+			for(var i:int=0;i < addressList.length;i++)
+			{
+				if(addressList[i].status == 0)
+					return false;
+			}
+			
+			return true;
+		}
 		public function addNewAddress(adddata:Object):void
 		{
 			if(addressList == null)
@@ -59,6 +79,24 @@ package model
 			addressList.push(new AddressVo(adddata));
 
 		}
+		
+		public function get passedAddress():Array
+		{
+			if(addressList == null || addressList.length == 0)
+				return [];
+			else
+			{
+				var tempaddr:Array = [];
+				for(var i:int=0;i < addressList.length;i++)
+				{
+					if(addressList[i].status == 1)
+						tempaddr.push(addressList[i]);
+				}
+				return tempaddr;
+			}
+			
+		}
+
 		
 		public function updateAddress(adddata:Object):void
 		{
@@ -85,18 +123,20 @@ package model
 		
 		public function getDefaultAddress():AddressVo
 		{
-			if(addressList == null || addressList.length == 0)
+			var validAddList:Array = passedAddress;
+			
+			if(validAddList == null || validAddList.length == 0)
 				return null;
 			else
 			{
-				for(var i:int=0;i < addressList.length;i++)
+				for(var i:int=0;i < validAddList.length;i++)
 				{
-					if(addressList[i].id == defaultAddId)
-						return addressList[i];
+					if(validAddList[i].id == defaultAddId)
+						return validAddList[i];
 				}
 			}
 			
-			return addressList[0];
+			return validAddList[0];
 		}
 	}
 }

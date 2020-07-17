@@ -1,12 +1,16 @@
 package utils
 {
+	
 	import laya.filters.ColorFilter;
 	import laya.maths.Point;
 	import laya.net.LocalStorage;
 	import laya.utils.Browser;
 	
 	import model.orderModel.OrderConstant;
+	import model.orderModel.PicOrderItemVo;
 	import model.picmanagerModel.PicInfoVo;
+	
+	import script.ViewManager;
 	
 	import ui.common.TipPanelUI;
 
@@ -126,7 +130,7 @@ package utils
 		
 		public static function getYixingImageCount(url:String,caller:*):void
 		{
-			Browser.window.picProcess = caller;
+			Browser.window.picProcess = UtilTool;
 			Browser.window.getImagePixels(url);
 		}
 		
@@ -144,6 +148,8 @@ package utils
 			var allblotindex:Array = [];
 			var equalBlot:Object = {};
 			
+			var areanum:int = 0;
+			
 			for(var i:int=0;i < imgheight;i++)
 			{
 				pixelVec[i] = new Array(imgwidth);
@@ -158,7 +164,10 @@ package utils
 					if(pixelVec[i][j] > 100)
 						pixelVec[i][j] = 1;
 					else
+					{
 						pixelVec[i][j] = 0;
+						areanum++;
+					}
 					temparr[i][j] = pixelVec[i][j];
 					if(pixelVec[i][j] == 0 )
 					{
@@ -247,21 +256,22 @@ package utils
 					
 				}
 			}
-			var edgenum:int = 0;
 			
-
-			for(var i:int=0;i < imgheight;i++)
-			{
-				for(var j:int=0;j < imgwidth;j++)
-				{
-					if(temparr[i][j] == 0)
-					{
-						
-						edgenum++;
-					}
-				}
-							
-			}
+//			var edgenum:int = 0;
+//			
+//
+//			for(var i:int=0;i < imgheight;i++)
+//			{
+//				for(var j:int=0;j < imgwidth;j++)
+//				{
+//					if(temparr[i][j] == 0)
+//					{
+//						
+//						edgenum++;
+//					}
+//				}
+//							
+//			}
 			
 			var allEqualBlot:Array = [];
 			for(var startblotindex in equalBlot)
@@ -327,7 +337,7 @@ package utils
 				if(inequal == false)
 					blotnum++;
 			}
-			trace("边缘数量：" + edgenum);
+			trace("面积：" + areanum);
 			trace("连通域数量:" + (blotnum + allEqualBlot.length));
 			
 		}
@@ -646,7 +656,7 @@ package utils
 			else if(unit == OrderConstant.MEASURE_UNIT_LEFT_RIGHT)
 			{
 				var lrsum:Number = picheight + picheight;
-				return baseprice + unitprice*btsum;
+				return baseprice + unitprice*lrsum;
 			}
 			else if(unit == OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE)
 			{
@@ -670,9 +680,85 @@ package utils
 			else return 0;
 		}
 		
+		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
+		{			
+			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.relatedPicWidth)  * finalwidth;
+			
+			//var linemeter1:Number = (picinfo.relatedRoadLength / picinfo.relatedDpi * 2.54) * (finalwidth/picinfo.picPhysicWidth);
+			
+			//trace("line1:" + linemeter + "," + linemeter1);
+
+			
+			return basePrice * picinfo.relatedRoadNum + linemeter*unitPrice;
+		}
+		
+		public static function getAvgCutPrice(orderitem:PicOrderItemVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
+		{			
+			var linemeter:Number = orderitem.horiCutNum * finalwidth + orderitem.verCutNum * finalheight;
+			
+			return basePrice * orderitem.horiCutNum * orderitem.verCutNum + linemeter*unitPrice;
+		}
+		
 		public static function isMeasureUnitByNum(unit:String):Boolean
 		{
 			return unit == OrderConstant.MEASURE_UNIT_SINGLE_NUM || unit == OrderConstant.MEASURE_UNIT_SINGLE_SUIT || unit == OrderConstant.MEASURE_UNIT_SINGLE_TAO;
+		}
+		
+		public static function isValidPic(picInfo:PicInfoVo):Boolean
+		{
+			if(picInfo.colorspace.toUpperCase() != "CMYK")
+				return false;
+			
+			var validClass:Array = ["JPG","JPEG","TIF","TIFF","ZIP"];
+			if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase()) < 0)
+				return false;
+			if(picInfo.picClass.toLocaleUpperCase() == "ZIP" && picInfo.directName.indexOf(".cdr") < 0)
+				return false;
+			
+			return true;
+		}
+		
+		public static function isFitYixing(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
+		{
+			if(sourcefile != null && selfile != null)
+			{
+				if(selfile.roadNum <= 0)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"该图片不符合异形切割图片要求"});
+					return false;
+
+				}
+				var xdif:Number = Math.abs(sourcefile.picPhysicWidth - selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+				var ydif:Number = Math.abs(sourcefile.picPhysicHeight - selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+				if(xdif >0.01 || ydif > 0.01)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸不匹配"});
+					
+					return false;
+				}
+				return true;
+				
+			}
+			return false;
+		}
+		
+		public static function isFitFanmain(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
+		{
+			if(sourcefile != null && selfile != null)
+			{
+				
+				var xdif:Number = Math.abs(sourcefile.picPhysicWidth - selfile.picPhysicWidth)/sourcefile.picPhysicWidth;
+				var ydif:Number = Math.abs(sourcefile.picPhysicHeight - selfile.picPhysicHeight)/sourcefile.picPhysicHeight;
+				if(xdif >0.01 || ydif > 0.01)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片尺寸不匹配"});
+					
+					return false;
+				}
+				return true;
+				
+			}
+			return false;
 		}
 	}
 }

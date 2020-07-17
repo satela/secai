@@ -33,8 +33,10 @@
 	 document.onkeydown = KeyDown;
 	 function KeyDown()
 	 {
-	 if(window.event.keyCode == 9)
-		window.event.returnValue=false;
+	 
+	 var evt = window.event || arguments.callee.caller.arguments[0];
+	 if(evt.keyCode == 9)
+		evt.returnValue=false;
 	 }
 	 
 	 function getImagePixels(imgurl)
@@ -47,7 +49,7 @@
 	 {
 		if(picProcess != null)
 		{
-			picProcess.getPixelInfo(picdata);
+			picProcess.getYixingImageInfo(picdata);
 		}
 	 }
 	function goprogress(){

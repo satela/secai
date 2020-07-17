@@ -120,6 +120,23 @@ package script.order
 			alighComponet();
 		}
 		
+		public function reset():void
+		{
+			this.mattxt.text = "";
+			this.architype.text = "";
+			this.price.text = "0";
+			this.total.text = "0";
+			
+			this.ordervo.orderData = null;
+			
+			this.curproductvo = null;
+			
+			this.yixingimg.visible = false;
+			this.backimg.visible = false;
+			this.yingxback.visible = false;
+			
+			
+		}
 		private function onLockChange():void
 		{
 			if(locked)
@@ -145,6 +162,8 @@ package script.order
 				
 				this.editheight.text = heightration.toFixed(2);
 			}
+			reset();
+
 			updatePrice();
 		}
 		private function onHeightSizeChange():void
@@ -159,6 +178,8 @@ package script.order
 
 				this.editwidth.text = widthration.toFixed(2);
 			}
+			
+			reset();
 			updatePrice();
 		}
 		
@@ -276,15 +297,16 @@ package script.order
 //					area = 0.1;
 //				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
-				EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
 
 			}
+			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
+
 		}
 		private function onNumChange():void
 		{
@@ -297,6 +319,16 @@ package script.order
 		}
 		private function onShowMaterialView():void
 		{
+			if(PaintOrderModel.instance.selectAddress == null)
+			{
+				ViewManager.showAlert("请选择收货地址");
+				return;
+			}
+			if(PaintOrderModel.instance.outPutAddr == null || PaintOrderModel.instance.outPutAddr.length == 0)
+			{
+				ViewManager.showAlert("当前的收货地址没有输出中心，请重新选择收货地址");
+				return;
+			}
 			for(var i:int=0;i < PaintOrderModel.instance.outPutAddr.length;i++)
 			{
 				if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code] == null)
@@ -340,13 +372,13 @@ package script.order
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
 				{
-					doublesideImg = hasSelectedTech[i].attchFileId;
+					doublesideImg = ordervo.picinfo.backFid; //hasSelectedTech[i].attchFileId;
 					fanmianFid = doublesideImg;
 					
 				}
 				else if(hasSelectedTech[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
 				{
-					yixingqiegeImg = hasSelectedTech[i].attchFileId;
+					yixingqiegeImg =  ordervo.picinfo.yixingFid;//hasSelectedTech[i].attchFileId;
 				}
 			}
 			
@@ -379,18 +411,26 @@ package script.order
 //				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/area).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true)/perimeter).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false)).toFixed(1) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
 
-			this.architype.text = provo.getTechDes();
+			var tech:String = provo.getTechDes(false,finalWidth,finalHeight);
 			
+			if(tech.indexOf("超幅裁切") >= 0)
+				tech = tech.replace("超幅裁切","超幅裁切" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
+			
+			if(tech.indexOf("等份裁切") >= 0)
+				tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.verCutNum+ ",V-" + this.ordervo.horiCutNum + ")");
+			
+			this.architype.text = tech;
+
 			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
 			else
@@ -421,7 +461,7 @@ package script.order
 //			if(area < 0.1)
 //				area = 0.1;
 			
-			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false);
+			this.ordervo.orderPrice = productVo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo);
 			if(this.ordervo.orderPrice < 0.1)
 				this.ordervo.orderPrice = 0.1;
 			
@@ -446,7 +486,7 @@ package script.order
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.filename = this.ordervo.picinfo.directName;
 			
-			orderitemdata.procInfoList = productVo.getProInfoList();
+			orderitemdata.procInfoList = productVo.getProInfoList(this.ordervo.picinfo,finalWidth,finalHeight,this.ordervo);
 			
 
 			this.ordervo.orderData =  orderitemdata;
@@ -472,10 +512,16 @@ package script.order
 				return false;
 			}
 			
-			if(curproductvo != null)
-				return curproductvo.checkCurTechValid();
-			else
+			if(this.ordervo.orderData.procInfoList == null ||  this.ordervo.orderData.procInfoList.length == 0)
+			{
+				ViewManager.showAlert("未选择工艺");
 				return false;
+			}
+			
+//			if(curproductvo != null)
+//				return curproductvo.checkCurTechValid();
+//			else
+				return true;
 			
 		}
 	}
