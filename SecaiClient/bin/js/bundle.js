@@ -710,7 +710,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="common/TipPanel.scene";
+	GameConfig.startScene="PicManagePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -36816,6 +36816,7 @@ var PicManagerControl=(function(_super){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/list?",this,this.onGetTopDirListBack,"path=0|","post");
 		this.initFileOpen();
 		this.uiSkin.selectNum.text=0+"";
+		this.uiSkin.selectzipainum.text=0+"";
 		this.uiSkin.btnSureCreate.on("click",this,this.onSureCreeate);
 		EventCenter.instance.on("SELECT_FOLDER",this,this.onSelectChildFolder);
 		EventCenter.instance.on("UPDATE_FILE_LIST",this,this.getFileList);
@@ -36929,6 +36930,7 @@ var PicManagerControl=(function(_super){
 			num++;
 		}
 		this.uiSkin.selectNum.text=num+"";
+		this.uiSkin.selectzipainum.text=num+"";
 	}
 
 	__proto.initFileOpen=function(){
@@ -36987,6 +36989,7 @@ var PicManagerControl=(function(_super){
 				num++;
 			}
 			this.uiSkin.selectNum.text=num+"";
+			this.uiSkin.selectzipainum.text=num+"";
 		}
 	}
 
@@ -54279,6 +54282,8 @@ var PicManagePanelUI=(function(_super){
 		this.btnroot=null;
 		this.flder1=null;
 		this.flder2=null;
+		this.btnzipai=null;
+		this.selectzipainum=null;
 		this.filetypeRadio=null;
 		this.picList=null;
 		this.seltips=null;
@@ -61049,10 +61054,10 @@ var PicInfoItem=(function(_super){
 			datainfo.push(this.img);
 			datainfo.push(this);
 			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
-			UtilTool.getYixingImageCount("cl.jpg",this);
 		}
 	}
 
+	//UtilTool.getYixingImageCount("cl.jpg",this);
 	__proto.onSetYixingBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){

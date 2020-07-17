@@ -85,6 +85,9 @@ package script.picUpload
 			initFileOpen();
 			
 			uiSkin.selectNum.text = 0 + "";
+			
+			uiSkin.selectzipainum.text = 0 + "";
+			
 			uiSkin.btnSureCreate.on(Event.CLICK,this,onSureCreeate);
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
@@ -239,6 +242,7 @@ package script.picUpload
 				num++;
 			}
 			uiSkin.selectNum.text =  num + "";
+			uiSkin.selectzipainum.text = num + "";
 
 			
 		}
@@ -295,8 +299,7 @@ package script.picUpload
 					return;
 				}
 			}
-			
-			
+						
 			
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
@@ -328,6 +331,8 @@ package script.picUpload
 					num++;
 				}
 				uiSkin.selectNum.text =  num + "";
+				uiSkin.selectzipainum.text = num + "";
+
 			}
 
 		}

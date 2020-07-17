@@ -26,6 +26,8 @@ package ui {
 		public var btnroot:Label;
 		public var flder1:Label;
 		public var flder2:Label;
+		public var btnzipai:Button;
+		public var selectzipainum:Label;
 		public var filetypeRadio:RadioGroup;
 		public var picList:List;
 		public var seltips:Label;
