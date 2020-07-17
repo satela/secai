@@ -130,7 +130,7 @@ package utils
 		
 		public static function getYixingImageCount(url:String,caller:*):void
 		{
-			Browser.window.picProcess = caller;
+			Browser.window.picProcess = UtilTool;
 			Browser.window.getImagePixels(url);
 		}
 		
@@ -148,6 +148,8 @@ package utils
 			var allblotindex:Array = [];
 			var equalBlot:Object = {};
 			
+			var areanum:int = 0;
+			
 			for(var i:int=0;i < imgheight;i++)
 			{
 				pixelVec[i] = new Array(imgwidth);
@@ -162,7 +164,10 @@ package utils
 					if(pixelVec[i][j] > 100)
 						pixelVec[i][j] = 1;
 					else
+					{
 						pixelVec[i][j] = 0;
+						areanum++;
+					}
 					temparr[i][j] = pixelVec[i][j];
 					if(pixelVec[i][j] == 0 )
 					{
@@ -251,21 +256,22 @@ package utils
 					
 				}
 			}
-			var edgenum:int = 0;
 			
-
-			for(var i:int=0;i < imgheight;i++)
-			{
-				for(var j:int=0;j < imgwidth;j++)
-				{
-					if(temparr[i][j] == 0)
-					{
-						
-						edgenum++;
-					}
-				}
-							
-			}
+//			var edgenum:int = 0;
+//			
+//
+//			for(var i:int=0;i < imgheight;i++)
+//			{
+//				for(var j:int=0;j < imgwidth;j++)
+//				{
+//					if(temparr[i][j] == 0)
+//					{
+//						
+//						edgenum++;
+//					}
+//				}
+//							
+//			}
 			
 			var allEqualBlot:Array = [];
 			for(var startblotindex in equalBlot)
@@ -331,7 +337,7 @@ package utils
 				if(inequal == false)
 					blotnum++;
 			}
-			trace("边缘数量：" + edgenum);
+			trace("面积：" + areanum);
 			trace("连通域数量:" + (blotnum + allEqualBlot.length));
 			
 		}
@@ -678,7 +684,7 @@ package utils
 		{			
 			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.relatedPicWidth)  * finalwidth;
 			
-			var linemeter1:Number = (picinfo.relatedRoadLength / picinfo.relatedDpi * 2.54) * (finalwidth/picinfo.picPhysicWidth);
+			//var linemeter1:Number = (picinfo.relatedRoadLength / picinfo.relatedDpi * 2.54) * (finalwidth/picinfo.picPhysicWidth);
 			
 			//trace("line1:" + linemeter + "," + linemeter1);
 

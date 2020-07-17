@@ -1395,7 +1395,7 @@ var Main=(function(){
 	__proto.onVersionLoaded=function(e){
 		Userdata.instance.version=Laya.loader.getRes('version.json');
 		console.log("版本号:"+Userdata.instance.version);
-		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas?"+(new Date()).getTime().toString(),type:"atlas"},{url:"res/atlas/order.atlas",type:"atlas"},{url:"res/atlas/upload.atlas?"+(new Date()).getTime().toString(),type:"atlas"},{url:"res/atlas/usercenter.atlas",type:"atlas"},{url:"res/atlas/mainpage.atlas",type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
+		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/order.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/upload.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/usercenter.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/mainpage.atlas?"+Userdata.instance.version,type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
 	__proto.onLoadedComp=function(){
@@ -1881,10 +1881,11 @@ var PicInfoVo=(function(){
 		this.roadLength=0;
 		this.yixingFid="";
 		this.backFid="";
+		this.yixingPicClass="";
+		this.backPicClass="";
 		this.relatedRoadNum=0;
 		this.relatedRoadLength=0;
 		this.relatedPicWidth=0;
-		this.relatedDpi=0;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1942,11 +1943,14 @@ var PicInfoVo=(function(){
 			this.relatedRoadNum=info[0];
 			this.relatedRoadLength=info[1];
 			this.relatedPicWidth=info[2];
-			this.relatedDpi=info[3];
+			this.yixingPicClass=info[3];
+		}
+		if(this.backFid !="0"){
+			var info=DirectoryFileModel.instance.getQiegeData(this.backFid);
+			this.backPicClass=info[3];
 		}
 	}
 
-	//trace("切割 信息:"+this.relatedRoadNum+","+this.relatedRoadLength);
 	__getset(0,__proto,'dpath',function(){
 		return this.parentDirect+this.directId+"|";
 	});
@@ -2418,9 +2422,9 @@ var ProductVo=(function(){
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 						procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
 					if(arr[i].preProc_Code=="SPTE10420")
-						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.yixingFid+"."+picinfo.picClass});
+						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.yixingFid+"."+picinfo.yixingPicClass});
 					else if(arr[i].preProc_Code=="SPTE10330")
-					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.backFid+"."+picinfo.picClass});
+					prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:"http://original-image.oss-cn-hangzhou.aliyuncs.com/"+picinfo.backFid+"."+picinfo.backPicClass});
 					else if(arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ"){
 						var procname="超幅裁切"+"("+["V","H"][orderitemvo.cuttype]+"-"+orderitemvo.cutnum+"-"+orderitemvo.eachCutLength.join(";")+")";
 						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
@@ -2560,7 +2564,7 @@ var UtilTool=(function(){
 	}
 
 	UtilTool.getYixingImageCount=function(url,caller){
-		Browser.window.picProcess=caller;
+		Browser.window.picProcess=UtilTool;
 		Browser.window.getImagePixels(url);
 	}
 
@@ -2574,6 +2578,7 @@ var UtilTool=(function(){
 		var blotIndex=1;
 		var allblotindex=[];
 		var equalBlot={};
+		var areanum=0;
 		for(var i=0;i < imgheight;i++){
 			pixelVec[i]=new Array(imgwidth);
 			temparr[i]=new Array(imgwidth);
@@ -2583,8 +2588,10 @@ var UtilTool=(function(){
 				pixelVec[i][j]=pixelsArr[startindex]+pixelsArr[startindex+1]+pixelsArr[startindex+2];
 				if(pixelVec[i][j] > 100)
 					pixelVec[i][j]=1;
-				else
-				pixelVec[i][j]=0;
+				else{
+					pixelVec[i][j]=0;
+					areanum++;
+				}
 				temparr[i][j]=pixelVec[i][j];
 				if(pixelVec[i][j]==0){
 					if(rowBlot[i].length==0){
@@ -2642,14 +2649,6 @@ var UtilTool=(function(){
 				}
 			}
 		};
-		var edgenum=0;
-		for(var i=0;i < imgheight;i++){
-			for(var j=0;j < imgwidth;j++){
-				if(temparr[i][j]==0){
-					edgenum++;
-				}
-			}
-		};
 		var allEqualBlot=[];
 		for(var startblotindex in equalBlot){
 			var hasfind=false;
@@ -2700,7 +2699,7 @@ var UtilTool=(function(){
 			if(inequal==false)
 				blotnum++;
 		}
-		console.log("边缘数量："+edgenum);
+		console.log("面积："+areanum);
 		console.log("连通域数量:"+(blotnum+allEqualBlot.length));
 	}
 
@@ -2935,7 +2934,6 @@ var UtilTool=(function(){
 
 	UtilTool.getYixingPrice=function(picinfo,basePrice,unitPrice,finalwidth,finalheight){
 		var linemeter=(picinfo.relatedRoadLength /picinfo.relatedPicWidth)*finalwidth;
-		var linemeter1=(picinfo.relatedRoadLength / picinfo.relatedDpi *2.54)*(finalwidth/picinfo.picPhysicWidth);
 		return basePrice *picinfo.relatedRoadNum+linemeter*unitPrice;
 	}
 
@@ -3259,7 +3257,7 @@ var DirectoryFileModel=(function(){
 		if(curfiles !=null){
 			for(var i=0;i < curfiles.length;i++){
 				if(curfiles[i].fid==fid){
-					return [curfiles[i].roadNum,curfiles[i].roadLength,curfiles[i].picWidth,curfiles[i].dpi];
+					return [curfiles[i].roadNum,curfiles[i].roadLength,curfiles[i].picWidth,curfiles[i].picClass];
 				}
 			}
 		}
@@ -54912,7 +54910,7 @@ var PicOrderItem=(function(_super){
 		if(tech.indexOf("超幅裁切")>=0)
 			tech=tech.replace("超幅裁切","超幅裁切"+"("+["V","H"][this.ordervo.cuttype]+"-"+this.ordervo.cutnum+"-"+this.ordervo.eachCutLength.join(";")+")");
 		if(tech.indexOf("等份裁切")>=0)
-			tech=tech.replace("等份裁切","等份裁切"+"(V-"+this.ordervo.horiCutNum+",H-"+this.ordervo.verCutNum+")");
+			tech=tech.replace("等份裁切","等份裁切"+"(H-"+this.ordervo.verCutNum+",V-"+this.ordervo.horiCutNum+")");
 		this.architype.text=tech;
 		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
@@ -61040,10 +61038,10 @@ var PicInfoItem=(function(_super){
 			datainfo.push(this.img);
 			datainfo.push(this);
 			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
+			UtilTool.getYixingImageCount("cl.jpg",this);
 		}
 	}
 
-	//UtilTool.getYixingImageCount("circle.jpg",this);
 	__proto.onSetYixingBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){

@@ -34,11 +34,14 @@ package model.picmanagerModel
 		public var yixingFid:String = "";
 		public var backFid:String = "";
 		
+		public var yixingPicClass:String = "";
+		public var backPicClass:String = "";
+		
+		
 		public var relatedRoadNum:int = 0;
 		public var relatedRoadLength:int = 0;
 		
 		public var relatedPicWidth:int = 0;
-		public var relatedDpi:int = 0;
 		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
@@ -117,9 +120,16 @@ package model.picmanagerModel
 				this.relatedRoadNum = info[0];
 				this.relatedRoadLength = info[1];
 				this.relatedPicWidth = info[2];
-				this.relatedDpi = info[3];
+				this.yixingPicClass = info[3];
 
-				//trace("切割 信息:" + this.relatedRoadNum + "," + this.relatedRoadLength);
+			}
+			
+			if(backFid != "0")
+			{
+				var info:Array = DirectoryFileModel.instance.getQiegeData(backFid);
+								
+				this.backPicClass = info[3];
+				
 			}
 		}
 		public function get dpath():String

@@ -121,7 +121,7 @@
 			
 			Userdata.instance.version = Laya.loader.getRes('version.json');
 			console.log("版本号:" + Userdata.instance.version);
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas?" + (new Date()).getTime().toString(),type:Loader.ATLAS},{url:"res/atlas/order.atlas",type:Loader.ATLAS},{url:"res/atlas/upload.atlas?" + (new Date()).getTime().toString(),type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/order.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/upload.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas?" + Userdata.instance.version,type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}
 		

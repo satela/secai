@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":4,
+    "selectedBox":4,
+    "selecteID":97,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
@@ -594,21 +594,6 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":64,
-                    "child":[
-                        ],
-                    "$HIDDEN":false
-                },
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":125,"x":1618,"wordWrap":true,"width":31,"text":"29号系统更新，请重新上传之前的异形文件","height":546,"fontSize":20,"font":"SimHei","color":"#f42c2c"},
-                    "nodeParent":4,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":97,
                     "child":[
                         ],
                     "$HIDDEN":false

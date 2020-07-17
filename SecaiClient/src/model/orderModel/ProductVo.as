@@ -274,9 +274,9 @@ package model.orderModel
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
 							procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
 						if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.yixingFid + "." + picinfo.picClass});
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.yixingFid + "." + picinfo.yixingPicClass});
 						else if(arr[i].preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO)
-							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.backFid + "." + picinfo.picClass});
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.backFid + "." + picinfo.backPicClass});
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
 						{
 							var procname:String = "超幅裁切" + "(" + ["V","H"][orderitemvo.cuttype] + "-" +  orderitemvo.cutnum+ "-" + orderitemvo.eachCutLength.join(";") +")";//["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
