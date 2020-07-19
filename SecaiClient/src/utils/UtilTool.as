@@ -257,21 +257,6 @@ package utils
 				}
 			}
 			
-//			var edgenum:int = 0;
-//			
-//
-//			for(var i:int=0;i < imgheight;i++)
-//			{
-//				for(var j:int=0;j < imgwidth;j++)
-//				{
-//					if(temparr[i][j] == 0)
-//					{
-//						
-//						edgenum++;
-//					}
-//				}
-//							
-//			}
 			
 			var allEqualBlot:Array = [];
 			for(var startblotindex in equalBlot)
