@@ -11,6 +11,7 @@ package script
 	import ui.PaintOrderPanelUI;
 	import ui.PicManagePanelUI;
 	import ui.PopUpDialogUI;
+	import ui.characterpaint.CharacterPaintUI;
 	import ui.login.LoadingPanelUI;
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
@@ -83,6 +84,8 @@ package script
 		
 		public static const VIEW_SELECT_PAYTYPE_PANEL:String = "VIEW_SELECT_PAYTYPE_PANEL";//选择支付方式界面
 
+		public static const VIEW_CHARACTER_DEMONSTRATE_PANEL:String = "VIEW_CHARACTER_DEMONSTRATE_PANEL";//字牌展示界面
+
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
@@ -146,6 +149,7 @@ package script
 			viewDict[VIEW_BUY_PRODUCT_VIEW] = BuyProductPanelUI;
 			viewDict[VIEW_ORDER_DETAIL_PANEL] = OrderDetailPanelUI;
 			viewDict[VIEW_SELECT_PAYTYPE_PANEL] = ConfirmOrderPanelUI;
+			viewDict[VIEW_CHARACTER_DEMONSTRATE_PANEL] = CharacterPaintUI;
 
 
 		}
