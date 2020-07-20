@@ -28,7 +28,8 @@ package script.usercenter
 			this.orderid.text = orderdata.or_id;
 			this.ordertime.text = orderdata.or_date;
 			var status:int = parseInt(orderdata.or_status);
-			
+			this.retrybtn.visible = false;
+
 			if(status == 0)
 			{
 				this.orderstatus.text = "未支付";
@@ -37,18 +38,36 @@ package script.usercenter
 			}
 			else if(status == 1)
 			{
-				this.orderstatus.text = "已支付";
+				this.orderstatus.text = "已支付排产成功";
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
 			}
+			else if(status == 2 || status == 3)
+			{
+				this.orderstatus.text = "已支付排产中";
+				this.orderstatus.color = "#0022EE";
+				this.payagain.visible = false;
+				
+				this.deletebtn.visible = false;
+				//this.retrybtn.visible = true;
+			}
+			
 			else if(status == 4)
 			{
 				this.orderstatus.text = "已撤单";
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
 				this.deletebtn.visible = false;
-				this.payagain.visible = false;
 			}
+			else if(status == 100)
+			{
+				this.orderstatus.text = "已支付排产失败";
+				this.orderstatus.color = "#EE4400";
+				this.payagain.visible = false;
+				this.deletebtn.visible = true;
+				this.retrybtn.visible = true;
+			}
+			
 			else
 			{
 				this.orderstatus.text = "订单异常";
@@ -62,7 +81,8 @@ package script.usercenter
 			this.detailbtn.on(Event.CLICK,this,onShowDetail);
 			this.deletebtn.on(Event.CLICK,this,onClickDelete);
 			this.payagain.on(Event.CLICK,this,onClickPay);
-			
+			this.retrybtn.on(Event.CLICK,this,onClickRetry);
+
 			TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 
 		}
@@ -120,6 +140,24 @@ package script.usercenter
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
 
+		}
+		
+		private function onClickRetry():void
+		{
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + orderdata.or_id,"post");
+
+		}
+		
+		private function payMoneyBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				ViewManager.showAlert("支付成功");
+				EventCenter.instance.event(EventCenter.PAY_ORDER_SUCESS);
+				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+				
+			}
 		}
 	}
 }

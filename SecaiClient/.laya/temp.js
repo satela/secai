@@ -699,7 +699,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="common/TipPanel.scene";
+	GameConfig.startScene="usercenter/MyOrdersPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1408,6 +1408,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -54121,6 +54122,7 @@ var OrderListItemUI=(function(_super){
 		this.detailbtn=null;
 		this.deletebtn=null;
 		this.payagain=null;
+		this.retrybtn=null;
 		OrderListItemUI.__super.call(this);
 	}
 
@@ -54131,7 +54133,7 @@ var OrderListItemUI=(function(_super){
 		this.createView(OrderListItemUI.uiView);
 	}
 
-	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":747,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"17.88","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":508,"width":74,"var":"orderstatus","valign":"middle","text":"已支付","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":615,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"撤回","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":700,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":838,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"17.88","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":496,"width":106,"var":"orderstatus","valign":"middle","text":"已支付","height":26,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":642,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":685,"var":"deletebtn","text":"撤回","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":727,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]},{"type":"Text","props":{"y":3,"x":727,"var":"retrybtn","text":"重试","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":15,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":16}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderListItemUI;
 })(View)
 
@@ -60421,22 +60423,35 @@ var OrderCheckListItem=(function(_super){
 		this.orderid.text=this.orderdata.or_id;
 		this.ordertime.text=this.orderdata.or_date;
 		var status=parseInt(this.orderdata.or_status);
+		this.retrybtn.visible=false;
 		if(status==0){
 			this.orderstatus.text="未支付";
 			this.orderstatus.color="#FF0000";
 			this.payagain.visible=true;
 		}
 		else if(status==1){
-			this.orderstatus.text="已支付";
+			this.orderstatus.text="已支付排产成功";
 			this.orderstatus.color="#52B232";
 			this.payagain.visible=false;
+		}
+		else if(status==2 || status==3){
+			this.orderstatus.text="已支付排产中";
+			this.orderstatus.color="#0022EE";
+			this.payagain.visible=false;
+			this.deletebtn.visible=false;
 		}
 		else if(status==4){
 			this.orderstatus.text="已撤单";
 			this.orderstatus.color="#52B232";
 			this.payagain.visible=false;
 			this.deletebtn.visible=false;
+		}
+		else if(status==100){
+			this.orderstatus.text="已支付排产失败";
+			this.orderstatus.color="#EE4400";
 			this.payagain.visible=false;
+			this.deletebtn.visible=true;
+			this.retrybtn.visible=true;
 		}
 		else{
 			this.orderstatus.text="订单异常";
@@ -60449,6 +60464,7 @@ var OrderCheckListItem=(function(_super){
 		this.detailbtn.on("click",this,this.onShowDetail);
 		this.deletebtn.on("click",this,this.onClickDelete);
 		this.payagain.on("click",this,this.onClickPay);
+		this.retrybtn.on("click",this,this.onClickRetry);
 		TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 	}
 
@@ -60485,6 +60501,19 @@ var OrderCheckListItem=(function(_super){
 
 	__proto.onClickPay=function(){
 		ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(this.paymoney.text),orderid:[this.orderdata.or_id]});
+	}
+
+	__proto.onClickRetry=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-order?",this,this.payMoneyBack,"orderid="+this.orderdata.or_id,"post");
+	}
+
+	__proto.payMoneyBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("支付成功");
+			EventCenter.instance.event("PAY_ORDER_SUCESS");
+			ViewManager.instance.closeView("VIEW_SELECT_PAYTYPE_PANEL");
+		}
 	}
 
 	return OrderCheckListItem;
@@ -61038,10 +61067,10 @@ var PicInfoItem=(function(_super){
 			datainfo.push(this.img);
 			datainfo.push(this);
 			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
-			UtilTool.getYixingImageCount("cl.jpg",this);
 		}
 	}
 
+	//UtilTool.getYixingImageCount("cl.jpg",this);
 	__proto.onSetYixingBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
