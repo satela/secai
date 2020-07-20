@@ -280,6 +280,8 @@ package script {
 		}
 		private function onProductView():void
 		{
+			ViewManager.instance.openView(ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL,false);
+			return;
 			if(!Userdata.instance.isLogin)
 			{
 				ViewManager.showAlert("请先登录");

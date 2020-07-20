@@ -2,9 +2,20 @@
 package ui.characterpaint {
 	import laya.ui.*;
 	import laya.display.*;
+	import script.characterpaint.CharacterMainControl;
 
 	public class CharacterPaintUI extends View {
 		public var panel_main:Panel;
+		public var depth1:TextInput;
+		public var mattype1:RadioGroup;
+		public var createlayer1:Button;
+		public var closebtn:Button;
+		public var colorinput1:TextInput;
+		public var depth2:TextInput;
+		public var mattype2:RadioGroup;
+		public var createlayer2:Button;
+		public var colorinput2:TextInput;
+		public var imgurl:TextInput;
 
 		override protected function createChildren():void {
 			super.createChildren();

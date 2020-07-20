@@ -3,6 +3,7 @@ package {
 	import laya.utils.ClassUtils;
 	import laya.ui.View;
 	import laya.webgl.WebGL;
+	import script.characterpaint.CharacterMainControl;
 	import utils.LoadingPrgControl;
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
@@ -59,6 +60,7 @@ package {
 		public static function init():void {
 			//注册Script或者Runtime引用
 			var reg:Function = ClassUtils.regClass;
+			reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
 			reg("laya.display.Text",Text);
 			reg("script.prefabScript.LinkTextControl",LinkTextControl);

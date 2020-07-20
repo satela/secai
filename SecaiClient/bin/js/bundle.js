@@ -666,6 +666,7 @@ var GameConfig=(function(){
 	__class(GameConfig,'GameConfig');
 	GameConfig.init=function(){
 		var reg=ClassUtils.regClass;
+		reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 		reg("utils.LoadingPrgControl",LoadingPrgControl);
 		reg("laya.display.Text",Text);
 		reg("script.prefabScript.LinkTextControl",LinkTextControl);
@@ -710,7 +711,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PicManagePanel.scene";
+	GameConfig.startScene="characterpaint/CharacterPaint.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1080,6 +1081,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_BUY_PRODUCT_VIEW"]=BuyProductPanelUI;
 		this.viewDict["VIEW_ORDER_DETAIL_PANEL"]=OrderDetailPanelUI;
 		this.viewDict["VIEW_SELECT_PAYTYPE_PANEL"]=ConfirmOrderPanelUI;
+		this.viewDict["VIEW_CHARACTER_DEMONSTRATE_PANEL"]=CharacterPaintUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1155,6 +1157,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_ADD_NEW_ADDRESS="VIEW_ADD_NEW_ADDRESS";
 	ViewManager.VIEW_ORDER_DETAIL_PANEL="VIEW_ORDER_DETAIL_PANEL";
 	ViewManager.VIEW_SELECT_PAYTYPE_PANEL="VIEW_SELECT_PAYTYPE_PANEL";
+	ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL="VIEW_CHARACTER_DEMONSTRATE_PANEL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -35744,6 +35747,8 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.onProductView=function(){
+		ViewManager.instance.openView("VIEW_CHARACTER_DEMONSTRATE_PANEL",false);
+		return;
 		if(!Userdata.instance.isLogin){
 			ViewManager.showAlert("请先登录");
 			ViewManager.instance.openView("VIEW_lOGPANEL");
@@ -41044,6 +41049,104 @@ var PictureCheckControl=(function(_super){
 	}
 
 	return PictureCheckControl;
+})(Script)
+
+
+//class script.characterpaint.CharacterMainControl extends laya.components.Script
+var CharacterMainControl=(function(_super){
+	function CharacterMainControl(){
+		this.uiSkin=null;
+		this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398509938750.jpg";
+		CharacterMainControl.__super.call(this);
+	}
+
+	__class(CharacterMainControl,'script.characterpaint.CharacterMainControl',_super);
+	var __proto=CharacterMainControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.panel_main.vScrollBarSkin="";
+		this.uiSkin.panel_main.hScrollBarSkin="";
+		this.uiSkin.closebtn.on("click",this,this.closeView);
+		this.uiSkin.mattype1.selectedIndex=0;
+		this.uiSkin.mattype2.selectedIndex=0;
+		this.uiSkin.depth1.text="0.1";
+		this.uiSkin.depth2.text="0.1";
+		this.uiSkin.createlayer1.on("click",this,this.oncreateLayer1);
+		this.uiSkin.createlayer2.on("click",this,this.oncreateLayer2);
+		this.initU3dWeb();
+		Browser.window.layaCaller=this;
+	}
+
+	__proto.initU3dWeb=function(){
+		if(CharacterMainControl.u3ddiv==null){
+			CharacterMainControl.u3ddiv=Browser.document.createElement("div");
+			CharacterMainControl.u3ddiv.style="width: 1280px; height: 900px;left:320px;top:-120px";
+			CharacterMainControl.u3ddiv.id="gameContainer";
+			Browser.document.body.appendChild(CharacterMainControl.u3ddiv);
+			var complete=0;
+			CharacterMainControl.script=Browser.document.createElement("script");
+			CharacterMainControl.script.src="webglout/Build/UnityLoader.js";
+			CharacterMainControl.script.onload=function (){
+				console.log("on load unoty");
+				complete++;
+				if(complete >=2){
+					Browser.window.Unity3dWeb.createUnity();
+				}
+			}
+			CharacterMainControl.script.onerror=function (){}
+			Browser.document.body.appendChild(CharacterMainControl.script);
+			CharacterMainControl.scriptpr=Browser.document.createElement("script");
+			CharacterMainControl.scriptpr.src="webglout/TemplateData/UnityProgress.js";
+			CharacterMainControl.scriptpr.onload=function (){
+				console.log("on load unoty");
+				complete++;
+				if(complete >=2){
+					Browser.window.Unity3dWeb.createUnity();
+				}
+			}
+			CharacterMainControl.scriptpr.onerror=function (){}
+			Browser.document.body.appendChild(CharacterMainControl.scriptpr);
+		}
+		else
+		CharacterMainControl.u3ddiv.style.display="block";
+	}
+
+	__proto.unityIsReady=function(){
+		Browser.window.Unity3dWeb.createMesh(this.picurl);
+	}
+
+	__proto.oncreateLayer1=function(){
+		var str="";
+		str+="0&";
+		str+=this.uiSkin.depth1.text+"&";
+		str+=(this.uiSkin.mattype1.selectedIndex+1)+"&";
+		str+=(this.uiSkin.colorinput1.text);
+		Browser.window.Unity3dWeb.createLayer(str);
+	}
+
+	__proto.oncreateLayer2=function(){
+		var str="";
+		str+="1&";
+		str+=this.uiSkin.depth2.text+"&";
+		str+=(this.uiSkin.mattype2.selectedIndex+1)+"&";
+		str+=(this.uiSkin.colorinput2.text);
+		Browser.window.Unity3dWeb.createLayer(str);
+	}
+
+	__proto.closeView=function(){
+		ViewManager.instance.closeView("VIEW_CHARACTER_DEMONSTRATE_PANEL");
+	}
+
+	__proto.onDestroy=function(){
+		if(CharacterMainControl.u3ddiv !=null){
+			CharacterMainControl.u3ddiv.style.display="none";
+		}
+	}
+
+	CharacterMainControl.u3ddiv=null;
+	CharacterMainControl.script=null;
+	CharacterMainControl.scriptpr=null;
+	return CharacterMainControl;
 })(Script)
 
 
@@ -53408,23 +53511,31 @@ var SelectPicPanelUI=(function(_super){
 })(View)
 
 
-//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
-var AddressMgrPanelUI=(function(_super){
-	function AddressMgrPanelUI(){
-		this.btnaddAddress=null;
-		this.addlist=null;
-		this.numAddress=null;
-		AddressMgrPanelUI.__super.call(this);
+//class ui.characterpaint.CharacterPaintUI extends laya.ui.View
+var CharacterPaintUI=(function(_super){
+	function CharacterPaintUI(){
+		this.panel_main=null;
+		this.depth1=null;
+		this.mattype1=null;
+		this.createlayer1=null;
+		this.closebtn=null;
+		this.colorinput1=null;
+		this.depth2=null;
+		this.mattype2=null;
+		this.createlayer2=null;
+		this.colorinput2=null;
+		this.imgurl=null;
+		CharacterPaintUI.__super.call(this);
 	}
 
-	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
-	var __proto=AddressMgrPanelUI.prototype;
+	__class(CharacterPaintUI,'ui.characterpaint.CharacterPaintUI',_super);
+	var __proto=CharacterPaintUI.prototype;
 	__proto.createChildren=function(){
 		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("usercenter/AddressMgrPanel");
+		this.loadScene("characterpaint/CharacterPaint");
 	}
 
-	return AddressMgrPanelUI;
+	return CharacterPaintUI;
 })(View)
 
 
@@ -53505,6 +53616,26 @@ var QuestOrderItem=(function(_super){
 
 	return QuestOrderItem;
 })(OrderQuestItemUI)
+
+
+//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
+var AddressMgrPanelUI=(function(_super){
+	function AddressMgrPanelUI(){
+		this.btnaddAddress=null;
+		this.addlist=null;
+		this.numAddress=null;
+		AddressMgrPanelUI.__super.call(this);
+	}
+
+	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
+	var __proto=AddressMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/AddressMgrPanel");
+	}
+
+	return AddressMgrPanelUI;
+})(View)
 
 
 //class ui.usercenter.OrganizeMgrPanelUI extends laya.ui.View
