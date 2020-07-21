@@ -102,6 +102,9 @@ package model.orderModel
 						var hasBeyongd:Boolean = false;
 						for(var i:int=0;i < allpics.length;i++)
 						{
+							//var longside:Number = Math.max(allpics[i].finalWidth,allpics[i].finalHeight);
+							//var shortside:Number = Math.min(allpics[i].finalWidth,allpics[i].finalHeight);
+							
 							if(allpics[i].finalWidth > curselectProduct.max_width && allpics[i].finalHeight > curselectProduct.max_width)
 							{
 								hasBeyongd = true;

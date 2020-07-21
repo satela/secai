@@ -710,7 +710,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/MyOrdersPanel.scene";
+	GameConfig.startScene="characterpaint/CharacterPaint.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -2159,6 +2159,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getManuFactureMatProcPrice="business/getmatprocprice?manufacturer_code=";
 	HttpRequestUtil.getOrderState="business/getorderitemstatus?";
 	HttpRequestUtil.getCompanyInfo="group/get-info?";
+	HttpRequestUtil.cancelExceptOrder="group/cancel-exception-order?";
+	HttpRequestUtil.payExceptOrder="group/pay-exception-order?";
 	HttpRequestUtil.chargeRequest="group/recharge?";
 	HttpRequestUtil.orderOnlinePay="group/recharge?";
 	HttpRequestUtil.payOrderByMoney="group/pay-order?";
@@ -37607,6 +37609,8 @@ var PaintOrderControl=(function(_super){
 		var arr=this.getOrderData();
 		if(arr==null)
 			return;
+		var tempdata='[{"order_sn":"18014398509640518","client_code":"CL10200","consignee":"横店智升广告#刘井伟","tel":"17857591543","address":"浙江省 金华市 东阳市 横店镇 横店镇华夏大道691号","order_amountStr":"72.3","shipping_feeStr":"0","money_paidStr":"72.3","discountStr":"0","pay_timeStr":"2020-07-19 13:39:22","delivery_dateStr":"2020-07-19","manufacturer_code":"SP0579100","manufacturer_name":"义乌物与喷印","contact_phone":"13244556677","logistic_code":"DC0579100#送货上门","orderItemList":[{"prod_name":"户内PP背胶（户内写真）","prod_code":"SPPR10120","prod_description":"","LWH":"68.40/200.00/1","weightStr":1,"item_number":1,"item_priceStr":"35.28","is_merchandise":0,"item_status":"1","comments":"","imagefile_path":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","previewImage_path":"http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","thumbnails_path":"http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","filename":"2.jpg","procInfoList":[{"proc_Code":"SPTE10120","proc_description":"进口高清户内写真","proc_attachpath":""},{"proc_Code":"SPTE10200","proc_description":"覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10210","proc_description":"覆板(高密KT板)","proc_attachpath":""},{"proc_Code":"SPTE10310","proc_description":"覆双面(户内PP背胶（户内写真）)","proc_attachpath":""},{"proc_Code":"SPTE10205","proc_description":"另面覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10330","proc_description":"双面不同画面","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057094.jpg"},{"proc_Code":"SPTE10420","proc_description":"异形切割","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057097.jpg"}],"item_seq":1},{"prod_name":"户内PP背胶（户内写真）","prod_code":"SPPR10120","prod_description":"","LWH":"68.40/210.00/1","weightStr":1,"item_number":1,"item_priceStr":"37.02","is_merchandise":0,"item_status":"1","comments":"","imagefile_path":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","previewImage_path":"http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","thumbnails_path":"http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","filename":"4.jpg","procInfoList":[{"proc_Code":"SPTE10120","proc_description":"进口高清户内写真","proc_attachpath":""},{"proc_Code":"SPTE10200","proc_description":"覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10210","proc_description":"覆板(高密KT板)","proc_attachpath":""},{"proc_Code":"SPTE10310","proc_description":"覆双面(户内PP背胶（户内写真）)","proc_attachpath":""},{"proc_Code":"SPTE10205","proc_description":"另面覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10330","proc_description":"双面不同画面","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057096.jpg"},{"proc_Code":"SPTE10420","proc_description":"异形切割","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057099.jpg"}],"item_seq":2}]}]';
+		arr=JSON.parse(tempdata);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 	}
 
@@ -40830,9 +40834,13 @@ var MyOrderControl=(function(_super){
 	}
 
 	__proto.onRefreshOrder=function(){
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/list-order?",this,this.onGetOrderListBack,null,"post");
+		var curdata=new Date(this.dateInput2.value);
+		var lastdate=new Date(this.dateInput.value);
+		var param="begindate="+this.dateInput.value+" 00:00:00&enddate="+this.dateInput2.value+" 23:59:59&status="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 	}
 
+	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
 	__proto.onGetOrderListBack=function(data){
 		if (data==null || data=="")
 			return;
@@ -60489,13 +60497,28 @@ var OrderCheckListItem=(function(_super){
 
 	__proto.confirmDelete=function(b){
 		if(b){
-			var detail=JSON.parse(this.orderdata.or_text);
+			var status=parseInt(this.orderdata.or_status);
+			if(status==100){
+				var prams="orderid="+this.orderdata.or_id;
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/cancel-exception-order?",this,this.deleteExceptOrderBack,prams,"post");
+				return;
+			};
 			var orderdataStr={"orderid":this.orderdata.or_id,"client_code":"CL10200"};
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/cancelorder?",this,this.deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
 		}
 	}
 
 	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.cancelOrder,this,deleteOrderBack,param,"post");
+	__proto.deleteExceptOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("DELETE_ORDER_BACK");
+		}
+		else{
+			ViewManager.showAlert("订单取消失败");
+		}
+	}
+
 	__proto.deleteOrderBack=function(data){
 		var result=JSON.parse(data);
 		if(result.code==0){
@@ -60515,15 +60538,17 @@ var OrderCheckListItem=(function(_super){
 	}
 
 	__proto.onClickRetry=function(){
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-order?",this,this.payMoneyBack,"orderid="+this.orderdata.or_id,"post");
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-exception-order?",this,this.payMoneyBack,"orderid="+this.orderdata.or_id,"post");
 	}
 
 	__proto.payMoneyBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
-			ViewManager.showAlert("支付成功");
+			ViewManager.showAlert("订单排产失成功");
 			EventCenter.instance.event("PAY_ORDER_SUCESS");
-			ViewManager.instance.closeView("VIEW_SELECT_PAYTYPE_PANEL");
+		}
+		else{
+			ViewManager.showAlert("订单排产失败，您可以撤回订单，重新下单");
 		}
 	}
 

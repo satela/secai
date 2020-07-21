@@ -102,18 +102,39 @@ package script.usercenter
 		{
 			if(b)
 			{
-			var detail:Object = JSON.parse(orderdata.or_text);
-			
-			//var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
-			var orderdataStr:Object = {"orderid":orderdata.or_id,"client_code":"CL10200"};
-			//var param:String = "orderid=" + orderdata.or_id;
-			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
+				var status:int = parseInt(orderdata.or_status);
+
+				if(status == 100)
+				{
+					var prams:String = "orderid=" + orderdata.or_id;
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelExceptOrder,this,deleteExceptOrderBack,prams,"post");
+					return;
+				}
+					//var detail:Object = JSON.parse(orderdata.or_text);
+					
+					//var orderdataStr:Object = {"order_sn":orderdata.or_id,"Client_Code":"CL10200","Refund_amount":Number(detail.money_paidStr).toFixed(2)};
+					var orderdataStr:Object = {"orderid":orderdata.or_id,"client_code":"CL10200"};
+					//var param:String = "orderid=" + orderdata.or_id;
+					
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,{data:JSON.stringify(orderdataStr)},"post");
 			}
 			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,deleteOrderBack,param,"post");
 
 		}
 		
+		private function deleteExceptOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				EventCenter.instance.event(EventCenter.DELETE_ORDER_BACK);
+			}
+			else
+			{
+				ViewManager.showAlert("订单取消失败");
+			}
+			
+		}
 		private function deleteOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -144,7 +165,7 @@ package script.usercenter
 		
 		private function onClickRetry():void
 		{
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + orderdata.or_id,"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payExceptOrder,this,payMoneyBack,"orderid=" + orderdata.or_id,"post");
 
 		}
 		
@@ -153,10 +174,13 @@ package script.usercenter
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				ViewManager.showAlert("支付成功");
+				ViewManager.showAlert("订单排产失成功");
 				EventCenter.instance.event(EventCenter.PAY_ORDER_SUCESS);
-				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
 				
+			}
+			else
+			{
+				ViewManager.showAlert("订单排产失败，您可以撤回订单，重新下单");
 			}
 		}
 	}

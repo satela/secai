@@ -17,7 +17,7 @@ package model.orderModel
 		public var  max_length: Number = 0;//  最大长度
 		public var  min_width: Number = 0;//  最小宽度
 		public var  max_width: Number = 0;//  最大宽度
-		public var material_code: String = "";//  材料编码
+		public var  material_code: String = "";//  材料编码
 		public var  material_name: String = "";//  材料名称
 		public var  material_color: String = "";//  颜色
 		public var  material_brand: String = "";//  材料品牌

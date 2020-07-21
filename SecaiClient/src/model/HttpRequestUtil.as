@@ -87,6 +87,11 @@ package model
 
 		//充值
 		public static const getCompanyInfo:String = "group/get-info?";//账户信息
+		
+		
+		public static const cancelExceptOrder:String = "group/cancel-exception-order?";//取消异常订单
+		
+		public static const payExceptOrder:String = "group/pay-exception-order?";//重试异常订单
 
 		
 		public static const chargeRequest:String = "group/recharge?";//账户充值

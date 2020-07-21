@@ -343,7 +343,21 @@ package script.usercenter
 		
 		private function onRefreshOrder():void
 		{
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
+			var curdata:Date = new Date(dateInput2.value);
+			var lastdate:Date = new Date(dateInput.value);
+			
+			var param:String = "begindate=" + dateInput.value + " 00:00:00&enddate=" + dateInput2.value + " 23:59:59&status=" + uiSkin.paytype.selectedIndex + "&curpage=" + curpage;
+			//if(curmonth + 1 < 10 )
+			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
+			
+			//if(uiSkin.monthCombox.selectedIndex + 1 >= 10)
+			//	var param:String = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			//else
+			//	 param = "date=" + (2019 + uiSkin.yearCombox.selectedIndex) +  "0" + (uiSkin.monthCombox.selectedIndex + 1) + "&curpage=" + curpage;
+			
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
 		}
 		private function onGetOrderListBack(data:Object):void
 		{

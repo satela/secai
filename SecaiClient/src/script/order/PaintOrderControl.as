@@ -684,6 +684,8 @@ package script.order
 			var arr:Array = getOrderData();
 			if(arr == null)
 				return;
+			
+	
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 
 		}
