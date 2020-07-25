@@ -343,9 +343,14 @@ package script.order
 				ViewManager.showAlert("请先选择收货地址");
 				return;
 			}
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
 			PaintOrderModel.instance.curSelectOrderItem = this;
 			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
+			
+			if(PaintOrderModel.instance.orderType == OrderConstant.PAINTING)
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
+			if(PaintOrderModel.instance.orderType == OrderConstant.CUTTING)
+				ViewManager.instance.openView(ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL,false,ordervo.picinfo);
+			
 		}
 		
 		public function changeProduct(provo:ProductVo):void

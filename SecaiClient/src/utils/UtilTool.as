@@ -718,6 +718,15 @@ package utils
 			return true;
 		}
 		
+		public static function isValidPicZipai(picinfo:PicInfoVo):Boolean
+		{
+			if(picinfo.roadNum <= 0)
+			{
+				return false;
+			}
+			else
+				return true;
+		}
 		public static function isFitYixing(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
 		{
 			if(sourcefile != null && selfile != null)

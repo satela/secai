@@ -10,6 +10,7 @@ package script.picUpload
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
@@ -48,6 +49,8 @@ package script.picUpload
 			uiSkin = this.owner as PicManagePanelUI; 
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
 			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
+
+			uiSkin.btnzipai.on(Event.CLICK,this,onshowZipaiOrder);
 
 			createbox = uiSkin.boxNewFolder;
 			createbox.visible = false;
@@ -300,10 +303,31 @@ package script.picUpload
 				}
 			}
 						
+			PaintOrderModel.instance.orderType = OrderConstant.PAINTING;
 			
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
+		private function onshowZipaiOrder():void
+		{
+			
+			var hassrgb:Boolean = false;
+			
+			PaintOrderModel.instance.orderType = OrderConstant.CUTTING;
+
+			for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
+			{
+				if(UtilTool.isValidPicZipai(pic) == false)
+				{
+					ViewManager.showAlert("标准异形文件才能字牌下单");
+					return;
+				}
+			}
+			
+			
+			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			
+		}
 		private function confirmOrderNow(b:Boolean):void
 		{
 			if(b)

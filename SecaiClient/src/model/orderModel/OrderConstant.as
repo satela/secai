@@ -44,6 +44,10 @@ package model.orderModel
 
 		public static const MANUFACTURE_TYPE_PAINT:int = 2;//喷印输出中心
 		public static const MANUFACTURE_TYPE_TEXT_PAINT:int = 5;//字牌
+		
+		public static const PAINTING:int = 1;//喷印下单
+		
+		public static const CUTTING:int = 2;//雕刻下单
 
 	}
 }

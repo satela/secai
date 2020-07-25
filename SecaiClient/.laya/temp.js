@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -700,7 +700,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="characterpaint/CharacterPaint.scene";
+	GameConfig.startScene="characterpaint/BackImgItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1411,6 +1411,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1539,6 +1540,7 @@ var PaintOrderModel=(function(){
 		this.curSelectProcList=null;
 		this.batchChangeMatItems=null;
 		this.allManuFacutreMatProcPrice={};
+		this.orderType=0;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -2960,6 +2962,14 @@ var UtilTool=(function(){
 		return true;
 	}
 
+	UtilTool.isValidPicZipai=function(picinfo){
+		if(picinfo.roadNum <=0){
+			return false;
+		}
+		else
+		return true;
+	}
+
 	UtilTool.isFitYixing=function(sourcefile,selfile){
 		if(sourcefile !=null && selfile !=null){
 			if(selfile.roadNum <=0){
@@ -3055,6 +3065,8 @@ var OrderConstant=(function(){
 	OrderConstant.VERTICAL_CUT_COMBINE="SPTE10150";
 	OrderConstant.MANUFACTURE_TYPE_PAINT=2;
 	OrderConstant.MANUFACTURE_TYPE_TEXT_PAINT=5;
+	OrderConstant.PAINTING=1;
+	OrderConstant.CUTTING=2;
 	return OrderConstant;
 })()
 
@@ -30629,79 +30641,6 @@ var Loader=(function(_super){
 
 
 /**
-*用来画矢量的mesh。顶点格式固定为 x,y,rgba
-*/
-//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
-var MeshVG=(function(_super){
-	function MeshVG(){
-		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
-	}
-
-	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
-	var __proto=MeshVG.prototype;
-	/**
-	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
-	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
-	*@param rgba rgba颜色
-	*@param ib index数组。
-	*/
-	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
-		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
-		var f32pos=startpos >> 2;
-		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
-		var vbu32Arr=this._vb._uint32Array;
-		var ci=0;
-		var sz=points.length / 2;
-		for (var i=0;i < sz;i++){
-			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
-			vbu32Arr[f32pos++]=rgba;
-		}
-		this._vb.setNeedUpload();
-		this._ib.append(new Uint16Array(ib));
-		this._ib.setNeedUpload();
-		this.vertNum+=sz;
-		this.indexNum+=ib.length;
-	}
-
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this._ib.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshVG._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._ib.disposeResource();
-		this._vb.deleteBuffer();
-	}
-
-	MeshVG.getAMesh=function(){
-		if (laya.webgl.utils.MeshVG._POOL.length){
-			return laya.webgl.utils.MeshVG._POOL.pop();
-		}
-		return new MeshVG();
-	}
-
-	MeshVG.const_stride=12;
-	MeshVG._POOL=[];
-	__static(MeshVG,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,2,0,
-		0x1401,4,8];}
-	]);
-	return MeshVG;
-})(Mesh2D)
-
-
-/**
 *<code>Texture</code> 是一个纹理处理类。
 */
 //class laya.resource.Texture extends laya.events.EventDispatcher
@@ -31028,6 +30967,79 @@ var Texture=(function(_super){
 	Texture._rect2=new Rectangle();
 	return Texture;
 })(EventDispatcher)
+
+
+/**
+*用来画矢量的mesh。顶点格式固定为 x,y,rgba
+*/
+//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
+var MeshVG=(function(_super){
+	function MeshVG(){
+		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
+	}
+
+	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
+	var __proto=MeshVG.prototype;
+	/**
+	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
+	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
+	*@param rgba rgba颜色
+	*@param ib index数组。
+	*/
+	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
+		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
+		var f32pos=startpos >> 2;
+		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
+		var vbu32Arr=this._vb._uint32Array;
+		var ci=0;
+		var sz=points.length / 2;
+		for (var i=0;i < sz;i++){
+			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
+			vbu32Arr[f32pos++]=rgba;
+		}
+		this._vb.setNeedUpload();
+		this._ib.append(new Uint16Array(ib));
+		this._ib.setNeedUpload();
+		this.vertNum+=sz;
+		this.indexNum+=ib.length;
+	}
+
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this._ib.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshVG._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._ib.disposeResource();
+		this._vb.deleteBuffer();
+	}
+
+	MeshVG.getAMesh=function(){
+		if (laya.webgl.utils.MeshVG._POOL.length){
+			return laya.webgl.utils.MeshVG._POOL.pop();
+		}
+		return new MeshVG();
+	}
+
+	MeshVG.const_stride=12;
+	MeshVG._POOL=[];
+	__static(MeshVG,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,2,0,
+		0x1401,4,8];}
+	]);
+	return MeshVG;
+})(Mesh2D)
 
 
 //class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
@@ -35736,8 +35748,6 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.onProductView=function(){
-		ViewManager.instance.openView("VIEW_CHARACTER_DEMONSTRATE_PANEL",false);
-		return;
 		if(!Userdata.instance.isLogin){
 			ViewManager.showAlert("请先登录");
 			ViewManager.instance.openView("VIEW_lOGPANEL");
@@ -36788,6 +36798,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.btnNewFolder.on("click",this,this.onCreateNewFolder);
 		this.uiSkin.btnorder.on("click",this,this.onshowOrder);
+		this.uiSkin.btnzipai.on("click",this,this.onshowZipaiOrder);
 		this.createbox=this.uiSkin.boxNewFolder;
 		this.createbox.visible=false;
 		this.uiSkin.input_folename.maxChars=10;
@@ -36955,6 +36966,21 @@ var PicManagerControl=(function(_super){
 			pic=DirectoryFileModel.instance.haselectPic[$each_pic];
 			if(UtilTool.isValidPic(pic)==false){
 				ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
+				return;
+			}
+		}
+		PaintOrderModel.instance.orderType=1;
+		ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
+	}
+
+	__proto.onshowZipaiOrder=function(){
+		var hassrgb=false;
+		PaintOrderModel.instance.orderType=2;
+		var pic;
+		for(var $each_pic in DirectoryFileModel.instance.haselectPic){
+			pic=DirectoryFileModel.instance.haselectPic[$each_pic];
+			if(UtilTool.isValidPicZipai(pic)==false){
+				ViewManager.showAlert("标准异形文件才能字牌下单");
 				return;
 			}
 		}
@@ -41046,6 +41072,7 @@ var CharacterMainControl=(function(_super){
 	function CharacterMainControl(){
 		this.uiSkin=null;
 		this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398509938750.jpg";
+		this.param=null;
 		CharacterMainControl.__super.call(this);
 	}
 
@@ -41062,14 +41089,38 @@ var CharacterMainControl=(function(_super){
 		this.uiSkin.depth2.text="0.1";
 		this.uiSkin.createlayer1.on("click",this,this.oncreateLayer1);
 		this.uiSkin.createlayer2.on("click",this,this.oncreateLayer2);
+		this.uiSkin.fontsizeinput.on("input",this,this.onSizeChange);
+		this.uiSkin.backimglist.itemRender=BackGroundItem;
+		this.uiSkin.backimglist.vScrollBarSkin="";
+		this.uiSkin.backimglist.repeatX=2;
+		var imgback=["stone/stone1","stone/stone2","stone/stone3","wall/wall","wall/wall1","wall/wall2","wood/wood1","wood/wood2","wood/wood3"];
+		this.uiSkin.backimglist.array=imgback;
+		this.uiSkin.backimglist.renderHandler=new Handler(this,this.updateBackgroundList);
+		this.uiSkin.backimglist.selectHandler=new Handler(this,this.onSelectHandler);
+		this.uiSkin.backimglist.selectEnable=true;
+		if(this.param !=null){
+			this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.param.fid+".jpg";
+		}
 		this.initU3dWeb();
 		Browser.window.layaCaller=this;
+	}
+
+	__proto.updateBackgroundList=function(cell){
+		cell.setData(cell.dataSource);
+		cell.setSelected(cell.dataSource==this.uiSkin.backimglist.array[this.uiSkin.backimglist.selectedIndex]);
+	}
+
+	__proto.onSelectHandler=function(index){
+		for(var i=0;i < this.uiSkin.backimglist.cells.length;i++){
+			(this.uiSkin.backimglist.cells [i]).setSelected((this.uiSkin.backimglist.cells [i]).urlpath==this.uiSkin.backimglist.array[index]);
+		}
+		Browser.window.Unity3dWeb.changebackground(this.uiSkin.backimglist.array[index]);
 	}
 
 	__proto.initU3dWeb=function(){
 		if(CharacterMainControl.u3ddiv==null){
 			CharacterMainControl.u3ddiv=Browser.document.createElement("div");
-			CharacterMainControl.u3ddiv.style="width: 1280px; height: 900px;left:320px;top:-120px";
+			CharacterMainControl.u3ddiv.style="width: 900px; height: 830px;left:540px;top:-110px";
 			CharacterMainControl.u3ddiv.id="gameContainer";
 			Browser.document.body.appendChild(CharacterMainControl.u3ddiv);
 			var complete=0;
@@ -41096,8 +41147,10 @@ var CharacterMainControl=(function(_super){
 			CharacterMainControl.scriptpr.onerror=function (){}
 			Browser.document.body.appendChild(CharacterMainControl.scriptpr);
 		}
-		else
-		CharacterMainControl.u3ddiv.style.display="block";
+		else{
+			CharacterMainControl.u3ddiv.style.display="block";
+			Browser.window.Unity3dWeb.createMesh(this.picurl);
+		}
 	}
 
 	__proto.unityIsReady=function(){
@@ -41120,6 +41173,12 @@ var CharacterMainControl=(function(_super){
 		str+=(this.uiSkin.mattype2.selectedIndex+1)+"&";
 		str+=(this.uiSkin.colorinput2.text);
 		Browser.window.Unity3dWeb.createLayer(str);
+	}
+
+	__proto.onSizeChange=function(){
+		if(this.uiSkin.fontsizeinput.text=="")
+			return;
+		Browser.window.Unity3dWeb.changefontSize(this.uiSkin.fontsizeinput.text);
 	}
 
 	__proto.closeView=function(){
@@ -49655,7 +49714,8 @@ var ComboBox=(function(_super){
 			var label=box.getChildByName("label");
 			if (label){
 				if (type==="mouseover"){
-					label.bgColor=this._itemColors[0];
+					label.bgColor=this._itemColors[0]
+					;
 					label.color=this._itemColors[1];
 					}else {
 					label.bgColor=null;
@@ -53513,7 +53573,8 @@ var CharacterPaintUI=(function(_super){
 		this.mattype2=null;
 		this.createlayer2=null;
 		this.colorinput2=null;
-		this.imgurl=null;
+		this.fontsizeinput=null;
+		this.backimglist=null;
 		CharacterPaintUI.__super.call(this);
 	}
 
@@ -54487,6 +54548,26 @@ var UpLoadPanelUI=(function(_super){
 })(View)
 
 
+//class ui.characterpaint.BackImgItemUI extends laya.ui.View
+var BackImgItemUI=(function(_super){
+	function BackImgItemUI(){
+		this.img=null;
+		this.frame=null;
+		BackImgItemUI.__super.call(this);
+	}
+
+	__class(BackImgItemUI,'ui.characterpaint.BackImgItemUI',_super);
+	var __proto=BackImgItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(BackImgItemUI.uiView);
+	}
+
+	BackImgItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"width":80,"var":"img","skin":"textureU3d/stone/stone1.jpg","height":80},"compId":3},{"type":"Image","props":{"width":82,"var":"frame","skin":"commers/inputfocus.png","sizeGrid":"3,3,3,3","height":82},"compId":4}],"loadList":["textureU3d/stone/stone1.jpg","commers/inputfocus.png"],"loadList3D":[]};
+	return BackImgItemUI;
+})(View)
+
+
 //class ui.product.ProductMarketPanelUI extends laya.ui.View
 var ProductMarketPanelUI=(function(_super){
 	function ProductMarketPanelUI(){
@@ -54993,9 +55074,12 @@ var PicOrderItem=(function(_super){
 			ViewManager.showAlert("请先选择收货地址");
 			return;
 		}
-		ViewManager.instance.openView("VIEW_SELECT_MATERIAL",false,this.ordervo.picinfo);
 		PaintOrderModel.instance.curSelectOrderItem=this;
 		PaintOrderModel.instance.batchChangeMatItems=[];
+		if(PaintOrderModel.instance.orderType==1)
+			ViewManager.instance.openView("VIEW_SELECT_MATERIAL",false,this.ordervo.picinfo);
+		if(PaintOrderModel.instance.orderType==2)
+			ViewManager.instance.openView("VIEW_CHARACTER_DEMONSTRATE_PANEL",false,this.ordervo.picinfo);
 	}
 
 	__proto.changeProduct=function(provo){
@@ -60786,183 +60870,6 @@ var SelAddressItem=(function(_super){
 })(OrderAddressItemUI)
 
 
-//class script.picUpload.PicPaintItem extends ui.picManager.PicPaintItemUI
-var PicPaintItem=(function(_super){
-	function PicPaintItem(){
-		this.picInfo=null;
-		this.trytime=0;
-		PicPaintItem.__super.call(this);
-	}
-
-	__class(PicPaintItem,'script.picUpload.PicPaintItem',_super);
-	var __proto=PicPaintItem.prototype;
-	__proto.setData=function(filedata){
-		this.picInfo=filedata;
-		this.offAll();
-		this.on("doubleclick",this,this.onDoubleClick);
-		this.on("click",this,this.onClickHandler);
-		this.on("mouseover",this,this.onMouseOverHandler);
-		this.on("mouseout",this,this.onMouseOutHandler);
-		this.btndelete.visible=false;
-		this.frame.visible=false;
-		this.btndelete.on("click",this,this.onDeleteHandler);
-		this.trytime=0;
-		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)|| DirectoryFileModel.instance.curOperateFile==this.picInfo;
-		this.sel.selected=this.sel.visible;
-		this.yixingimg.visible=false;
-		this.backimg.visible=false;
-		if(this.picInfo.picType==0 || !UtilTool.checkFileIsImg(this.picInfo)){
-			this.img.skin="upload/fold.png";
-			this.filename.text=this.picInfo.directName;
-			this.fileinfo.visible=false;
-			this.picClassTxt.visible=false;
-			this.colorspacetxt.visible=false;
-			this.img.x=126;
-			this.img.width=156;
-			this.img.height=156;
-		}
-		else{
-			this.fileinfo.visible=true;
-			this.filename.text=this.picInfo.directName;
-			this.img.x=126;
-			if(this.picInfo.isProcessing){
-				this.fileinfo.text="处理中...";
-				this.img.skin="upload/fold.png";
-				this.picClassTxt.visible=false;
-				this.colorspacetxt.visible=false;
-				this.img.width=156;
-				this.img.height=156;
-				return;
-			}
-			if(this.picInfo.picWidth > this.picInfo.picHeight){
-				this.img.width=156;
-				this.img.height=156/this.picInfo.picWidth *this.picInfo.picHeight;
-				this.yixingimg.width=78;
-				this.yixingimg.height=78/this.picInfo.picWidth *this.picInfo.picHeight;
-				this.backimg.width=78;
-				this.backimg.height=this.yixingimg.height;
-			}
-			else{
-				this.img.height=156;
-				this.img.width=156/this.picInfo.picHeight *this.picInfo.picWidth;
-				this.yixingimg.height=78;
-				this.yixingimg.width=78/this.picInfo.picHeight *this.picInfo.picWidth;
-				this.backimg.height=78;
-				this.backimg.width=this.yixingimg.width;
-			}
-			if(this.img.skin !="upload/fold.png")
-				Laya.loader.clearTextureRes(this.img.skin);
-			this.img.skin=null;
-			this.img.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.fid+".jpg";
-			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
-			str+="dpi:"+this.picInfo.dpi;
-			this.fileinfo.text=str;
-			if(this.picInfo.isCdr)
-				this.picClassTxt.text="CDR";
-			else
-			this.picClassTxt.text=this.picInfo.picClass.toLocaleUpperCase();
-			if(this.picInfo.yixingFid !="" && this.picInfo.yixingFid !="0"){
-				this.yixingimg.visible=true;
-				this.yixingimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.yixingFid+".jpg";
-				this.img.x=87;
-			}
-			if(this.picInfo.backFid !="" && this.picInfo.backFid !="0"){
-				this.backimg.visible=true;
-				this.backimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.backFid+".jpg";
-				this.img.x=87;
-			}
-			this.picClassTxt.visible=true;
-			this.colorspacetxt.text=this.picInfo.colorspace.toLocaleUpperCase();
-			this.colorspacetxt.visible=true;
-		}
-	}
-
-	//this.fileinfo.text=picInfo.directName;
-	__proto.onDeleteHandler=function(e){
-		e.stopPropagation();
-		if(this.picInfo.picType==1)
-			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该图片吗？",caller:this,callback:this.confirmDelete});
-		else
-		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该目录吗？",caller:this,callback:this.confirmDelete});
-	}
-
-	__proto.confirmDelete=function(result){
-		if(result){
-			if(this.sel.visible){
-				var datainfo=[];
-				datainfo.push(this.picInfo);
-				datainfo.push(this.img);
-				datainfo.push(this);
-				EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
-			}
-			if(this.picInfo.picType==1)
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
-			else
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
-		}
-	}
-
-	__proto.onDeleteFileBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			EventCenter.instance.event("UPDATE_FILE_LIST");
-		}
-	}
-
-	__proto.onMouseOutHandler=function(){
-		this.btndelete.visible=false;
-		this.frame.visible=false;
-	}
-
-	__proto.canCelSelected=function(){
-		this.sel.visible=false;
-		this.sel.selected=false;
-	}
-
-	__proto.onMouseOverHandler=function(){
-		this.btndelete.visible=true;
-		this.frame.visible=true;
-	}
-
-	__proto.onClickHandler=function(){
-		if(this.picInfo.picType==1 && this.picInfo.picClass.toLocaleUpperCase()=="PNG")
-			return;
-		if(this.picInfo.picType==1 && this.picInfo.picPhysicWidth > 0){
-			if(!DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)){
-				this.sel.visible=true;
-				this.sel.selected=true;
-			}
-			else{
-				this.sel.visible=false;
-				this.sel.selected=false;
-			};
-			var datainfo=[];
-			datainfo.push(this.picInfo);
-			datainfo.push(this.img);
-			datainfo.push(this);
-			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
-		}
-	}
-
-	//UtilTool.getYixingImageCount("circle.jpg",this);
-	__proto.getPixelInfo=function(pixel){
-		var imgdata=pixel;
-		UtilTool.getCutCountLength(imgdata);
-	}
-
-	__proto.onDoubleClick=function(){
-		if(this.picInfo.picType==0){
-			EventCenter.instance.event("SELECT_FOLDER",this.picInfo);
-		}
-		else{
-			ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.picInfo);
-		}
-	}
-
-	return PicPaintItem;
-})(PicPaintItemUI)
-
-
 //class script.picUpload.PicInfoItem extends ui.picManager.PicShortItemUI
 var PicInfoItem=(function(_super){
 	function PicInfoItem(){
@@ -61246,6 +61153,183 @@ var PicInfoItem=(function(_super){
 })(PicShortItemUI)
 
 
+//class script.picUpload.PicPaintItem extends ui.picManager.PicPaintItemUI
+var PicPaintItem=(function(_super){
+	function PicPaintItem(){
+		this.picInfo=null;
+		this.trytime=0;
+		PicPaintItem.__super.call(this);
+	}
+
+	__class(PicPaintItem,'script.picUpload.PicPaintItem',_super);
+	var __proto=PicPaintItem.prototype;
+	__proto.setData=function(filedata){
+		this.picInfo=filedata;
+		this.offAll();
+		this.on("doubleclick",this,this.onDoubleClick);
+		this.on("click",this,this.onClickHandler);
+		this.on("mouseover",this,this.onMouseOverHandler);
+		this.on("mouseout",this,this.onMouseOutHandler);
+		this.btndelete.visible=false;
+		this.frame.visible=false;
+		this.btndelete.on("click",this,this.onDeleteHandler);
+		this.trytime=0;
+		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)|| DirectoryFileModel.instance.curOperateFile==this.picInfo;
+		this.sel.selected=this.sel.visible;
+		this.yixingimg.visible=false;
+		this.backimg.visible=false;
+		if(this.picInfo.picType==0 || !UtilTool.checkFileIsImg(this.picInfo)){
+			this.img.skin="upload/fold.png";
+			this.filename.text=this.picInfo.directName;
+			this.fileinfo.visible=false;
+			this.picClassTxt.visible=false;
+			this.colorspacetxt.visible=false;
+			this.img.x=126;
+			this.img.width=156;
+			this.img.height=156;
+		}
+		else{
+			this.fileinfo.visible=true;
+			this.filename.text=this.picInfo.directName;
+			this.img.x=126;
+			if(this.picInfo.isProcessing){
+				this.fileinfo.text="处理中...";
+				this.img.skin="upload/fold.png";
+				this.picClassTxt.visible=false;
+				this.colorspacetxt.visible=false;
+				this.img.width=156;
+				this.img.height=156;
+				return;
+			}
+			if(this.picInfo.picWidth > this.picInfo.picHeight){
+				this.img.width=156;
+				this.img.height=156/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.yixingimg.width=78;
+				this.yixingimg.height=78/this.picInfo.picWidth *this.picInfo.picHeight;
+				this.backimg.width=78;
+				this.backimg.height=this.yixingimg.height;
+			}
+			else{
+				this.img.height=156;
+				this.img.width=156/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.yixingimg.height=78;
+				this.yixingimg.width=78/this.picInfo.picHeight *this.picInfo.picWidth;
+				this.backimg.height=78;
+				this.backimg.width=this.yixingimg.width;
+			}
+			if(this.img.skin !="upload/fold.png")
+				Laya.loader.clearTextureRes(this.img.skin);
+			this.img.skin=null;
+			this.img.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.fid+".jpg";
+			var str="宽:"+this.picInfo.picPhysicWidth+";高:"+this.picInfo.picPhysicHeight+"\n";
+			str+="dpi:"+this.picInfo.dpi;
+			this.fileinfo.text=str;
+			if(this.picInfo.isCdr)
+				this.picClassTxt.text="CDR";
+			else
+			this.picClassTxt.text=this.picInfo.picClass.toLocaleUpperCase();
+			if(this.picInfo.yixingFid !="" && this.picInfo.yixingFid !="0"){
+				this.yixingimg.visible=true;
+				this.yixingimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.yixingFid+".jpg";
+				this.img.x=87;
+			}
+			if(this.picInfo.backFid !="" && this.picInfo.backFid !="0"){
+				this.backimg.visible=true;
+				this.backimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.picInfo.backFid+".jpg";
+				this.img.x=87;
+			}
+			this.picClassTxt.visible=true;
+			this.colorspacetxt.text=this.picInfo.colorspace.toLocaleUpperCase();
+			this.colorspacetxt.visible=true;
+		}
+	}
+
+	//this.fileinfo.text=picInfo.directName;
+	__proto.onDeleteHandler=function(e){
+		e.stopPropagation();
+		if(this.picInfo.picType==1)
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该图片吗？",caller:this,callback:this.confirmDelete});
+		else
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定删除该目录吗？",caller:this,callback:this.confirmDelete});
+	}
+
+	__proto.confirmDelete=function(result){
+		if(result){
+			if(this.sel.visible){
+				var datainfo=[];
+				datainfo.push(this.picInfo);
+				datainfo.push(this.img);
+				datainfo.push(this);
+				EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
+			}
+			if(this.picInfo.picType==1)
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/remove?",this,this.onDeleteFileBack,"fid="+this.picInfo.fid,"post");
+			else
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"dir/remove?",this,this.onDeleteFileBack,"path="+this.picInfo.dpath,"post");
+		}
+	}
+
+	__proto.onDeleteFileBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
+	}
+
+	__proto.onMouseOutHandler=function(){
+		this.btndelete.visible=false;
+		this.frame.visible=false;
+	}
+
+	__proto.canCelSelected=function(){
+		this.sel.visible=false;
+		this.sel.selected=false;
+	}
+
+	__proto.onMouseOverHandler=function(){
+		this.btndelete.visible=true;
+		this.frame.visible=true;
+	}
+
+	__proto.onClickHandler=function(){
+		if(this.picInfo.picType==1 && this.picInfo.picClass.toLocaleUpperCase()=="PNG")
+			return;
+		if(this.picInfo.picType==1 && this.picInfo.picPhysicWidth > 0){
+			if(!DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)){
+				this.sel.visible=true;
+				this.sel.selected=true;
+			}
+			else{
+				this.sel.visible=false;
+				this.sel.selected=false;
+			};
+			var datainfo=[];
+			datainfo.push(this.picInfo);
+			datainfo.push(this.img);
+			datainfo.push(this);
+			EventCenter.instance.event("SELECT_PIC_ORDER",[datainfo]);
+		}
+	}
+
+	//UtilTool.getYixingImageCount("circle.jpg",this);
+	__proto.getPixelInfo=function(pixel){
+		var imgdata=pixel;
+		UtilTool.getCutCountLength(imgdata);
+	}
+
+	__proto.onDoubleClick=function(){
+		if(this.picInfo.picType==0){
+			EventCenter.instance.event("SELECT_FOLDER",this.picInfo);
+		}
+		else{
+			ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.picInfo);
+		}
+	}
+
+	return PicPaintItem;
+})(PicPaintItemUI)
+
+
 //class script.picUpload.DirectFolderItem extends ui.picManager.DirectItemUI
 var DirectFolderItem=(function(_super){
 	function DirectFolderItem(){
@@ -61308,6 +61392,29 @@ var ProductCategoryItem=(function(_super){
 
 	return ProductCategoryItem;
 })(ProductCateItemUI)
+
+
+//class script.characterpaint.BackGroundItem extends ui.characterpaint.BackImgItemUI
+var BackGroundItem=(function(_super){
+	function BackGroundItem(){
+		this.urlpath=null;
+		BackGroundItem.__super.call(this);
+	}
+
+	__class(BackGroundItem,'script.characterpaint.BackGroundItem',_super);
+	var __proto=BackGroundItem.prototype;
+	__proto.setData=function(url){
+		this.img.skin="textureU3d/"+url+".jpg";
+		this.urlpath=url;
+		this.setSelected(false);
+	}
+
+	__proto.setSelected=function(isSel){
+		this.frame.visible=isSel;
+	}
+
+	return BackGroundItem;
+})(BackImgItemUI)
 
 
 //class script.product.ProductItemView extends ui.product.ProductItemUI

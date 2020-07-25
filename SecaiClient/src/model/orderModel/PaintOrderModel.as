@@ -46,6 +46,7 @@ package model.orderModel
 
 		public var allManuFacutreMatProcPrice:Object = {};
 		
+		public var orderType:int;//当前下单类型 
 		public function PaintOrderModel()
 		{
 		}

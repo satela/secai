@@ -15,7 +15,7 @@ Unity3dWeb.closeUnity = function()
 
 }
 
-Unity3dWeb.onReady = function()
+Unity3dWeb.UnityIsReady = function()
 {
 	console.log("unity load complete");	
 	if(layaCaller != null)
@@ -36,4 +36,16 @@ Unity3dWeb.createLayer = function(params)
 	if(gameInstance != null)
 	gameInstance.SendMessage("Main Camera", "createFontlayer",params);
 
+}
+
+Unity3dWeb.changefontSize = function(size)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "setFontSize",size);
+}
+
+Unity3dWeb.changebackground = function(texurl)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeBackGround",texurl);
 }

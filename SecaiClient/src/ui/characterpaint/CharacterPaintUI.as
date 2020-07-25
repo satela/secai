@@ -15,7 +15,8 @@ package ui.characterpaint {
 		public var mattype2:RadioGroup;
 		public var createlayer2:Button;
 		public var colorinput2:TextInput;
-		public var imgurl:TextInput;
+		public var fontsizeinput:TextInput;
+		public var backimglist:List;
 
 		override protected function createChildren():void {
 			super.createChildren();
