@@ -17,6 +17,14 @@ package ui.characterpaint {
 		public var colorinput2:TextInput;
 		public var fontsizeinput:TextInput;
 		public var backimglist:List;
+		public var alphasilder1:HSlider;
+		public var alphasilder2:HSlider;
+		public var depth3:TextInput;
+		public var mattype3:RadioGroup;
+		public var createlayer3:Button;
+		public var colorinput3:TextInput;
+		public var alphasilder3:HSlider;
+		public var lightIntensity:HSlider;
 
 		override protected function createChildren():void {
 			super.createChildren();

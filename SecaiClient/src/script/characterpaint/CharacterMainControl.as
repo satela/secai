@@ -24,6 +24,7 @@ package script.characterpaint
 		
 		public var param:PicInfoVo;
 		
+		private var allsilder:Array;
 		public function CharacterMainControl()
 		{
 			super();
@@ -46,6 +47,15 @@ package script.characterpaint
 			uiSkin.createlayer1.on(Event.CLICK,this,oncreateLayer1);
 			uiSkin.createlayer2.on(Event.CLICK,this,oncreateLayer2);
 			
+			uiSkin.createlayer3.on(Event.CLICK,this,oncreateLayer3);
+			
+			 allsilder = [uiSkin.alphasilder1,uiSkin.alphasilder2,uiSkin.alphasilder3];
+			for(var i:int=0;i<allsilder.length;i++)
+				allsilder[i].on(Event.CHANGE,this,onChangeAlpha,[i]);
+			
+			
+			uiSkin.lightIntensity.on(Event.CHANGE,this,onChangeLigthIntensity);
+
 			this.uiSkin.fontsizeinput.on(Event.INPUT,this,onSizeChange);
 			
 			uiSkin.backimglist.itemRender = BackGroundItem;
@@ -155,6 +165,19 @@ package script.characterpaint
 		{
 			Browser.window.Unity3dWeb.createMesh(picurl);
 		}
+		
+		private function onChangeAlpha(index:int):void
+		{
+			
+			Browser.window.Unity3dWeb.changelayerAlpha(index + "&" + allsilder[index].value/100);
+
+		}
+		
+		private function onChangeLigthIntensity():void
+		{
+			Browser.window.Unity3dWeb.changeligthIntensity(uiSkin.lightIntensity.value/100+"");
+
+		}
 		private function oncreateLayer1():void
 		{
 			var str:String = "";
@@ -181,6 +204,21 @@ package script.characterpaint
 			
 			Browser.window.Unity3dWeb.createLayer(str);
 		}
+		
+		private function oncreateLayer3():void
+		{
+			var str:String = "";
+			str += "2&";
+			
+			str += uiSkin.depth3.text + "&";
+			
+			str += (uiSkin.mattype3.selectedIndex+1) + "&";
+			
+			str += (uiSkin.colorinput3.text);
+			
+			Browser.window.Unity3dWeb.createLayer(str);
+		}
+		
 		
 		private function onSizeChange():void
 		{

@@ -49,3 +49,15 @@ Unity3dWeb.changebackground = function(texurl)
 	if(gameInstance != null)
 	gameInstance.SendMessage("Main Camera", "changeBackGround",texurl);
 }
+
+Unity3dWeb.changelayerAlpha = function(texurl)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeLayerAlpha",texurl);
+}
+
+Unity3dWeb.changeligthIntensity = function(texurl)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeLightIntensity",texurl);
+}

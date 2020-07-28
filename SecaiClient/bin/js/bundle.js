@@ -711,7 +711,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="characterpaint/BackImgItem.scene";
+	GameConfig.startScene="characterpaint/CharacterPaint.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1422,7 +1422,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -41084,6 +41083,7 @@ var CharacterMainControl=(function(_super){
 		this.uiSkin=null;
 		this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398509938750.jpg";
 		this.param=null;
+		this.allsilder=null;
 		CharacterMainControl.__super.call(this);
 	}
 
@@ -41100,6 +41100,11 @@ var CharacterMainControl=(function(_super){
 		this.uiSkin.depth2.text="0.1";
 		this.uiSkin.createlayer1.on("click",this,this.oncreateLayer1);
 		this.uiSkin.createlayer2.on("click",this,this.oncreateLayer2);
+		this.uiSkin.createlayer3.on("click",this,this.oncreateLayer3);
+		this.allsilder=[this.uiSkin.alphasilder1,this.uiSkin.alphasilder2,this.uiSkin.alphasilder3];
+		for(var i=0;i<this.allsilder.length;i++)
+		this.allsilder[i].on("change",this,this.onChangeAlpha,[i]);
+		this.uiSkin.lightIntensity.on("change",this,this.onChangeLigthIntensity);
 		this.uiSkin.fontsizeinput.on("input",this,this.onSizeChange);
 		this.uiSkin.backimglist.itemRender=BackGroundItem;
 		this.uiSkin.backimglist.vScrollBarSkin="";
@@ -41168,6 +41173,14 @@ var CharacterMainControl=(function(_super){
 		Browser.window.Unity3dWeb.createMesh(this.picurl);
 	}
 
+	__proto.onChangeAlpha=function(index){
+		Browser.window.Unity3dWeb.changelayerAlpha(index+"&"+this.allsilder[index].value/100);
+	}
+
+	__proto.onChangeLigthIntensity=function(){
+		Browser.window.Unity3dWeb.changeligthIntensity(this.uiSkin.lightIntensity.value/100+"");
+	}
+
 	__proto.oncreateLayer1=function(){
 		var str="";
 		str+="0&";
@@ -41183,6 +41196,15 @@ var CharacterMainControl=(function(_super){
 		str+=this.uiSkin.depth2.text+"&";
 		str+=(this.uiSkin.mattype2.selectedIndex+1)+"&";
 		str+=(this.uiSkin.colorinput2.text);
+		Browser.window.Unity3dWeb.createLayer(str);
+	}
+
+	__proto.oncreateLayer3=function(){
+		var str="";
+		str+="2&";
+		str+=this.uiSkin.depth3.text+"&";
+		str+=(this.uiSkin.mattype3.selectedIndex+1)+"&";
+		str+=(this.uiSkin.colorinput3.text);
 		Browser.window.Unity3dWeb.createLayer(str);
 	}
 
@@ -49725,8 +49747,7 @@ var ComboBox=(function(_super){
 			var label=box.getChildByName("label");
 			if (label){
 				if (type==="mouseover"){
-					label.bgColor=this._itemColors[0]
-					;
+					label.bgColor=this._itemColors[0];
 					label.color=this._itemColors[1];
 					}else {
 					label.bgColor=null;
@@ -53586,6 +53607,14 @@ var CharacterPaintUI=(function(_super){
 		this.colorinput2=null;
 		this.fontsizeinput=null;
 		this.backimglist=null;
+		this.alphasilder1=null;
+		this.alphasilder2=null;
+		this.depth3=null;
+		this.mattype3=null;
+		this.createlayer3=null;
+		this.colorinput3=null;
+		this.alphasilder3=null;
+		this.lightIntensity=null;
 		CharacterPaintUI.__super.call(this);
 	}
 
@@ -60885,7 +60914,6 @@ var SelAddressItem=(function(_super){
 var PicInfoItem=(function(_super){
 	function PicInfoItem(){
 		this.picInfo=null;
-		this.trytime=0;
 		PicInfoItem.__super.call(this);
 	}
 
@@ -60903,7 +60931,6 @@ var PicInfoItem=(function(_super){
 		this.selYixingBtn.on("click",this,this.onSelectYixingImg);
 		this.selBackBtn.on("click",this,this.onSelectBackImg);
 		this.btndelete.on("click",this,this.onDeleteHandler);
-		this.trytime=0;
 		this.sel.visible=DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)|| DirectoryFileModel.instance.curOperateFile==this.picInfo;
 		this.sel.selected=this.sel.visible;
 		this.yixingimg.visible=false;
