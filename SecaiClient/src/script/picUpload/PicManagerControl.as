@@ -147,6 +147,7 @@ package script.picUpload
 			uiSkin.seltips.visible = true;
 			uiSkin.seltips.text = "选择反面图片中";
 			Laya.stage.on(Event.RIGHT_CLICK,this,stopRightSelectRelate);
+			Laya.stage.on(Event.DOUBLE_CLICK,this,stopRightSelectRelate);
 
 		}
 		
@@ -158,9 +159,11 @@ package script.picUpload
 			//	return;
 			Laya.stage.off(Event.CLICK,this,stopSelectRelate);
 			uiSkin.seltips.visible = false;
+			cancelSelected();
 			DirectoryFileModel.instance.curOperateFile = null;
 			Laya.stage.off(Event.RIGHT_CLICK,this,stopSelectRelate);
-			
+			Laya.stage.off(Event.DOUBLE_CLICK,this,stopRightSelectRelate);
+
 			
 		}
 		
@@ -172,10 +175,32 @@ package script.picUpload
 				return;
 			Laya.stage.off(Event.CLICK,this,stopSelectRelate);
 			uiSkin.seltips.visible = false;
+			cancelSelected();
 			DirectoryFileModel.instance.curOperateFile = null;
 			Laya.stage.off(Event.RIGHT_CLICK,this,stopSelectRelate);
+			Laya.stage.off(Event.DOUBLE_CLICK,this,stopRightSelectRelate);
 
 
+		}
+		
+		private function cancelSelected():void
+		{
+			if(DirectoryFileModel.instance.curOperateFile != null)
+			{
+				for(var i:int=0;i < uiSkin.picList.cells.length;i++)
+				{
+					var picinfoitem:PicInfoItem = uiSkin.picList.cells[i] as PicInfoItem;
+					if(picinfoitem != null)
+					{
+						if(picinfoitem.picInfo == DirectoryFileModel.instance.curOperateFile)
+						{
+							picinfoitem.canCelSelected();
+							return;
+						}
+					}
+				}
+			}
+			
 		}
 		private function onGetLeftCapacitBack(data:Object):void
 		{

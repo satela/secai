@@ -30,6 +30,8 @@ package script.usercenter
 			var status:int = parseInt(orderdata.or_status);
 			this.retrybtn.visible = false;
 
+			this.deletebtn.visible = false;
+			
 			if(status == 0)
 			{
 				this.orderstatus.text = "未支付";
@@ -41,6 +43,8 @@ package script.usercenter
 				this.orderstatus.text = "已支付排产成功";
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
+				this.deletebtn.visible = true;
+
 			}
 			else if(status == 2 || status == 3)
 			{
@@ -66,6 +70,8 @@ package script.usercenter
 				this.payagain.visible = false;
 				this.deletebtn.visible = true;
 				this.retrybtn.visible = true;
+				this.deletebtn.visible = true;
+
 			}
 			
 			else

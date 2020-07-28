@@ -115,9 +115,9 @@ package script.usercenter
 		{
 			EventCenter.instance.event(EventCenter.PAUSE_SCROLL_VIEW,true);
 		}
-		private function onshowInputDate():void
+		private function onshowInputDate(viewname:String):void
 		{
-			if(dateInput != null)
+			if(dateInput != null && viewname == ViewManager.VIEW_ORDER_DETAIL_PANEL)
 			{
 				dateInput.hidden = false;
 				dateInput2.hidden = false;

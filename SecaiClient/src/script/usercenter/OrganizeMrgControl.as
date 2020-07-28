@@ -66,6 +66,7 @@ package script.usercenter
 			
 			uiSkin.moveOkbtn.on(Event.CLICK,this,onMoveMemberSure);
 			uiSkin.closeDist.on(Event.CLICK,this,onCloseDistribute);
+			uiSkin.btncloseCreate.on(Event.CLICK,this,onCloseCreate);
 
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getMyOrganize,this,onGetAllOrganizeBack,null,"post");
 			
@@ -208,6 +209,10 @@ package script.usercenter
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.moveOrganizeMembers,this,onMoveOrganizeMemberBack,params,"post");
 		}
 		
+		private function onCloseCreate():void
+		{
+			this.uiSkin.createOrganizePanel.visible = false;
+		}
 		private function onMoveOrganizeMemberBack(data:*):void
 		{
 			var result:Object = JSON.parse(data as String);

@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":9,
+    "selectedBox":52,
+    "selecteID":60,
     "searchKey":"View",
     "props":{"width":900,"sceneColor":"#ffffff","height":800},
     "nodeParent":-1,
@@ -166,7 +166,7 @@
             "props":{"y":0,"x":0,"var":"distributePanel","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"distributePanel",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
@@ -298,13 +298,14 @@
             "props":{"y":0,"x":0,"var":"createOrganizePanel","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"createOrganizePanel",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":52,
             "child":[
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
@@ -319,6 +320,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":300,"width":850,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":186,"alpha":1},
@@ -332,6 +334,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":320,"x":205},
@@ -344,6 +347,7 @@
                     "compId":55,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":17,"text":"组织名称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -358,6 +362,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,organizeNameInput",
                             "props":{"y":-3,"x":187,"width":302,"var":"organizeNameInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入组织名称","height":50,"fontSize":20,"font":"SimHei"},
@@ -372,6 +377,7 @@
                             "$HIDDEN":false
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -388,6 +394,7 @@
                     "$HIDDEN":false
                 },
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,createBtnOk",
                     "props":{"y":415,"x":406,"width":138,"var":"createBtnOk","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
@@ -401,6 +408,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btncloseCreate",
                     "props":{"y":308,"x":823,"var":"btncloseCreate","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
@@ -414,7 +422,7 @@
                     "child":[
                         ]
                 }],
-            "$HIDDEN":true
+            "$HIDDEN":false
         },
         {
             "x":15,

@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":4,
-    "selecteID":97,
+    "selectedBox":96,
+    "selecteID":98,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#f8f1f1","height":1080},
     "nodeParent":-1,
-    "maxID":98,
+    "maxID":99,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -602,15 +602,29 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,seltips",
-                    "props":{"y":520,"x":560,"width":800,"var":"seltips","text":"选择异形切割图片中","mouseEnabled":false,"fontSize":40,"font":"SimSun","color":"#554949","bgColor":"#f4e9e9","alpha":0.7,"align":"center"},
+                    "props":{"y":520,"x":560,"width":800,"var":"seltips","text":"选择异形切割图片中","mouseEnabled":false,"height":67,"fontSize":40,"font":"SimSun","color":"#554949","bgColor":"#f4e9e9","alpha":0.7,"align":"center"},
                     "nodeParent":4,
                     "label":"seltips",
-                    "isDirectory":false,
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
+                    "hasChild":true,
                     "compId":96,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":43,"x":312,"text":"（右击可取消选择操作）","fontSize":16,"color":"#ef100c"},
+                            "nodeParent":96,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":98,
+                            "child":[
+                                ]
+                        }]
                 },
                 {
                     "x":30,

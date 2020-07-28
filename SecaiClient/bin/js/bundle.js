@@ -710,7 +710,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="characterpaint/CharacterPaint.scene";
+	GameConfig.startScene="usercenter/OrganizeMgrPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -35803,6 +35803,7 @@ var OrganizeMrgControl=(function(_super){
 		this.uiSkin.memberlist.on("mouseout",this,this.resumeParentScroll);
 		this.uiSkin.moveOkbtn.on("click",this,this.onMoveMemberSure);
 		this.uiSkin.closeDist.on("click",this,this.onCloseDistribute);
+		this.uiSkin.btncloseCreate.on("click",this,this.onCloseCreate);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-dept?",this,this.onGetAllOrganizeBack,null,"post");
 		EventCenter.instance.on("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
 		EventCenter.instance.on("MOVE_MEMBER_DEPT",this,this.moveMember);
@@ -35909,6 +35910,10 @@ var OrganizeMrgControl=(function(_super){
 		};
 		var params="dept="+todept+"&uid="+this.curMemberdata.uid;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-memberdept?",this,this.onMoveOrganizeMemberBack,params,"post");
+	}
+
+	__proto.onCloseCreate=function(){
+		this.uiSkin.createOrganizePanel.visible=false;
 	}
 
 	__proto.onMoveOrganizeMemberBack=function(data){
@@ -36866,13 +36871,16 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.seltips.visible=true;
 		this.uiSkin.seltips.text="选择反面图片中";
 		Laya.stage.on("rightclick",this,this.stopRightSelectRelate);
+		Laya.stage.on("doubleclick",this,this.stopRightSelectRelate);
 	}
 
 	__proto.stopRightSelectRelate=function(e){
 		Laya.stage.off("click",this,this.stopSelectRelate);
 		this.uiSkin.seltips.visible=false;
+		this.cancelSelected();
 		DirectoryFileModel.instance.curOperateFile=null;
 		Laya.stage.off("rightclick",this,this.stopSelectRelate);
+		Laya.stage.off("doubleclick",this,this.stopRightSelectRelate);
 	}
 
 	__proto.stopSelectRelate=function(e){
@@ -36880,8 +36888,24 @@ var PicManagerControl=(function(_super){
 			return;
 		Laya.stage.off("click",this,this.stopSelectRelate);
 		this.uiSkin.seltips.visible=false;
+		this.cancelSelected();
 		DirectoryFileModel.instance.curOperateFile=null;
 		Laya.stage.off("rightclick",this,this.stopSelectRelate);
+		Laya.stage.off("doubleclick",this,this.stopRightSelectRelate);
+	}
+
+	__proto.cancelSelected=function(){
+		if(DirectoryFileModel.instance.curOperateFile !=null){
+			for(var i=0;i < this.uiSkin.picList.cells.length;i++){
+				var picinfoitem=this.uiSkin.picList.cells [i];
+				if(picinfoitem !=null){
+					if(picinfoitem.picInfo==DirectoryFileModel.instance.curOperateFile){
+						picinfoitem.canCelSelected();
+						return;
+					}
+				}
+			}
+		}
 	}
 
 	__proto.onGetLeftCapacitBack=function(data){
@@ -37609,8 +37633,6 @@ var PaintOrderControl=(function(_super){
 		var arr=this.getOrderData();
 		if(arr==null)
 			return;
-		var tempdata='[{"order_sn":"18014398509640518","client_code":"CL10200","consignee":"横店智升广告#刘井伟","tel":"17857591543","address":"浙江省 金华市 东阳市 横店镇 横店镇华夏大道691号","order_amountStr":"72.3","shipping_feeStr":"0","money_paidStr":"72.3","discountStr":"0","pay_timeStr":"2020-07-19 13:39:22","delivery_dateStr":"2020-07-19","manufacturer_code":"SP0579100","manufacturer_name":"义乌物与喷印","contact_phone":"13244556677","logistic_code":"DC0579100#送货上门","orderItemList":[{"prod_name":"户内PP背胶（户内写真）","prod_code":"SPPR10120","prod_description":"","LWH":"68.40/200.00/1","weightStr":1,"item_number":1,"item_priceStr":"35.28","is_merchandise":0,"item_status":"1","comments":"","imagefile_path":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","previewImage_path":"http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","thumbnails_path":"http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057093.jpg","filename":"2.jpg","procInfoList":[{"proc_Code":"SPTE10120","proc_description":"进口高清户内写真","proc_attachpath":""},{"proc_Code":"SPTE10200","proc_description":"覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10210","proc_description":"覆板(高密KT板)","proc_attachpath":""},{"proc_Code":"SPTE10310","proc_description":"覆双面(户内PP背胶（户内写真）)","proc_attachpath":""},{"proc_Code":"SPTE10205","proc_description":"另面覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10330","proc_description":"双面不同画面","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057094.jpg"},{"proc_Code":"SPTE10420","proc_description":"异形切割","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057097.jpg"}],"item_seq":1},{"prod_name":"户内PP背胶（户内写真）","prod_code":"SPPR10120","prod_description":"","LWH":"68.40/210.00/1","weightStr":1,"item_number":1,"item_priceStr":"37.02","is_merchandise":0,"item_status":"1","comments":"","imagefile_path":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","previewImage_path":"http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","thumbnails_path":"http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398510057095.jpg","filename":"4.jpg","procInfoList":[{"proc_Code":"SPTE10120","proc_description":"进口高清户内写真","proc_attachpath":""},{"proc_Code":"SPTE10200","proc_description":"覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10210","proc_description":"覆板(高密KT板)","proc_attachpath":""},{"proc_Code":"SPTE10310","proc_description":"覆双面(户内PP背胶（户内写真）)","proc_attachpath":""},{"proc_Code":"SPTE10205","proc_description":"另面覆膜(哑膜)","proc_attachpath":""},{"proc_Code":"SPTE10330","proc_description":"双面不同画面","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057096.jpg"},{"proc_Code":"SPTE10420","proc_description":"异形切割","proc_attachpath":"http://original-image.oss-cn-hangzhou.aliyuncs.com/18014398510057099.jpg"}],"item_seq":2}]}]';
-		arr=JSON.parse(tempdata);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 	}
 
@@ -40689,8 +40711,8 @@ var MyOrderControl=(function(_super){
 		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
 	}
 
-	__proto.onshowInputDate=function(){
-		if(this.dateInput !=null){
+	__proto.onshowInputDate=function(viewname){
+		if(this.dateInput !=null && viewname=="VIEW_ORDER_DETAIL_PANEL"){
 			this.dateInput.hidden=false;
 			this.dateInput2.hidden=false;
 		}
@@ -60443,6 +60465,7 @@ var OrderCheckListItem=(function(_super){
 		this.ordertime.text=this.orderdata.or_date;
 		var status=parseInt(this.orderdata.or_status);
 		this.retrybtn.visible=false;
+		this.deletebtn.visible=false;
 		if(status==0){
 			this.orderstatus.text="未支付";
 			this.orderstatus.color="#FF0000";
@@ -60452,6 +60475,7 @@ var OrderCheckListItem=(function(_super){
 			this.orderstatus.text="已支付排产成功";
 			this.orderstatus.color="#52B232";
 			this.payagain.visible=false;
+			this.deletebtn.visible=true;
 		}
 		else if(status==2 || status==3){
 			this.orderstatus.text="已支付排产中";
@@ -60471,6 +60495,7 @@ var OrderCheckListItem=(function(_super){
 			this.payagain.visible=false;
 			this.deletebtn.visible=true;
 			this.retrybtn.visible=true;
+			this.deletebtn.visible=true;
 		}
 		else{
 			this.orderstatus.text="订单异常";
