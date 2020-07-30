@@ -6,6 +6,7 @@ package utils
 	import laya.net.LocalStorage;
 	import laya.utils.Browser;
 	
+	import model.orderModel.MaterialItemVo;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PicOrderItemVo;
 	import model.picmanagerModel.PicInfoVo;
@@ -744,6 +745,21 @@ package utils
 				
 			}
 			return false;
+		}
+		
+		public static function getBorderDistance(proclist:Vector.<MaterialItemVo>):int
+		{
+			for(var i:int=0;i < proclist.length;i++)
+			{
+				if(proclist[i].preProc_attachmentTypeList == "SPlb-5")
+					return 10;
+				if(proclist[i].preProc_attachmentTypeList == "SPlb-10")
+					return 20;
+				if(proclist[i].preProc_attachmentTypeList == "SPlb-15")
+					return 30;
+			}
+			
+			return 0;
 		}
 	}
 }

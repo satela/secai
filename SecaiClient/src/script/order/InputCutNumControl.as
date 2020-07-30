@@ -20,6 +20,8 @@ package script.order
 	
 	import ui.order.InputCutNumPanelUI;
 	
+	import utils.UtilTool;
+	
 	public class InputCutNumControl extends Script
 	{
 		private var uiSkin:InputCutNumPanelUI;
@@ -73,6 +75,8 @@ package script.order
 				cutdata.finalHeight = PaintOrderModel.instance.curSelectOrderItem.finalHeight;
 				cutdata.fid = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.fid;
 				
+				cutdata.border = UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>);
+				
 				cutdata.orderitemvo = PaintOrderModel.instance.curSelectOrderItem.ordervo;
 				cutdata.orderitemvo.cuttype = 0;
 				cutdata.orderitemvo.cutnum = Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3));
@@ -96,6 +100,8 @@ package script.order
 						cutdata.finalHeight = batchlist[i].finalHeight;
 						cutdata.fid = batchlist[i].ordervo.picinfo.fid;
 						
+						cutdata.border = UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>);
+
 						cutdata.orderitemvo = batchlist[i].ordervo;
 						cutdata.orderitemvo.cuttype = 0;
 						cutdata.orderitemvo.cutnum = Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3));

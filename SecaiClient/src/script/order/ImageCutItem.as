@@ -92,8 +92,8 @@ package script.order
 			
 			cuttype = cuttyperad.selectedIndex;
 
-			var finalwidth:Number = cutdata.finalWidth;
-			var finalheight:Number = cutdata.finalHeight;
+			var finalwidth:Number = cutdata.finalWidth + cutdata.border;
+			var finalheight:Number = cutdata.finalHeight + cutdata.border;;
 			var product:ProductVo = PaintOrderModel.instance.curSelectMat;
 			
 			var maxwidth:Number = product.max_width - 3;
@@ -120,15 +120,28 @@ package script.order
 			
 			var finalwidth:Number = cutdata.finalWidth;
 			var finalheight:Number = cutdata.finalHeight;
+			
+			var border:Number = cutdata.border;
+			
+			this.borderimg.visible = border > 0;
+				
+			
 			if(finalwidth > finalheight)
 			{
-				paintimg.width = 400;
-				paintimg.height = 400 * finalheight/finalwidth;
+				this.borderimg.width = 400;
+				this.borderimg.height = 400*(finalheight+border)/(finalwidth+border);
+				
+				paintimg.width = 400*finalwidth/(finalwidth + border);
+				
+				paintimg.height = paintimg.width * finalheight/finalwidth;
 			}
 			else
 			{
-				paintimg.height = 400;
-				paintimg.width = 400 * finalwidth/finalheight;
+				this.borderimg.height = 400;
+				this.borderimg.width = 400*(finalwidth+border)/(finalheight+border);
+				
+				paintimg.height = 400*finalheight/(finalheight + border);;
+				paintimg.width = paintimg.height * finalwidth/finalheight;
 			}
 			
 			this.hbox.width = paintimg.width;
@@ -189,7 +202,7 @@ package script.order
 			
 			var curnum:Number = parseFloat(this.hinputlist[index].text);
 			
-			var maxlen:Number = Math.min(maxwidth,cutdata.finalWidth - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1);
+			var maxlen:Number = Math.min(maxwidth,cutdata.finalWidth + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1);
 			
 			if(curnum <= 0)
 				this.hinputlist[index].text = "1";
@@ -197,7 +210,7 @@ package script.order
 				this.hinputlist[index].text = maxlen + "";
 			
 			hascutlen += parseFloat(this.hinputlist[index].text);
-			var leftAvg:Number = (cutdata.finalWidth - hascutlen)/(this.cutdata.orderitemvo.cutnum - index - 1);
+			var leftAvg:Number = (cutdata.finalWidth + cutdata.border - hascutlen)/(this.cutdata.orderitemvo.cutnum - index - 1);
 			
 			for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++)
 			{
@@ -235,11 +248,11 @@ package script.order
 			var curnum:Number = parseFloat(this.vinputlist[index].text);
 			if(curnum <= 0)
 				this.vinputlist[index].text = "1";
-			if(curnum > cutdata.finalWidth - hascutlen - this.cutdata.orderitemvo.cutnum + index+1)
-				this.vinputlist[index].text = (cutdata.finalHeight - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1) + "";
+			if(curnum > cutdata.finalHeight + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index+1)
+				this.vinputlist[index].text = (cutdata.finalHeight + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1) + "";
 			
 			hascutlen += parseFloat(this.vinputlist[index].text);
-			var leftAvg:Number = (cutdata.finalHeight - hascutlen)/(this.cutdata.orderitemvo.cutnum - index - 1);
+			var leftAvg:Number = (cutdata.finalHeight + cutdata.border - hascutlen)/(this.cutdata.orderitemvo.cutnum - index - 1);
 			
 			for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++)
 			{
@@ -260,9 +273,9 @@ package script.order
 		{
 			var cutlen:Number = 0;
 			if(cuttype == 0)
-			 	cutlen = cutdata.finalWidth/cutdata.orderitemvo.cutnum;
+			 	cutlen = (cutdata.finalWidth + cutdata.border)/cutdata.orderitemvo.cutnum;
 			else
-				cutlen = cutdata.finalHeight/cutdata.orderitemvo.cutnum;
+				cutlen = (cutdata.finalHeight + cutdata.border)/cutdata.orderitemvo.cutnum;
 
 			cutlen = parseFloat(cutlen.toFixed(2));
 			cutdata.orderitemvo.eachCutLength = [];
@@ -307,8 +320,8 @@ package script.order
 		private function initCutNum():void
 		{
 			
-			var finalwidth:Number = cutdata.finalWidth;
-			var finalheight:Number = cutdata.finalHeight;
+			var finalwidth:Number = cutdata.finalWidth+ cutdata.border;
+			var finalheight:Number = cutdata.finalHeight+ cutdata.border;
 			var product:ProductVo = PaintOrderModel.instance.curSelectMat;
 
 			var maxwidth:Number = product.max_width - 3;
@@ -367,7 +380,7 @@ package script.order
 			var stepdist:Number = 0;
 			if(cuttype == 0)
 			{
-				stepdist = paintimg.width/lineNum;
+				stepdist = borderimg.width/lineNum;
 				
 				//this.widthnum.text = (cutdata.finalWidth/lineNum).toFixed(2);
 				for(var i:int=0;i < 2;i++)
@@ -375,14 +388,17 @@ package script.order
 					var sp:Sprite = new Sprite();
 					this.paintimg.addChild(sp);									
 					
-					var linelen:Number = this.paintimg.width/linenum;
+					sp.x = (this.paintimg.width - this.borderimg.width)/2;
+					sp.y = (this.paintimg.height - this.borderimg.height)/2;
+
+					var linelen:Number = this.borderimg.width/linenum;
 					for(var j:int=0;j < linenum;j++)
 					{
 						
 						if(j % 2 == 0)
-							sp.graphics.drawLine(j  * linelen,i * this.paintimg.height, (j + 1) * linelen,i * this.paintimg.height,curColorIndex == 0? color1:color2, linethick);
+							sp.graphics.drawLine(j  * linelen,i * this.borderimg.height, (j + 1) * linelen,i * this.borderimg.height,curColorIndex == 0? color1:color2, linethick);
 						else
-							sp.graphics.drawLine(j * linelen,i * this.paintimg.height, (j + 1) * linelen,i * this.paintimg.height,curColorIndex == 1? color1:color2, linethick);
+							sp.graphics.drawLine(j * linelen,i * this.borderimg.height, (j + 1) * linelen,i * this.borderimg.height,curColorIndex == 1? color1:color2, linethick);
 						
 					}											
 					linelist.push(sp);
@@ -390,7 +406,7 @@ package script.order
 			}
 			else
 			{
-				stepdist = paintimg.height/lineNum;
+				stepdist = borderimg.height/lineNum;
 				//this.widthnum.text = (cutdata.finalHeight/lineNum).toFixed(2);
 
 				for(var i:int=0;i < 2;i++)
@@ -398,13 +414,16 @@ package script.order
 					var sp:Sprite = new Sprite();
 					this.paintimg.addChild(sp);									
 					
-					var linelen:Number = this.paintimg.height/linenum;
+					sp.x = (this.paintimg.width - this.borderimg.width)/2;
+					sp.y = (this.paintimg.height - this.borderimg.height)/2;
+
+					var linelen:Number = this.borderimg.height/linenum;
 					for(var j:int=0;j < linenum;j++)
 					{
 						if(j % 2 == 0)
-							sp.graphics.drawLine(i * this.paintimg.width,j * linelen, i * this.paintimg.width,(j +1)* linelen,curColorIndex == 0? color1:color2, linethick);
+							sp.graphics.drawLine(i * this.borderimg.width,j * linelen, i * this.borderimg.width,(j +1)* linelen,curColorIndex == 0? color1:color2, linethick);
 						else
-							sp.graphics.drawLine(i * this.paintimg.width,j * linelen, i * this.paintimg.width,(j +1)* linelen,curColorIndex == 1? color1:color2, linethick);
+							sp.graphics.drawLine(i * this.borderimg.width,j * linelen, i * this.borderimg.width,(j +1)* linelen,curColorIndex == 1? color1:color2, linethick);
 						
 					}											
 					linelist.push(sp);
@@ -417,13 +436,15 @@ package script.order
 				var sp:Sprite = new Sprite();
 				this.paintimg.addChild(sp);
 				
-				
+				sp.x = (this.paintimg.width - this.borderimg.width)/2;
+				sp.y = (this.paintimg.height - this.borderimg.height)/2;
+
 				if(cuttype == 0)
 				{
 					
 					//sp.graphics.drawLine((i+1) * stepdist,0, (i+1) * stepdist,this.paintimg.height,"#ff4400", 1);
 					
-					var linelen:Number = this.paintimg.height/linenum;
+					var linelen:Number = this.borderimg.height/linenum;
 					
 					var beforewidth:Number = 0;
 					for(var k:int=0;k < i;k++)
@@ -434,9 +455,7 @@ package script.order
 					{
 						//if(j == linenum - 1)
 						//	sp.graphics.drawLine((i+1) * stepdist,j * 2 * linelen, (i+1) * stepdist,this.paintimg.height,color2, 1);
-						
-						
-						
+										
 						
 						if(j % 2 == 0)
 							sp.graphics.drawLine(startpos,j * linelen, startpos,(j +1)* linelen,curColorIndex == 0? color1:color2, linethick);
@@ -449,12 +468,12 @@ package script.order
 				}
 				else
 				{
-					var linelen:Number = this.paintimg.width/linenum;
+					var linelen:Number = this.borderimg.width/linenum;
 					
 					var beforewidth:Number = 0;
 					for(var k:int=0;k < i;k++)
 						beforewidth += cutdata.orderitemvo.eachCutLength[k];
-					var startpos:Number = (beforewidth/cutdata.finalHeight)*this.paintimg.height;
+					var startpos:Number = (beforewidth/(cutdata.finalHeight+cutdata.border))*this.borderimg.height;
 					
 					for(var j:int=0;j < linenum;j++)
 					{

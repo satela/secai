@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":26,
-    "selecteID":34,
+    "selectedBox":3,
+    "selecteID":35,
     "searchKey":"View",
     "props":{"width":0,"sceneColor":"#f6f1f1","height":0},
     "nodeParent":-1,
-    "maxID":35,
+    "maxID":36,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -30,6 +30,20 @@
                 {
                     "x":30,
                     "type":"Image",
+                    "searchKey":"Image,borderimg",
+                    "props":{"y":201,"x":201,"width":400,"var":"borderimg","skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","height":100,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},
+                    "nodeParent":3,
+                    "label":"borderimg",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":35,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
                     "searchKey":"Image,paintimg",
                     "props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},
                     "nodeParent":3,
@@ -39,8 +53,10 @@
                     "hasChild":false,
                     "compId":4,
                     "child":[
-                        ]
-                }]
+                        ],
+                    "$HIDDEN":false
+                }],
+            "$HIDDEN":false
         },
         {
             "x":15,

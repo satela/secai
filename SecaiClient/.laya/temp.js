@@ -699,7 +699,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/OrganizeMgrPanel.scene";
+	GameConfig.startScene="order/CutImageItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -2988,6 +2988,18 @@ var UtilTool=(function(){
 			return true;
 		}
 		return false;
+	}
+
+	UtilTool.getBorderDistance=function(proclist){
+		for(var i=0;i < proclist.length;i++){
+			if(proclist[i].preProc_attachmentTypeList=="SPlb-5")
+				return 10;
+			if(proclist[i].preProc_attachmentTypeList=="SPlb-10")
+				return 20;
+			if(proclist[i].preProc_attachmentTypeList=="SPlb-15")
+				return 30;
+		}
+		return 0;
 	}
 
 	__static(UtilTool,
@@ -41102,6 +41114,7 @@ var InputCutNumControl=(function(_super){
 			cutdata.finalWidth=PaintOrderModel.instance.curSelectOrderItem.finalWidth;
 			cutdata.finalHeight=PaintOrderModel.instance.curSelectOrderItem.finalHeight;
 			cutdata.fid=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.fid;
+			cutdata.border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 			cutdata.orderitemvo=PaintOrderModel.instance.curSelectOrderItem.ordervo;
 			cutdata.orderitemvo.cuttype=0;
 			cutdata.orderitemvo.cutnum=Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3));
@@ -41120,6 +41133,7 @@ var InputCutNumControl=(function(_super){
 					cutdata.finalWidth=batchlist[i].finalWidth;
 					cutdata.finalHeight=batchlist[i].finalHeight;
 					cutdata.fid=batchlist[i].ordervo.picinfo.fid;
+					cutdata.border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 					cutdata.orderitemvo=batchlist[i].ordervo;
 					cutdata.orderitemvo.cuttype=0;
 					cutdata.orderitemvo.cutnum=Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3));
@@ -53637,6 +53651,7 @@ var ApplyJoinItemUI=(function(_super){
 //class ui.order.CutImageItemUI extends laya.ui.View
 var CutImageItemUI=(function(_super){
 	function CutImageItemUI(){
+		this.borderimg=null;
 		this.paintimg=null;
 		this.cuttyperad=null;
 		this.cutnumrad=null;
@@ -53666,7 +53681,7 @@ var CutImageItemUI=(function(_super){
 		this.createView(CutImageItemUI.uiView);
 	}
 
-	CutImageItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":3,"x":5,"text":"裁切方向：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"RadioGroup","props":{"y":7,"x":95,"var":"cuttyperad","skin":"commers/checksingle.png","labels":"竖拼裁切 ,横拼裁切","labelSize":18,"labelFont":"SimHei"},"compId":7},{"type":"Label","props":{"y":34,"x":5,"text":"裁切份数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"RadioGroup","props":{"y":38,"x":95,"var":"cutnumrad","skin":"commers/checksingle.png","labels":"3 ,4 ,5 , 6","labelSize":18,"labelFont":"SimHei"},"compId":9},{"type":"HBox","props":{"y":469,"x":5,"width":400,"var":"hbox","height":30},"compId":20,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":13},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":15},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":17},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":22},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":24},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":25},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":33}]},{"type":"VBox","props":{"y":65,"x":405,"width":50,"var":"vbox","height":400},"compId":26,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":27},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":28},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":29},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":30},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":31},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":32},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":34}]}],"loadList":["upload/inoutbg.png","comp/image.png","commers/checksingle.png","comp/textinput.png"],"loadList3D":[]};
+	CutImageItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":65,"x":0,"width":402,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":402},"compId":3,"child":[{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"borderimg","skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","height":100,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":35},{"type":"Image","props":{"y":201,"x":201,"width":400,"var":"paintimg","skin":"comp/image.png","height":400,"anchorY":0.5,"anchorX":0.5},"compId":4}]},{"type":"Label","props":{"y":3,"x":5,"text":"裁切方向：","fontSize":18,"font":"SimHei"},"compId":5},{"type":"RadioGroup","props":{"y":7,"x":95,"var":"cuttyperad","skin":"commers/checksingle.png","labels":"竖拼裁切 ,横拼裁切","labelSize":18,"labelFont":"SimHei"},"compId":7},{"type":"Label","props":{"y":34,"x":5,"text":"裁切份数：","fontSize":18,"font":"SimHei"},"compId":8},{"type":"RadioGroup","props":{"y":38,"x":95,"var":"cutnumrad","skin":"commers/checksingle.png","labels":"3 ,4 ,5 , 6","labelSize":18,"labelFont":"SimHei"},"compId":9},{"type":"HBox","props":{"y":469,"x":5,"width":400,"var":"hbox","height":30},"compId":20,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":13},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":15},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":17},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":22},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":24},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":25},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"hinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":33}]},{"type":"VBox","props":{"y":65,"x":405,"width":50,"var":"vbox","height":400},"compId":26,"child":[{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput0","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":27},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput1","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":28},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput2","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":29},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput3","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":30},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput4","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":31},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput5","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":32},{"type":"TextInput","props":{"y":0,"x":0,"width":50,"var":"vinput6","text":"100","skin":"comp/textinput.png","fontSize":18,"font":"SimSun","sizeGrid":"6,15,7,14"},"compId":34}]}],"loadList":["upload/inoutbg.png","commers/blackbg.png","comp/image.png","commers/checksingle.png","comp/textinput.png"],"loadList3D":[]};
 	return CutImageItemUI;
 })(View)
 
@@ -59778,8 +59793,8 @@ var ImageCutItem=(function(_super){
 
 	__proto.onCutTypeChange=function(){
 		this.cuttype=this.cuttyperad.selectedIndex;
-		var finalwidth=this.cutdata.finalWidth;
-		var finalheight=this.cutdata.finalHeight;
+		var finalwidth=this.cutdata.finalWidth+this.cutdata.border;
+		var finalheight=this.cutdata.finalHeight+this.cutdata.border;;
 		var product=PaintOrderModel.instance.curSelectMat;
 		var maxwidth=product.max_width-3;
 		if(this.cuttype==1){
@@ -59798,13 +59813,19 @@ var ImageCutItem=(function(_super){
 	__proto.initView=function(){
 		var finalwidth=this.cutdata.finalWidth;
 		var finalheight=this.cutdata.finalHeight;
+		var border=this.cutdata.border;
+		this.borderimg.visible=border > 0;
 		if(finalwidth > finalheight){
-			this.paintimg.width=400;
-			this.paintimg.height=400 *finalheight/finalwidth;
+			this.borderimg.width=400;
+			this.borderimg.height=400*(finalheight+border)/(finalwidth+border);
+			this.paintimg.width=400*finalwidth/(finalwidth+border);
+			this.paintimg.height=this.paintimg.width *finalheight/finalwidth;
 		}
 		else{
-			this.paintimg.height=400;
-			this.paintimg.width=400 *finalwidth/finalheight;
+			this.borderimg.height=400;
+			this.borderimg.width=400*(finalwidth+border)/(finalheight+border);
+			this.paintimg.height=400*finalheight/(finalheight+border);;
+			this.paintimg.width=this.paintimg.height *finalwidth/finalheight;
 		}
 		this.hbox.width=this.paintimg.width;
 		this.vbox.height=this.paintimg.height;
@@ -59842,13 +59863,13 @@ var ImageCutItem=(function(_super){
 			hascutlen+=this.cutdata.orderitemvo.eachCutLength[i];
 		};
 		var curnum=parseFloat(this.hinputlist[index].text);
-		var maxlen=Math.min(maxwidth,this.cutdata.finalWidth-hascutlen-this.cutdata.orderitemvo.cutnum+index+1);
+		var maxlen=Math.min(maxwidth,this.cutdata.finalWidth+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1);
 		if(curnum <=0)
 			this.hinputlist[index].text="1";
 		if(curnum > maxlen)
 			this.hinputlist[index].text=maxlen+"";
 		hascutlen+=parseFloat(this.hinputlist[index].text);
-		var leftAvg=(this.cutdata.finalWidth-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
+		var leftAvg=(this.cutdata.finalWidth+this.cutdata.border-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
 		for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++){
 			if(i < this.vinputlist.length)
 				this.hinputlist[i].text=leftAvg.toFixed(2);
@@ -59874,10 +59895,10 @@ var ImageCutItem=(function(_super){
 		var curnum=parseFloat(this.vinputlist[index].text);
 		if(curnum <=0)
 			this.vinputlist[index].text="1";
-		if(curnum > this.cutdata.finalWidth-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)
-			this.vinputlist[index].text=(this.cutdata.finalHeight-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)+"";
+		if(curnum > this.cutdata.finalHeight+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)
+			this.vinputlist[index].text=(this.cutdata.finalHeight+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)+"";
 		hascutlen+=parseFloat(this.vinputlist[index].text);
-		var leftAvg=(this.cutdata.finalHeight-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
+		var leftAvg=(this.cutdata.finalHeight+this.cutdata.border-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
 		for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++){
 			if(i < this.vinputlist.length)
 				this.vinputlist[i].text=leftAvg.toFixed(2);
@@ -59892,9 +59913,9 @@ var ImageCutItem=(function(_super){
 	__proto.resetCutlen=function(){
 		var cutlen=0;
 		if(this.cuttype==0)
-			cutlen=this.cutdata.finalWidth/this.cutdata.orderitemvo.cutnum;
+			cutlen=(this.cutdata.finalWidth+this.cutdata.border)/this.cutdata.orderitemvo.cutnum;
 		else
-		cutlen=this.cutdata.finalHeight/this.cutdata.orderitemvo.cutnum;
+		cutlen=(this.cutdata.finalHeight+this.cutdata.border)/this.cutdata.orderitemvo.cutnum;
 		cutlen=parseFloat(cutlen.toFixed(2));
 		this.cutdata.orderitemvo.eachCutLength=[];
 		for(var j=0;j < this.cutdata.orderitemvo.cutnum;j++)
@@ -59925,8 +59946,8 @@ var ImageCutItem=(function(_super){
 	}
 
 	__proto.initCutNum=function(){
-		var finalwidth=this.cutdata.finalWidth;
-		var finalheight=this.cutdata.finalHeight;
+		var finalwidth=this.cutdata.finalWidth+this.cutdata.border;
+		var finalheight=this.cutdata.finalHeight+this.cutdata.border;
 		var product=PaintOrderModel.instance.curSelectMat;
 		var maxwidth=product.max_width-3;
 		if(this.cuttype==1){
@@ -59966,31 +59987,35 @@ var ImageCutItem=(function(_super){
 		var lineNum=this.cutnumrad.selectedIndex+this.leastCutNum;
 		var stepdist=0;
 		if(this.cuttype==0){
-			stepdist=this.paintimg.width/lineNum;
+			stepdist=this.borderimg.width/lineNum;
 			for(var i=0;i < 2;i++){
 				var sp=new Sprite();
 				this.paintimg.addChild(sp);
-				var linelen=this.paintimg.width/this.linenum;
+				sp.x=(this.paintimg.width-this.borderimg.width)/2;
+				sp.y=(this.paintimg.height-this.borderimg.height)/2;
+				var linelen=this.borderimg.width/this.linenum;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.curColorIndex==0? this.color1:this.color2,this.linethick);
+						sp.graphics.drawLine(j *linelen,i *this.borderimg.height,(j+1)*linelen,i *this.borderimg.height,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(j *linelen,i *this.paintimg.height,(j+1)*linelen,i *this.paintimg.height,this.curColorIndex==1? this.color1:this.color2,this.linethick);
+					sp.graphics.drawLine(j *linelen,i *this.borderimg.height,(j+1)*linelen,i *this.borderimg.height,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 				this.linelist.push(sp);
 			}
 		}
 		else{
-			stepdist=this.paintimg.height/lineNum;
+			stepdist=this.borderimg.height/lineNum;
 			for(var i=0;i < 2;i++){
 				var sp=new Sprite();
 				this.paintimg.addChild(sp);
-				var linelen=this.paintimg.height/this.linenum;
+				sp.x=(this.paintimg.width-this.borderimg.width)/2;
+				sp.y=(this.paintimg.height-this.borderimg.height)/2;
+				var linelen=this.borderimg.height/this.linenum;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
-						sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.curColorIndex==0? this.color1:this.color2,this.linethick);
+						sp.graphics.drawLine(i *this.borderimg.width,j *linelen,i *this.borderimg.width,(j+1)*linelen,this.curColorIndex==0? this.color1:this.color2,this.linethick);
 					else
-					sp.graphics.drawLine(i *this.paintimg.width,j *linelen,i *this.paintimg.width,(j+1)*linelen,this.curColorIndex==1? this.color1:this.color2,this.linethick);
+					sp.graphics.drawLine(i *this.borderimg.width,j *linelen,i *this.borderimg.width,(j+1)*linelen,this.curColorIndex==1? this.color1:this.color2,this.linethick);
 				}
 				this.linelist.push(sp);
 			}
@@ -59998,8 +60023,10 @@ var ImageCutItem=(function(_super){
 		for(var i=0;i < lineNum+1;i++){
 			var sp=new Sprite();
 			this.paintimg.addChild(sp);
+			sp.x=(this.paintimg.width-this.borderimg.width)/2;
+			sp.y=(this.paintimg.height-this.borderimg.height)/2;
 			if(this.cuttype==0){
-				var linelen=this.paintimg.height/this.linenum;
+				var linelen=this.borderimg.height/this.linenum;
 				var beforewidth=0;
 				for(var k=0;k < i;k++)
 				beforewidth+=this.cutdata.orderitemvo.eachCutLength[k];
@@ -60012,11 +60039,11 @@ var ImageCutItem=(function(_super){
 				}
 			}
 			else{
-				var linelen=this.paintimg.width/this.linenum;
+				var linelen=this.borderimg.width/this.linenum;
 				var beforewidth=0;
 				for(var k=0;k < i;k++)
 				beforewidth+=this.cutdata.orderitemvo.eachCutLength[k];
-				var startpos=(beforewidth/this.cutdata.finalHeight)*this.paintimg.height;
+				var startpos=(beforewidth/(this.cutdata.finalHeight+this.cutdata.border))*this.borderimg.height;
 				for(var j=0;j < this.linenum;j++){
 					if(j % 2==0)
 						sp.graphics.drawLine(j *linelen,startpos,(j+1)*linelen,startpos,this.curColorIndex==0? this.color1:this.color2,this.linethick);
