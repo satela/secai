@@ -70,4 +70,5 @@
    <item name="CharacterPaint.scene" props="" ifExport="分离模式" aName=""/>
    <item name="characterpaint/CharacterPaint.scene" props="" ifExport="分离模式" aName=""/>
    <item name="characterpaint/BackImgItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="characterpaint/ColorLblItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

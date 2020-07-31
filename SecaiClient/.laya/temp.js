@@ -30075,86 +30075,6 @@ var TextureSV=(function(_super){
 
 
 /**
-*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
-*/
-//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
-var MeshQuadTexture=(function(_super){
-	//private static var _num;
-	function MeshQuadTexture(){
-		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
-		if(!laya.webgl.utils.MeshQuadTexture._fixib){
-			this.createQuadIB(MeshQuadTexture._maxIB);
-			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
-			}else {
-			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
-			this._quadNum=MeshQuadTexture._maxIB;
-		}
-	}
-
-	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
-	var __proto=MeshQuadTexture.prototype;
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._vb.destroy();
-		this._vb.deleteBuffer();
-	}
-
-	/**
-	*
-	*@param pos
-	*@param uv
-	*@param color
-	*@param clip ox,oy,xx,xy,yx,yy
-	*@param useTex 是否使用贴图。false的话是给fillRect用的
-	*/
-	__proto.addQuad=function(pos,uv,color,useTex){
-		var vb=this._vb;
-		var vpos=(vb._byteLength >> 2);
-		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
-		var vbdata=vb._floatArray32 || vb.getFloat32Array();
-		var vbu32Arr=vb._uint32Array;
-		var cpos=vpos;
-		var useTexVal=useTex?0xff:0;
-		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vb._upload=true;
-	}
-
-	MeshQuadTexture.getAMesh=function(){
-		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
-			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
-		}
-		return new MeshQuadTexture();
-	}
-
-	MeshQuadTexture.const_stride=24;
-	MeshQuadTexture._fixib=null;
-	MeshQuadTexture._maxIB=16 *1024;
-	MeshQuadTexture._POOL=[];
-	__static(MeshQuadTexture,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1401,4,16,
-		0x1401,4,20];}
-	]);
-	return MeshQuadTexture;
-})(Mesh2D)
-
-
-/**
 *<code>Loader</code> 类可用来加载文本、JSON、XML、二进制、图像等资源。
 */
 //class laya.net.Loader extends laya.events.EventDispatcher
@@ -30637,6 +30557,86 @@ var Loader=(function(_super){
 	Loader._startIndex=0;
 	return Loader;
 })(EventDispatcher)
+
+
+/**
+*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*/
+//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
+var MeshQuadTexture=(function(_super){
+	//private static var _num;
+	function MeshQuadTexture(){
+		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
+		if(!laya.webgl.utils.MeshQuadTexture._fixib){
+			this.createQuadIB(MeshQuadTexture._maxIB);
+			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
+			}else {
+			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
+			this._quadNum=MeshQuadTexture._maxIB;
+		}
+	}
+
+	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
+	var __proto=MeshQuadTexture.prototype;
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._vb.destroy();
+		this._vb.deleteBuffer();
+	}
+
+	/**
+	*
+	*@param pos
+	*@param uv
+	*@param color
+	*@param clip ox,oy,xx,xy,yx,yy
+	*@param useTex 是否使用贴图。false的话是给fillRect用的
+	*/
+	__proto.addQuad=function(pos,uv,color,useTex){
+		var vb=this._vb;
+		var vpos=(vb._byteLength >> 2);
+		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
+		var vbdata=vb._floatArray32 || vb.getFloat32Array();
+		var vbu32Arr=vb._uint32Array;
+		var cpos=vpos;
+		var useTexVal=useTex?0xff:0;
+		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vb._upload=true;
+	}
+
+	MeshQuadTexture.getAMesh=function(){
+		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
+			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
+		}
+		return new MeshQuadTexture();
+	}
+
+	MeshQuadTexture.const_stride=24;
+	MeshQuadTexture._fixib=null;
+	MeshQuadTexture._maxIB=16 *1024;
+	MeshQuadTexture._POOL=[];
+	__static(MeshQuadTexture,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1401,4,16,
+		0x1401,4,20];}
+	]);
+	return MeshQuadTexture;
+})(Mesh2D)
 
 
 /**
@@ -41073,6 +41073,7 @@ var CharacterMainControl=(function(_super){
 		this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/18014398509938750.jpg";
 		this.param=null;
 		this.allsilder=null;
+		this.curselectColor=null;
 		CharacterMainControl.__super.call(this);
 	}
 
@@ -41085,8 +41086,10 @@ var CharacterMainControl=(function(_super){
 		this.uiSkin.closebtn.on("click",this,this.closeView);
 		this.uiSkin.mattype1.selectedIndex=0;
 		this.uiSkin.mattype2.selectedIndex=0;
-		this.uiSkin.depth1.text="0.1";
-		this.uiSkin.depth2.text="0.1";
+		this.uiSkin.mattype3.selectedIndex=0;
+		this.uiSkin.depth1.text="1";
+		this.uiSkin.depth2.text="10";
+		this.uiSkin.depth3.text="10";
 		this.uiSkin.createlayer1.on("click",this,this.oncreateLayer1);
 		this.uiSkin.createlayer2.on("click",this,this.oncreateLayer2);
 		this.uiSkin.createlayer3.on("click",this,this.oncreateLayer3);
@@ -41094,7 +41097,6 @@ var CharacterMainControl=(function(_super){
 		for(var i=0;i<this.allsilder.length;i++)
 		this.allsilder[i].on("change",this,this.onChangeAlpha,[i]);
 		this.uiSkin.lightIntensity.on("change",this,this.onChangeLigthIntensity);
-		this.uiSkin.fontsizeinput.on("input",this,this.onSizeChange);
 		this.uiSkin.backimglist.itemRender=BackGroundItem;
 		this.uiSkin.backimglist.vScrollBarSkin="";
 		this.uiSkin.backimglist.repeatX=2;
@@ -41103,9 +41105,28 @@ var CharacterMainControl=(function(_super){
 		this.uiSkin.backimglist.renderHandler=new Handler(this,this.updateBackgroundList);
 		this.uiSkin.backimglist.selectHandler=new Handler(this,this.onSelectHandler);
 		this.uiSkin.backimglist.selectEnable=true;
+		this.uiSkin.colorlist.itemRender=ColorItem;
+		this.uiSkin.fontsizeinput.text=this.param.picPhysicWidth+"";
+		this.uiSkin.colorlist.repeatX=2;
+		this.uiSkin.colorlist.spaceX=2;
+		this.uiSkin.colorlist.spaceY=5;
+		var colorlist=["FF0000","000000","808080","D3D3D3","FFFFFF","800000","F08080","A0522D","FF8C00","FFA500","DAA520","808000","BDB76B",
+		"FFFF00","6B8E23","9ACD32","ADFF2F","006400","008000","00FF00","90EE90","40E0D0","008B8B","00FFFF","00BFFF","1E90FF",
+		"4169E1","00008B","0000FF","48CD8B","7B68EE","8A2BE2","9400D3","800080","FF00FF","EE82EE"];
+		this.uiSkin.colorlist.array=colorlist;
+		this.uiSkin.colorlist.renderHandler=new Handler(this,this.updateColorList);
+		this.uiSkin.colorlist.selectHandler=new Handler(this,this.onSelectColor);
+		this.uiSkin.colorlist.selectEnable=true;
+		this.uiSkin.colorpanel.visible=false;
+		this.uiSkin.closecolor.on("click",this,this.onCloseColorPanel);
 		if(this.param !=null){
 			this.picurl="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.param.fid+".jpg";
+		};
+		var colorlbl=[this.uiSkin.choosecolor1,this.uiSkin.choosecolor2,this.uiSkin.choosecolor3];
+		for(var i=0;i < colorlbl.length;i++){
+			colorlbl[i].on("click",this,this.showColorPanel,[i]);
 		}
+		this.uiSkin.changSizeBtn.on("click",this,this.onchangeFontSize);
 		this.initU3dWeb();
 		Browser.window.layaCaller=this;
 	}
@@ -41120,6 +41141,27 @@ var CharacterMainControl=(function(_super){
 			(this.uiSkin.backimglist.cells [i]).setSelected((this.uiSkin.backimglist.cells [i]).urlpath==this.uiSkin.backimglist.array[index]);
 		}
 		Browser.window.Unity3dWeb.changebackground(this.uiSkin.backimglist.array[index]);
+	}
+
+	__proto.updateColorList=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onSelectColor=function(index){
+		if(index < 0)
+			return;
+		this.curselectColor.bgColor="#"+this.uiSkin.colorlist.array[index];
+		this.uiSkin.colorpanel.visible=false;
+	}
+
+	__proto.showColorPanel=function(index){
+		this.uiSkin.colorlist.selectedIndex=-1;
+		this.uiSkin.colorpanel.visible=true;
+		this.curselectColor=this.uiSkin["choosecolor"+(index+1)];
+	}
+
+	__proto.onCloseColorPanel=function(){
+		this.uiSkin.colorpanel.visible=false;
 	}
 
 	__proto.initU3dWeb=function(){
@@ -41154,11 +41196,15 @@ var CharacterMainControl=(function(_super){
 		}
 		else{
 			CharacterMainControl.u3ddiv.style.display="block";
+			var size=parseInt(this.uiSkin.fontsizeinput.text)/100;
+			Browser.window.Unity3dWeb.changefontSize(size.toString());
 			Browser.window.Unity3dWeb.createMesh(this.picurl);
 		}
 	}
 
 	__proto.unityIsReady=function(){
+		var size=parseInt(this.uiSkin.fontsizeinput.text)/100;
+		Browser.window.Unity3dWeb.changefontSize(size.toString());
 		Browser.window.Unity3dWeb.createMesh(this.picurl);
 	}
 
@@ -41172,35 +41218,39 @@ var CharacterMainControl=(function(_super){
 
 	__proto.oncreateLayer1=function(){
 		var str="";
+		var depth=parseInt(this.uiSkin.depth1.text)/100;
 		str+="0&";
-		str+=this.uiSkin.depth1.text+"&";
+		str+=depth+"&";
 		str+=(this.uiSkin.mattype1.selectedIndex+1)+"&";
-		str+=(this.uiSkin.colorinput1.text);
+		str+=(this.uiSkin.choosecolor1.bgColor);
 		Browser.window.Unity3dWeb.createLayer(str);
 	}
 
 	__proto.oncreateLayer2=function(){
 		var str="";
 		str+="1&";
-		str+=this.uiSkin.depth2.text+"&";
+		var depth=parseInt(this.uiSkin.depth2.text)/100;
+		str+=depth+"&";
 		str+=(this.uiSkin.mattype2.selectedIndex+1)+"&";
-		str+=(this.uiSkin.colorinput2.text);
+		str+=(this.uiSkin.choosecolor2.bgColor);
 		Browser.window.Unity3dWeb.createLayer(str);
 	}
 
 	__proto.oncreateLayer3=function(){
 		var str="";
 		str+="2&";
-		str+=this.uiSkin.depth3.text+"&";
+		var depth=parseInt(this.uiSkin.depth3.text)/100;
+		str+=depth+"&";
 		str+=(this.uiSkin.mattype3.selectedIndex+1)+"&";
-		str+=(this.uiSkin.colorinput3.text);
+		str+=(this.uiSkin.choosecolor3.bgColor);
 		Browser.window.Unity3dWeb.createLayer(str);
 	}
 
-	__proto.onSizeChange=function(){
+	__proto.onchangeFontSize=function(){
 		if(this.uiSkin.fontsizeinput.text=="")
 			return;
-		Browser.window.Unity3dWeb.changefontSize(this.uiSkin.fontsizeinput.text);
+		var size=parseInt(this.uiSkin.fontsizeinput.text)/100;
+		Browser.window.Unity3dWeb.changefontSize(size.toString());
 	}
 
 	__proto.closeView=function(){
@@ -53589,11 +53639,10 @@ var CharacterPaintUI=(function(_super){
 		this.mattype1=null;
 		this.createlayer1=null;
 		this.closebtn=null;
-		this.colorinput1=null;
+		this.choosecolor1=null;
 		this.depth2=null;
 		this.mattype2=null;
 		this.createlayer2=null;
-		this.colorinput2=null;
 		this.fontsizeinput=null;
 		this.backimglist=null;
 		this.alphasilder1=null;
@@ -53601,9 +53650,14 @@ var CharacterPaintUI=(function(_super){
 		this.depth3=null;
 		this.mattype3=null;
 		this.createlayer3=null;
-		this.colorinput3=null;
 		this.alphasilder3=null;
 		this.lightIntensity=null;
+		this.changSizeBtn=null;
+		this.choosecolor2=null;
+		this.choosecolor3=null;
+		this.colorpanel=null;
+		this.colorlist=null;
+		this.closecolor=null;
 		CharacterPaintUI.__super.call(this);
 	}
 
@@ -53615,6 +53669,26 @@ var CharacterPaintUI=(function(_super){
 	}
 
 	return CharacterPaintUI;
+})(View)
+
+
+//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
+var AddressMgrPanelUI=(function(_super){
+	function AddressMgrPanelUI(){
+		this.btnaddAddress=null;
+		this.addlist=null;
+		this.numAddress=null;
+		AddressMgrPanelUI.__super.call(this);
+	}
+
+	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
+	var __proto=AddressMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/AddressMgrPanel");
+	}
+
+	return AddressMgrPanelUI;
 })(View)
 
 
@@ -53695,26 +53769,6 @@ var QuestOrderItem=(function(_super){
 
 	return QuestOrderItem;
 })(OrderQuestItemUI)
-
-
-//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
-var AddressMgrPanelUI=(function(_super){
-	function AddressMgrPanelUI(){
-		this.btnaddAddress=null;
-		this.addlist=null;
-		this.numAddress=null;
-		AddressMgrPanelUI.__super.call(this);
-	}
-
-	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
-	var __proto=AddressMgrPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("usercenter/AddressMgrPanel");
-	}
-
-	return AddressMgrPanelUI;
-})(View)
 
 
 //class ui.usercenter.OrganizeMgrPanelUI extends laya.ui.View
@@ -53824,6 +53878,25 @@ var ApplyJoinItemUI=(function(_super){
 
 	ApplyJoinItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"account","valign":"middle","text":"13589898989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"msg","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"reqdate","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"refusebtn","text":"拒绝","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"agreebtn","text":"同意","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return ApplyJoinItemUI;
+})(View)
+
+
+//class ui.characterpaint.ColorLblItemUI extends laya.ui.View
+var ColorLblItemUI=(function(_super){
+	function ColorLblItemUI(){
+		this.lblcolor=null;
+		ColorLblItemUI.__super.call(this);
+	}
+
+	__class(ColorLblItemUI,'ui.characterpaint.ColorLblItemUI',_super);
+	var __proto=ColorLblItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(ColorLblItemUI.uiView);
+	}
+
+	ColorLblItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Label","props":{"width":90,"var":"lblcolor","height":30,"borderColor":"#101010","bgColor":"#f41815"},"compId":3}],"loadList":[],"loadList3D":[]};
+	return ColorLblItemUI;
 })(View)
 
 
@@ -58103,6 +58176,111 @@ var Tree=(function(_super){
 
 
 /**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
+
+
+/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -59054,111 +59232,6 @@ var List=(function(_super){
 
 	return List;
 })(Box)
-
-
-/**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
 
 
 /**
@@ -60370,6 +60443,22 @@ var MaterialItem=(function(_super){
 })(MaterialNameItemUI)
 
 
+//class script.characterpaint.ColorItem extends ui.characterpaint.ColorLblItemUI
+var ColorItem=(function(_super){
+	function ColorItem(){
+		ColorItem.__super.call(this);
+	}
+
+	__class(ColorItem,'script.characterpaint.ColorItem',_super);
+	var __proto=ColorItem.prototype;
+	__proto.setData=function(color){
+		this.lblcolor.bgColor="#"+color;
+	}
+
+	return ColorItem;
+})(ColorLblItemUI)
+
+
 //class script.order.SelectAttachBtn extends ui.order.TabChooseBtnUI
 var SelectAttachBtn=(function(_super){
 	function SelectAttachBtn(){
@@ -60656,6 +60745,68 @@ var DeliveryTypeItem=(function(_super){
 })(OrderAddressItemUI)
 
 
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(){
+		this.techmainvo=null;
+		this.isSelected=false;
+		this.processCatVo=null;
+		this.attachVo=null;
+		TechBoxItem.__super.call(this);
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.processCatVo=null;
+		this.techmainvo=tvo;
+		this.initView();
+		if(tvo.selected)
+			this.setSelected(true);
+		else
+		this.setSelected(false);
+	}
+
+	__proto.setAttachVo=function(attachvo){
+		this.processCatVo=null;
+		this.techmainvo=null;
+		this.attachVo=attachvo;
+		this.techBtn.label=this.attachVo.accessory_name;
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.techmainvo=null;
+		this.processCatVo=pvo;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
+	}
+
+	// setSelected(false);
+	__proto.initView=function(){
+		this.techBtn.label=this.techmainvo.preProc_Name;
+	}
+
+	__proto.setSelected=function(sel){
+		this.techBtn.selected=sel;;
+		this.isSelected=sel;
+	}
+
+	__proto.setTechSelected=function(sel){
+		if(this.techmainvo !=null){
+			this.techmainvo.selected=sel;
+			this.techmainvo.attchMentFileId="";
+			this.techmainvo.attchFileId="";
+			this.techmainvo.selectAttachVoList=null;
+		}
+		else
+		this.processCatVo.selected=sel;
+	}
+
+	__proto.onClickTech=function(index){}
+	return TechBoxItem;
+})(TechorItemUI)
+
+
 //class script.usercenter.OrderCheckListItem extends ui.usercenter.OrderListItemUI
 var OrderCheckListItem=(function(_super){
 	function OrderCheckListItem(){
@@ -60738,68 +60889,6 @@ var OrderCheckListItem=(function(_super){
 
 	return OrderCheckListItem;
 })(OrderListItemUI)
-
-
-//class script.order.TechBoxItem extends ui.order.TechorItemUI
-var TechBoxItem=(function(_super){
-	function TechBoxItem(){
-		this.techmainvo=null;
-		this.isSelected=false;
-		this.processCatVo=null;
-		this.attachVo=null;
-		TechBoxItem.__super.call(this);
-	}
-
-	__class(TechBoxItem,'script.order.TechBoxItem',_super);
-	var __proto=TechBoxItem.prototype;
-	__proto.setData=function(tvo){
-		this.processCatVo=null;
-		this.techmainvo=tvo;
-		this.initView();
-		if(tvo.selected)
-			this.setSelected(true);
-		else
-		this.setSelected(false);
-	}
-
-	__proto.setAttachVo=function(attachvo){
-		this.processCatVo=null;
-		this.techmainvo=null;
-		this.attachVo=attachvo;
-		this.techBtn.label=this.attachVo.accessory_name;
-		this.setSelected(false);
-	}
-
-	__proto.setProcessData=function(pvo){
-		this.techmainvo=null;
-		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name.split("-")[0];
-	}
-
-	// setSelected(false);
-	__proto.initView=function(){
-		this.techBtn.label=this.techmainvo.preProc_Name;
-	}
-
-	__proto.setSelected=function(sel){
-		this.techBtn.selected=sel;;
-		this.isSelected=sel;
-	}
-
-	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null){
-			this.techmainvo.selected=sel;
-			this.techmainvo.attchMentFileId="";
-			this.techmainvo.attchFileId="";
-			this.techmainvo.selectAttachVoList=null;
-		}
-		else
-		this.processCatVo.selected=sel;
-	}
-
-	__proto.onClickTech=function(index){}
-	return TechBoxItem;
-})(TechorItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI

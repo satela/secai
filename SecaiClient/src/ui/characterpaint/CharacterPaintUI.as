@@ -10,11 +10,10 @@ package ui.characterpaint {
 		public var mattype1:RadioGroup;
 		public var createlayer1:Button;
 		public var closebtn:Button;
-		public var colorinput1:TextInput;
+		public var choosecolor1:Label;
 		public var depth2:TextInput;
 		public var mattype2:RadioGroup;
 		public var createlayer2:Button;
-		public var colorinput2:TextInput;
 		public var fontsizeinput:TextInput;
 		public var backimglist:List;
 		public var alphasilder1:HSlider;
@@ -22,9 +21,14 @@ package ui.characterpaint {
 		public var depth3:TextInput;
 		public var mattype3:RadioGroup;
 		public var createlayer3:Button;
-		public var colorinput3:TextInput;
 		public var alphasilder3:HSlider;
 		public var lightIntensity:HSlider;
+		public var changSizeBtn:Button;
+		public var choosecolor2:Label;
+		public var choosecolor3:Label;
+		public var colorpanel:Image;
+		public var colorlist:List;
+		public var closecolor:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

@@ -2,6 +2,7 @@ package script.characterpaint
 {
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.Label;
 	import laya.utils.Browser;
 	import laya.utils.Handler;
 	
@@ -25,6 +26,9 @@ package script.characterpaint
 		public var param:PicInfoVo;
 		
 		private var allsilder:Array;
+		
+		private var curselectColor:Label;
+		
 		public function CharacterMainControl()
 		{
 			super();
@@ -41,9 +45,12 @@ package script.characterpaint
 			
 			uiSkin.mattype1.selectedIndex = 0;
 			uiSkin.mattype2.selectedIndex = 0;
-			
-			uiSkin.depth1.text = "0.1";
-			uiSkin.depth2.text = "0.1";
+			uiSkin.mattype3.selectedIndex = 0;
+
+			uiSkin.depth1.text = "1";
+			uiSkin.depth2.text = "10";
+			uiSkin.depth3.text = "10";
+
 			uiSkin.createlayer1.on(Event.CLICK,this,oncreateLayer1);
 			uiSkin.createlayer2.on(Event.CLICK,this,oncreateLayer2);
 			
@@ -56,7 +63,7 @@ package script.characterpaint
 			
 			uiSkin.lightIntensity.on(Event.CHANGE,this,onChangeLigthIntensity);
 
-			this.uiSkin.fontsizeinput.on(Event.INPUT,this,onSizeChange);
+			//this.uiSkin.fontsizeinput.on(Event.INPUT,this,onSizeChange);
 			
 			uiSkin.backimglist.itemRender = BackGroundItem;
 			
@@ -74,11 +81,42 @@ package script.characterpaint
 			uiSkin.backimglist.selectEnable = true;
 			
 
+			uiSkin.colorlist.itemRender = ColorItem;
+			
+			uiSkin.fontsizeinput.text = param.picPhysicWidth + "";
+			
+			//uiSkin.colorlist.vScrollBarSkin = "";
+			uiSkin.colorlist.repeatX = 2;
+			uiSkin.colorlist.spaceX = 2;
+			uiSkin.colorlist.spaceY = 5;
+			
+			var colorlist:Array = ["FF0000","000000","808080","D3D3D3","FFFFFF","800000","F08080","A0522D","FF8C00","FFA500","DAA520","808000","BDB76B",
+									"FFFF00","6B8E23","9ACD32","ADFF2F","006400","008000","00FF00","90EE90","40E0D0","008B8B","00FFFF","00BFFF","1E90FF",
+									"4169E1","00008B","0000FF","48CD8B","7B68EE","8A2BE2","9400D3","800080","FF00FF","EE82EE"];
+			
+			uiSkin.colorlist.array = colorlist;
+			
+			
+			uiSkin.colorlist.renderHandler = new Handler(this, updateColorList);
+			uiSkin.colorlist.selectHandler = new Handler(this, onSelectColor);
+			
+			uiSkin.colorlist.selectEnable = true;
+			
+			uiSkin.colorpanel.visible = false;
+			
+			uiSkin.closecolor.on(Event.CLICK,this,onCloseColorPanel);
+
 			if(param != null)
 			{
 				picurl = HttpRequestUtil.biggerPicUrl + param.fid + ".jpg";
 			}
 			
+			var colorlbl:Array = [uiSkin.choosecolor1,uiSkin.choosecolor2,uiSkin.choosecolor3];
+			for(var i:int=0;i < colorlbl.length;i++)
+			{
+				colorlbl[i].on(Event.CLICK,this,showColorPanel,[i]);
+			}
+			uiSkin.changSizeBtn.on(Event.CLICK,this,onchangeFontSize);
 			initU3dWeb();
 			
 			Browser.window.layaCaller = this;
@@ -102,6 +140,35 @@ package script.characterpaint
 
 		}
 		
+		private function updateColorList(cell:ColorItem):void
+		{
+			cell.setData(cell.dataSource);
+			
+		}
+		
+		private function onSelectColor(index:int):void
+		{
+			if(index < 0)
+				return;
+			//Browser.window.Unity3dWeb.changebackground(uiSkin.backimglist.array[index]);
+			curselectColor.bgColor = "#" + uiSkin.colorlist.array[index];
+			uiSkin.colorpanel.visible = false;
+
+		}
+		
+		private function showColorPanel(index:int):void
+		{
+			uiSkin.colorlist.selectedIndex = -1;
+			uiSkin.colorpanel.visible = true;
+			curselectColor = uiSkin["choosecolor" + (index+1)];
+					
+		}
+		
+		private function onCloseColorPanel():void
+		{
+			uiSkin.colorpanel.visible = false;
+
+		}
 		private function initU3dWeb():void
 		{
 			if(u3ddiv == null)
@@ -155,6 +222,10 @@ package script.characterpaint
 			else
 			{
 				u3ddiv.style.display = "block";
+				var size:Number = parseInt(uiSkin.fontsizeinput.text)/100;
+				
+				Browser.window.Unity3dWeb.changefontSize(size.toString());
+				
 				Browser.window.Unity3dWeb.createMesh(picurl);
 
 			}
@@ -163,6 +234,10 @@ package script.characterpaint
 		
 		private function unityIsReady():void
 		{
+			var size:Number = parseInt(uiSkin.fontsizeinput.text)/100;
+			
+			Browser.window.Unity3dWeb.changefontSize(size.toString());
+			
 			Browser.window.Unity3dWeb.createMesh(picurl);
 		}
 		
@@ -181,13 +256,16 @@ package script.characterpaint
 		private function oncreateLayer1():void
 		{
 			var str:String = "";
+			
+			var depth:Number = parseInt(uiSkin.depth1.text)/100;
+			
 			str += "0&";
 			
-			str += uiSkin.depth1.text + "&";
+			str += depth + "&";
 			
 			str += (uiSkin.mattype1.selectedIndex+1) + "&";
 			
-			str += (uiSkin.colorinput1.text);
+			str += (uiSkin.choosecolor1.bgColor);
 			
 			Browser.window.Unity3dWeb.createLayer(str);
 		}
@@ -196,11 +274,14 @@ package script.characterpaint
 			var str:String = "";
 			str += "1&";
 			
-			str += uiSkin.depth2.text + "&";
+			var depth:Number = parseInt(uiSkin.depth2.text)/100;
+
+			
+			str += depth + "&";
 			
 			str += (uiSkin.mattype2.selectedIndex+1) + "&";
 			
-			str += (uiSkin.colorinput2.text);
+			str += (uiSkin.choosecolor2.bgColor);
 			
 			Browser.window.Unity3dWeb.createLayer(str);
 		}
@@ -210,22 +291,29 @@ package script.characterpaint
 			var str:String = "";
 			str += "2&";
 			
-			str += uiSkin.depth3.text + "&";
+			var depth:Number = parseInt(uiSkin.depth3.text)/100;
+			
+			
+			str += depth + "&";
 			
 			str += (uiSkin.mattype3.selectedIndex+1) + "&";
 			
-			str += (uiSkin.colorinput3.text);
+			str += (uiSkin.choosecolor3.bgColor);
 			
 			Browser.window.Unity3dWeb.createLayer(str);
 		}
 		
 		
-		private function onSizeChange():void
+		private function onchangeFontSize():void
 		{
 			if(uiSkin.fontsizeinput.text == "")
 				return;
-			Browser.window.Unity3dWeb.changefontSize(uiSkin.fontsizeinput.text);
+			var size:Number = parseInt(uiSkin.fontsizeinput.text)/100;
+			
+			Browser.window.Unity3dWeb.changefontSize(size.toString());
 		}
+		
+		
 		private function closeView():void
 		{
 			ViewManager.instance.closeView(ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL);
