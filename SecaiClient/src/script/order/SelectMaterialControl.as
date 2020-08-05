@@ -1,4 +1,4 @@
-package script.order
+package script.order 
 {
 	import eventUtil.EventCenter;
 	
@@ -900,6 +900,19 @@ package script.order
 					if(hasSelectedTech[i].selectAttachVoList == null || hasSelectedTech[i].selectAttachVoList.length == 0 )
 					{
 						ViewManager.showAlert("未选择配件");
+						return;
+					}
+				}
+			}
+			
+			var nextmatlist:Vector.<MaterialItemVo> = curclickItem.techmainvo.nextMatList;
+			if(nextmatlist != null && nextmatlist.length == 1)
+			{
+				for(var i:int=0;i < nextmatlist.length;i++)
+				{
+					if(nextmatlist[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
+					{
+						ViewManager.showAlert("当前有必选工艺，请选择");
 						return;
 					}
 				}

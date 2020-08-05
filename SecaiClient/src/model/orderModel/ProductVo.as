@@ -122,7 +122,7 @@ package model.orderModel
 						if(peijian != "")
 							return arr[i].preProc_Name + "(" + peijian.substr(0,peijian.length-1) + ")" +  "-" + getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 						else 
-							return arr[i].preProc_Name +  "-" + getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
+							return arr[i].preProc_Name +  UtilTool.getAttachDesc(arr[i]) +  "-" + getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 					}
 					else
 						return  getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
@@ -270,7 +270,7 @@ package model.orderModel
 				{
 					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
 					{
-						var procname:String = arr[i].preProc_Name;
+						var procname:String = arr[i].preProc_Name + UtilTool.getAttachDesc(arr[i]);
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
 							procname += "(" + arr[i].selectAttachVoList[0].accessory_name + ")";
 						if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)

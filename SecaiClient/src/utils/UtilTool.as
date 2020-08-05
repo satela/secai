@@ -761,5 +761,15 @@ package utils
 			
 			return 0;
 		}
+		
+		public static function getAttachDesc(matvp:MaterialItemVo):String
+		{
+			
+				if(matvp.preProc_attachmentTypeList.indexOf("SPlb") >= 0)
+				
+					return "(" + matvp.preProc_attachmentTypeList + ")";
+				else return "";
+			
+		}
 	}
 }

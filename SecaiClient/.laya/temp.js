@@ -699,7 +699,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/CutImageItem.scene";
+	GameConfig.startScene="common/TipPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1408,7 +1408,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2337,7 +2336,7 @@ var ProductVo=(function(){
 					if(peijian !="")
 						return arr[i].preProc_Name+"("+peijian.substr(0,peijian.length-1)+")"+"-"+this.getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 					else
-					return arr[i].preProc_Name+"-"+this.getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
+					return arr[i].preProc_Name+UtilTool.getAttachDesc(arr[i])+"-"+this.getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
 				}
 				else
 				return this.getTechStr(arr[i].nextMatList,ignoreWidth,picwidth,picheight);
@@ -2421,7 +2420,7 @@ var ProductVo=(function(){
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
 				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth > this.max_width && picheight > this.max_width)){
-					var procname=arr[i].preProc_Name;
+					var procname=arr[i].preProc_Name+UtilTool.getAttachDesc(arr[i]);
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 						procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
 					if(arr[i].preProc_Code=="SPTE10420")
@@ -3000,6 +2999,12 @@ var UtilTool=(function(){
 				return 30;
 		}
 		return 0;
+	}
+
+	UtilTool.getAttachDesc=function(matvp){
+		if(matvp.preProc_attachmentTypeList.indexOf("SPlb")>=0)
+			return "("+matvp.preProc_attachmentTypeList+")";
+		else return "";
 	}
 
 	__static(UtilTool,
@@ -40151,6 +40156,15 @@ var SelectMaterialControl=(function(_super){
 			if(hasSelectedTech[i].preProc_attachmentTypeList.toLocaleUpperCase()=="SPPEIJIAN"){
 				if(hasSelectedTech[i].selectAttachVoList==null || hasSelectedTech[i].selectAttachVoList.length==0){
 					ViewManager.showAlert("未选择配件");
+					return;
+				}
+			}
+		};
+		var nextmatlist=this.curclickItem.techmainvo.nextMatList;
+		if(nextmatlist !=null && nextmatlist.length==1){
+			for(var i=0;i < nextmatlist.length;i++){
+				if(nextmatlist[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ"){
+					ViewManager.showAlert("当前有必选工艺，请选择");
 					return;
 				}
 			}
