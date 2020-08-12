@@ -61,3 +61,39 @@ Unity3dWeb.changeligthIntensity = function(texurl)
 	if(gameInstance != null)
 	gameInstance.SendMessage("Main Camera", "changeLightIntensity",texurl);
 }
+
+Unity3dWeb.changeCausticUVX = function(uvx)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeCausticUVX",uvx);
+}
+
+Unity3dWeb.changeCausticUVY = function(uvx)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeCausticUVY",uvx);
+}
+Unity3dWeb.changeCausticStrength = function(strength)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeCausticItrate",strength);
+}
+
+Unity3dWeb.changeCameraFov = function(fov)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "changeReflectCameraFov",fov);
+}
+
+Unity3dWeb.moveCamera = function(offset)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "moveCamera",offset);
+}
+
+Unity3dWeb.setSceneActive = function(active)
+{
+	if(gameInstance != null)
+	gameInstance.SendMessage("Main Camera", "setSceneActive",active);
+}
+

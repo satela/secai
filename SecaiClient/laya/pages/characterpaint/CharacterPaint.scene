@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":4,
-    "selecteID":56,
+    "selecteID":49,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#fdfbfb","height":1080},
     "nodeParent":-1,
-    "maxID":62,
+    "maxID":72,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -285,7 +285,7 @@
                     "x":30,
                     "type":"HSlider",
                     "searchKey":"HSlider,alphasilder1",
-                    "props":{"y":184,"x":392,"width":134,"var":"alphasilder1","skin":"comp/hslider.png","min":0,"max":200,"height":14},
+                    "props":{"y":184,"x":392,"width":134,"var":"alphasilder1","skin":"comp/hslider.png","min":0,"max":100,"height":14},
                     "nodeParent":4,
                     "label":"alphasilder1",
                     "isDirectory":false,
@@ -313,7 +313,7 @@
                     "x":30,
                     "type":"HSlider",
                     "searchKey":"HSlider,alphasilder2",
-                    "props":{"y":359,"x":394,"width":134,"var":"alphasilder2","skin":"comp/hslider.png","min":0,"max":200,"height":14},
+                    "props":{"y":359,"x":394,"width":134,"var":"alphasilder2","skin":"comp/hslider.png","min":0,"max":100,"height":14},
                     "nodeParent":4,
                     "label":"alphasilder2",
                     "isDirectory":false,
@@ -411,7 +411,7 @@
                     "x":30,
                     "type":"HSlider",
                     "searchKey":"HSlider,alphasilder3",
-                    "props":{"y":528,"x":387,"width":134,"var":"alphasilder3","skin":"comp/hslider.png","min":0,"max":200,"height":14},
+                    "props":{"y":528,"x":387,"width":134,"var":"alphasilder3","skin":"comp/hslider.png","min":0,"max":100,"height":14},
                     "nodeParent":4,
                     "label":"alphasilder3",
                     "isDirectory":false,
@@ -561,6 +561,146 @@
                                 ]
                         }],
                     "$HIDDEN":true
+                },
+                {
+                    "x":30,
+                    "type":"HSlider",
+                    "searchKey":"HSlider,horiCaustic",
+                    "props":{"y":196,"x":1454,"width":134,"var":"horiCaustic","skin":"comp/hslider.png","min":1,"max":100,"height":14},
+                    "nodeParent":4,
+                    "label":"horiCaustic",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":62,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":157,"x":1456,"width":83,"text":"水平焦散度","height":18,"fontSize":18,"font":"SimHei"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":63,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"HSlider",
+                    "searchKey":"HSlider,vertCaustic",
+                    "props":{"y":274,"x":1458,"width":134,"var":"vertCaustic","skin":"comp/hslider.png","min":1,"max":100,"height":14},
+                    "nodeParent":4,
+                    "label":"vertCaustic",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":64,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":235,"x":1460,"width":83,"text":"垂直焦散度","height":18,"fontSize":18,"font":"SimHei"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":65,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"HSlider",
+                    "searchKey":"HSlider,causticStrength",
+                    "props":{"y":348,"x":1454,"width":134,"var":"causticStrength","skin":"comp/hslider.png","min":5,"max":20,"height":14},
+                    "nodeParent":4,
+                    "label":"causticStrength",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":66,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":309,"x":1456,"width":83,"text":"焦散强度","height":18,"fontSize":18,"font":"SimHei"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":67,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"HSlider",
+                    "searchKey":"HSlider,reflectFov",
+                    "props":{"y":429,"x":1454,"width":134,"var":"reflectFov","value":100,"skin":"comp/hslider.png","min":1,"max":170,"height":14},
+                    "nodeParent":4,
+                    "label":"reflectFov",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":68,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":390,"x":1456,"width":83,"text":"镜面距离","height":18,"fontSize":18,"font":"SimHei"},
+                    "nodeParent":4,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":69,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,moveleft",
+                    "props":{"y":465,"x":1458,"width":100,"var":"moveleft","skin":"comp/button.png","label":"视野左移","height":40},
+                    "nodeParent":4,
+                    "label":"moveleft",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":70,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,moveright",
+                    "props":{"y":528,"x":1456,"width":100,"var":"moveright","skin":"comp/button.png","label":"视野右移","height":40},
+                    "nodeParent":4,
+                    "label":"moveright",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":71,
+                    "child":[
+                        ]
                 }]
         },
         {

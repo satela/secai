@@ -29,6 +29,12 @@ package ui.characterpaint {
 		public var colorpanel:Image;
 		public var colorlist:List;
 		public var closecolor:Button;
+		public var horiCaustic:HSlider;
+		public var vertCaustic:HSlider;
+		public var causticStrength:HSlider;
+		public var reflectFov:HSlider;
+		public var moveleft:Button;
+		public var moveright:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

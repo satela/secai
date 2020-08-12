@@ -62,6 +62,17 @@ package script.characterpaint
 			
 			
 			uiSkin.lightIntensity.on(Event.CHANGE,this,onChangeLigthIntensity);
+			
+			uiSkin.horiCaustic.on(Event.CHANGE,this,onChangeHoriCaustic);
+
+			uiSkin.vertCaustic.on(Event.CHANGE,this,onChangeVerticalCaustic);
+
+			uiSkin.causticStrength.on(Event.CHANGE,this,onChangeCausticStrength);
+
+			uiSkin.reflectFov.on(Event.CHANGE,this,onChangeFov);
+
+			uiSkin.moveleft.on(Event.CLICK,this,moveCameraLeft);
+			uiSkin.moveright.on(Event.CLICK,this,moveCameraRight);
 
 			//this.uiSkin.fontsizeinput.on(Event.INPUT,this,onSizeChange);
 			
@@ -222,6 +233,9 @@ package script.characterpaint
 			else
 			{
 				u3ddiv.style.display = "block";
+				
+				Browser.window.Unity3dWeb.setSceneActive("1");
+
 				var size:Number = parseInt(uiSkin.fontsizeinput.text)/100;
 				
 				Browser.window.Unity3dWeb.changefontSize(size.toString());
@@ -252,6 +266,38 @@ package script.characterpaint
 		{
 			Browser.window.Unity3dWeb.changeligthIntensity(uiSkin.lightIntensity.value/100+"");
 
+		}
+		
+		private function onChangeHoriCaustic():void
+		{
+			Browser.window.Unity3dWeb.changeCausticUVX(uiSkin.horiCaustic.value+"");
+		}
+		
+		private function onChangeVerticalCaustic():void
+		{
+			Browser.window.Unity3dWeb.changeCausticUVY(uiSkin.vertCaustic.value+"");
+		}
+		
+		private function onChangeCausticStrength():void
+		{
+			Browser.window.Unity3dWeb.changeCausticStrength(uiSkin.causticStrength.value+"");
+
+		}
+		
+		private function onChangeFov():void
+		{
+			Browser.window.Unity3dWeb.changeCameraFov(uiSkin.reflectFov.value+"");
+		}
+		
+		private function moveCameraLeft():void
+		{
+			Browser.window.Unity3dWeb.moveCamera("-0.1");
+
+		}
+		private function moveCameraRight():void
+		{
+			Browser.window.Unity3dWeb.moveCamera("0.1");
+			
 		}
 		private function oncreateLayer1():void
 		{
@@ -323,6 +369,8 @@ package script.characterpaint
 		{
 			if(u3ddiv != null)
 			{
+				Browser.window.Unity3dWeb.setSceneActive("0");
+
 				u3ddiv.style.display = "none";
 
 				//Browser.window.Unity3dWeb.closeUnity();

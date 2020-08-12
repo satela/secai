@@ -2962,10 +2962,6 @@ var UtilTool=(function(){
 	}
 
 	UtilTool.isValidPicZipai=function(picinfo){
-		if(picinfo.roadNum <=0){
-			return false;
-		}
-		else
 		return true;
 	}
 
@@ -41097,6 +41093,12 @@ var CharacterMainControl=(function(_super){
 		for(var i=0;i<this.allsilder.length;i++)
 		this.allsilder[i].on("change",this,this.onChangeAlpha,[i]);
 		this.uiSkin.lightIntensity.on("change",this,this.onChangeLigthIntensity);
+		this.uiSkin.horiCaustic.on("change",this,this.onChangeHoriCaustic);
+		this.uiSkin.vertCaustic.on("change",this,this.onChangeVerticalCaustic);
+		this.uiSkin.causticStrength.on("change",this,this.onChangeCausticStrength);
+		this.uiSkin.reflectFov.on("change",this,this.onChangeFov);
+		this.uiSkin.moveleft.on("click",this,this.moveCameraLeft);
+		this.uiSkin.moveright.on("click",this,this.moveCameraRight);
 		this.uiSkin.backimglist.itemRender=BackGroundItem;
 		this.uiSkin.backimglist.vScrollBarSkin="";
 		this.uiSkin.backimglist.repeatX=2;
@@ -41196,6 +41198,7 @@ var CharacterMainControl=(function(_super){
 		}
 		else{
 			CharacterMainControl.u3ddiv.style.display="block";
+			Browser.window.Unity3dWeb.setSceneActive("1");
 			var size=parseInt(this.uiSkin.fontsizeinput.text)/100;
 			Browser.window.Unity3dWeb.changefontSize(size.toString());
 			Browser.window.Unity3dWeb.createMesh(this.picurl);
@@ -41214,6 +41217,30 @@ var CharacterMainControl=(function(_super){
 
 	__proto.onChangeLigthIntensity=function(){
 		Browser.window.Unity3dWeb.changeligthIntensity(this.uiSkin.lightIntensity.value/100+"");
+	}
+
+	__proto.onChangeHoriCaustic=function(){
+		Browser.window.Unity3dWeb.changeCausticUVX(this.uiSkin.horiCaustic.value+"");
+	}
+
+	__proto.onChangeVerticalCaustic=function(){
+		Browser.window.Unity3dWeb.changeCausticUVY(this.uiSkin.vertCaustic.value+"");
+	}
+
+	__proto.onChangeCausticStrength=function(){
+		Browser.window.Unity3dWeb.changeCausticStrength(this.uiSkin.causticStrength.value+"");
+	}
+
+	__proto.onChangeFov=function(){
+		Browser.window.Unity3dWeb.changeCameraFov(this.uiSkin.reflectFov.value+"");
+	}
+
+	__proto.moveCameraLeft=function(){
+		Browser.window.Unity3dWeb.moveCamera("-0.1");
+	}
+
+	__proto.moveCameraRight=function(){
+		Browser.window.Unity3dWeb.moveCamera("0.1");
 	}
 
 	__proto.oncreateLayer1=function(){
@@ -41259,6 +41286,7 @@ var CharacterMainControl=(function(_super){
 
 	__proto.onDestroy=function(){
 		if(CharacterMainControl.u3ddiv !=null){
+			Browser.window.Unity3dWeb.setSceneActive("0");
 			CharacterMainControl.u3ddiv.style.display="none";
 		}
 	}
@@ -53658,6 +53686,12 @@ var CharacterPaintUI=(function(_super){
 		this.colorpanel=null;
 		this.colorlist=null;
 		this.closecolor=null;
+		this.horiCaustic=null;
+		this.vertCaustic=null;
+		this.causticStrength=null;
+		this.reflectFov=null;
+		this.moveleft=null;
+		this.moveright=null;
 		CharacterPaintUI.__super.call(this);
 	}
 
