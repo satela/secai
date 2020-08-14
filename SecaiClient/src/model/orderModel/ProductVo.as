@@ -284,7 +284,7 @@ package model.orderModel
 						}
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)
 						{
-							var procname:String = procname + "(H-" + orderitemvo.verCutNum + ",V-" + orderitemvo.horiCutNum+  ")";
+							var procname:String = procname + "(H-" + orderitemvo.horiCutNum + ",V-" + orderitemvo.verCutNum+  ")";
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 						}
 						else

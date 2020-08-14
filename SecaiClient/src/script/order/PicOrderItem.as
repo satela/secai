@@ -427,7 +427,7 @@ package script.order
 				tech = tech.replace("超幅裁切","超幅裁切" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
 			
 			if(tech.indexOf("等份裁切") >= 0)
-				tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.verCutNum+ ",V-" + this.ordervo.horiCutNum + ")");
+				tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
 			
 			this.architype.text = tech;
 

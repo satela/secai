@@ -162,7 +162,10 @@ package utils
 				{
 					var startindex:int = (i*imgwidth + j)*4;
 					pixelVec[i][j] = pixelsArr[startindex] +  pixelsArr[startindex+1] + pixelsArr[startindex+2];
-					if(pixelVec[i][j] > 100)
+					
+					if(Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 1])) >= 20 || Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 2])) >= 20)
+						trace("jjjj sec" +  pixelsArr[startindex] + "," +  pixelsArr[startindex+1] + "," +  pixelsArr[startindex+2]);
+					if(pixelVec[i][j] > 200)
 						pixelVec[i][j] = 1;
 					else
 					{
@@ -281,9 +284,10 @@ package utils
 							hasfind = true;
 							hasFindBlotIndex = i;
 							break;
-							break;
+							//break;
 						}
 					}
+					
 				}
 				if(hasfind && hasFindBlotIndex == -1)
 					continue;

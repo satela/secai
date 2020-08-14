@@ -1419,6 +1419,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1897,6 +1898,9 @@ var PicInfoVo=(function(){
 		this.relatedRoadNum=0;
 		this.relatedRoadLength=0;
 		this.relatedPicWidth=0;
+		this.connectnum=0;
+		//连通域数量
+		this.area=0;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1919,6 +1923,12 @@ var PicInfoVo=(function(){
 					this.roadNum=fattr.roadnum;
 					var longside=Math.max(this.picWidth,this.picHeight);
 					this.roadLength=Math.floor(fattr.totallen *longside/1000);
+				}
+				if(fattr.hasOwnProperty("connectnum")){
+					this.connectnum=fattr.connectnum;
+					var longside=Math.max(this.picWidth,this.picHeight);
+					this.area=Math.floor(fattr.area *longside/1000 *longside/1000);
+					console.log("connectnum:"+this.connectnum+","+this.area);
 				}
 				if(fattr !=null && fattr.flag==1){
 					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
@@ -2443,7 +2453,7 @@ var ProductVo=(function(){
 						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 					}
 					else if(arr[i].preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
-						var procname=procname+"(H-"+orderitemvo.verCutNum+",V-"+orderitemvo.horiCutNum+")";
+						var procname=procname+"(H-"+orderitemvo.horiCutNum+",V-"+orderitemvo.verCutNum+")";
 						prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 					}
 					else
@@ -2599,7 +2609,9 @@ var UtilTool=(function(){
 			for(var j=0;j < imgwidth;j++){
 				var startindex=(i*imgwidth+j)*4;
 				pixelVec[i][j]=pixelsArr[startindex]+pixelsArr[startindex+1]+pixelsArr[startindex+2];
-				if(pixelVec[i][j] > 100)
+				if(Math.abs((pixelsArr[startindex]-pixelsArr[startindex+1]))>=20 || Math.abs((pixelsArr[startindex]-pixelsArr[startindex+2]))>=20)
+					console.log("jjjj sec"+pixelsArr[startindex]+","+pixelsArr[startindex+1]+","+pixelsArr[startindex+2]);
+				if(pixelVec[i][j] > 200)
 					pixelVec[i][j]=1;
 				else{
 					pixelVec[i][j]=0;
@@ -2678,7 +2690,6 @@ var UtilTool=(function(){
 					if(equalline.indexOf(sameblot[j])>=0){
 						hasfind=true;
 						hasFindBlotIndex=i;
-						break ;
 						break ;
 					}
 				}
@@ -54982,7 +54993,7 @@ var PicOrderItem=(function(_super){
 		if(tech.indexOf("超幅裁切")>=0)
 			tech=tech.replace("超幅裁切","超幅裁切"+"("+["V","H"][this.ordervo.cuttype]+"-"+this.ordervo.cutnum+"-"+this.ordervo.eachCutLength.join(";")+")");
 		if(tech.indexOf("等份裁切")>=0)
-			tech=tech.replace("等份裁切","等份裁切"+"(H-"+this.ordervo.verCutNum+",V-"+this.ordervo.horiCutNum+")");
+			tech=tech.replace("等份裁切","等份裁切"+"(H-"+this.ordervo.horiCutNum+",V-"+this.ordervo.verCutNum+")");
 		this.architype.text=tech;
 		if(this.architype.textField.textHeight > 80)
 			this.architype.height=this.architype.textField.textHeight;
@@ -61172,7 +61183,7 @@ var PicInfoItem=(function(_super){
 		}
 	}
 
-	//UtilTool.getYixingImageCount("cl.jpg",this);
+	//UtilTool.getYixingImageCount("hs.jpg",this);
 	__proto.onSetYixingBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){

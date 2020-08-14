@@ -339,7 +339,7 @@ package script.picUpload
 
 				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,[datainfo]);
 				
-				//UtilTool.getYixingImageCount("cl.jpg",this);
+				//UtilTool.getYixingImageCount("hs.jpg",this);
 
 			}
 		}

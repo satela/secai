@@ -43,6 +43,9 @@ package model.picmanagerModel
 		
 		public var relatedPicWidth:int = 0;
 		
+		public var connectnum:int = 0;//连通域数量
+		public var area:int = 0;//面积
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -76,7 +79,14 @@ package model.picmanagerModel
 						roadLength = Math.floor( fattr.totallen * longside/1000);
 						//trace("raodNum:" + roadNum + "," + roadLength);
 					}
-					
+					if(fattr.hasOwnProperty("connectnum"))
+					{
+						connectnum = fattr.connectnum;
+						var longside:Number = Math.max(picWidth,picHeight);
+
+						area = Math.floor(fattr.area *  longside/1000 * longside/1000);
+						trace("connectnum:" + connectnum + "," + area);
+					}
 					if(fattr != null && fattr.flag == 1)
 					{
 						picWidth = Math.round(Number(fattr.width)*dpi);
