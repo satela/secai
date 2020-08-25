@@ -105,11 +105,13 @@ package model.orderModel
 		private function getTechStr(arr:Vector.<MaterialItemVo>,ignoreWidth:Boolean,picwidth:Number,picheight:Number):String
 		{
 			//var arr:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.nextMatList;
+			
+			var border:Number = UtilTool.getBorderDistance(this.getAllSelectedTech() as Vector.<MaterialItemVo>);
 			for(var i:int=0;i < arr.length;i++)
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border> this.max_width))
 					{
 						var peijian:String = "";
 						if(arr[i].selectAttachVoList != null)
@@ -192,11 +194,14 @@ package model.orderModel
 			var prices:Array = [];
 			if(arr == null)
 				return [];
+			
+			var border:Number = UtilTool.getBorderDistance(this.getAllSelectedTech() as Vector.<MaterialItemVo>);
+
 			for(var i:int=0;i < arr.length;i++)
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border > this.max_width))
 					{
 						var totalprice:Number = 0;
 						
@@ -264,11 +269,13 @@ package model.orderModel
 			var prolist:Array = [];
 			if(arr == null)
 				return [];
+			var border:Number = UtilTool.getBorderDistance(this.getAllSelectedTech() as Vector.<MaterialItemVo>);
+
 			for(var i:int=0;i < arr.length;i++)
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth > this.max_width && picheight > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width  && picheight + border > this.max_width))
 					{
 						var procname:String = arr[i].preProc_Name + UtilTool.getAttachDesc(arr[i]);
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
@@ -279,7 +286,7 @@ package model.orderModel
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath: HttpRequestUtil.originPicPicUrl + picinfo.backFid + "." + picinfo.backPicClass});
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
 						{
-							var procname:String = "超幅裁切" + "(" + ["V","H"][orderitemvo.cuttype] + "-" +  orderitemvo.cutnum+ "-" + orderitemvo.eachCutLength.join(";") +")";//["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
+							var procname:String = arr[i].preProc_Name + "(" + ["V","H"][orderitemvo.cuttype] + "-" +  orderitemvo.cutnum+ "-" + orderitemvo.eachCutLength.join(";") +")";//["竖拼裁切","横拼裁切"][orderitemvo.cuttype] + "(" + orderitemvo.cutnum+")";
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 						}
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)

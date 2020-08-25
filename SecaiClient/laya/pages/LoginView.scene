@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":65,
-    "selecteID":62,
+    "selectedBox":3,
+    "selecteID":12,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
-    "maxID":70,
+    "maxID":73,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -142,7 +142,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,paintOrderBtn",
-                    "props":{"y":34,"x":661,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":654,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"paintOrderBtn",
@@ -183,7 +183,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnproduct",
-                    "props":{"y":34,"x":781,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":879,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"btnproduct",
@@ -224,7 +224,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text",
-                    "props":{"y":34,"x":901,"width":92,"text":"视觉资料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":991,"width":92,"text":"视觉资料","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"Text(LinksText)",
@@ -265,7 +265,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUserCenter",
-                    "props":{"y":34,"x":1021,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "props":{"y":34,"x":1104,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"btnUserCenter",
@@ -408,6 +408,61 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":59,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Text",
+                    "selectedBox":3,
+                    "searchKey":"Text,characBtn",
+                    "props":{"y":34,"x":766,"width":92,"var":"characBtn","text":"字牌雕刻","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC"},
+                    "nodeParent":3,
+                    "maxID":5,
+                    "label":"characBtn",
+                    "isOpen":null,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":70,
+                    "child":[
+                        {
+                            "type":"Script",
+                            "switchAble":true,
+                            "source":"src/script/prefabScript/LinkTextControl.as",
+                            "searchKey":"Script,LinkTextControl",
+                            "removeAble":true,
+                            "props":{"txttype":1,"presetID":2,"preset":"laya/pages/prefabs/LinksText.prefab"},
+                            "nodeParent":70,
+                            "label":"LinkTextControl",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":71,
+                            "child":[
+                                ]
+                        }],
+                    "animations":[
+                        {
+                            "nodes":[
+                                ],
+                            "name":"ani1",
+                            "id":1,
+                            "frameRate":24,
+                            "action":0
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":150,"x":585,"visible":false,"text":"服务器将于23日早上6点停机维护，预计持续一个小时，请避开此时间段下单，谢谢！","fontSize":20,"font":"SimHei","color":"#ff0905"},
+                    "nodeParent":3,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":72,
                     "child":[
                         ]
                 }]

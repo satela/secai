@@ -46,6 +46,7 @@ package model.orderModel
 
 		public var allManuFacutreMatProcPrice:Object = {};
 		
+		public var orderType:int;//当前下单类型 
 		public function PaintOrderModel()
 		{
 		}
@@ -254,5 +255,24 @@ package model.orderModel
 			return false;
 		}
 		
+		public function checkIslongerForDfcq():Boolean
+		{
+			var vect:Vector.<PicOrderItem> = new Vector.<PicOrderItem>();
+			if(this.curSelectOrderItem != null)
+				vect.push(this.curSelectOrderItem);
+			else
+				vect = this.batchChangeMatItems;
+			
+			for(var i:int=0;i < vect.length;i++)
+			{
+				var minside:Number = Math.min(vect[i].finalWidth,vect[i].finalHeight);
+				var longside:Number = Math.max(vect[i].finalWidth,vect[i].finalHeight);
+				if(minside > 120 || longside > 240)
+					return true;
+
+			}
+			
+			return false;
+		}
 	}
 }

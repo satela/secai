@@ -19,7 +19,6 @@ package script.picUpload
 	public class PicInfoItem extends PicShortItemUI
 	{
 		public var picInfo:PicInfoVo;
-		private var trytime:int = 0;
 		public function PicInfoItem()
 		{
 			super();
@@ -43,7 +42,6 @@ package script.picUpload
 			this.selBackBtn.on(Event.CLICK,this,onSelectBackImg);
 
 			this.btndelete.on(Event.CLICK,this,onDeleteHandler);
-			trytime = 0;
 			this.sel.visible = DirectoryFileModel.instance.haselectPic.hasOwnProperty(picInfo.fid) || DirectoryFileModel.instance.curOperateFile == picInfo;
 			this.sel.selected = this.sel.visible;
 			this.yixingimg.visible = false;
@@ -339,7 +337,7 @@ package script.picUpload
 
 				EventCenter.instance.event(EventCenter.SELECT_PIC_ORDER,[datainfo]);
 				
-				//UtilTool.getYixingImageCount("hs.jpg",this);
+				//UtilTool.getYixingImageCount("ddd.jpg",this);
 
 			}
 		}

@@ -35,16 +35,28 @@ package script.order
 			techmainvo = tvo;
 			initView();
 			
-//			if(techmainvo.preProc_Code == OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO || techmainvo.preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-//			{
-//				this.techBtn.disabled = PaintOrderModel.instance.batchChangeMatItems != null && PaintOrderModel.instance.batchChangeMatItems.length > 1;
-//				this.mouseEnabled = !this.techBtn.disabled;
-//				this.grayimg.visible = !this.mouseEnabled;
-//			}
 			if(tvo.selected)
 				setSelected(true);
 			else
 				setSelected(false);
+			
+			if(techmainvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)
+			{
+				if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>) || PaintOrderModel.instance.checkIslongerForDfcq())
+				{
+					this.techBtn.disabled = true;
+					this.mouseEnabled = !this.techBtn.disabled;
+					this.grayimg.visible = !this.mouseEnabled;
+					return;
+				}				
+				
+			}
+			
+			this.techBtn.disabled = false;
+			this.mouseEnabled = true;
+			this.grayimg.visible = false;
+
+					
 		}
 		
 		public function setAttachVo(attachvo:AttchCatVo):void

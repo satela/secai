@@ -127,6 +127,11 @@ package script.order
 						ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
 						return;
 					}
+					else if(PaintOrderModel.instance.orderType == OrderConstant.CUTTING && UtilTool.isValidPicZipai(pic) == false)
+					{
+						ViewManager.showAlert("有图片不能用于字牌下单，请重新上传或选择其他图片");
+						return;
+					}
 				}
 				
 				

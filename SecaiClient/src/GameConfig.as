@@ -3,6 +3,8 @@ package {
 	import laya.utils.ClassUtils;
 	import laya.ui.View;
 	import laya.webgl.WebGL;
+	import script.characterpaint.CharacterMainControl;
+	import script.characterpaint.CharacterTypeChooseControl;
 	import utils.LoadingPrgControl;
 	import laya.display.Text;
 	import script.prefabScript.LinkTextControl;
@@ -49,7 +51,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "common/TipPanel.scene";
+		public static var startScene:* = "characterpaint/BackImgItem.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -59,6 +61,8 @@ package {
 		public static function init():void {
 			//注册Script或者Runtime引用
 			var reg:Function = ClassUtils.regClass;
+			reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
+			reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
 			reg("laya.display.Text",Text);
 			reg("script.prefabScript.LinkTextControl",LinkTextControl);

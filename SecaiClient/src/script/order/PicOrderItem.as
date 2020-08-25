@@ -343,9 +343,16 @@ package script.order
 				ViewManager.showAlert("请先选择收货地址");
 				return;
 			}
-			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
 			PaintOrderModel.instance.curSelectOrderItem = this;
 			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
+			
+			PaintOrderModel.instance.curSelectMat = null;
+			
+			//if(PaintOrderModel.instance.orderType == OrderConstant.PAINTING)
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL,false,ordervo.picinfo);
+			//if(PaintOrderModel.instance.orderType == OrderConstant.CUTTING)
+			//	ViewManager.instance.openView(ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL,false,ordervo.picinfo);
+			
 		}
 		
 		public function changeProduct(provo:ProductVo):void
@@ -423,11 +430,14 @@ package script.order
 
 			var tech:String = provo.getTechDes(false,finalWidth,finalHeight);
 			
-			if(tech.indexOf("超幅裁切") >= 0)
-				tech = tech.replace("超幅裁切","超幅裁切" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
+			if(tech.indexOf("超宽拼接") >= 0)
+				tech = tech.replace("超宽拼接","超宽拼接" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
 			
-			if(tech.indexOf("等份裁切") >= 0)
-				tech = tech.replace("等份裁切","等份裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
+			if(tech.indexOf("超幅拼接") >= 0)
+				tech = tech.replace("超幅拼接","超幅拼接" + "(" + ["V","H"][this.ordervo.cuttype] + "-" +  this.ordervo.cutnum+ "-" + this.ordervo.eachCutLength.join(";") +")");
+			
+			if(tech.indexOf("小块裁切") >= 0)
+				tech = tech.replace("小块裁切","小块裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
 			
 			this.architype.text = tech;
 

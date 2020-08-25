@@ -76,6 +76,7 @@ P 65152D5C confirmadd.png
 P 245C366E selection.png
 P E6BD083E subtbn.png
 P 8CF86666 vipbg.png
+D textureU3d
 D upload
 P 28C55A8D addimg.png
 P BB801AE3 btnclose.png
@@ -118,3 +119,15 @@ P 57CAC0BF scrolldown.png
 P 2BDDDBFD scrollup.png
 P FC488F8F setting.png
 P E7450350 usercenterbg.jpg
+D textureU3d/stone
+R FD1A3785 stone1.jpg
+R 10ECFC58 stone2.jpg
+R E3D6F2A5 stone3.jpg
+D textureU3d/wall
+R B6BA4153 wall.jpg
+R 7E78E306 wall1.jpg
+R 59F8F548 wall2.jpg
+D textureU3d/wood
+R A016C619 wood1.jpg
+R 73F43136 wood2.jpg
+R BD1D5E37 wood3.jpg

@@ -79,7 +79,7 @@ package script.order
 				
 				cutdata.orderitemvo = PaintOrderModel.instance.curSelectOrderItem.ordervo;
 				cutdata.orderitemvo.cuttype = 0;
-				cutdata.orderitemvo.cutnum = Math.ceil(PaintOrderModel.instance.curSelectOrderItem.finalWidth/(curmat.max_width-3));
+				cutdata.orderitemvo.cutnum = Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth + cutdata.border)/(curmat.max_width-3));
 				
 				var cutlen:Number = PaintOrderModel.instance.curSelectOrderItem.finalWidth/cutdata.orderitemvo.cutnum;
 				cutlen = parseFloat(cutlen.toFixed(2));
@@ -91,9 +91,12 @@ package script.order
 			else
 			{
 				var batchlist:Vector.<PicOrderItem> = PaintOrderModel.instance.batchChangeMatItems;
+				
+				var border:Number = UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>);
+				
 				for(var i:int=0;i < batchlist.length;i++)
 				{
-					if(batchlist[i].finalWidth > curmat.max_width && batchlist[i].finalHeight > curmat.max_width)
+					if(batchlist[i].finalWidth + border > curmat.max_width && batchlist[i].finalHeight + border > curmat.max_width)
 					{
 						var cutdata:Object = {};
 						cutdata.finalWidth = batchlist[i].finalWidth;
@@ -104,7 +107,7 @@ package script.order
 
 						cutdata.orderitemvo = batchlist[i].ordervo;
 						cutdata.orderitemvo.cuttype = 0;
-						cutdata.orderitemvo.cutnum = Math.ceil(batchlist[i].finalWidth/(curmat.max_width-3));
+						cutdata.orderitemvo.cutnum = Math.ceil((batchlist[i].finalWidth + cutdata.border)/(curmat.max_width-3));
 						
 						var cutlen:Number = batchlist[i].finalWidth/cutdata.orderitemvo.cutnum;
 						cutlen = parseFloat(cutlen.toFixed(2));

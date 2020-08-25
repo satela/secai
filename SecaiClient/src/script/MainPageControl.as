@@ -61,6 +61,9 @@ package script {
 			var paintOrderBtn:Button = this.owner["paintOrderBtn"];
 			paintOrderBtn.on(Event.CLICK,this,onShowPaintOrder);
 
+			var diaokeOrderBtn:Button = this.owner["characBtn"];
+			//diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
+
 			
 			var btnUserCenter:Button = this.owner["btnUserCenter"];
 			btnUserCenter.on(Event.CLICK,this,onShowUserCenter);
@@ -190,6 +193,17 @@ package script {
 		{
 			if(Userdata.instance.isLogin)
 				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			else
+			{
+				ViewManager.showAlert("请先登录");
+				ViewManager.instance.openView(ViewManager.VIEW_lOGPANEL);
+			}
+		}
+		
+		private function onShowChracterTypePanel():void
+		{
+			if(Userdata.instance.isLogin)
+				ViewManager.instance.openView(ViewManager.VIEW_CHARACTER_TYPE_PANEL,false);
 			else
 			{
 				ViewManager.showAlert("请先登录");

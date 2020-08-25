@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 2020/07/20-21:12:21.982 5708 Log #3: 1 ops saved to Table #4 OK
 2020/07/20-21:12:21.984 5708 Archiving F:\work\secaiorderweb\secai\SecaiClient\.laya\chrome\Default\Site Characteristics Database/000003.log: OK
 2020/07/20-21:12:21.985 5708 Table #4: 1 entries OK
 2020/07/20-21:12:21.988 5708 Archiving F:\work\secaiorderweb\secai\SecaiClient\.laya\chrome\Default\Site Characteristics Database/MANIFEST-000001: OK
 2020/07/20-21:12:22.001 5708 **** Repaired leveldb F:\work\secaiorderweb\secai\SecaiClient\.laya\chrome\Default\Site Characteristics Database; recovered 1 files; 130 bytes. Some data may have been lost. ****
+=======
+2020/06/16-16:13:19.778 40a8 Reusing MANIFEST F:\work\secaiorderweb\secai\SecaiClient\.laya\chrome\Default\Site Characteristics Database/MANIFEST-000001
+>>>>>>> branch_dev

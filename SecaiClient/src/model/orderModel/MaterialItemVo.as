@@ -4,6 +4,8 @@ package model.orderModel
 	import model.picmanagerModel.PicInfoVo;
 	
 	import script.order.PicOrderItem;
+	
+	import utils.UtilTool;
 
 	public class MaterialItemVo
 	{
@@ -91,7 +93,7 @@ package model.orderModel
 				allpics.push(curSelectPic);
 			else
 				allpics = PaintOrderModel.instance.batchChangeMatItems;
-			
+						
 			if(curselectProduct != null && allpics.length > 0)
 			{				
 				
@@ -104,8 +106,11 @@ package model.orderModel
 						{
 							//var longside:Number = Math.max(allpics[i].finalWidth,allpics[i].finalHeight);
 							//var shortside:Number = Math.min(allpics[i].finalWidth,allpics[i].finalHeight);
+							var vec:Vector.<MaterialItemVo> = new Vector.<MaterialItemVo>();
+							vec.push(this);
+							var border:Number = UtilTool.getBorderDistance(vec);
 							
-							if(allpics[i].finalWidth > curselectProduct.max_width && allpics[i].finalHeight > curselectProduct.max_width)
+							if(allpics[i].finalWidth + border > curselectProduct.max_width && allpics[i].finalHeight + border > curselectProduct.max_width)
 							{
 								hasBeyongd = true;
 								break;

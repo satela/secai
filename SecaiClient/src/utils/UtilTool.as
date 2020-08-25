@@ -163,8 +163,8 @@ package utils
 					var startindex:int = (i*imgwidth + j)*4;
 					pixelVec[i][j] = pixelsArr[startindex] +  pixelsArr[startindex+1] + pixelsArr[startindex+2];
 					
-					if(Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 1])) >= 20 || Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 2])) >= 20)
-						trace("jjjj sec" +  pixelsArr[startindex] + "," +  pixelsArr[startindex+1] + "," +  pixelsArr[startindex+2]);
+					//if(Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 1])) >= 20 || Math.abs((pixelsArr[startindex] - pixelsArr[startindex + 2])) >= 20)
+					//	trace("jjjj sec" +  pixelsArr[startindex] + "," +  pixelsArr[startindex+1] + "," +  pixelsArr[startindex+2]);
 					if(pixelVec[i][j] > 200)
 						pixelVec[i][j] = 1;
 					else
@@ -708,6 +708,15 @@ package utils
 			return true;
 		}
 		
+		public static function isValidPicZipai(picinfo:PicInfoVo):Boolean
+		{
+			if(picinfo.connectnum <= 0)
+			{
+				return false;
+			}
+			else
+				return true;
+		}
 		public static function isFitYixing(sourcefile:PicInfoVo,selfile:PicInfoVo):Boolean
 		{
 			if(sourcefile != null && selfile != null)
@@ -775,5 +784,19 @@ package utils
 				else return "";
 			
 		}
+		
+		public static function hasChaofuProcess(proclist:Vector.<MaterialItemVo>):Boolean
+		{
+			
+			for(var i:int=0;i < proclist.length;i++)
+			{
+				if(proclist[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
+					return true;
+			}
+			
+			return false;
+			
+		}
+		
 	}
 }

@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":63,
-    "selecteID":91,
+    "selectedBox":26,
+    "selecteID":184,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
@@ -429,20 +429,6 @@
                             "isAniNode":true,
                             "hasChild":false,
                             "compId":27,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":5,"x":500,"text":"通告：如不能勾选更换材料，请将您收货地址更新为新的行政区域并设为默认","fontSize":20,"font":"SimHei","color":"#e8100c"},
-                            "nodeParent":26,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":184,
                             "child":[
                                 ]
                         },

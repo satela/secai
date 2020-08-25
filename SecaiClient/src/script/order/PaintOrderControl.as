@@ -562,6 +562,7 @@ package script.order
 				ViewManager.showAlert("请至少选择一个需要更换的产品");
 				return;
 			}
+			PaintOrderModel.instance.curSelectMat = null;
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_MATERIAL);
 			PaintOrderModel.instance.curSelectOrderItem = null;
 		}

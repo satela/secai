@@ -38,7 +38,7 @@ package script.order
 		private var itemheight:int = 40;
 		
 		private var itemspaceH:int = 30;
-		private var itemspaceV:int = 20;
+		private var itemspaceV:int = 10;
 		
 		private var allitemlist:Array;
 		
@@ -64,6 +64,9 @@ package script.order
 			uiSkin.main_panel.vScrollBarSkin = "";
 			uiSkin.main_panel.hScrollBarSkin = "";
 			
+			uiSkin.main_panel.vScrollBar.mouseWheelEnable = false;
+			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
+
 			uiSkin.tablist.itemRender = MaterialClassBtn;
 			uiSkin.tablist.vScrollBarSkin = "";
 			uiSkin.tablist.selectEnable = true;

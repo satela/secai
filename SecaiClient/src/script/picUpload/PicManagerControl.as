@@ -10,6 +10,7 @@ package script.picUpload
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
@@ -49,6 +50,8 @@ package script.picUpload
 			uiSkin.btnNewFolder.on(Event.CLICK,this,onCreateNewFolder);
 			uiSkin.btnorder.on(Event.CLICK,this,onshowOrder);
 
+			uiSkin.btnzipai.on(Event.CLICK,this,onshowZipaiOrder);
+
 			createbox = uiSkin.boxNewFolder;
 			createbox.visible = false;
 		
@@ -85,6 +88,9 @@ package script.picUpload
 			initFileOpen();
 			
 			uiSkin.selectNum.text = 0 + "";
+			
+			uiSkin.selectzipainum.text = 0 + "";
+			
 			uiSkin.btnSureCreate.on(Event.CLICK,this,onSureCreeate);
 			EventCenter.instance.on(EventCenter.SELECT_FOLDER,this,onSelectChildFolder);
 			EventCenter.instance.on(EventCenter.UPDATE_FILE_LIST,this,getFileList);
@@ -264,6 +270,7 @@ package script.picUpload
 				num++;
 			}
 			uiSkin.selectNum.text =  num + "";
+			uiSkin.selectzipainum.text = num + "";
 
 			
 		}
@@ -320,12 +327,32 @@ package script.picUpload
 					return;
 				}
 			}
-			
-			
+						
+			PaintOrderModel.instance.orderType = OrderConstant.PAINTING;
 			
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		
+		private function onshowZipaiOrder():void
+		{
+			
+			var hassrgb:Boolean = false;
+			
+			PaintOrderModel.instance.orderType = OrderConstant.CUTTING;
+
+			for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
+			{
+				if(UtilTool.isValidPicZipai(pic) == false)
+				{
+					ViewManager.showAlert("有图片不能用于字牌下单，请重新上传或选择其他图片");
+					return;
+				}
+			}
+			
+			
+			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			
+		}
 		private function confirmOrderNow(b:Boolean):void
 		{
 			if(b)
@@ -353,6 +380,8 @@ package script.picUpload
 					num++;
 				}
 				uiSkin.selectNum.text =  num + "";
+				uiSkin.selectzipainum.text = num + "";
+
 			}
 
 		}

@@ -24,7 +24,11 @@ package script.usercenter
 		{
 			uiSkin = this.owner as ChargePanelUI;
 			uiSkin.accout.text = Userdata.instance.userAccount;
-			uiSkin.moneytxt.text = Userdata.instance.money.toString();
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
+
+			uiSkin.moneytxt.text = "0";
+			//uiSkin.moneytxt.text = Userdata.instance.money.toString();
 			
 			uiSkin.chargeinput.restrict = "0-9" + ".";
 			uiSkin.chargeinput.maxChars = 8;

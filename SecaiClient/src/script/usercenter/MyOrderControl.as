@@ -117,7 +117,7 @@ package script.usercenter
 		}
 		private function onshowInputDate(viewname:String):void
 		{
-			if(dateInput != null && viewname == ViewManager.VIEW_ORDER_DETAIL_PANEL)
+			if(dateInput != null && (viewname == ViewManager.VIEW_ORDER_DETAIL_PANEL || viewname == ViewManager.VIEW_SELECT_PAYTYPE_PANEL))
 			{
 				dateInput.hidden = false;
 				dateInput2.hidden = false;
