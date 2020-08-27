@@ -62,7 +62,7 @@ package script {
 			paintOrderBtn.on(Event.CLICK,this,onShowPaintOrder);
 
 			var diaokeOrderBtn:Button = this.owner["characBtn"];
-			//diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
+			diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
 
 			
 			var btnUserCenter:Button = this.owner["btnUserCenter"];

@@ -35645,6 +35645,7 @@ var MainPageControl=(function(_super){
 		var paintOrderBtn=this.owner["paintOrderBtn"];
 		paintOrderBtn.on("click",this,this.onShowPaintOrder);
 		var diaokeOrderBtn=this.owner["characBtn"];
+		diaokeOrderBtn.on("click",this,this.onShowChracterTypePanel);
 		var btnUserCenter=this.owner["btnUserCenter"];
 		btnUserCenter.on("click",this,this.onShowUserCenter);
 		var btnproduct=this.owner["btnproduct"];
