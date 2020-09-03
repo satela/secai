@@ -96,16 +96,36 @@ package script.order
 			var finalheight:Number = cutdata.finalHeight + cutdata.border;;
 			var product:ProductVo = PaintOrderModel.instance.curSelectMat;
 			
-			var maxwidth:Number = product.max_width - 3;
+			var maxwidth:Number = cutdata.maxwidth;//product.max_width - 3;
 			if(cuttype == 1)
 			{
 				leastCutNum = Math.ceil(finalheight/maxwidth);
+				
+				if(cutdata.maxwidth < OrderConstant.MAX_CUT_THRESHOLD)		
+				{
+					cutdata.orderitemvo.cutnum = Math.ceil(finalheight/OrderConstant.CUT_PRIOR_WIDTH);
+					if(cutdata.orderitemvo.cutnum < 2)
+						cutdata.orderitemvo.cutnum = 2;
+				}
+				else
+					cutdata.orderitemvo.cutnum = leastCutNum;
 			}
 			else
 			{
 				leastCutNum = Math.ceil(finalwidth/maxwidth);
+				
+				if(cutdata.maxwidth < OrderConstant.MAX_CUT_THRESHOLD)		
+				{
+					cutdata.orderitemvo.cutnum = Math.ceil(finalwidth/OrderConstant.CUT_PRIOR_WIDTH);
+					if(cutdata.orderitemvo.cutnum < 2)
+						cutdata.orderitemvo.cutnum = 2;
+				}
+				else
+					cutdata.orderitemvo.cutnum = leastCutNum;
+				
 			}
-			cutdata.orderitemvo.cutnum = leastCutNum;
+			//cutdata.orderitemvo.cutnum = leastCutNum;
+			
 			
 			
 			cutdata.orderitemvo.cuttype = cuttype;
@@ -189,9 +209,9 @@ package script.order
 			if(this.hinputlist[index].text == "")
 				return;
 			
-			var product:ProductVo = PaintOrderModel.instance.curSelectMat;
+			//var product:ProductVo = PaintOrderModel.instance.curSelectMat;
 			
-			var maxwidth:Number = product.max_width - 3;
+			var maxwidth:Number = cutdata.maxwidth;//product.max_width - 3;
 			
 			
 			var hascutlen:Number = 0;
@@ -200,12 +220,14 @@ package script.order
 				hascutlen += cutdata.orderitemvo.eachCutLength[i];
 			}
 			
-			var curnum:Number = parseFloat(this.hinputlist[index].text);
-			
+			var curnum:Number = parseFloat(parseFloat(this.hinputlist[index].text).toFixed(2));
+			this.hinputlist[index].text = curnum + "";
 			var maxlen:Number = Math.min(maxwidth,cutdata.finalWidth + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1);
 			
-			if(curnum <= 0)
-				this.hinputlist[index].text = "1";
+			var minlen:Number = Math.max(1,cutdata.finalWidth + cutdata.border - hascutlen - maxwidth*(cutdata.orderitemvo.cutnum - index - 1));
+			
+			if(curnum <= minlen)
+				this.hinputlist[index].text = minlen.toFixed(2) + "";
 			if(curnum > maxlen )
 				this.hinputlist[index].text = maxlen + "";
 			
@@ -238,6 +260,7 @@ package script.order
 			if(this.vinputlist[index].text == "")
 				return;
 			
+			var maxwidth:Number = cutdata.maxwidth;
 			
 			var hascutlen:Number = 0;
 			for(var i:int=0;i < index;i++)
@@ -245,11 +268,18 @@ package script.order
 				hascutlen += cutdata.orderitemvo.eachCutLength[i];
 			}
 			
-			var curnum:Number = parseFloat(this.vinputlist[index].text);
-			if(curnum <= 0)
-				this.vinputlist[index].text = "1";
-			if(curnum > cutdata.finalHeight + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index+1)
-				this.vinputlist[index].text = (cutdata.finalHeight + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1) + "";
+			var curnum:Number = parseFloat(parseFloat(this.vinputlist[index].text).toFixed(2));
+			this.vinputlist[index].text = curnum + "";
+
+			var maxlen:Number = Math.min(maxwidth,cutdata.finalHeight + cutdata.border - hascutlen - this.cutdata.orderitemvo.cutnum + index + 1);
+
+			var minlen:Number = Math.max(1,cutdata.finalHeight + cutdata.border - hascutlen - maxwidth*(cutdata.orderitemvo.cutnum - index - 1));
+
+			
+			if(curnum <= minlen)
+				this.vinputlist[index].text = minlen + "";
+			if(curnum > maxlen)
+				this.vinputlist[index].text = maxlen + "";
 			
 			hascutlen += parseFloat(this.vinputlist[index].text);
 			var leftAvg:Number = (cutdata.finalHeight + cutdata.border - hascutlen)/(this.cutdata.orderitemvo.cutnum - index - 1);
@@ -324,7 +354,7 @@ package script.order
 			var finalheight:Number = cutdata.finalHeight+ cutdata.border;
 			var product:ProductVo = PaintOrderModel.instance.curSelectMat;
 
-			var maxwidth:Number = product.max_width - 3;
+			var maxwidth:Number = cutdata.maxwidth;//product.max_width - 3;
 			if(cuttype == 1)
 			{
 				leastCutNum = Math.ceil(finalheight/maxwidth);

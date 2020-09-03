@@ -46,6 +46,8 @@ package model.picmanagerModel
 		public var connectnum:int = 0;//连通域数量
 		public var area:int = 0;//面积
 		
+		public var leftDeleteDays:int = 0;
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -71,6 +73,17 @@ package model.picmanagerModel
 					yixingFid = fileinfo.fmaskid;
 					backFid = fileinfo.fbackid;
 					
+					if(fileinfo.fdate != null)
+					{
+						var updatetime:Date = new Date(Date.parse(UtilTool.convertDateStr(fileinfo.fdate)));
+						//updatetime.time = Date.parse(UtilTool.convertDateStr(fileinfo.fdate));
+						
+						var passtime:int = Math.ceil(((new Date()).getTime() - updatetime.getTime() + 8 * 3600 * 1000)/(3600*24*1000));
+						
+						leftDeleteDays = 30 - passtime;
+						if(leftDeleteDays < 0)
+							leftDeleteDays = 0;
+					}
 					
 					if(fattr.hasOwnProperty("roadnum"))
 					{
@@ -85,7 +98,7 @@ package model.picmanagerModel
 						var longside:Number = Math.max(picWidth,picHeight);
 
 						area = Math.floor(fattr.area *  longside/1000 * longside/1000);
-						trace("connectnum:" + connectnum + "," + area);
+						//trace("connectnum:" + connectnum + "," + area);
 					}
 					if(fattr != null && fattr.flag == 1)
 					{

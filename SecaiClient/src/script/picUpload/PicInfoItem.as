@@ -64,13 +64,17 @@ package script.picUpload
 				
 				this.img.x = 126;
 				
+				this.countdown.visible = false;
+				
 			}
 			else
 			{
 				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
 				this.img.x = 87;
+				this.countdown.visible = true;
 
+				this.autodellabel.text = picInfo.leftDeleteDays + "天";
 				if( picInfo.isProcessing)
 				{
 					this.fileinfo.text = "处理中...";

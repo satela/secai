@@ -701,7 +701,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="characterpaint/BackImgItem.scene";
+	GameConfig.startScene="order/MaterialNameItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1414,6 +1414,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1694,6 +1695,7 @@ var PaintOrderModel=(function(){
 		return false;
 	}
 
+	//判断图片是否不符合等份裁切的尺寸要求
 	__proto.checkIslongerForDfcq=function(){
 		var vect=[];
 		if(this.curSelectOrderItem !=null)
@@ -1704,6 +1706,58 @@ var PaintOrderModel=(function(){
 			var minside=Math.min(vect[i].finalWidth,vect[i].finalHeight);
 			var longside=Math.max(vect[i].finalWidth,vect[i].finalHeight);
 			if(minside > 120 || longside > 240)
+				return true;
+		}
+		return false;
+	}
+
+	//判断是否需要重新选择超幅拼接参数
+	__proto.checkNeedReChooseCfpj=function(){
+		var curprocesslst=model.orderModel.PaintOrderModel.instance.curSelectMat.getAllSelectedTech();
+		var picorderitems=[];
+		if(model.orderModel.PaintOrderModel._instance.curSelectOrderItem !=null)
+			picorderitems.push(model.orderModel.PaintOrderModel._instance.curSelectOrderItem);
+		else
+		picorderitems=model.orderModel.PaintOrderModel._instance.batchChangeMatItems;
+		var hascfpj=false;
+		for(var i=0;i < curprocesslst.length;i++){
+			if(curprocesslst[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ"){
+				hascfpj=true;
+				break ;
+			}
+		}
+		if(hascfpj){
+			for(var i=0;i < picorderitems.length;i++){
+				var cutlengths=picorderitems[i].ordervo.eachCutLength;
+				if(cutlengths !=null){
+					for(var j=0;j < cutlengths.length;j++){
+						if(cutlengths[j] > 120){
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	__proto.getCurPicOrderItems=function(){
+		var picorderitems=[];
+		if(model.orderModel.PaintOrderModel._instance.curSelectOrderItem !=null)
+			picorderitems.push(model.orderModel.PaintOrderModel._instance.curSelectOrderItem);
+		else
+		picorderitems=model.orderModel.PaintOrderModel._instance.batchChangeMatItems;
+		return picorderitems;
+	}
+
+	__proto.checkExceedMaterialSize=function(material){
+		var picorderitems=this.getCurPicOrderItems();
+		for(var i=0;i < picorderitems.length;i++){
+			var minside=Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+			var longside=Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+			if(minside > material.max_width || longside > material.max_length)
+				return true;
+			if(minside < material.min_width || longside < material.min_length)
 				return true;
 		}
 		return false;
@@ -1911,6 +1965,8 @@ var PicInfoVo=(function(){
 		this.connectnum=0;
 		//连通域数量
 		this.area=0;
+		//面积
+		this.leftDeleteDays=0;
 		this.picType=dtype;
 		if(this.picType==0){
 			this.directName=fileinfo.dname;
@@ -1929,6 +1985,13 @@ var PicInfoVo=(function(){
 				this.picPhysicHeight=UtilTool.oneCutNineAdd(this.picHeight/this.dpi*2.54);
 				this.yixingFid=fileinfo.fmaskid;
 				this.backFid=fileinfo.fbackid;
+				if(fileinfo.fdate !=null){
+					var updatetime=new Date(Date.parse(UtilTool.convertDateStr(fileinfo.fdate)));
+					var passtime=Math.ceil(((new Date()).getTime()-updatetime.getTime()+8 *3600 *1000)/(3600*24*1000));
+					this.leftDeleteDays=30-passtime;
+					if(this.leftDeleteDays < 0)
+						this.leftDeleteDays=0;
+				}
 				if(fattr.hasOwnProperty("roadnum")){
 					this.roadNum=fattr.roadnum;
 					var longside=Math.max(this.picWidth,this.picHeight);
@@ -1938,7 +2001,6 @@ var PicInfoVo=(function(){
 					this.connectnum=fattr.connectnum;
 					var longside=Math.max(this.picWidth,this.picHeight);
 					this.area=Math.floor(fattr.area *longside/1000 *longside/1000);
-					console.log("connectnum:"+this.connectnum+","+this.area);
 				}
 				if(fattr !=null && fattr.flag==1){
 					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
@@ -2295,6 +2357,9 @@ var ProductVo=(function(){
 		this.additional_unitfee=0;
 		// 单位附加金额
 		this.is_merchandise=false;
+		this.mat_width=0;
+		this.mat_length=0;
+		this.mat_thickness=0;
 		this.prcessCatList=null;
 		//工艺类列表
 		this.hasDoublePrint=1;
@@ -2358,7 +2423,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border> this.max_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border> this.mat_width)){
 					var peijian="";
 					if(arr[i].selectAttachVoList !=null){
 						for(var j=0;j < arr[i].selectAttachVoList.length;j++){
@@ -2418,7 +2483,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border > this.max_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border > this.mat_width)){
 					var totalprice=0;
 					var priceInfo=PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
 					if(priceInfo !=null && priceInfo.length==3){
@@ -2453,7 +2518,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border > this.max_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border > this.mat_width)){
 					var procname=arr[i].preProc_Name+UtilTool.getAttachDesc(arr[i]);
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 						procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
@@ -3056,6 +3121,20 @@ var UtilTool=(function(){
 		return false;
 	}
 
+	UtilTool.convertDateStr=function(dateStr){
+		var strArr=dateStr.split(" ");
+		var fStr="{0} {1} {2}";
+		return UtilTool.format(fStr,(strArr [0]).split("-").join("/"),strArr[1],"GMT");
+	}
+
+	UtilTool.format=function(str,__args){
+		var args=[];for(var i=1,sz=arguments.length;i<sz;i++)args.push(arguments[i]);
+		for(var i=0;i<args.length;i++){
+			str=str.replace(new RegExp("\\{"+i+"\\}","gm"),args[i]);
+		}
+		return str;
+	}
+
 	__static(UtilTool,
 	['grayscaleMat',function(){return this.grayscaleMat=[
 		0.3086,0.6094,0.0820,0,0,
@@ -3123,6 +3202,11 @@ var OrderConstant=(function(){
 	OrderConstant.MANUFACTURE_TYPE_TEXT_PAINT=5;
 	OrderConstant.PAINTING=1;
 	OrderConstant.CUTTING=2;
+	OrderConstant.MAX_CUT_THRESHOLD=160;
+	OrderConstant.FUBAI_WOOD_MAX_WIDTH=120;
+	OrderConstant.DFCQ_MAX_WIDTH=240;
+	OrderConstant.DFCQ_MAX_HEIGHT=120;
+	OrderConstant.CUT_PRIOR_WIDTH=120;
 	return OrderConstant;
 })()
 
@@ -3456,7 +3540,7 @@ var MaterialItemVo=(function(){
 						var vec=[];
 						vec.push(this);
 						var border=UtilTool.getBorderDistance(vec);
-						if(allpics[i].finalWidth+border > curselectProduct.max_width && allpics[i].finalHeight+border > curselectProduct.max_width){
+						if(allpics[i].finalWidth+border > curselectProduct.mat_width && allpics[i].finalHeight+border > curselectProduct.mat_width){
 							hasBeyongd=true;
 							break ;
 						}
@@ -36946,7 +37030,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.main_panel.height=fixedheight;
 		this.uiSkin.main_panel.width=Browser.width;
 		this.uiSkin.main_panel.hScrollBarSkin="";
-		this.uiSkin.picList.height=fixedheight-120;
+		this.uiSkin.picList.height=fixedheight-125;
 		this.uiSkin.main_panel.hScrollBar.mouseWheelEnable=false;
 		this.uiSkin.seltips.visible=false;
 		DirectoryFileModel.instance.curFileList=[];
@@ -36959,7 +37043,7 @@ var PicManagerControl=(function(_super){
 			fixedheight=Laya.stage.height;
 		}
 		this.uiSkin.main_panel.height=fixedheight;
-		this.uiSkin.picList.height=fixedheight-120;
+		this.uiSkin.picList.height=fixedheight-125;
 		this.uiSkin.main_panel.width=Browser.width;
 	}
 
@@ -38617,6 +38701,10 @@ var SelectAttchesControl=(function(_super){
 		ViewManager.instance.closeView("VIEW_SELECT_ATTACH");
 		EventCenter.instance.off("ADD_TECH_ATTACH",this,this.onAddAttach);
 		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		if(this.matvo.preProc_Code=="SPTE10210"){
+			if(PaintOrderModel.instance.checkNeedReChooseCfpj())
+				ViewManager.instance.openView("INPUT_CUT_NUM",false,true);
+		}
 	}
 
 	return SelectAttchesControl;
@@ -40103,7 +40191,7 @@ var SelectMaterialControl=(function(_super){
 		if(matvo.preProc_attachmentTypeList.toLocaleUpperCase()=="SPPEIJIAN")
 			ViewManager.instance.openView("VIEW_SELECT_ATTACH",false,matvo);
 		else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase()=="SPPJ")
-		ViewManager.instance.openView("INPUT_CUT_NUM",false,matvo);
+		ViewManager.instance.openView("INPUT_CUT_NUM",false,false);
 		else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase()=="SPDFCQ")
 		ViewManager.instance.openView("AVG_CUT_VIEW",false,matvo);
 		this.updateSelectedTech();
@@ -41449,7 +41537,8 @@ var CharacterMainControl=(function(_super){
 var InputCutNumControl=(function(_super){
 	function InputCutNumControl(){
 		this.uiSkin=null;
-		this.matvo=null;
+		//private var matvo:MaterialItemVo;
+		this.hasFubai=false;
 		this.param=null;
 		this.leastCutNum=0;
 		this.cuttype=0;
@@ -41465,7 +41554,7 @@ var InputCutNumControl=(function(_super){
 		this.uiSkin.mainpanel.hScrollBarSkin="";
 		this.uiSkin.mainpanel.height=Browser.height;
 		this.uiSkin.mainpanel.width=Browser.width;
-		this.matvo=this.param;
+		this.hasFubai=this.param;
 		this.linelist=[];
 		this.uiSkin.okbtn.on("click",this,this.closeView);
 		this.uiSkin.productlist.itemRender=ImageCutItem;
@@ -41477,16 +41566,26 @@ var InputCutNumControl=(function(_super){
 		this.uiSkin.productlist.selectEnable=false;
 		var arr=[];
 		var curmat=PaintOrderModel.instance.curSelectMat;
-		this.uiSkin.maxtips.text="（单份最大裁切宽度："+(curmat.max_width-3)+"cm）";
+		var maxcutwidth=curmat.mat_width-3;
+		if(this.hasFubai)
+			maxcutwidth=120;
+		this.uiSkin.maxtips.text="（单份最大裁切宽度："+maxcutwidth+"cm）";
 		if(PaintOrderModel.instance.curSelectOrderItem !=null){
 			var cutdata={};
 			cutdata.finalWidth=PaintOrderModel.instance.curSelectOrderItem.finalWidth;
 			cutdata.finalHeight=PaintOrderModel.instance.curSelectOrderItem.finalHeight;
 			cutdata.fid=PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.fid;
+			cutdata.maxwidth=maxcutwidth;
 			cutdata.border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 			cutdata.orderitemvo=PaintOrderModel.instance.curSelectOrderItem.ordervo;
 			cutdata.orderitemvo.cuttype=0;
-			cutdata.orderitemvo.cutnum=Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth+cutdata.border)/(curmat.max_width-3));
+			if(maxcutwidth < 160){
+				cutdata.orderitemvo.cutnum=Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth+cutdata.border)/120);
+				if(cutdata.orderitemvo.cutnum < 2)
+					cutdata.orderitemvo.cutnum=2;
+			}
+			else
+			cutdata.orderitemvo.cutnum=Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth+cutdata.border)/maxcutwidth);
 			var cutlen=PaintOrderModel.instance.curSelectOrderItem.finalWidth/cutdata.orderitemvo.cutnum;
 			cutlen=parseFloat(cutlen.toFixed(2));
 			cutdata.orderitemvo.eachCutLength=[];
@@ -41498,15 +41597,22 @@ var InputCutNumControl=(function(_super){
 			var batchlist=PaintOrderModel.instance.batchChangeMatItems;
 			var border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 			for(var i=0;i < batchlist.length;i++){
-				if(batchlist[i].finalWidth+border > curmat.max_width && batchlist[i].finalHeight+border > curmat.max_width){
+				if(batchlist[i].finalWidth+border > curmat.mat_width && batchlist[i].finalHeight+border > curmat.mat_width){
 					var cutdata={};
 					cutdata.finalWidth=batchlist[i].finalWidth;
 					cutdata.finalHeight=batchlist[i].finalHeight;
 					cutdata.fid=batchlist[i].ordervo.picinfo.fid;
+					cutdata.maxwidth=maxcutwidth;
 					cutdata.border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 					cutdata.orderitemvo=batchlist[i].ordervo;
 					cutdata.orderitemvo.cuttype=0;
-					cutdata.orderitemvo.cutnum=Math.ceil((batchlist[i].finalWidth+cutdata.border)/(curmat.max_width-3));
+					if(maxcutwidth < 160){
+						cutdata.orderitemvo.cutnum=Math.ceil((batchlist[i].finalWidth+cutdata.border)/120);
+						if(cutdata.orderitemvo.cutnum < 2)
+							cutdata.orderitemvo.cutnum=2;
+					}
+					else
+					cutdata.orderitemvo.cutnum=Math.ceil((batchlist[i].finalWidth+cutdata.border)/maxcutwidth);
 					var cutlen=batchlist[i].finalWidth/cutdata.orderitemvo.cutnum;
 					cutlen=parseFloat(cutlen.toFixed(2));
 					cutdata.orderitemvo.eachCutLength=[];
@@ -54054,6 +54160,7 @@ var LoadingPanelUI=(function(_super){
 var MaterialNameItemUI=(function(_super){
 	function MaterialNameItemUI(){
 		this.matbtn=null;
+		this.grayimg=null;
 		MaterialNameItemUI.__super.call(this);
 	}
 
@@ -54064,7 +54171,7 @@ var MaterialNameItemUI=(function(_super){
 		this.createView(MaterialNameItemUI.uiView);
 	}
 
-	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":179,"var":"matbtn","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"户内PP背胶（户内写真）","height":40},"compId":8}],"loadList":["commers/btn2.png"],"loadList3D":[]};
+	MaterialNameItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":179,"var":"matbtn","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"户内PP背胶（户内写真）","height":40,"disabled":false},"compId":8,"child":[{"type":"Image","props":{"var":"grayimg","top":0,"skin":"commers/graydisable.jpg","sizeGrid":"2,2,2,2","right":0,"left":0,"bottom":0},"compId":9}]}],"loadList":["commers/btn2.png","commers/graydisable.jpg"],"loadList3D":[]};
 	return MaterialNameItemUI;
 })(View)
 
@@ -54708,6 +54815,8 @@ var PicShortItemUI=(function(_super){
 		this.btnyxtxt=null;
 		this.selBackBtn=null;
 		this.btnfmtxt=null;
+		this.countdown=null;
+		this.autodellabel=null;
 		PicShortItemUI.__super.call(this);
 	}
 
@@ -54718,7 +54827,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":252,"height":228},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":228},"compId":15},{"type":"Image","props":{"y":85,"x":87,"width":156,"var":"img","skin":"upload/fold.png","height":156,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":46,"x":209,"width":78,"var":"yixingimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":124,"x":209,"width":78,"var":"backimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":164,"wordWrap":false,"width":248,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"scroll","left":2,"height":23,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":7,"var":"btndelete","stateNum":2,"skin":"upload/closebutton.png"},"compId":7},{"type":"Label","props":{"y":184,"wordWrap":true,"width":252,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":44,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":141,"x":9,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":141,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":129,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":6,"x":142,"var":"sel","skin":"upload/imgselect.png"},"compId":12},{"type":"Button","props":{"y":7,"var":"selYixingBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"4,4,4,4","right":4,"labelSize":14,"labelColors":"#444A4E,#444A4E,#444A4E"},"compId":13,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnyxtxt","text":"选择异形","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":18}]},{"type":"Button","props":{"y":86,"var":"selBackBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"2,2,2,2","right":4,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":14,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnfmtxt","text":"选择反面","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":19}]}],"loadList":["upload/picimg.png","upload/fold.png","upload/closebutton.png","upload/imgselect.png","upload/addimg.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":252,"height":240},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":240},"compId":15},{"type":"Image","props":{"y":85,"x":87,"width":156,"var":"img","skin":"upload/fold.png","height":156,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":46,"x":209,"width":78,"var":"yixingimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":124,"x":209,"width":78,"var":"backimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":164,"wordWrap":false,"width":248,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"scroll","left":2,"height":23,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":7,"var":"btndelete","stateNum":2,"skin":"upload/closebutton.png"},"compId":7},{"type":"Label","props":{"y":184,"wordWrap":true,"width":252,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":44,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":141,"x":9,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":141,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":129,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":6,"x":142,"var":"sel","skin":"upload/imgselect.png"},"compId":12},{"type":"Button","props":{"y":7,"var":"selYixingBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"4,4,4,4","right":4,"labelSize":14,"labelColors":"#444A4E,#444A4E,#444A4E"},"compId":13,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnyxtxt","text":"选择异形","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":18}]},{"type":"Button","props":{"y":86,"var":"selBackBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"2,2,2,2","right":4,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":14,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnfmtxt","text":"选择反面","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":19}]},{"type":"Box","props":{"y":220,"x":2,"var":"countdown"},"compId":22,"child":[{"type":"Label","props":{"x":-2,"wordWrap":false,"width":113,"valign":"middle","text":"自动删除倒计时：","right":137,"overflow":"scroll","left":2,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":20},{"type":"Label","props":{"x":-2,"wordWrap":false,"width":36,"var":"autodellabel","valign":"middle","text":"30天","overflow":"scroll","left":115,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":21}]}],"loadList":["upload/picimg.png","upload/fold.png","upload/closebutton.png","upload/imgselect.png","upload/addimg.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -60285,14 +60394,27 @@ var ImageCutItem=(function(_super){
 		var finalwidth=this.cutdata.finalWidth+this.cutdata.border;
 		var finalheight=this.cutdata.finalHeight+this.cutdata.border;;
 		var product=PaintOrderModel.instance.curSelectMat;
-		var maxwidth=product.max_width-3;
+		var maxwidth=this.cutdata.maxwidth;
 		if(this.cuttype==1){
 			this.leastCutNum=Math.ceil(finalheight/maxwidth);
+			if(this.cutdata.maxwidth < 160){
+				this.cutdata.orderitemvo.cutnum=Math.ceil(finalheight/120);
+				if(this.cutdata.orderitemvo.cutnum < 2)
+					this.cutdata.orderitemvo.cutnum=2;
+			}
+			else
+			this.cutdata.orderitemvo.cutnum=this.leastCutNum;
 		}
 		else{
 			this.leastCutNum=Math.ceil(finalwidth/maxwidth);
+			if(this.cutdata.maxwidth < 160){
+				this.cutdata.orderitemvo.cutnum=Math.ceil(finalwidth/120);
+				if(this.cutdata.orderitemvo.cutnum < 2)
+					this.cutdata.orderitemvo.cutnum=2;
+			}
+			else
+			this.cutdata.orderitemvo.cutnum=this.leastCutNum;
 		}
-		this.cutdata.orderitemvo.cutnum=this.leastCutNum;
 		this.cutdata.orderitemvo.cuttype=this.cuttype;
 		this.initCutNum();
 		this.resetCutlen();
@@ -60345,16 +60467,17 @@ var ImageCutItem=(function(_super){
 		}
 		if(this.hinputlist[index].text=="")
 			return;
-		var product=PaintOrderModel.instance.curSelectMat;
-		var maxwidth=product.max_width-3;
+		var maxwidth=this.cutdata.maxwidth;
 		var hascutlen=0;
 		for(var i=0;i < index;i++){
 			hascutlen+=this.cutdata.orderitemvo.eachCutLength[i];
 		};
-		var curnum=parseFloat(this.hinputlist[index].text);
+		var curnum=parseFloat(parseFloat(this.hinputlist[index].text).toFixed(2));
+		this.hinputlist[index].text=curnum+"";
 		var maxlen=Math.min(maxwidth,this.cutdata.finalWidth+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1);
-		if(curnum <=0)
-			this.hinputlist[index].text="1";
+		var minlen=Math.max(1,this.cutdata.finalWidth+this.cutdata.border-hascutlen-maxwidth*(this.cutdata.orderitemvo.cutnum-index-1));
+		if(curnum <=minlen)
+			this.hinputlist[index].text=minlen.toFixed(2)+"";
 		if(curnum > maxlen)
 			this.hinputlist[index].text=maxlen+"";
 		hascutlen+=parseFloat(this.hinputlist[index].text);
@@ -60377,15 +60500,19 @@ var ImageCutItem=(function(_super){
 		}
 		if(this.vinputlist[index].text=="")
 			return;
+		var maxwidth=this.cutdata.maxwidth;
 		var hascutlen=0;
 		for(var i=0;i < index;i++){
 			hascutlen+=this.cutdata.orderitemvo.eachCutLength[i];
 		};
-		var curnum=parseFloat(this.vinputlist[index].text);
-		if(curnum <=0)
-			this.vinputlist[index].text="1";
-		if(curnum > this.cutdata.finalHeight+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)
-			this.vinputlist[index].text=(this.cutdata.finalHeight+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1)+"";
+		var curnum=parseFloat(parseFloat(this.vinputlist[index].text).toFixed(2));
+		this.vinputlist[index].text=curnum+"";
+		var maxlen=Math.min(maxwidth,this.cutdata.finalHeight+this.cutdata.border-hascutlen-this.cutdata.orderitemvo.cutnum+index+1);
+		var minlen=Math.max(1,this.cutdata.finalHeight+this.cutdata.border-hascutlen-maxwidth*(this.cutdata.orderitemvo.cutnum-index-1));
+		if(curnum <=minlen)
+			this.vinputlist[index].text=minlen+"";
+		if(curnum > maxlen)
+			this.vinputlist[index].text=maxlen+"";
 		hascutlen+=parseFloat(this.vinputlist[index].text);
 		var leftAvg=(this.cutdata.finalHeight+this.cutdata.border-hascutlen)/(this.cutdata.orderitemvo.cutnum-index-1);
 		for(var i=index+1;i < this.cutdata.orderitemvo.cutnum;i++){
@@ -60438,7 +60565,7 @@ var ImageCutItem=(function(_super){
 		var finalwidth=this.cutdata.finalWidth+this.cutdata.border;
 		var finalheight=this.cutdata.finalHeight+this.cutdata.border;
 		var product=PaintOrderModel.instance.curSelectMat;
-		var maxwidth=product.max_width-3;
+		var maxwidth=this.cutdata.maxwidth;
 		if(this.cuttype==1){
 			this.leastCutNum=Math.ceil(finalheight/maxwidth);
 		}
@@ -60635,10 +60762,16 @@ var MaterialItem=(function(_super){
 		this.matvo=product;
 		this.matbtn.label=this.matvo.prod_name;
 		this.on("click",this,this.onClickMat);
+		this.grayimg.visible=PaintOrderModel.instance.checkExceedMaterialSize(this.matvo);
+		this.mouseEnabled=!PaintOrderModel.instance.checkExceedMaterialSize(this.matvo);
 	}
 
 	//this.redrect.visible=false;
 	__proto.onClickMat=function(){
+		if(PaintOrderModel.instance.checkExceedMaterialSize(this.matvo)){
+			ViewManager.showAlert("有图片超出材料的最大尺寸");
+			return;
+		}
 		if(this.matvo.prcessCatList !=null && this.matvo.prcessCatList.length > 0){
 			this.matvo.resetData();
 			PaintOrderModel.instance.curSelectMat=this.matvo;
@@ -61308,11 +61441,14 @@ var PicInfoItem=(function(_super){
 			this.selYixingBtn.visible=false;
 			this.selBackBtn.visible=false;
 			this.img.x=126;
+			this.countdown.visible=false;
 		}
 		else{
 			this.fileinfo.visible=true;
 			this.filename.text=this.picInfo.directName;
 			this.img.x=87;
+			this.countdown.visible=true;
+			this.autodellabel.text=this.picInfo.leftDeleteDays+"天";
 			if(this.picInfo.isProcessing){
 				this.fileinfo.text="处理中...";
 				this.img.skin="upload/fold.png";

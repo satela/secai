@@ -660,7 +660,7 @@ package script.order
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_ATTACH,false,matvo);
 			
 			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.CUTOFF_H_V)
-				ViewManager.instance.openView(ViewManager.INPUT_CUT_NUM,false,matvo);
+				ViewManager.instance.openView(ViewManager.INPUT_CUT_NUM,false,false);
 			
 			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.AVERAGE_CUTOFF)
 				ViewManager.instance.openView(ViewManager.AVG_CUT_VIEW,false,matvo);

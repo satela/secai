@@ -14,6 +14,8 @@ package script.order
 	
 	import ui.order.MaterialNameItemUI;
 	
+	import utils.UtilTool;
+	
 	public class MaterialItem extends MaterialNameItemUI
 	{
 		public var matvo:ProductVo;
@@ -27,12 +29,24 @@ package script.order
 			matvo = product as ProductVo;
 			this.matbtn.label = matvo.prod_name;
 			this.on(Event.CLICK,this,onClickMat);
+			
+			this.grayimg.visible = PaintOrderModel.instance.checkExceedMaterialSize(matvo);
+			
+			this.mouseEnabled = !PaintOrderModel.instance.checkExceedMaterialSize(matvo);
+			
 			//this.blackrect.visible = false;
 			//this.redrect.visible = false;
 		}
 		
 		private function onClickMat():void
 		{
+			
+			if(PaintOrderModel.instance.checkExceedMaterialSize(matvo))
+			{
+				ViewManager.showAlert("有图片超出材料的最大尺寸");
+				return;
+			}
+			
 			// TODO Auto Generated method stub
 			if(matvo.prcessCatList != null && matvo.prcessCatList.length > 0)
 			{

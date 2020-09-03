@@ -110,7 +110,7 @@ package model.orderModel
 							vec.push(this);
 							var border:Number = UtilTool.getBorderDistance(vec);
 							
-							if(allpics[i].finalWidth + border > curselectProduct.max_width && allpics[i].finalHeight + border > curselectProduct.max_width)
+							if(allpics[i].finalWidth + border > curselectProduct.mat_width && allpics[i].finalHeight + border > curselectProduct.mat_width)
 							{
 								hasBeyongd = true;
 								break;

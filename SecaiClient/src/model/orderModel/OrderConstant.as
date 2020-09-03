@@ -48,6 +48,16 @@ package model.orderModel
 		public static const PAINTING:int = 1;//喷印下单
 		
 		public static const CUTTING:int = 2;//雕刻下单
+		
+		public static const MAX_CUT_THRESHOLD:int = 160;// 需要优先 裁切到 120 cm 的阈值，材料最大宽度小于 160 优先选到 120
+		
+		public static const FUBAI_WOOD_MAX_WIDTH:int = 120;//腹板的最大 宽度 是 120 cm，，如果有超幅拼接 工艺 且 有超过 120cm的 需要重新选择;
+		
+		public static const DFCQ_MAX_WIDTH:int = 240;  //等分裁切 最大宽度
+		public static const DFCQ_MAX_HEIGHT:int = 120; //等分裁切 最大高度
+
+		public static const CUT_PRIOR_WIDTH:int = 120;//优先裁切宽度
+
 
 	}
 }

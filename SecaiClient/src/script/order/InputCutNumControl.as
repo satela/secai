@@ -19,13 +19,16 @@ package script.order
 	import script.ViewManager;
 	
 	import ui.order.InputCutNumPanelUI;
+	import ui.order.OrderAddressItemUI;
 	
 	import utils.UtilTool;
 	
 	public class InputCutNumControl extends Script
 	{
 		private var uiSkin:InputCutNumPanelUI;
-		private var matvo:MaterialItemVo;
+		//private var matvo:MaterialItemVo;
+		
+		private var hasFubai:Boolean;
 		private var param:Object;
 		private var leastCutNum:int;
 
@@ -49,7 +52,7 @@ package script.order
 			uiSkin.mainpanel.height = Browser.height;
 			uiSkin.mainpanel.width = Browser.width;
 			
-			matvo = param as MaterialItemVo;
+			hasFubai = param;
 			linelist = new Vector.<Sprite>();
 			uiSkin.okbtn.on(Event.CLICK,this,closeView);
 			
@@ -67,19 +70,35 @@ package script.order
 			var arr:Array = [];
 			var curmat:ProductVo = PaintOrderModel.instance.curSelectMat;
 
-			uiSkin.maxtips.text = "（单份最大裁切宽度：" + (curmat.max_width-3) + "cm）";
+			
+			var maxcutwidth:Number = curmat.mat_width-3;
+			if(hasFubai)
+				maxcutwidth = 120;
+			
+			uiSkin.maxtips.text = "（单份最大裁切宽度：" + maxcutwidth + "cm）";
+
 			if(PaintOrderModel.instance.curSelectOrderItem != null)
 			{
 				var cutdata:Object = {};
 				cutdata.finalWidth = PaintOrderModel.instance.curSelectOrderItem.finalWidth;
 				cutdata.finalHeight = PaintOrderModel.instance.curSelectOrderItem.finalHeight;
 				cutdata.fid = PaintOrderModel.instance.curSelectOrderItem.ordervo.picinfo.fid;
-				
+				cutdata.maxwidth = maxcutwidth;
+
 				cutdata.border = UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>);
 				
 				cutdata.orderitemvo = PaintOrderModel.instance.curSelectOrderItem.ordervo;
 				cutdata.orderitemvo.cuttype = 0;
-				cutdata.orderitemvo.cutnum = Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth + cutdata.border)/(curmat.max_width-3));
+				
+				if(maxcutwidth < OrderConstant.MAX_CUT_THRESHOLD)		
+				{
+					cutdata.orderitemvo.cutnum = Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth + cutdata.border)/OrderConstant.CUT_PRIOR_WIDTH);
+					if(cutdata.orderitemvo.cutnum < 2)
+						cutdata.orderitemvo.cutnum = 2;
+				}
+				else
+					cutdata.orderitemvo.cutnum = Math.ceil((PaintOrderModel.instance.curSelectOrderItem.finalWidth + cutdata.border)/maxcutwidth);
+
 				
 				var cutlen:Number = PaintOrderModel.instance.curSelectOrderItem.finalWidth/cutdata.orderitemvo.cutnum;
 				cutlen = parseFloat(cutlen.toFixed(2));
@@ -96,18 +115,29 @@ package script.order
 				
 				for(var i:int=0;i < batchlist.length;i++)
 				{
-					if(batchlist[i].finalWidth + border > curmat.max_width && batchlist[i].finalHeight + border > curmat.max_width)
+					if(batchlist[i].finalWidth + border > curmat.mat_width && batchlist[i].finalHeight + border > curmat.mat_width)
 					{
 						var cutdata:Object = {};
 						cutdata.finalWidth = batchlist[i].finalWidth;
 						cutdata.finalHeight = batchlist[i].finalHeight;
 						cutdata.fid = batchlist[i].ordervo.picinfo.fid;
+						cutdata.maxwidth = maxcutwidth;
 						
 						cutdata.border = UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>);
 
 						cutdata.orderitemvo = batchlist[i].ordervo;
 						cutdata.orderitemvo.cuttype = 0;
-						cutdata.orderitemvo.cutnum = Math.ceil((batchlist[i].finalWidth + cutdata.border)/(curmat.max_width-3));
+						//cutdata.orderitemvo.cutnum = Math.ceil((batchlist[i].finalWidth + cutdata.border)/maxcutwidth);
+						
+						if(maxcutwidth < OrderConstant.MAX_CUT_THRESHOLD)					
+						{
+							cutdata.orderitemvo.cutnum = Math.ceil((batchlist[i].finalWidth + cutdata.border)/OrderConstant.CUT_PRIOR_WIDTH);
+							if(cutdata.orderitemvo.cutnum < 2)
+								cutdata.orderitemvo.cutnum = 2;
+						}
+						else
+							cutdata.orderitemvo.cutnum = Math.ceil((batchlist[i].finalWidth + cutdata.border)/maxcutwidth);
+						
 						
 						var cutlen:Number = batchlist[i].finalWidth/cutdata.orderitemvo.cutnum;
 						cutlen = parseFloat(cutlen.toFixed(2));

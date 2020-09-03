@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":2,
-    "selecteID":14,
+    "selecteID":22,
     "searchKey":"View",
-    "props":{"width":252,"sceneColor":"#ece3e2","height":228},
+    "props":{"width":252,"sceneColor":"#ece3e2","height":240},
     "nodeParent":-1,
-    "maxID":20,
+    "maxID":23,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,frame",
-            "props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":228},
+            "props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":240},
             "nodeParent":2,
             "label":"frame",
             "isDirectory":false,
@@ -147,6 +147,7 @@
             "props":{"y":6,"x":142,"var":"sel","skin":"upload/imgselect.png"},
             "nodeParent":2,
             "label":"sel",
+            "isOpen":true,
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
@@ -161,14 +162,13 @@
             "props":{"y":7,"var":"selYixingBtn","stateNum":"1","skin":"upload/addimg.png","sizeGrid":"4,4,4,4","right":4,"labelSize":14,"labelColors":"#444A4E,#444A4E,#444A4E"},
             "nodeParent":2,
             "label":"selYixingBtn",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":13,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,btnyxtxt",
                     "props":{"y":56,"x":11,"var":"btnyxtxt","text":"选择异形","fontSize":14,"font":"SimSun","color":"#444a4e"},
@@ -189,14 +189,13 @@
             "props":{"y":86,"var":"selBackBtn","stateNum":"1","skin":"upload/addimg.png","sizeGrid":"2,2,2,2","right":4,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
             "nodeParent":2,
             "label":"selBackBtn",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":14,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,btnfmtxt",
                     "props":{"y":56,"x":11,"var":"btnfmtxt","text":"选择反面","fontSize":14,"font":"SimSun","color":"#444a4e"},
@@ -206,6 +205,46 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":19,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Box",
+            "searchKey":"Box,countdown",
+            "props":{"y":220,"x":2,"var":"countdown"},
+            "nodeParent":2,
+            "label":"countdown",
+            "isOpen":null,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":22,
+            "child":[
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"x":-2,"wordWrap":false,"width":113,"valign":"middle","text":"自动删除倒计时：","right":137,"overflow":"scroll","left":2,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},
+                    "nodeParent":22,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":20,
+                    "child":[
+                        ]
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label,autodellabel",
+                    "props":{"x":-2,"wordWrap":false,"width":36,"var":"autodellabel","valign":"middle","text":"30天","overflow":"scroll","left":115,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},
+                    "nodeParent":22,
+                    "label":"autodellabel",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":21,
                     "child":[
                         ]
                 }]

@@ -8,4 +8,5 @@
    <item name="commers/commonpopbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=3,5,3,3" picType="0" scale="0"/>
    <item name="upload/prgbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=2,2,2,2" picType="0" scale="0"/>
    <item name="commers/choosebg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=9,15,12,9" picType="0" scale="0"/>
+   <item name="commers/graydis.jpg" type="Sprite" compress="0" pack="1" quality="80" props="" picType="0" scale="0"/>
 </res>

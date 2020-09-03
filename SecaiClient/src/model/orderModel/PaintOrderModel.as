@@ -255,6 +255,7 @@ package model.orderModel
 			return false;
 		}
 		
+		//判断图片是否不符合等份裁切的尺寸要求
 		public function checkIslongerForDfcq():Boolean
 		{
 			var vect:Vector.<PicOrderItem> = new Vector.<PicOrderItem>();
@@ -267,9 +268,82 @@ package model.orderModel
 			{
 				var minside:Number = Math.min(vect[i].finalWidth,vect[i].finalHeight);
 				var longside:Number = Math.max(vect[i].finalWidth,vect[i].finalHeight);
-				if(minside > 120 || longside > 240)
+				if(minside > OrderConstant.DFCQ_MAX_HEIGHT || longside > OrderConstant.DFCQ_MAX_WIDTH)
 					return true;
 
+			}
+			
+			return false;
+		}
+		
+		//判断是否需要重新选择超幅拼接参数
+		public function checkNeedReChooseCfpj():Boolean
+		{
+			var curprocesslst:Vector.<MaterialItemVo> = PaintOrderModel.instance.curSelectMat.getAllSelectedTech() as Vector.<MaterialItemVo>;
+			var picorderitems:Vector.<PicOrderItem> = new Vector.<PicOrderItem>();
+			if(PaintOrderModel._instance.curSelectOrderItem != null)
+				picorderitems.push(PaintOrderModel._instance.curSelectOrderItem);
+			else
+				picorderitems = PaintOrderModel._instance.batchChangeMatItems;
+			
+			var hascfpj:Boolean = false;
+			for(var i:int=0;i < curprocesslst.length;i++)
+			{
+				if(curprocesslst[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V)
+				{
+					hascfpj = true;
+					break;
+				}
+			}
+			
+			if(hascfpj)
+			{
+				for(var i:int=0;i < picorderitems.length;i++)
+				{
+					var cutlengths:Array = picorderitems[i].ordervo.eachCutLength;
+					if(cutlengths != null)
+					{
+						for(var j:int=0;j < cutlengths.length;j++)
+						{
+							if(cutlengths[j] > OrderConstant.FUBAI_WOOD_MAX_WIDTH)
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
+			
+			return false;
+
+		}
+		
+		public function getCurPicOrderItems():Vector.<PicOrderItem>
+		{
+			var picorderitems:Vector.<PicOrderItem> = new Vector.<PicOrderItem>();
+			if(PaintOrderModel._instance.curSelectOrderItem != null)
+				picorderitems.push(PaintOrderModel._instance.curSelectOrderItem);
+			else
+				picorderitems = PaintOrderModel._instance.batchChangeMatItems;
+			
+			return picorderitems;
+			
+		}
+		
+		public function checkExceedMaterialSize(material:ProductVo):Boolean
+		{
+			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
+			
+			for(var i:int=0;i < picorderitems.length;i++)
+			{
+				var minside:Number = Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+				var longside:Number = Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+				
+				if(minside > material.max_width || longside > material.max_length)
+					return true;
+				
+				if(minside < material.min_width || longside < material.min_length)
+					return true;
 			}
 			
 			return false;

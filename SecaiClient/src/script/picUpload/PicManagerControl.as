@@ -114,7 +114,7 @@ package script.picUpload
 			uiSkin.main_panel.height = fixedheight;
 			uiSkin.main_panel.width = Browser.width;
 			uiSkin.main_panel.hScrollBarSkin = "";
-			uiSkin.picList.height =  fixedheight - 120;
+			uiSkin.picList.height =  fixedheight - 125;
 			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
 			uiSkin.seltips.visible = false;
 			
@@ -133,7 +133,7 @@ package script.picUpload
 				fixedheight = Laya.stage.height;
 			}
 			uiSkin.main_panel.height = fixedheight;
-			uiSkin.picList.height =  fixedheight - 120;
+			uiSkin.picList.height =  fixedheight - 125;
 			uiSkin.main_panel.width = Browser.width;
 
 		}

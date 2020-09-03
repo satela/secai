@@ -194,6 +194,12 @@ package script.order
 			ViewManager.instance.closeView(ViewManager.VIEW_SELECT_ATTACH);
 			EventCenter.instance.off(EventCenter.ADD_TECH_ATTACH,this,onAddAttach);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			
+			if(matvo.preProc_Code == "SPTE10210") //腹板工艺需要重新选择超幅拼接
+			{
+				if(PaintOrderModel.instance.checkNeedReChooseCfpj())
+					ViewManager.instance.openView(ViewManager.INPUT_CUT_NUM,false,true);
+			}
 
 		}
 	}

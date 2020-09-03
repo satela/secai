@@ -30,6 +30,12 @@ package model.orderModel
 		public var additional_unitfee: Number = 0;//  单位附加金额
 		public var is_merchandise:Boolean = false;
 
+		public var mat_width:Number = 0;
+		public var mat_length:Number = 0;
+		
+		public var mat_thickness:Number = 0;
+		
+		
 		public var prcessCatList:Vector.<ProcessCatVo>;//工艺类列表
 		
 		private var hasDoublePrint:int = 1; //如果有双面打印的工艺，这个等于2，用于主材料计算价格
@@ -111,7 +117,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border> this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width && picheight + border> this.mat_width))
 					{
 						var peijian:String = "";
 						if(arr[i].selectAttachVoList != null)
@@ -201,7 +207,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width && picheight + border > this.mat_width))
 					{
 						var totalprice:Number = 0;
 						
@@ -275,7 +281,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width  && picheight + border > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width  && picheight + border > this.mat_width))
 					{
 						var procname:String = arr[i].preProc_Name + UtilTool.getAttachDesc(arr[i]);
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
