@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":3,
-    "selecteID":9,
+    "selecteID":11,
     "searchKey":"View",
     "props":{"width":0,"sceneColor":"#000000","height":40},
     "nodeParent":-1,
-    "maxID":10,
+    "maxID":12,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -46,7 +46,7 @@
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,factorytxt",
-                    "props":{"y":5,"x":68,"var":"factorytxt","text":"更改输出中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":22,"font":"SimHei","color":"#39B25A"},
+                    "props":{"y":5,"x":78,"var":"factorytxt","text":"更改输出中心","presetID":1,"preset":"laya/pages/prefabs/LinksText.prefab","fontSize":22,"font":"SimHei","color":"#39B25A"},
                     "nodeParent":3,
                     "maxID":5,
                     "label":"factorytxt",
@@ -107,6 +107,20 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":9,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image,outicon",
+                    "props":{"y":5,"x":41,"width":30,"var":"outicon","skin":"commers/circle.png","height":30},
+                    "nodeParent":3,
+                    "label":"outicon",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":11,
                     "child":[
                         ]
                 }]

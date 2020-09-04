@@ -8,6 +8,7 @@ package model.orderModel
 	import model.users.FactoryInfoVo;
 	
 	import script.ViewManager;
+	import script.order.MaterialItem;
 	import script.order.PicOrderItem;
 
 	public class PaintOrderModel
@@ -47,6 +48,7 @@ package model.orderModel
 		public var allManuFacutreMatProcPrice:Object = {};
 		
 		public var orderType:int;//当前下单类型 
+		
 		public function PaintOrderModel()
 		{
 		}
@@ -151,6 +153,39 @@ package model.orderModel
 					}
 				}
 				return [];
+			}
+		}
+		
+		public function getNeedCapcity(allprocess:Vector.<MaterialItem>,orgCode:String,orderitem:PicOrderItem):Number
+		{
+			
+			
+			return 0;
+			
+		}
+		
+		public function getCapacityData(orgcode:String,procCode:String,matcode:String,processList:Array):Array
+		{
+			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
+				return [];
+			else
+			{
+				var list:Array = allManuFacutreMatProcPrice[orgcode];
+				if(list == null)
+					return [0,0,0];
+							
+				
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode)
+					{
+						if(list[i].matlist[matcode] != null)
+							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+						else
+							return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+					}
+				}
+				return [0,0,0];
 			}
 		}
 		
@@ -273,6 +308,22 @@ package model.orderModel
 			}
 			
 			return false;
+		}
+		
+		public function getManuFactureIndex(manucode:String):int
+		{
+			for(var i:int=0;i < outPutAddr.length;i++)
+			{
+				if(manucode == (outPutAddr[i] as FactoryInfoVo).org_code)
+					return i;
+			}
+			
+			return 0;
+		}
+		
+		public function getDiscountByDate(delaydays:int):Number
+		{
+			return [1,0.95,0.9,0.85,0.8][delaydays];
 		}
 	}
 }

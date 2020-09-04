@@ -48,6 +48,10 @@ package model.orderModel
 		public static const PAINTING:int = 1;//喷印下单
 		
 		public static const CUTTING:int = 2;//雕刻下单
+		
+		public static const OUTPUT_ICON:Array=["star.png","circle.png","square.png"];
+		public static const OUTPUT_COLOR:Array=["#FF0000","#0d6a27","#3f48cc"];
+
 
 	}
 }

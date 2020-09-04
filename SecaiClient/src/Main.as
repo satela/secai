@@ -111,7 +111,7 @@
 			Laya.alertGlobalError = true;
 			
 			//激活资源版本控制，版本文件由发布功能生成
-			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
+			ResourceVersion.enable("version.json?" + (new Date()).getTime().toString(), Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 			
 			
@@ -141,7 +141,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
-			//HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
+			HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
 			
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			
