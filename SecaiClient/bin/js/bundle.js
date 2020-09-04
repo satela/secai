@@ -712,7 +712,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/MaterialNameItem.scene";
+	GameConfig.startScene="order/TechorItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -54709,7 +54709,7 @@ var TechorItemUI=(function(_super){
 		this.createView(TechorItemUI.uiView);
 	}
 
-	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":140,"var":"grayimg","skin":"commers/commonpopbg.png","sizeGrid":"2,2,2,2","height":40,"gray":true},"compId":10},{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"techBtn","skin":"order/selection.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},"compId":9}],"loadList":["commers/commonpopbg.png","order/selection.png"],"loadList3D":[]};
+	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":140,"var":"grayimg","skin":"commers/graydisable.jpg","sizeGrid":"2,2,2,2","height":40,"gray":true},"compId":10},{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"techBtn","skin":"order/selection.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},"compId":9}],"loadList":["commers/graydisable.jpg","order/selection.png"],"loadList3D":[]};
 	return TechorItemUI;
 })(View)
 
