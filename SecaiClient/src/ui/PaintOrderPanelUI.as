@@ -36,6 +36,7 @@ package ui {
 		public var copynum:TextInput;
 		public var btnsaveorder:Button;
 		public var btnordernow:Button;
+		public var emergency:CheckBox;
 
 		override protected function createChildren():void {
 			super.createChildren();

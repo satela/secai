@@ -798,5 +798,33 @@ package utils
 			
 		}
 		
+		public static function getNextFiveDays(curday:String):Array
+		{
+			var curdate:Date = new Date(Date.parse(convertDateStr(curday)));
+			var arr:Array = [];
+			
+			for(var i:int=1;i <= 5;i++)
+			{
+				var date:Date = new Date(curdate.getTime() + 24 * 3600 * i * 1000);
+				arr.push(date.getDate());
+			}
+			
+			return arr;
+		}
+		
+		public static function convertDateStr(dateStr:String):String{
+			var strArr:Array = dateStr.split(" ");
+			var fStr:String = "{0} {1} {2}";
+			return format(fStr, (strArr[0] as String).split("-").join("/"), strArr[1], "GMT");
+		}
+		
+		/**以前的format文章中的方法*/
+		public static function format(str:String, ...args):String{
+			for(var i:int = 0; i<args.length; i++){
+				str = str.replace(new RegExp("\\{" + i + "\\}", "gm"), args[i]);
+			}
+			return str;
+		}
+		
 	}
 }

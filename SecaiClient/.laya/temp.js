@@ -701,7 +701,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="order/TechorItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1625,6 +1625,29 @@ var PaintOrderModel=(function(){
 				}
 			}
 			return [];
+		}
+	}
+
+	__proto.getNeedCapcity=function(allprocess,orgCode,orderitem){
+		return 0;
+	}
+
+	__proto.getCapacityData=function(orgcode,procCode,matcode,processList){
+		if(this.allManuFacutreMatProcPrice==null || this.allManuFacutreMatProcPrice[orgcode]==null)
+			return [];
+		else{
+			var list=this.allManuFacutreMatProcPrice[orgcode];
+			if(list==null)
+				return [0,0,0];
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode){
+					if(list[i].matlist[matcode] !=null)
+						return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+					else
+					return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+				}
+			}
+			return [0,0,0];
 		}
 	}
 
@@ -3067,6 +3090,30 @@ var UtilTool=(function(){
 				return true;
 		}
 		return false;
+	}
+
+	UtilTool.getNextFiveDays=function(curday){
+		var curdate=new Date(Date.parse(UtilTool.convertDateStr(curday)));
+		var arr=[];
+		for(var i=1;i <=5;i++){
+			var date=new Date(curdate.getTime()+24 *3600 *i *1000);
+			arr.push(date.getDate());
+		}
+		return arr;
+	}
+
+	UtilTool.convertDateStr=function(dateStr){
+		var strArr=dateStr.split(" ");
+		var fStr="{0} {1} {2}";
+		return UtilTool.format(fStr,(strArr [0]).split("-").join("/"),strArr[1],"GMT");
+	}
+
+	UtilTool.format=function(str,__args){
+		var args=[];for(var i=1,sz=arguments.length;i<sz;i++)args.push(arguments[i]);
+		for(var i=0;i<args.length;i++){
+			str=str.replace(new RegExp("\\{"+i+"\\}","gm"),args[i]);
+		}
+		return str;
 	}
 
 	__static(UtilTool,
@@ -55446,8 +55493,10 @@ var PicOrderItem=(function(_super){
 		this.estimatelbl.color=OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
 		this.timebox.visible=true;
 		var colors=this.estimatelbl.color+","+","+this.estimatelbl.color;
+		var nextdays=UtilTool.getNextFiveDays("2020-09-04 12:00:00");
 		for(var i=0;i < 5;i++){
 			this["timebtn"+i].labelColors=colors;
+			this["timebtn"+i].label=nextdays[i]+"";
 		}
 		this.onSelectTime(0);
 		var area=(this.finalHeight *this.finalWidth)/10000;

@@ -15,6 +15,8 @@ package script.order
 	
 	import ui.order.OrderItemUI;
 	
+	import utils.UtilTool;
+	
 	public class PicOrderItem extends OrderItemUI
 	{
 		public var ordervo:PicOrderItemVo;
@@ -394,9 +396,12 @@ package script.order
 			this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
 			this.timebox.visible = true;
 			var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;
+			var nextdays:Array = UtilTool.getNextFiveDays("2020-09-04 12:00:00");
+			
 			for(var i:int=0;i < 5;i++)
 			{
 				this["timebtn"+i].labelColors = colors;
+				this["timebtn"+i].label = nextdays[i] + "";
 			}
 			
 			onSelectTime(0);
