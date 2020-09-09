@@ -1,4 +1,4 @@
-package script.order
+package script.carving
 {
 	import eventUtil.EventCenter;
 	
@@ -13,12 +13,12 @@ package script.order
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.PicOrderItemVo;
 	import model.orderModel.DeliveryTypeVo;
 	import model.orderModel.MatetialClassVo;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PartItemVo;
-	import model.orderModel.PicOrderItemVo;
 	import model.picmanagerModel.DirectoryFileModel;
 	import model.picmanagerModel.PicInfoVo;
 	
@@ -31,12 +31,12 @@ package script.order
 	
 	import utils.UtilTool;
 	
-	public class PaintOrderControl extends Script
+	public class CarvingOrderControl extends Script
 	{
 		private var uiSkin:PaintOrderPanelUI;
 		public var param:Object;
 		
-		private var orderlist:Vector.<PicOrderItem>;
+		private var orderlist:Vector.<CarvingOrderItem>;
 		
 		private var fengeoriginy:Number = 0;
 		
@@ -44,7 +44,7 @@ package script.order
 		
 		private var mianvbox:Number = 0;
 		
-		public function PaintOrderControl()
+		public function CarvingOrderControl()
 		{
 			super();
 		}
@@ -71,18 +71,18 @@ package script.order
 			uiSkin.copynum.restrict = "0-9";
 			uiSkin.copynum.maxChars = 3;
 			uiSkin.copynum.on(Event.INPUT,this,onNumChange);
-
+			
 			
 			fengeoriginy = uiSkin.fengeimg.y;
 			floatpyy = uiSkin.floatpt.y;
 			mianvbox = uiSkin.mainvbox.y;
 			
-			orderlist = new Vector.<PicOrderItem>();
+			orderlist = new Vector.<CarvingOrderItem>();
 			for each(var fvo in DirectoryFileModel.instance.haselectPic)
 			{
 				var ovo:PicOrderItemVo = new PicOrderItemVo(fvo);
 				ovo.indexNum = i++;
-				var item:PicOrderItem = new PicOrderItem(ovo);
+				var item:CarvingOrderItem = new CarvingOrderItem(ovo);
 				uiSkin.ordervbox.addChild(item);
 				orderlist.push(item);
 				//if(num > 0)
@@ -107,73 +107,73 @@ package script.order
 			
 			uiSkin.ordervbox.size(uiSkin.ordervbox.width,totalheight - uiSkin.ordervbox.space);
 			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
-
+			
 			DirectoryFileModel.instance.haselectPic = {};
 			//uiSkin.myaddresstxt.underline = true;
 			//uiSkin.myaddresstxt.underlineColor = "#222222";
 			
 			//uiSkin.factorytxt.underline = true;
 			//uiSkin.factorytxt.underlineColor = "#222222";
-		//	uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
+			//	uiSkin.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 			uiSkin.myaddresstxt.on(Event.CLICK,this,onShowSelectAddress);
-		//	uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
+			//	uiSkin.factorytxt.on(Event.CLICK,this,onShowSelectFactory);
 			//uiSkin.deliverytxt.on(Event.CLICK,this,onShowSelectDelivery);
 			
 			uiSkin.batchChange.on(Event.CLICK,this,onBatchChangeMaterial);
 			uiSkin.selectAll.on(Event.CLICK,this,onSelectAll);
 			EventCenter.instance.on(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
 			EventCenter.instance.on(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
-
+			
 			EventCenter.instance.on(EventCenter.ADD_PIC_FOR_ORDER,this,onUpdateOrderPic);
 			
 			EventCenter.instance.on(EventCenter.DELETE_PIC_ORDER,this,onDeletePicOrder);
 			
 			EventCenter.instance.on(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
-
+			
 			EventCenter.instance.on(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.on(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.on(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 			EventCenter.instance.on(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
 			EventCenter.instance.on(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
-
+			
 			uiSkin.panelout.vScrollBarSkin = "";
 			uiSkin.panelout.hScrollBarSkin = "";
 			
 			uiSkin.panelbottom.hScrollBarSkin = "";
 			uiSkin.panelout.hScrollBar.mouseWheelEnable = false;
 			
-
+			
 			uiSkin.panelout.width = Browser.width;
 			uiSkin.panelbottom.width = Browser.width;
-
+			
 			uiSkin.deliversp.autoSize = true;
 			//(uiSkin.panel_main).bottom = 298 + (Browser.height - 1080);
 			//(uiSkin.panelout).height = (Browser.height - 80);
-
+			
 			if(Browser.height > Laya.stage.height)
 				this.uiSkin.height = 1080;
 			else
 				this.uiSkin.height = Browser.height;
 			this.uiSkin.btnordernow.on(Event.CLICK,this,onOrderPaint);
 			this.uiSkin.btnsaveorder.on(Event.CLICK,this,onSaveOrder);
-
+			
 			this.uiSkin.panelout.on(Event.DRAG_MOVE,this,onDragMove);
 			
 			if(Userdata.instance.company == null || Userdata.instance.company == "")
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo ,this,getCompanyInfo,null,"post");
-
-//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
-//				
-//				var result:Object = JSON.parse(data as String);
-//				if(result.hasOwnProperty("status"))
-//				{
-//					
-//				}
-//				trace(data);
-//			});
+			
+			//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProcessFlow,this,function(data:Object):void{
+			//				
+			//				var result:Object = JSON.parse(data as String);
+			//				if(result.hasOwnProperty("status"))
+			//				{
+			//					
+			//				}
+			//				trace(data);
+			//			});
 			PaintOrderModel.instance.selectAddress = null;
-
+			
 			resetOrderInfo();
 			if(Userdata.instance.getDefaultAddress() != null)
 			{
@@ -231,16 +231,16 @@ package script.order
 				uiSkin.floatpt.addChild(uiSkin.floatdocker);
 				uiSkin.floatdocker.y = 0;
 				uiSkin.floatdocker.x = 0;
-
+				
 			}
 		}
 		private function resetOrderInfo():void
 		{
 			var total:Number = 0;
-//			for(var i:int=0;i < orderlist.length;i++)
-//			{
-//				total += Number(orderlist[i].total.text);
-//			}
+			//			for(var i:int=0;i < orderlist.length;i++)
+			//			{
+			//				total += Number(orderlist[i].total.text);
+			//			}
 			//var arr:Array = [];
 			if(orderlist.length > 0)
 			{
@@ -249,7 +249,7 @@ package script.order
 				
 				for(var i:int=0; i < orderlist.length;i++)
 				{
-					var orderitem:PicOrderItem = orderlist[i];
+					var orderitem:CarvingOrderItem = orderlist[i];
 					//				if(!orderitem.checkCanOrder())
 					//				{
 					//					//ViewManager.showAlert("未选择材料工艺");
@@ -315,7 +315,7 @@ package script.order
 						odata.order_amountStr = 2.00;
 					
 					total += (Number)((odata.order_amountStr as Number).toFixed(2));
-						
+					
 					//odata.order_amountStr = (odata.order_amountStr as Number).toFixed(2);
 					
 					//arr.push(odata);
@@ -329,7 +329,7 @@ package script.order
 			
 			uiSkin.textTotalPrice.innerHTML = "<span color='#262B2E' size='20'>折后总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(1) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			uiSkin.textDeliveryType.innerHTML = "<span color='#262B2E' size='20'>运费总额：</span>" + "<span color='#FF4400' size='20'>" + "0" + "</span>" + "<span color='#262B2E' size='20'>元</span>";
-
+			
 			uiSkin.textPayPrice.innerHTML = "<span color='#262B2E' size='20'>应付总额：</span>" + "<span color='#FF4400' size='20'>" + total.toFixed(1) + "</span>" + "<span color='#262B2E' size='20'>元</span>";
 			
 		}
@@ -357,22 +357,22 @@ package script.order
 						outputitem.holaday.text = "";
 						
 					}
-
-						
-//						if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("义乌物与") >= 0)
-//							outputitem.holaday.text = "2020年春节放假时间1月17日22时截稿，2月4日正式上班";
-//						else if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("无锡点") >= 0)
-//							outputitem.holaday.text = "2020年春节放假时间1月19日22时截稿，2月1日正式上班";
-						// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
+					
+					
+					//						if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("义乌物与") >= 0)
+					//							outputitem.holaday.text = "2020年春节放假时间1月17日22时截稿，2月4日正式上班";
+					//						else if(PaintOrderModel.instance.selectFactoryAddress[i].name.indexOf("无锡点") >= 0)
+					//							outputitem.holaday.text = "2020年春节放假时间1月19日22时截稿，2月1日正式上班";
+					// + " " + PaintOrderModel.instance.selectFactoryAddress[i].addr;
 					
 					uiSkin.fengeimg.y = fengeoriginy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 					uiSkin.floatpt.y = floatpyy + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
 					uiSkin.mainvbox.y = mianvbox + (PaintOrderModel.instance.outPutAddr.length - 1)*40 + (PaintOrderModel.instance.outPutAddr.length - 2)*uiSkin.outputbox.space;
-
+					
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid ,this,onGetProductBack,null,null);
 					
 					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList + PaintOrderModel.instance.outPutAddr[0].org_code + "&addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetDeliveryBack,null,null);
-
+					
 				}
 				else
 				{
@@ -384,7 +384,7 @@ package script.order
 			
 			for(var i:int=0; i < orderlist.length;i++)
 			{
-				var orderitem:PicOrderItem = orderlist[i];
+				var orderitem:CarvingOrderItem = orderlist[i];
 				orderitem.reset();
 			}
 			
@@ -438,7 +438,7 @@ package script.order
 			deliitem.btnsel.selected = true;
 			deliitem.selCheck.selected = true;
 			PaintOrderModel.instance.selectDelivery = delivervo;
-
+			
 			
 		}
 		private function onResizeBrower():void
@@ -447,7 +447,7 @@ package script.order
 			//if(Browser.height - 350 > 0)
 			//	(uiSkin.panel_main).height = (Browser.height - 350);
 			//(uiSkin.panel_main).bottom = 298 + (Browser.height - 1080);
-
+			
 			//(uiSkin.panelout).height = (Browser.height - 80);
 			if(Browser.height > Laya.stage.height)
 				this.uiSkin.height = 1080;
@@ -455,7 +455,7 @@ package script.order
 				this.uiSkin.height = Browser.height;
 			uiSkin.panelout.width = Browser.width;
 			uiSkin.panelbottom.width = Browser.width;
-
+			
 		}
 		private function onShowSelectPic():void
 		{
@@ -467,24 +467,24 @@ package script.order
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_FACTORY);
-
+			
 		}
 		
 		private function onSelectedSelfAddress():void
 		{
 			if(PaintOrderModel.instance.selectAddress)
 			{
-			uiSkin.myaddresstxt.text = PaintOrderModel.instance.selectAddress.addressDetail;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
+				uiSkin.myaddresstxt.text = PaintOrderModel.instance.selectAddress.addressDetail;
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOuputAddr + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid + "&manufacturer_type=喷印输出中心",this,onGetOutPutAddress,null,null);
 			}
 		}
 		private function onSelectedAddress():void
 		{
 			if(PaintOrderModel.instance.selectFactoryAddress)
-			//this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name +  " " +  PaintOrderModel.instance.selectFactoryAddress.addr;
+				//this.uiSkin.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress.name +  " " +  PaintOrderModel.instance.selectFactoryAddress.addr;
+				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetProductBack,null,null);
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProdCategory + "addr_id=" + PaintOrderModel.instance.selectAddress.searchZoneid,this,onGetProductBack,null,null);
-
 			
 		}
 		private function onGetProductBack(data:Object):void
@@ -494,11 +494,11 @@ package script.order
 			{
 				var product:Array = result as Array;
 				PaintOrderModel.instance.productList = [];
-
+				
 				var hasMatName:Array = [];
 				for(var i:int=0;i < product.length;i++)
 				{
-					if(product[i].prodCat_name.indexOf("雕刻") < 0 && hasMatName.indexOf(product[i].prodCat_name) < 0)
+					if(product[i].prodCat_name.indexOf("雕刻") >=0 &&  hasMatName.indexOf(product[i].prodCat_name) < 0)
 					{
 						var matvo:MatetialClassVo = new MatetialClassVo(product[i].prodCat_name);
 						PaintOrderModel.instance.productList.push(matvo);
@@ -507,6 +507,7 @@ package script.order
 				}
 			}
 		}
+		
 		private function onShowSelectAddress():void
 		{
 			// TODO Auto Generated method stub
@@ -523,7 +524,7 @@ package script.order
 				return;
 			}
 			
-			var orderitem:PicOrderItem = orderlist[0];
+			var orderitem:CarvingOrderItem = orderlist[0];
 			if(orderitem.ordervo.orderData == null)
 			{
 				ViewManager.showAlert("未选择材料工艺");
@@ -549,7 +550,7 @@ package script.order
 				return;
 			}
 			
-			PaintOrderModel.instance.batchChangeMatItems = new Vector.<PicOrderItem>();
+			PaintOrderModel.instance.batchChangeMatItems = new Vector.<CarvingOrderItem>();
 			for(var i:int=0;i < orderlist.length;i++)
 			{
 				if(orderlist[i].checkSel.selected)
@@ -582,19 +583,19 @@ package script.order
 			curindex++;
 			
 			var childarr:Array = [];
-//			while(uiSkin.ordervbox.numChildren > 1)
-//			{
-//				childarr.push(uiSkin.ordervbox.getChildAt(1));
-//				uiSkin.ordervbox.removeChildAt(1);	
-//			}
+			//			while(uiSkin.ordervbox.numChildren > 1)
+			//			{
+			//				childarr.push(uiSkin.ordervbox.getChildAt(1));
+			//				uiSkin.ordervbox.removeChildAt(1);	
+			//			}
 			for each(var fvo in DirectoryFileModel.instance.haselectPic)
 			{
 				if(uiSkin.ordervbox.numChildren > 0)
 					uiSkin.ordervbox.height += uiSkin.ordervbox.space;
 				var ovo:PicOrderItemVo = new PicOrderItemVo(fvo);
 				ovo.indexNum = curindex++ ;
-				var item:PicOrderItem = new PicOrderItem(ovo);
-
+				var item:CarvingOrderItem = new CarvingOrderItem(ovo);
+				
 				uiSkin.ordervbox.height += item.height;
 				uiSkin.ordervbox.addChild(item);
 				orderlist.push(item);
@@ -603,31 +604,31 @@ package script.order
 			for(var i:int=0;i < uiSkin.ordervbox.numChildren;i++)
 			{
 				if(i == 0)
-					(uiSkin.ordervbox.getChildAt(0) as PicOrderItem).y = 0;
+					(uiSkin.ordervbox.getChildAt(0) as CarvingOrderItem).y = 0;
 				else
-					(uiSkin.ordervbox.getChildAt(i) as PicOrderItem).y = (uiSkin.ordervbox.getChildAt(i-1) as PicOrderItem).y + (uiSkin.ordervbox.getChildAt(i-1) as PicOrderItem).height + uiSkin.ordervbox.space;
+					(uiSkin.ordervbox.getChildAt(i) as CarvingOrderItem).y = (uiSkin.ordervbox.getChildAt(i-1) as CarvingOrderItem).y + (uiSkin.ordervbox.getChildAt(i-1) as CarvingOrderItem).height + uiSkin.ordervbox.space;
 			}
 			uiSkin.ordervbox.refresh();
 			DirectoryFileModel.instance.haselectPic = {};
 			resetOrderInfo();
 			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
 			uiSkin.productNum.text = orderlist.length.toString();
-
+			
 		}
 		
-		private function onDeletePicOrder(orderitem:PicOrderItem):void
+		private function onDeletePicOrder(orderitem:CarvingOrderItem):void
 		{
 			var ordervo:PicOrderItemVo = orderitem.ordervo;
 			
 			if(orderlist.indexOf(orderitem) >=0 )
 				orderlist.splice(orderlist.indexOf(orderitem),1);
-
+			
 			for(var i:int=0;i < uiSkin.ordervbox.numChildren;i++)
 			{
-				var pvo:PicOrderItemVo = (uiSkin.ordervbox.getChildAt(i) as PicOrderItem).ordervo;
+				var pvo:PicOrderItemVo = (uiSkin.ordervbox.getChildAt(i) as CarvingOrderItem).ordervo;
 				if(pvo.indexNum > ordervo.indexNum)
 					pvo.indexNum--;
-				(uiSkin.ordervbox.getChildAt(i) as PicOrderItem).updateIndex();
+				(uiSkin.ordervbox.getChildAt(i) as CarvingOrderItem).updateIndex();
 			}
 			uiSkin.ordervbox.removeChild(orderitem);
 			if(uiSkin.ordervbox.height - orderitem.height - uiSkin.ordervbox.space < 0)			
@@ -641,7 +642,7 @@ package script.order
 			resetOrderInfo();
 			//(uiSkin.panel_main).height = uiSkin.mainvbox.height;
 			uiSkin.productNum.text = orderlist.length.toString();
-
+			
 		}
 		
 		private function updateDeliveryType():void
@@ -658,9 +659,9 @@ package script.order
 		
 		private function onOrderPaint():void
 		{
-//			var obj:Object = {client_code:"SCFY001",order_sn:"123456",refund_amount:"9.12"};
-//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,onPlaceOrderBack,{data:JSON.stringify(obj)},"post");
-//			return;
+			//			var obj:Object = {client_code:"SCFY001",order_sn:"123456",refund_amount:"9.12"};
+			//			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.cancelOrder,this,onPlaceOrderBack,{data:JSON.stringify(obj)},"post");
+			//			return;
 			
 			if(Userdata.instance.companyShort == null)
 			{
@@ -678,7 +679,7 @@ package script.order
 					
 					onOrderPaint();		
 				}
-				,null,"post");	
+					,null,"post");	
 				
 				return;
 			}
@@ -686,9 +687,9 @@ package script.order
 			if(arr == null)
 				return;
 			
-	
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
-
+			
 		}
 		
 		private function onSaveOrder():void
@@ -733,7 +734,7 @@ package script.order
 		private function onPaySucess():void
 		{
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
-
+			
 		}
 		
 		private function onCancelPay():void
@@ -778,7 +779,7 @@ package script.order
 			
 			for(var i:int=0; i < orderlist.length;i++)
 			{
-				var orderitem:PicOrderItem = orderlist[i];
+				var orderitem:CarvingOrderItem = orderlist[i];
 				if(!orderitem.checkCanOrder())
 				{
 					//ViewManager.showAlert("未选择材料工艺");
@@ -804,7 +805,7 @@ package script.order
 					orderdata.manufacturer_code = orderitem.ordervo.manufacturer_code;
 					orderdata.manufacturer_name = orderitem.ordervo.manufacturer_name;
 					orderdata.contact_phone = PaintOrderModel.instance.getContactPhone(orderitem.ordervo.manufacturer_code);
-						
+					
 					var totalMoney:Number = 0;
 					if(PaintOrderModel.instance.selectDelivery)
 					{
@@ -883,7 +884,7 @@ package script.order
 				arr = arr.concat(copyarr);
 			return arr;
 		}
-	
+		
 		private function onClickOpenQQ():void
 		{
 			window.open('tencent://message/?uin=10987654321');
@@ -896,23 +897,23 @@ package script.order
 			EventCenter.instance.off(EventCenter.ADJUST_PIC_ORDER_TECH,this,onAdjustHeight);
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
 			EventCenter.instance.off(EventCenter.SELECT_ORDER_ADDRESS,this,onSelectedSelfAddress);
-
+			
 			EventCenter.instance.off(EventCenter.SELECT_OUT_ADDRESS,this,onSelectedAddress);
-						
+			
 			EventCenter.instance.off(EventCenter.SELECT_DELIVERY_TYPE,this,updateDeliveryType);
 			EventCenter.instance.off(EventCenter.UPDATE_ORDER_ITEM_TECH,this,resetOrderInfo);
 			EventCenter.instance.off(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
 			EventCenter.instance.off(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
-
+			
 			Laya.timer.clear(this,onDragMove);
-
+			
 		}
 		private function onClosePanel():void
 		{
 			// TODO Auto Generated method stub
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
-
+			
 		}
 	}
 }

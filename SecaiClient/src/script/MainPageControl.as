@@ -17,6 +17,8 @@ package script {
 	import model.ChinaAreaModel;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.OrderConstant;
+	import model.orderModel.PaintOrderModel;
 	
 	import script.login.LogPanelControl;
 	import script.usercenter.UserMainControl;
@@ -62,7 +64,7 @@ package script {
 			paintOrderBtn.on(Event.CLICK,this,onShowPaintOrder);
 
 			var diaokeOrderBtn:Button = this.owner["characBtn"];
-			//diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
+			diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
 
 			
 			var btnUserCenter:Button = this.owner["btnUserCenter"];
@@ -192,7 +194,10 @@ package script {
 		private function onShowPaintOrder():void
 		{
 			if(Userdata.instance.isLogin)
+			{
+				PaintOrderModel.instance.orderType = OrderConstant.PAINTING;
 				ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			}
 			else
 			{
 				ViewManager.showAlert("请先登录");

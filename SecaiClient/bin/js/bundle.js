@@ -666,11 +666,15 @@ var GameConfig=(function(){
 	__class(GameConfig,'GameConfig');
 	GameConfig.init=function(){
 		var reg=ClassUtils.regClass;
+		reg("laya.display.Text",Text);
+		reg("script.prefabScript.LinkTextControl",LinkTextControl);
+		reg("script.prefabScript.TopBannerControl",TopBannerControl);
+		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
+		reg("script.carving.CarvingOrderControl",CarvingOrderControl);
+		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 		reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
 		reg("utils.LoadingPrgControl",LoadingPrgControl);
-		reg("laya.display.Text",Text);
-		reg("script.prefabScript.LinkTextControl",LinkTextControl);
 		reg("script.login.LogPanelControl",LogPanelControl);
 		reg("script.login.RegisterCntrol",RegisterCntrol);
 		reg("script.login.ResetPwdControl",ResetPwdControl);
@@ -683,10 +687,7 @@ var GameConfig=(function(){
 		reg("script.order.SelectAttchesControl",SelectAttchesControl);
 		reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
 		reg("script.order.SelectFactoryControl",SelectFactoryControl);
-		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("script.order.SelectPicControl",SelectPicControl);
-		reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
-		reg("script.prefabScript.TopBannerControl",TopBannerControl);
 		reg("script.order.PaintOrderControl",PaintOrderControl);
 		reg("script.picUpload.PicManagerControl",PicManagerControl);
 		reg("script.picUpload.PictureCheckControl",PictureCheckControl);
@@ -712,7 +713,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/TechorItem.scene";
+	GameConfig.startScene="carving/CarvingOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1084,6 +1085,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_SELECT_PAYTYPE_PANEL"]=ConfirmOrderPanelUI;
 		this.viewDict["VIEW_CHARACTER_DEMONSTRATE_PANEL"]=CharacterPaintUI;
 		this.viewDict["VIEW_CHARACTER_TYPE_PANEL"]=CharactTypePanelUI;
+		this.viewDict["VIEW_CARVING_ORDER_PANEL"]=CarvingOrderPanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1161,6 +1163,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_PAYTYPE_PANEL="VIEW_SELECT_PAYTYPE_PANEL";
 	ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL="VIEW_CHARACTER_DEMONSTRATE_PANEL";
 	ViewManager.VIEW_CHARACTER_TYPE_PANEL="VIEW_CHARACTER_TYPE_PANEL";
+	ViewManager.VIEW_CARVING_ORDER_PANEL="VIEW_CARVING_ORDER_PANEL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -2011,7 +2014,7 @@ var PicInfoVo=(function(){
 				if(fattr.hasOwnProperty("connectnum")){
 					this.connectnum=fattr.connectnum;
 					var longside=Math.max(this.picWidth,this.picHeight);
-					this.area=Math.floor(fattr.area *longside/1000 *longside/1000);
+					this.area=Math.floor(fattr.area *longside/1000 *longside/1000)/(this.picWidth*this.picHeight)*this.picPhysicWidth *this.picPhysicHeight/10000;
 				}
 				if(fattr !=null && fattr.flag==1){
 					this.picWidth=Math.round(Number(fattr.width)*this.dpi);
@@ -2501,12 +2504,17 @@ var ProductVo=(function(){
 						arr[i].measure_unit=priceInfo[0];
 						arr[i].baseprice=priceInfo[1];
 						arr[i].preProc_Price=priceInfo[2];
-						if(arr[i].preProc_Code=="SPTE10420")
-							totalprice=UtilTool.getYixingPrice(picinfovo.picinfo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
-						else if(arr[i].preProc_Code=="SPTE10170")
-						totalprice=UtilTool.getAvgCutPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
-						else
-						totalprice=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+						if(PaintOrderModel.instance.orderType==1){
+							if(arr[i].preProc_Code=="SPTE10420")
+								totalprice=UtilTool.getYixingPrice(picinfovo.picinfo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+							else if(arr[i].preProc_Code=="SPTE10170")
+							totalprice=UtilTool.getAvgCutPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+							else
+							totalprice=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+						}
+						else{
+							totalprice=UtilTool.getCarvingPrice(picinfovo.picinfo.area,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+						}
 						if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0){
 							if(!UtilTool.isMeasureUnitByNum(arr[i].selectAttachVoList[0].measure_unit))
 								totalprice+=UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].selectAttachVoList[0].accessory_price,0);
@@ -3041,6 +3049,10 @@ var UtilTool=(function(){
 			return unitprice;
 		}
 		else return 0;
+	}
+
+	UtilTool.getCarvingPrice=function(area,unit,unitprice,baseprice){
+		return baseprice+unitprice *area;
 	}
 
 	UtilTool.getYixingPrice=function(picinfo,basePrice,unitPrice,finalwidth,finalheight){
@@ -30203,32 +30215,6 @@ var ColorFilter=(function(_super){
 })(Filter)
 
 
-//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
-var TextureSV=(function(_super){
-	function TextureSV(subID){
-		this.u_colorMatrix=null;
-		this.strength=0;
-		this.blurInfo=null;
-		this.colorMat=null;
-		this.colorAlpha=null;
-		(subID===void 0)&& (subID=0);
-		TextureSV.__super.call(this,0x01,subID);
-		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
-	}
-
-	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
-	var __proto=TextureSV.prototype;
-	// ,'clipDir',3,'clipRect',4];
-	__proto.clear=function(){
-		this.texture=null;
-		this.shader=null;
-		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
-	}
-
-	return TextureSV;
-})(Value2D)
-
-
 /**
 *<code>Loader</code> 类可用来加载文本、JSON、XML、二进制、图像等资源。
 */
@@ -30712,6 +30698,32 @@ var Loader=(function(_super){
 	Loader._startIndex=0;
 	return Loader;
 })(EventDispatcher)
+
+
+//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
+var TextureSV=(function(_super){
+	function TextureSV(subID){
+		this.u_colorMatrix=null;
+		this.strength=0;
+		this.blurInfo=null;
+		this.colorMat=null;
+		this.colorAlpha=null;
+		(subID===void 0)&& (subID=0);
+		TextureSV.__super.call(this,0x01,subID);
+		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
+	}
+
+	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
+	var __proto=TextureSV.prototype;
+	// ,'clipDir',3,'clipRect',4];
+	__proto.clear=function(){
+		this.texture=null;
+		this.shader=null;
+		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
+	}
+
+	return TextureSV;
+})(Value2D)
 
 
 /**
@@ -35740,6 +35752,7 @@ var MainPageControl=(function(_super){
 		var paintOrderBtn=this.owner["paintOrderBtn"];
 		paintOrderBtn.on("click",this,this.onShowPaintOrder);
 		var diaokeOrderBtn=this.owner["characBtn"];
+		diaokeOrderBtn.on("click",this,this.onShowChracterTypePanel);
 		var btnUserCenter=this.owner["btnUserCenter"];
 		btnUserCenter.on("click",this,this.onShowUserCenter);
 		var btnproduct=this.owner["btnproduct"];
@@ -35829,8 +35842,10 @@ var MainPageControl=(function(_super){
 
 	//ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true);
 	__proto.onShowPaintOrder=function(){
-		if(Userdata.instance.isLogin)
+		if(Userdata.instance.isLogin){
+			PaintOrderModel.instance.orderType=1;
 			ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
+		}
 		else{
 			ViewManager.showAlert("请先登录");
 			ViewManager.instance.openView("VIEW_lOGPANEL");
@@ -36343,7 +36358,7 @@ var CharacterTypeChooseControl=(function(_super){
 
 	__proto.onShowOrderPanel=function(){
 		PaintOrderModel.instance.orderType=2;
-		ViewManager.instance.openView("VIEW_PAINT_ORDER",true);
+		ViewManager.instance.openView("VIEW_CARVING_ORDER_PANEL",true);
 	}
 
 	return CharacterTypeChooseControl;
@@ -37711,7 +37726,7 @@ var PaintOrderControl=(function(_super){
 			PaintOrderModel.instance.productList=[];
 			var hasMatName=[];
 			for(var i=0;i < product.length;i++){
-				if(hasMatName.indexOf(product[i].prodCat_name)< 0){
+				if(product[i].prodCat_name.indexOf("雕刻")< 0 && hasMatName.indexOf(product[i].prodCat_name)< 0){
 					var matvo=new MatetialClassVo(product[i].prodCat_name);
 					PaintOrderModel.instance.productList.push(matvo);
 					hasMatName.push(product[i].prodCat_name);
@@ -39683,6 +39698,614 @@ var ChargeControl=(function(_super){
 	}
 
 	return ChargeControl;
+})(Script)
+
+
+//class script.carving.CarvingOrderControl extends laya.components.Script
+var CarvingOrderControl=(function(_super){
+	function CarvingOrderControl(){
+		this.uiSkin=null;
+		this.param=null;
+		this.orderlist=null;
+		this.fengeoriginy=0;
+		this.floatpyy=0;
+		this.mianvbox=0;
+		CarvingOrderControl.__super.call(this);
+	}
+
+	__class(CarvingOrderControl,'script.carving.CarvingOrderControl',_super);
+	var __proto=CarvingOrderControl.prototype;
+	__proto.onStart=function(){
+		PaintOrderModel.instance.resetData();
+		this.uiSkin=this.owner;
+		this.uiSkin.mainvbox.autoSize=true;
+		this.uiSkin.btnaddpic.on("click",this,this.onShowSelectPic);
+		var i=1;
+		var num=0;
+		var totalheight=0;
+		this.uiSkin.commentall.maxChars=10;
+		this.uiSkin.copynum.text="1";
+		this.uiSkin.copynum.restrict="0-9";
+		this.uiSkin.copynum.maxChars=3;
+		this.uiSkin.copynum.on("input",this,this.onNumChange);
+		this.fengeoriginy=this.uiSkin.fengeimg.y;
+		this.floatpyy=this.uiSkin.floatpt.y;
+		this.mianvbox=this.uiSkin.mainvbox.y;
+		this.orderlist=[];
+		var fvo;
+		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
+			fvo=DirectoryFileModel.instance.haselectPic[$each_fvo];
+			var ovo=new PicOrderItemVo(fvo);
+			ovo.indexNum=i++;
+			var item=new CarvingOrderItem(ovo);
+			this.uiSkin.ordervbox.addChild(item);
+			this.orderlist.push(item);
+			totalheight+=item.height+this.uiSkin.ordervbox.space;
+			num++;
+		}
+		this.uiSkin.productNum.text=this.orderlist.length.toString();
+		this.uiSkin.textTotalPrice.style.fontSize=22;
+		this.uiSkin.textTotalPrice.style.font="SimHei";
+		this.uiSkin.textDeliveryType.style.fontSize=22;
+		this.uiSkin.textDeliveryType.style.font="SimHei";
+		this.uiSkin.textPayPrice.style.fontSize=22;
+		this.uiSkin.textPayPrice.style.font="SimHei";
+		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,totalheight-this.uiSkin.ordervbox.space);
+		DirectoryFileModel.instance.haselectPic={};
+		this.uiSkin.myaddresstxt.on("click",this,this.onShowSelectAddress);
+		this.uiSkin.batchChange.on("click",this,this.onBatchChangeMaterial);
+		this.uiSkin.selectAll.on("click",this,this.onSelectAll);
+		EventCenter.instance.on("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.on("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
+		EventCenter.instance.on("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
+		EventCenter.instance.on("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
+		EventCenter.instance.on("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
+		EventCenter.instance.on("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.on("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
+		EventCenter.instance.on("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
+		EventCenter.instance.on("PAY_ORDER_SUCESS",this,this.onPaySucess);
+		EventCenter.instance.on("CANCEL_PAY_ORDER",this,this.onCancelPay);
+		this.uiSkin.panelout.vScrollBarSkin="";
+		this.uiSkin.panelout.hScrollBarSkin="";
+		this.uiSkin.panelbottom.hScrollBarSkin="";
+		this.uiSkin.panelout.hScrollBar.mouseWheelEnable=false;
+		this.uiSkin.panelout.width=Browser.width;
+		this.uiSkin.panelbottom.width=Browser.width;
+		this.uiSkin.deliversp.autoSize=true;
+		if(Browser.height > Laya.stage.height)
+			this.uiSkin.height=1080;
+		else
+		this.uiSkin.height=Browser.height;
+		this.uiSkin.btnordernow.on("click",this,this.onOrderPaint);
+		this.uiSkin.btnsaveorder.on("click",this,this.onSaveOrder);
+		this.uiSkin.panelout.on("dragmove",this,this.onDragMove);
+		if(Userdata.instance.company==null || Userdata.instance.company=="")
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,this.getCompanyInfo,null,"post");
+		PaintOrderModel.instance.selectAddress=null;
+		this.resetOrderInfo();
+		if(Userdata.instance.getDefaultAddress()!=null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+Userdata.instance.getDefaultAddress().searchZoneid+"&manufacturer_type=喷印输出中心",this,this.onGetOutPutAddress,null,null);
+			this.uiSkin.myaddresstxt.text=Userdata.instance.getDefaultAddress().addressDetail;
+			PaintOrderModel.instance.selectAddress=Userdata.instance.getDefaultAddress();
+		}
+		Laya.timer.frameLoop(5,this,this.onDragMove);
+	}
+
+	__proto.getCompanyInfo=function(data){
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.company=result.name;
+			Userdata.instance.companyShort=result.shortname;
+		}
+	}
+
+	__proto.onNumChange=function(){
+		if(this.uiSkin.copynum.text=="")
+			this.uiSkin.copynum.text="1";
+		var num=parseInt(this.uiSkin.copynum.text);
+		if(num < 1){
+			this.uiSkin.copynum.text="1";
+		}
+		if(num > 100){
+			this.uiSkin.copynum.text="100";
+		}
+		this.resetOrderInfo();
+	}
+
+	__proto.onDragMove=function(){
+		if(this.uiSkin.floatpt.localToGlobal(new Point(this.uiSkin.floatpt.x,this.uiSkin.floatpt.y),false).y-294 <=0){
+			if(this.uiSkin.floatdocker.parent !=this.uiSkin){
+				this.uiSkin.addChild(this.uiSkin.floatdocker);
+				this.uiSkin.floatdocker.y=0;
+				this.uiSkin.floatdocker.x=320;
+			}
+		}
+		else if(this.uiSkin.floatdocker.parent !=this.uiSkin.floatpt){
+			this.uiSkin.floatpt.addChild(this.uiSkin.floatdocker);
+			this.uiSkin.floatdocker.y=0;
+			this.uiSkin.floatdocker.x=0;
+		}
+	}
+
+	__proto.resetOrderInfo=function(){
+		var total=0;
+		if(this.orderlist.length > 0){
+			var orderFactory={};
+			for(var i=0;i < this.orderlist.length;i++){
+				var orderitem=this.orderlist[i];
+				var orderdata;
+				if(orderitem.ordervo.orderData !=null && !orderFactory.hasOwnProperty(orderitem.ordervo.manufacturer_code)){
+					orderdata={};
+					orderdata.order_sn=PaintOrderModel.getOrderSn();
+					orderdata.client_code="CL10200";
+					orderdata.consignee=Userdata.instance.companyShort+"#"+PaintOrderModel.instance.selectAddress.receiverName;
+					orderdata.tel=PaintOrderModel.instance.selectAddress.phone;
+					orderdata.address=PaintOrderModel.instance.selectAddress.proCityArea;
+					orderdata.order_amountStr=0;
+					orderdata.shipping_feeStr="0";
+					orderdata.money_paidStr="0";
+					orderdata.discountStr="0";
+					orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
+					orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
+					orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
+					orderdata.manufacturer_name=orderitem.ordervo.manufacturer_name;
+					orderdata.contact_phone=PaintOrderModel.instance.getContactPhone(orderitem.ordervo.manufacturer_code);
+					var totalMoney=0;
+					if(PaintOrderModel.instance.selectDelivery){
+						orderdata.logistic_code=PaintOrderModel.instance.selectDelivery.deliverynet_code+"#"+PaintOrderModel.instance.selectDelivery.delivery_name;
+					}
+					orderdata.orderItemList=[];
+					orderFactory[orderitem.ordervo.manufacturer_code]=orderdata;
+				}
+				else
+				orderdata=orderFactory[orderitem.ordervo.manufacturer_code];
+				if(this.orderlist[i].ordervo.orderData !=null){
+					orderdata.order_amountStr+=this.orderlist[i].getPrice();
+					if(this.orderlist[i].ordervo.orderData.comments=="")
+						this.orderlist[i].ordervo.orderData.comments=this.uiSkin.commentall.text;
+					this.orderlist[i].ordervo.orderData.item_seq=i+1;
+					orderdata.orderItemList.push(this.orderlist[i].ordervo.orderData);
+				}
+				else{
+				}
+			}
+			var odata;
+			for(var $each_odata in orderFactory){
+				odata=orderFactory[$each_odata];
+				if((odata.order_amountStr)< 2)
+					odata.order_amountStr=2.00;
+				total+=(Number)((odata.order_amountStr).toFixed(2));
+			}
+		};
+		var copy=parseInt(this.uiSkin.copynum.text);
+		total=parseFloat(total.toFixed(1));
+		total=total *copy;
+		this.uiSkin.textTotalPrice.innerHTML="<span color='#262B2E' size='20'>折后总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
+		this.uiSkin.textDeliveryType.innerHTML="<span color='#262B2E' size='20'>运费总额：</span>"+"<span color='#FF4400' size='20'>"+"0"+"</span>"+"<span color='#262B2E' size='20'>元</span>";
+		this.uiSkin.textPayPrice.innerHTML="<span color='#262B2E' size='20'>应付总额：</span>"+"<span color='#FF4400' size='20'>"+total.toFixed(1)+"</span>"+"<span color='#262B2E' size='20'>元</span>";
+	}
+
+	__proto.onGetOutPutAddress=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			PaintOrderModel.instance.initOutputAddr(result);
+			PaintOrderModel.instance.selectFactoryAddress=PaintOrderModel.instance.outPutAddr.concat();
+			while(this.uiSkin.outputbox.numChildren > 0)
+			this.uiSkin.outputbox.removeChildAt(0);
+			if(PaintOrderModel.instance.outPutAddr.length > 0){
+				for(var i=0;i < PaintOrderModel.instance.outPutAddr.length;i++){
+					var outputitem=new OutPutCenterUI();
+					this.uiSkin.outputbox.addChild(outputitem);
+					outputitem.checkselect.selected=true;
+					outputitem.qqContact.on("click",this,this.onClickOpenQQ);
+					outputitem.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress[i].name;
+					outputitem.holaday.text="";
+				}
+				this.uiSkin.fengeimg.y=this.fengeoriginy+(PaintOrderModel.instance.outPutAddr.length-1)*40+(PaintOrderModel.instance.outPutAddr.length-2)*this.uiSkin.outputbox.space;
+				this.uiSkin.floatpt.y=this.floatpyy+(PaintOrderModel.instance.outPutAddr.length-1)*40+(PaintOrderModel.instance.outPutAddr.length-2)*this.uiSkin.outputbox.space;
+				this.uiSkin.mainvbox.y=this.mianvbox+(PaintOrderModel.instance.outPutAddr.length-1)*40+(PaintOrderModel.instance.outPutAddr.length-2)*this.uiSkin.outputbox.space;
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/prodcategory?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid ,this,this.onGetProductBack,null,null);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/deliverylist?manufacturer_code="+PaintOrderModel.instance.outPutAddr[0].org_code+"&addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetDeliveryBack,null,null);
+			}
+			else{
+				PaintOrderModel.instance.selectFactoryAddress=null;
+				PaintOrderModel.instance.productList=[];
+			}
+		}
+		for(var i=0;i < this.orderlist.length;i++){
+			var orderitem=this.orderlist[i];
+			orderitem.reset();
+		}
+		this.resetOrderInfo();
+	}
+
+	__proto.onGetDeliveryBack=function(data){
+		var _$this=this;
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(data);
+		while(this.uiSkin.deliverbox.numChildren > 0)
+		this.uiSkin.deliverbox.removeChildAt(0);
+		if(!result.hasOwnProperty("status")){
+			PaintOrderModel.instance.deliveryList=[];
+			for(var i=0;i < result.length;i++){
+				var tempdevo=new DeliveryTypeVo(result[i]);
+				var deliveritem=new OrderAddressItemUI();
+				deliveritem.addresstxt.text=tempdevo.deliveryDesc;
+				if(tempdevo.delivery_name=="送货上门"){
+					deliveritem.btnsel.selected=true;
+					deliveritem.selCheck.selected=true;
+					PaintOrderModel.instance.selectDelivery=tempdevo;
+				}
+				deliveritem.on("click",this,this.onSelectDeliverAdd,[deliveritem,tempdevo]);
+				this.uiSkin.deliverbox.addChild(deliveritem);
+			}
+		}
+		Laya.timer.frameOnce(2,this,function(){
+			_$this.uiSkin.deliversp.size(1280,_$this.uiSkin.deliverbox.height);
+			_$this.uiSkin.mainvbox.refresh();
+		});
+	}
+
+	__proto.onSelectDeliverAdd=function(deliitem,delivervo){
+		for(var i=0;i < this.uiSkin.deliverbox.numChildren;i++){
+			var deitem=this.uiSkin.deliverbox.getChildAt(i);
+			if(deitem){
+				deitem.btnsel.selected=false;
+				deitem.selCheck.selected=false;
+			}
+		}
+		deliitem.btnsel.selected=true;
+		deliitem.selCheck.selected=true;
+		PaintOrderModel.instance.selectDelivery=delivervo;
+	}
+
+	__proto.onResizeBrower=function(){
+		if(Browser.height > Laya.stage.height)
+			this.uiSkin.height=1080;
+		else
+		this.uiSkin.height=Browser.height;
+		this.uiSkin.panelout.width=Browser.width;
+		this.uiSkin.panelbottom.width=Browser.width;
+	}
+
+	__proto.onShowSelectPic=function(){
+		ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER");
+	}
+
+	__proto.onShowSelectFactory=function(){
+		ViewManager.instance.openView("VIEW_SELECT_FACTORY");
+	}
+
+	__proto.onSelectedSelfAddress=function(){
+		if(PaintOrderModel.instance.selectAddress){
+			this.uiSkin.myaddresstxt.text=PaintOrderModel.instance.selectAddress.addressDetail;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/manufacturers?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid+"&manufacturer_type=喷印输出中心",this,this.onGetOutPutAddress,null,null);
+		}
+	}
+
+	__proto.onSelectedAddress=function(){
+		if(PaintOrderModel.instance.selectFactoryAddress)
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/prodcategory?client_code=CL10200&"+"addr_id="+PaintOrderModel.instance.selectAddress.searchZoneid,this,this.onGetProductBack,null,null);
+	}
+
+	__proto.onGetProductBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var product=result;
+			PaintOrderModel.instance.productList=[];
+			var hasMatName=[];
+			for(var i=0;i < product.length;i++){
+				if(product[i].prodCat_name.indexOf("雕刻")>=0 && hasMatName.indexOf(product[i].prodCat_name)< 0){
+					var matvo=new MatetialClassVo(product[i].prodCat_name);
+					PaintOrderModel.instance.productList.push(matvo);
+					hasMatName.push(product[i].prodCat_name);
+				}
+			}
+		}
+	}
+
+	__proto.onShowSelectAddress=function(){
+		ViewManager.instance.openView("VIEW_SELECT_ADDRESS");
+	}
+
+	__proto.onShowSelectDelivery=function(){
+		if(this.orderlist.length <=0){
+			ViewManager.showAlert("请先选择图片和工艺");
+			return;
+		};
+		var orderitem=this.orderlist[0];
+		if(orderitem.ordervo.orderData==null){
+			ViewManager.showAlert("未选择材料工艺");
+			return;
+		}
+		ViewManager.instance.openView("VIEW_SELECT_DELIVERY_TYPE",false,orderitem.ordervo.manufacturer_code);
+	}
+
+	__proto.onSelectAll=function(){
+		for(var i=0;i < this.orderlist.length;i++){
+			this.orderlist[i].checkSel.selected=this.uiSkin.selectAll.selected;
+		}
+	}
+
+	__proto.onBatchChangeMaterial=function(){
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请先选择收货地址");
+			return;
+		}
+		PaintOrderModel.instance.batchChangeMatItems=[];
+		for(var i=0;i < this.orderlist.length;i++){
+			if(this.orderlist[i].checkSel.selected){
+				PaintOrderModel.instance.batchChangeMatItems.push(this.orderlist[i]);
+			}
+		}
+		if(PaintOrderModel.instance.batchChangeMatItems.length <=0){
+			ViewManager.showAlert("请至少选择一个需要更换的产品");
+			return;
+		}
+		PaintOrderModel.instance.curSelectMat=null;
+		ViewManager.instance.openView("VIEW_SELECT_MATERIAL");
+		PaintOrderModel.instance.curSelectOrderItem=null;
+	}
+
+	__proto.changeProductNum=function(numstr){
+		for(var i=0;i < this.orderlist.length;i++){
+			if(this.orderlist[i].checkSel.selected){
+				this.orderlist[i].inputnum.text=numstr;
+			}
+		}
+	}
+
+	__proto.onUpdateOrderPic=function(){
+		var curindex=this.uiSkin.ordervbox.numChildren;
+		curindex++;
+		var childarr=[];
+		var fvo;
+		for(var $each_fvo in DirectoryFileModel.instance.haselectPic){
+			fvo=DirectoryFileModel.instance.haselectPic[$each_fvo];
+			if(this.uiSkin.ordervbox.numChildren > 0)
+				this.uiSkin.ordervbox.height+=this.uiSkin.ordervbox.space;
+			var ovo=new PicOrderItemVo(fvo);
+			ovo.indexNum=curindex++;
+			var item=new CarvingOrderItem(ovo);
+			this.uiSkin.ordervbox.height+=item.height;
+			this.uiSkin.ordervbox.addChild(item);
+			this.orderlist.push(item);
+		}
+		for(var i=0;i < this.uiSkin.ordervbox.numChildren;i++){
+			if(i==0)
+				(this.uiSkin.ordervbox.getChildAt(0)).y=0;
+			else
+			(this.uiSkin.ordervbox.getChildAt(i)).y=(this.uiSkin.ordervbox.getChildAt(i-1)).y+(this.uiSkin.ordervbox.getChildAt(i-1)).height+this.uiSkin.ordervbox.space;
+		}
+		this.uiSkin.ordervbox.refresh();
+		DirectoryFileModel.instance.haselectPic={};
+		this.resetOrderInfo();
+		this.uiSkin.productNum.text=this.orderlist.length.toString();
+	}
+
+	__proto.onDeletePicOrder=function(orderitem){
+		var ordervo=orderitem.ordervo;
+		if(this.orderlist.indexOf(orderitem)>=0)
+			this.orderlist.splice(this.orderlist.indexOf(orderitem),1);
+		for(var i=0;i < this.uiSkin.ordervbox.numChildren;i++){
+			var pvo=(this.uiSkin.ordervbox.getChildAt(i)).ordervo;
+			if(pvo.indexNum > ordervo.indexNum)
+				pvo.indexNum--;
+			(this.uiSkin.ordervbox.getChildAt(i)).updateIndex();
+		}
+		this.uiSkin.ordervbox.removeChild(orderitem);
+		if(this.uiSkin.ordervbox.height-orderitem.height-this.uiSkin.ordervbox.space < 0)
+			this.uiSkin.ordervbox.height=0;
+		else
+		this.uiSkin.ordervbox.height-=orderitem.height+this.uiSkin.ordervbox.space;
+		if(this.uiSkin.ordervbox.numChildren==0)
+			this.uiSkin.ordervbox.height=0;
+		this.uiSkin.ordervbox.size(this.uiSkin.ordervbox.width,0);
+		this.uiSkin.ordervbox.refresh();
+		this.resetOrderInfo();
+		this.uiSkin.productNum.text=this.orderlist.length.toString();
+	}
+
+	__proto.updateDeliveryType=function(){
+		this.resetOrderInfo();
+	}
+
+	__proto.onAdjustHeight=function(changeht){
+		this.uiSkin.ordervbox.height+=changeht;
+	}
+
+	//(uiSkin.panel_main).height=uiSkin.mainvbox.height;
+	__proto.onOrderPaint=function(){
+		var _$this=this;
+		if(Userdata.instance.companyShort==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,function(data){
+				if(this.destroyed)
+					return;
+				var result=JSON.parse(data);
+				if(result.status==0){
+					Userdata.instance.company=result.name;
+					Userdata.instance.companyShort=result.shortname;
+				}
+				_$this.onOrderPaint();
+			}
+			,null,"post");
+			return;
+		};
+		var arr=this.getOrderData();
+		if(arr==null)
+			return;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onSaveOrder=function(){
+		var _$this=this;
+		if(Userdata.instance.companyShort==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,function(data){
+				if(this.destroyed)
+					return;
+				var result=JSON.parse(data);
+				if(result.status==0){
+					Userdata.instance.company=result.name;
+					Userdata.instance.companyShort=result.shortname;
+				}
+				_$this.onSaveOrder();
+			}
+			,null,"post");
+			return;
+		};
+		var arr=this.getOrderData();
+		if(arr==null)
+			return;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onSaveOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onSaveOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("保存订单成功，您可以到我的订单继续支付");
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
+	__proto.onPaySucess=function(){
+		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+	}
+
+	__proto.onCancelPay=function(){
+		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+	}
+
+	__proto.onPlaceOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalmoney=0;
+			var allorders=[];
+			for(var i=0;i < result.orders.length;i++){
+				var orderdata=JSON.parse(result.orders[i]);
+				totalmoney+=Number(orderdata.money_paidStr);
+				allorders.push(orderdata.order_sn);
+			}
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
+	}
+
+	__proto.getOrderData=function(){
+		if(this.orderlist.length <=0){
+			ViewManager.showAlert("未选择下单图片");
+			return null;
+		}
+		if(PaintOrderModel.instance.selectDelivery==null){
+			ViewManager.showAlert("请选择配送方式");
+			return null;
+		};
+		var orderFactory={};
+		for(var i=0;i < this.orderlist.length;i++){
+			var orderitem=this.orderlist[i];
+			if(!orderitem.checkCanOrder()){
+				return null;
+			};
+			var orderdata;
+			if(!orderFactory.hasOwnProperty(orderitem.ordervo.manufacturer_code)){
+				orderdata={};
+				orderdata.order_sn=PaintOrderModel.getOrderSn();
+				orderdata.client_code="CL10200";
+				orderdata.consignee=Userdata.instance.companyShort+"#"+PaintOrderModel.instance.selectAddress.receiverName;
+				orderdata.tel=PaintOrderModel.instance.selectAddress.phone;
+				orderdata.address=PaintOrderModel.instance.selectAddress.proCityArea;
+				orderdata.order_amountStr=0;
+				orderdata.shipping_feeStr="0";
+				orderdata.money_paidStr="0";
+				orderdata.discountStr="0";
+				orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
+				orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
+				orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
+				orderdata.manufacturer_name=orderitem.ordervo.manufacturer_name;
+				orderdata.contact_phone=PaintOrderModel.instance.getContactPhone(orderitem.ordervo.manufacturer_code);
+				var totalMoney=0;
+				if(PaintOrderModel.instance.selectDelivery){
+					orderdata.logistic_code=PaintOrderModel.instance.selectDelivery.deliverynet_code+"#"+PaintOrderModel.instance.selectDelivery.delivery_name;
+				}
+				orderdata.orderItemList=[];
+				orderFactory[orderitem.ordervo.manufacturer_code]=orderdata;
+			}
+			else
+			orderdata=orderFactory[orderitem.ordervo.manufacturer_code];
+			if(this.orderlist[i].ordervo.orderData !=null){
+				orderdata.order_amountStr+=this.orderlist[i].getPrice();
+				if(this.orderlist[i].ordervo.orderData.comments=="")
+					this.orderlist[i].ordervo.orderData.comments=this.uiSkin.commentall.text;
+				this.orderlist[i].ordervo.orderData.item_seq=i+1;
+				orderdata.orderItemList.push(this.orderlist[i].ordervo.orderData);
+			}
+			else{
+				ViewManager.showAlert("有图片未选择材料工艺");
+				return null;
+			}
+		};
+		var arr=[];
+		var odata;
+		for(var $each_odata in orderFactory){
+			odata=orderFactory[$each_odata];
+			if((odata.order_amountStr)< 2){
+				odata.order_amountStr=2.00;
+				var itemarr=odata.orderItemList;
+				if(itemarr.length > 0){
+					var eachprice=Number((2/itemarr.length).toFixed(2));
+					var overflow=2-eachprice*itemarr.length;
+					for(var j=0;j < itemarr.length;j++){
+						if(j==0)
+							itemarr[j].item_priceStr=(((eachprice+overflow)/itemarr[j].item_number)).toFixed(2);
+						else
+						itemarr[j].item_priceStr=((eachprice/itemarr[j].item_number)).toFixed(2);
+					}
+				}
+			}
+			odata.money_paidStr=(odata.order_amountStr).toFixed(1);
+			odata.order_amountStr=(odata.order_amountStr).toFixed(1);
+			arr.push(odata);
+		};
+		var copy=parseInt(this.uiSkin.copynum.text);
+		var copyarr=[];
+		for(i=1;i < copy;i++){
+			for(var j=0;j < arr.length;j++){
+				var copydata=JSON.parse(JSON.stringify(arr[j]));
+				copyarr.push(copydata);
+			}
+		}
+		if(copyarr.length > 0)
+			arr=arr.concat(copyarr);
+		return arr;
+	}
+
+	__proto.onClickOpenQQ=function(){
+		window.open('tencent://message/?uin=10987654321');
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("SELECT_ORDER_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.off("ADD_PIC_FOR_ORDER",this,this.onUpdateOrderPic);
+		EventCenter.instance.off("DELETE_PIC_ORDER",this,this.onDeletePicOrder);
+		EventCenter.instance.off("ADJUST_PIC_ORDER_TECH",this,this.onAdjustHeight);
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		EventCenter.instance.off("SELECT_ORDER_ADDRESS",this,this.onSelectedSelfAddress);
+		EventCenter.instance.off("SELECT_OUT_ADDRESS",this,this.onSelectedAddress);
+		EventCenter.instance.off("SELECT_DELIVERY_TYPE",this,this.updateDeliveryType);
+		EventCenter.instance.off("UPDATE_ORDER_ITEM_TECH",this,this.resetOrderInfo);
+		EventCenter.instance.off("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
+		EventCenter.instance.off("PAY_ORDER_SUCESS",this,this.onPaySucess);
+		EventCenter.instance.off("CANCEL_PAY_ORDER",this,this.onCancelPay);
+		Laya.timer.clear(this,this.onDragMove);
+	}
+
+	__proto.onClosePanel=function(){
+		ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+	}
+
+	return CarvingOrderControl;
 })(Script)
 
 
@@ -41722,7 +42345,7 @@ var SelectPicControl=(function(_super){
 			var pic;
 			for(var $each_pic in DirectoryFileModel.instance.haselectPic){
 				pic=DirectoryFileModel.instance.haselectPic[$each_pic];
-				if(UtilTool.isValidPic(pic)==false){
+				if(PaintOrderModel.instance.orderType==1 && UtilTool.isValidPic(pic)==false){
 					ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
 					return;
 				}
@@ -41736,8 +42359,6 @@ var SelectPicControl=(function(_super){
 		else if((this.param).attchFileId==null || (this.param).attchFileId==""){
 			ViewManager.showAlert("请选择合适的附件");
 			return;
-		}
-		else if(this.texture !=null && this.texture.source !=null){
 		}
 		this.onCloseView();
 	}
@@ -48098,6 +48719,48 @@ var CharactTypePanelUI=(function(_super){
 	}
 
 	return CharactTypePanelUI;
+})(Scene)
+
+
+//class ui.carving.CarvOrderItemUI extends laya.display.Scene
+var CarvOrderItemUI=(function(_super){
+	function CarvOrderItemUI(){
+		this.bgimg=null;
+		this.fileimg=null;
+		this.yixingimg=null;
+		this.numindex=null;
+		this.filename=null;
+		this.price=null;
+		this.total=null;
+		this.operatebox=null;
+		this.addmsg=null;
+		this.deleteorder=null;
+		this.hascomment=null;
+		this.editbox=null;
+		this.editwidth=null;
+		this.editheight=null;
+		this.lockratio=null;
+		this.architype=null;
+		this.matbox=null;
+		this.mattxt=null;
+		this.changemat=null;
+		this.checkSel=null;
+		this.numbox=null;
+		this.inputnum=null;
+		this.addbtn=null;
+		this.subtn=null;
+		CarvOrderItemUI.__super.call(this);
+	}
+
+	__class(CarvOrderItemUI,'ui.carving.CarvOrderItemUI',_super);
+	var __proto=CarvOrderItemUI.prototype;
+	__proto.createChildren=function(){
+		_super.prototype.createChildren.call(this);
+		this.createView(CarvOrderItemUI.uiView);
+	}
+
+	CarvOrderItemUI.uiView={"type":"Scene","props":{"width":1280},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":82},"compId":26},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Image","props":{"y":40,"x":109,"width":80,"var":"yixingimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5,"alpha":0.5},"compId":39},{"type":"Label","props":{"y":34,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":207,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":5},{"type":"Label","props":{"y":35.5,"x":916,"width":58,"visible":false,"var":"price","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},"compId":15},{"type":"Label","props":{"y":34,"x":1109,"width":50,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":17},{"type":"Box","props":{"y":9,"x":1191,"var":"operatebox"},"compId":21,"child":[{"type":"Text","props":{"y":8,"x":0,"var":"addmsg","text":"添加备注","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":18},{"type":"Text","props":{"y":24,"x":0,"var":"deleteorder","text":"删除订单","fontSize":16,"font":"SimHei","color":"#262B2E","runtime":"laya.display.Text"},"compId":19},{"type":"Label","props":{"y":-13,"x":65,"width":14,"var":"hascomment","valign":"middle","text":"'''","height":17,"fontSize":24,"font":"Helvetica","color":"#39B25A","align":"center"},"compId":36}]},{"type":"Box","props":{"y":12,"x":530,"var":"editbox"},"compId":22,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"TextInput","props":{"x":58,"width":74,"var":"editwidth","text":"16","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":10},{"type":"TextInput","props":{"y":39,"x":58,"width":74,"var":"editheight","text":"16","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","mouseEnabled":true,"height":22,"fontSize":16,"font":"SimHei","color":"#262B2E"},"compId":11},{"type":"Image","props":{"y":17,"x":142,"width":20,"var":"lockratio","skin":"commers/lock.png","height":20},"compId":37}]},{"type":"VBox","props":{"y":29.5,"x":719,"space":0},"compId":24,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"architype","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":12}]},{"type":"Sprite","props":{"y":15,"x":347,"width":158,"var":"matbox","height":43},"compId":25,"child":[{"type":"Label","props":{"width":187,"var":"mattxt","text":"展架专用布","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":6},{"type":"Text","props":{"y":25,"x":59,"var":"changemat","text":"更换产品","presetID":1,"fontSize":16,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":27,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":28}]}]},{"type":"CheckBox","props":{"y":36,"x":14,"var":"checkSel","skin":"commers/multicheck.png","scaleY":1,"scaleX":1},"compId":31},{"type":"Sprite","props":{"y":30,"x":998,"var":"numbox"},"compId":35,"child":[{"type":"TextInput","props":{"y":1,"x":19,"width":40,"var":"inputnum","text":"10","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":22,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":16},{"type":"Button","props":{"x":60,"var":"addbtn","skin":"order/addbtn.png"},"compId":33},{"type":"Button","props":{"var":"subtn","skin":"order/subtbn.png"},"compId":34}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/lock.png","prefabs/LinksText.prefab","commers/multicheck.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	return CarvOrderItemUI;
 })(Scene)
 
 
@@ -54789,6 +55452,50 @@ var UpLoadItemUI=(function(_super){
 })(View)
 
 
+//class ui.carving.CarvingOrderPanelUI extends laya.ui.View
+var CarvingOrderPanelUI=(function(_super){
+	function CarvingOrderPanelUI(){
+		this.panelout=null;
+		this.firstPage=null;
+		this.myorder=null;
+		this.userName=null;
+		this.logout=null;
+		this.myaddresstxt=null;
+		this.outputbox=null;
+		this.fengeimg=null;
+		this.floatpt=null;
+		this.floatdocker=null;
+		this.selectAll=null;
+		this.productNum=null;
+		this.btnaddpic=null;
+		this.batchChange=null;
+		this.mainvbox=null;
+		this.ordervbox=null;
+		this.deliversp=null;
+		this.deliverbox=null;
+		this.batchcomment=null;
+		this.commentall=null;
+		this.panelbottom=null;
+		this.textTotalPrice=null;
+		this.textDeliveryType=null;
+		this.textPayPrice=null;
+		this.copynum=null;
+		this.btnsaveorder=null;
+		this.btnordernow=null;
+		CarvingOrderPanelUI.__super.call(this);
+	}
+
+	__class(CarvingOrderPanelUI,'ui.carving.CarvingOrderPanelUI',_super);
+	var __proto=CarvingOrderPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("carving/CarvingOrderPanel");
+	}
+
+	return CarvingOrderPanelUI;
+})(View)
+
+
 //class ui.order.SelectDeliveryPanelUI extends laya.ui.View
 var SelectDeliveryPanelUI=(function(_super){
 	function SelectDeliveryPanelUI(){
@@ -55263,6 +55970,48 @@ var ResetPwdPanelUI=(function(_super){
 })(View)
 
 
+//class ui.order.SelectFactoryPanelUI extends laya.ui.View
+var SelectFactoryPanelUI=(function(_super){
+	function SelectFactoryPanelUI(){
+		this.list_address=null;
+		this.okbtn=null;
+		this.cancelbtn=null;
+		SelectFactoryPanelUI.__super.call(this);
+	}
+
+	__class(SelectFactoryPanelUI,'ui.order.SelectFactoryPanelUI',_super);
+	var __proto=SelectFactoryPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/SelectFactoryPanel");
+	}
+
+	return SelectFactoryPanelUI;
+})(View)
+
+
+//class ui.order.InputCutNumPanelUI extends laya.ui.View
+var InputCutNumPanelUI=(function(_super){
+	function InputCutNumPanelUI(){
+		this.mainpanel=null;
+		this.productlist=null;
+		this.okbtn=null;
+		this.btnok=null;
+		this.maxtips=null;
+		InputCutNumPanelUI.__super.call(this);
+	}
+
+	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
+	var __proto=InputCutNumPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/InputCutNumPanel");
+	}
+
+	return InputCutNumPanelUI;
+})(View)
+
+
 //class script.order.PicOrderItem extends ui.order.OrderItemUI
 var PicOrderItem=(function(_super){
 	function PicOrderItem(vo){
@@ -55628,48 +56377,6 @@ var PicOrderItem=(function(_super){
 })(OrderItemUI)
 
 
-//class ui.order.SelectFactoryPanelUI extends laya.ui.View
-var SelectFactoryPanelUI=(function(_super){
-	function SelectFactoryPanelUI(){
-		this.list_address=null;
-		this.okbtn=null;
-		this.cancelbtn=null;
-		SelectFactoryPanelUI.__super.call(this);
-	}
-
-	__class(SelectFactoryPanelUI,'ui.order.SelectFactoryPanelUI',_super);
-	var __proto=SelectFactoryPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("order/SelectFactoryPanel");
-	}
-
-	return SelectFactoryPanelUI;
-})(View)
-
-
-//class ui.order.InputCutNumPanelUI extends laya.ui.View
-var InputCutNumPanelUI=(function(_super){
-	function InputCutNumPanelUI(){
-		this.mainpanel=null;
-		this.productlist=null;
-		this.okbtn=null;
-		this.btnok=null;
-		this.maxtips=null;
-		InputCutNumPanelUI.__super.call(this);
-	}
-
-	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
-	var __proto=InputCutNumPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("order/InputCutNumPanel");
-	}
-
-	return InputCutNumPanelUI;
-})(View)
-
-
 //class ui.PaintOrderPanelUI extends laya.ui.View
 var PaintOrderPanelUI=(function(_super){
 	function PaintOrderPanelUI(){
@@ -55730,6 +56437,341 @@ var TreeClipUI=(function(_super){
 	TreeClipUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Clip","props":{"y":0,"x":13,"skin":"comp/clip_selectBox.png","name":"selectBox","clipY":2,"clipX":1},"compId":3},{"type":"Clip","props":{"y":4,"x":14,"skin":"comp/clip_tree_folder.png","name":"folder","clipY":3,"clipX":1},"compId":4},{"type":"Clip","props":{"y":5,"x":0,"skin":"comp/clip_tree_arrow.png","name":"arrow","clipY":2,"clipX":1},"compId":5},{"type":"Label","props":{"y":1,"x":33,"width":76,"valign":"middle","text":"商品名称","name":"label","height":16},"compId":6}],"loadList":["comp/clip_selectBox.png","comp/clip_tree_folder.png","comp/clip_tree_arrow.png"],"loadList3D":[]};
 	return TreeClipUI;
 })(View)
+
+
+//class script.carving.CarvingOrderItem extends ui.carving.CarvOrderItemUI
+var CarvingOrderItem=(function(_super){
+	function CarvingOrderItem(vo){
+		this.ordervo=null;
+		this.locked=true;
+		this.finalWidth=NaN;
+		this.finalHeight=NaN;
+		this.curproductvo=null;
+		this.fanmianFid=null;
+		CarvingOrderItem.__super.call(this);
+		this.ordervo=vo;
+		this.initItem();
+	}
+
+	__class(CarvingOrderItem,'script.carving.CarvingOrderItem',_super);
+	var __proto=CarvingOrderItem.prototype;
+	__proto.initItem=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+		this.fileimg.skin="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		this.subtn.on("click",this,this.onSubItemNum);
+		this.addbtn.on("click",this,this.onAddItemNum);
+		this.hascomment.visible=false;
+		this.addmsg.visible=false;
+		if(this.ordervo.picinfo.picWidth > this.ordervo.picinfo.picHeight){
+			this.fileimg.width=80;
+			this.fileimg.height=80/this.ordervo.picinfo.picWidth *this.ordervo.picinfo.picHeight;
+		}
+		else{
+			this.fileimg.height=80;
+			this.fileimg.width=80/this.ordervo.picinfo.picHeight *this.ordervo.picinfo.picWidth;
+		}
+		this.yixingimg.width=this.fileimg.width;
+		this.yixingimg.height=this.fileimg.height;
+		this.yixingimg.visible=false;
+		this.fileimg.on("click",this,this.onShowBigImg);
+		this.finalWidth=this.ordervo.picinfo.picPhysicWidth;
+		this.finalHeight=this.ordervo.picinfo.picPhysicHeight;
+		this.editwidth.text=this.ordervo.picinfo.picPhysicWidth.toString();
+		this.editheight.text=this.ordervo.picinfo.picPhysicHeight.toString();
+		this.editwidth.restrict="0-9"+".";
+		this.editheight.restrict="0-9"+".";
+		this.filename.text=this.ordervo.picinfo.directName;
+		this.architype.text=this.ordervo.techStr;
+		this.total.text="0";
+		this.deleteorder.underline=true;
+		this.deleteorder.underlineColor="#222222";
+		this.inputnum.text="1";
+		this.inputnum.restrict="0-9";
+		this.deleteorder.on("click",this,this.onDeleteOrder);
+		this.addmsg.underline=true;
+		this.addmsg.underlineColor="#222222";
+		this.price.text="0";
+		this.addmsg.on("click",this,this.onAddComment);
+		this.mattxt.text="";
+		this.changemat.underline=true;
+		this.changemat.underlineColor="#222222";
+		this.changemat.on("click",this,this.onShowMaterialView);
+		this.inputnum.on("input",this,this.onNumChange);
+		this.editwidth.on("input",this,this.onWidthSizeChange);
+		this.editheight.on("input",this,this.onHeightSizeChange);
+		this.lockratio.on("click",this,this.onLockChange);
+		if(this.architype.textField.textHeight > 80)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=80;
+		if(this.architype.height > 80)
+			this.height=this.architype.height+35;
+		else
+		this.height=113;
+		this.bgimg.height=this.height;
+		this.alighComponet();
+	}
+
+	__proto.reset=function(){
+		this.mattxt.text="";
+		this.architype.text="";
+		this.price.text="0";
+		this.total.text="0";
+		this.ordervo.orderData=null;
+		this.curproductvo=null;
+		this.yixingimg.visible=false;
+	}
+
+	__proto.onLockChange=function(){
+		if(this.locked){
+			this.lockratio.skin="commers/unlock.png";
+			this.locked=false;
+		}
+		else{
+			this.lockratio.skin="commers/lock.png";
+			this.locked=true;
+		}
+	}
+
+	__proto.onWidthSizeChange=function(){
+		var curwidth=Number(this.editwidth.text);
+		this.finalWidth=curwidth;
+		if(this.locked){
+			var heightration=curwidth/this.ordervo.picinfo.picPhysicWidth*this.ordervo.picinfo.picPhysicHeight;
+			this.finalHeight=heightration;
+			this.editheight.text=heightration.toFixed(2);
+		}
+		this.reset();
+		this.updatePrice();
+	}
+
+	__proto.onHeightSizeChange=function(){
+		var curheight=Number(this.editheight.text);
+		this.finalHeight=curheight;
+		if(this.locked){
+			var widthration=curheight/this.ordervo.picinfo.picPhysicHeight*this.ordervo.picinfo.picPhysicWidth;
+			this.finalWidth=widthration;
+			this.editwidth.text=widthration.toFixed(2);
+		}
+		this.reset();
+		this.updatePrice();
+	}
+
+	__proto.onSubItemNum=function(){
+		var num=parseInt(this.inputnum.text);
+		if(num > 1)
+			num--;
+		this.inputnum.text=num.toString();
+		this.onNumChange();
+	}
+
+	__proto.onAddItemNum=function(){
+		var num=parseInt(this.inputnum.text);
+		num++;
+		this.inputnum.text=num.toString();
+		this.onNumChange();
+	}
+
+	__proto.onShowBigImg=function(){
+		if(this.yixingimg.visible){
+			var obj=[];
+			obj.push(this.ordervo.picinfo);
+			obj.push(this.yixingimg.skin);
+			obj.push(1);
+			ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,obj);
+		}
+		else
+		ViewManager.instance.openView("VIEW_PICTURE_CHECK",false,this.ordervo.picinfo);
+	}
+
+	__proto.onShowBackImg=function(){
+		var obj=new PicInfoVo({},1);
+		obj.fid=this.fanmianFid;
+		obj.picWidth=this.ordervo.picinfo.picWidth;
+		obj.picHeight=this.ordervo.picinfo.picHeight;
+	}
+
+	__proto.onAddComment=function(){
+		ViewManager.instance.openView("VIEW_ADD_MESSAGE",false,{msg:this.ordervo.comment,caller:this,callback:this.onAddMsgBack});
+	}
+
+	__proto.onAddMsgBack=function(msg){
+		this.ordervo.comment=msg;
+		this.hascomment.visible=this.ordervo.comment !="";
+		if(this.ordervo.orderData){
+			this.ordervo.orderData.comments=this.ordervo.comment;
+		}
+	}
+
+	__proto.alighComponet=function(){
+		this.checkSel.y=(this.height-26)/2;
+		this.numindex.y=(this.height-this.numindex.height)/2;
+		this.fileimg.y=this.height/2;
+		this.yixingimg.y=this.height/2;
+		this.filename.y=(this.height-this.filename.height)/2;
+		this.matbox.y=(this.height-42)/2;
+		this.editbox.y=(this.height-this.editbox.height)/2;
+		this.numbox.y=(this.height)/2-12;
+		this.price.y=(this.height-this.price.height)/2;
+		this.total.y=(this.height-this.total.height)/2;
+		this.operatebox.y=(this.height-this.operatebox.height)/2-10;
+	}
+
+	__proto.updateIndex=function(){
+		this.numindex.text=this.ordervo.indexNum.toString();
+	}
+
+	__proto.onDeleteOrder=function(){
+		EventCenter.instance.event("DELETE_PIC_ORDER",this);
+	}
+
+	__proto.updatePrice=function(){
+		if(this.curproductvo !=null){
+			this.updateOrderData(this.curproductvo);
+			var area=(this.finalHeight *this.finalWidth)/10000;
+			var perimeter=(this.finalHeight+this.finalWidth)*2/100;
+			if(this.curproductvo.measure_unit=="平方米")
+				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area).toFixed(1);
+			else
+			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter).toFixed(1);
+			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)).toFixed(1)+"";
+		}
+		EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
+	}
+
+	__proto.onNumChange=function(){
+		this.total.text=(parseInt(this.inputnum.text)*this.ordervo.orderPrice).toFixed(1).toString();
+		if(this.ordervo.orderData)
+			this.ordervo.orderData.item_number=parseInt(this.inputnum.text);
+		EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
+	}
+
+	__proto.onShowMaterialView=function(){
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请选择收货地址");
+			return;
+		}
+		if(PaintOrderModel.instance.outPutAddr==null || PaintOrderModel.instance.outPutAddr.length==0){
+			ViewManager.showAlert("当前的收货地址没有输出中心，请重新选择收货地址");
+			return;
+		}
+		for(var i=0;i < PaintOrderModel.instance.outPutAddr.length;i++){
+			if(PaintOrderModel.instance.allManuFacutreMatProcPrice[PaintOrderModel.instance.outPutAddr[i].org_code]==null){
+				ViewManager.showAlert("未获取到生产商材料工艺价格，请重新选择收货地址");
+				return;
+			}
+		}
+		if(PaintOrderModel.instance.selectAddress==null){
+			ViewManager.showAlert("请先选择收货地址");
+			return;
+		}
+		PaintOrderModel.instance.curSelectOrderItem=this;
+		PaintOrderModel.instance.batchChangeMatItems=[];
+		PaintOrderModel.instance.curSelectMat=null;
+		ViewManager.instance.openView("VIEW_SELECT_MATERIAL",false,this.ordervo.picinfo);
+	}
+
+	// ViewManager.instance.openView(ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL,false,ordervo.picinfo);
+	__proto.changeProduct=function(provo){
+		this.curproductvo=provo;
+		this.fanmianFid="";
+		this.updateOrderData(provo);
+		var area=(this.finalHeight *this.finalWidth)/10000;
+		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
+		var hasSelectedTech=provo.getAllSelectedTech();
+		var doublesideImg="";
+		var yixingqiegeImg="";
+		var doublesame=false;
+		for(var i=0;i < hasSelectedTech.length;i++){
+			if(hasSelectedTech[i].preProc_Code=="SPTE10320"){
+				doublesame=true;
+				this.fanmianFid=this.ordervo.picinfo.fid;
+			}
+			else if(hasSelectedTech[i].preProc_Code=="SPTE10330"){
+				doublesideImg=this.ordervo.picinfo.backFid;
+				this.fanmianFid=doublesideImg;
+			}
+			else if(hasSelectedTech[i].preProc_Code=="SPTE10420"){
+				yixingqiegeImg=this.ordervo.picinfo.yixingFid;
+			}
+		}
+		this.yixingimg.visible=yixingqiegeImg !="";
+		if(yixingqiegeImg !=""){
+			this.yixingimg.skin="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+yixingqiegeImg+".jpg";
+		}
+		if(provo.measure_unit=="平方米")
+			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area).toFixed(1);
+		else
+		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter).toFixed(1);
+		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)).toFixed(1)+"";
+		this.mattxt.text=provo.prod_name;
+		var lastheight=this.height;
+		var tech=provo.getTechDes(false,this.finalWidth,this.finalHeight);
+		if(tech.indexOf("超宽拼接")>=0)
+			tech=tech.replace("超宽拼接","超宽拼接"+"("+["V","H"][this.ordervo.cuttype]+"-"+this.ordervo.cutnum+"-"+this.ordervo.eachCutLength.join(";")+")");
+		if(tech.indexOf("超幅拼接")>=0)
+			tech=tech.replace("超幅拼接","超幅拼接"+"("+["V","H"][this.ordervo.cuttype]+"-"+this.ordervo.cutnum+"-"+this.ordervo.eachCutLength.join(";")+")");
+		if(tech.indexOf("小块裁切")>=0)
+			tech=tech.replace("小块裁切","小块裁切"+"(H-"+this.ordervo.horiCutNum+",V-"+this.ordervo.verCutNum+")");
+		this.architype.text=tech;
+		if(this.architype.textField.textHeight > 80)
+			this.architype.height=this.architype.textField.textHeight;
+		else
+		this.architype.height=80;
+		if(this.architype.height > 80)
+			this.height=this.architype.height+35;
+		else
+		this.height=113;
+		this.bgimg.height=this.height;
+		this.alighComponet();
+		EventCenter.instance.event("ADJUST_PIC_ORDER_TECH",this.height-lastheight);
+	}
+
+	__proto.getPrice=function(){
+		return parseInt(this.inputnum.text)*this.ordervo.orderPrice;
+	}
+
+	__proto.updateOrderData=function(productVo){
+		var area=(this.finalHeight *this.finalWidth)/10000;
+		var perimeter=(this.finalHeight+this.finalWidth)*2/100;
+		this.ordervo.orderPrice=productVo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo);
+		if(this.ordervo.orderPrice < 0.1)
+			this.ordervo.orderPrice=0.1;
+		this.ordervo.manufacturer_code=productVo.manufacturer_code;
+		this.ordervo.manufacturer_name=productVo.manufacturer_name;
+		var orderitemdata={};
+		orderitemdata.prod_name=productVo.prod_name;
+		orderitemdata.prod_code=productVo.prod_code;
+		orderitemdata.prod_description="";
+		orderitemdata.LWH=this.finalWidth.toFixed(2)+"/"+this.finalHeight.toFixed(2)+"/1";
+		orderitemdata.weightStr=1;
+		orderitemdata.item_number=parseInt(this.inputnum.text);
+		orderitemdata.item_priceStr=this.ordervo.orderPrice.toString();
+		orderitemdata.is_merchandise=0;
+		orderitemdata.item_status="1";
+		orderitemdata.comments=this.ordervo.comment;
+		orderitemdata.imagefile_path="http://original-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+"."+this.ordervo.picinfo.picClass;
+		orderitemdata.previewImage_path="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		orderitemdata.thumbnails_path="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
+		orderitemdata.filename=this.ordervo.picinfo.directName;
+		orderitemdata.procInfoList=productVo.getProInfoList(this.ordervo.picinfo,this.finalWidth,this.finalHeight,this.ordervo);
+		this.ordervo.orderData=orderitemdata;
+	}
+
+	__proto.checkCanOrder=function(){
+		if(this.ordervo.orderData==null){
+			ViewManager.showAlert("未选择材料工艺");
+			return false;
+		}
+		if(this.ordervo.orderData.procInfoList==null || this.ordervo.orderData.procInfoList.length==0){
+			ViewManager.showAlert("未选择工艺");
+			return false;
+		}
+		return true;
+	}
+
+	return CarvingOrderItem;
+})(CarvOrderItemUI)
 
 
 /**
@@ -58510,111 +59552,6 @@ var Tree=(function(_super){
 
 
 /**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
-
-
-/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -59566,6 +60503,111 @@ var List=(function(_super){
 
 	return List;
 })(Box)
+
+
+/**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
 
 
 /**
@@ -61115,79 +62157,6 @@ var DeliveryTypeItem=(function(_super){
 })(OrderAddressItemUI)
 
 
-//class script.order.TechBoxItem extends ui.order.TechorItemUI
-var TechBoxItem=(function(_super){
-	function TechBoxItem(){
-		this.techmainvo=null;
-		this.isSelected=false;
-		this.processCatVo=null;
-		this.attachVo=null;
-		TechBoxItem.__super.call(this);
-	}
-
-	__class(TechBoxItem,'script.order.TechBoxItem',_super);
-	var __proto=TechBoxItem.prototype;
-	__proto.setData=function(tvo){
-		this.processCatVo=null;
-		this.techmainvo=tvo;
-		this.initView();
-		if(tvo.selected)
-			this.setSelected(true);
-		else
-		this.setSelected(false);
-		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
-			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
-				this.techBtn.disabled=true;
-				this.mouseEnabled=!this.techBtn.disabled;
-				this.grayimg.visible=!this.mouseEnabled;
-				return;
-			}
-		}
-		this.techBtn.disabled=false;
-		this.mouseEnabled=true;
-		this.grayimg.visible=false;
-	}
-
-	__proto.setAttachVo=function(attachvo){
-		this.processCatVo=null;
-		this.techmainvo=null;
-		this.attachVo=attachvo;
-		this.techBtn.label=this.attachVo.accessory_name;
-		this.setSelected(false);
-	}
-
-	__proto.setProcessData=function(pvo){
-		this.techmainvo=null;
-		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name.split("-")[0];
-	}
-
-	// setSelected(false);
-	__proto.initView=function(){
-		this.techBtn.label=this.techmainvo.preProc_Name;
-	}
-
-	__proto.setSelected=function(sel){
-		this.techBtn.selected=sel;;
-		this.isSelected=sel;
-	}
-
-	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null){
-			this.techmainvo.selected=sel;
-			this.techmainvo.attchMentFileId="";
-			this.techmainvo.attchFileId="";
-			this.techmainvo.selectAttachVoList=null;
-		}
-		else
-		this.processCatVo.selected=sel;
-	}
-
-	__proto.onClickTech=function(index){}
-	return TechBoxItem;
-})(TechorItemUI)
-
-
 //class script.usercenter.OrderCheckListItem extends ui.usercenter.OrderListItemUI
 var OrderCheckListItem=(function(_super){
 	function OrderCheckListItem(){
@@ -61317,6 +62286,79 @@ var OrderCheckListItem=(function(_super){
 
 	return OrderCheckListItem;
 })(OrderListItemUI)
+
+
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(){
+		this.techmainvo=null;
+		this.isSelected=false;
+		this.processCatVo=null;
+		this.attachVo=null;
+		TechBoxItem.__super.call(this);
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.processCatVo=null;
+		this.techmainvo=tvo;
+		this.initView();
+		if(tvo.selected)
+			this.setSelected(true);
+		else
+		this.setSelected(false);
+		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
+			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
+				this.techBtn.disabled=true;
+				this.mouseEnabled=!this.techBtn.disabled;
+				this.grayimg.visible=!this.mouseEnabled;
+				return;
+			}
+		}
+		this.techBtn.disabled=false;
+		this.mouseEnabled=true;
+		this.grayimg.visible=false;
+	}
+
+	__proto.setAttachVo=function(attachvo){
+		this.processCatVo=null;
+		this.techmainvo=null;
+		this.attachVo=attachvo;
+		this.techBtn.label=this.attachVo.accessory_name;
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.techmainvo=null;
+		this.processCatVo=pvo;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
+	}
+
+	// setSelected(false);
+	__proto.initView=function(){
+		this.techBtn.label=this.techmainvo.preProc_Name;
+	}
+
+	__proto.setSelected=function(sel){
+		this.techBtn.selected=sel;;
+		this.isSelected=sel;
+	}
+
+	__proto.setTechSelected=function(sel){
+		if(this.techmainvo !=null){
+			this.techmainvo.selected=sel;
+			this.techmainvo.attchMentFileId="";
+			this.techmainvo.attchFileId="";
+			this.techmainvo.selectAttachVoList=null;
+		}
+		else
+		this.processCatVo.selected=sel;
+	}
+
+	__proto.onClickTech=function(index){}
+	return TechBoxItem;
+})(TechorItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI
@@ -62575,7 +63617,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,View,CallLater,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
+	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
 	/**LayaGameStart**/
 	new Main();
 

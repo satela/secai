@@ -224,12 +224,20 @@ package model.orderModel
 							//						{						
 							//							totalprice = arr[i].preProc_Price * perimeter;
 							//						}
-							if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
-								totalprice = UtilTool.getYixingPrice(picinfovo.picinfo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
-							else if(arr[i].preProc_Code == OrderConstant.AVGCUT_TECHNO)
-								totalprice = UtilTool.getAvgCutPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+							if(PaintOrderModel.instance.orderType == OrderConstant.PAINTING)
+							{
+								if(arr[i].preProc_Code == OrderConstant.UNNORMAL_CUT_TECHNO)
+									totalprice = UtilTool.getYixingPrice(picinfovo.picinfo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+								else if(arr[i].preProc_Code == OrderConstant.AVGCUT_TECHNO)
+									totalprice = UtilTool.getAvgCutPrice(picinfovo,arr[i].baseprice,arr[i].preProc_Price,picwidth,picheight);
+								else
+									totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+							}
 							else
-								totalprice = UtilTool.getProcessPrice(picwidth,picheight,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+							{
+								totalprice = UtilTool.getCarvingPrice(picinfovo.picinfo.area,arr[i].measure_unit,arr[i].preProc_Price,arr[i].baseprice);
+
+							}
 							
 							//if(arr[i].preProc_Price < 0)
 							//	hasDoublePrint = 2;

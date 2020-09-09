@@ -85,7 +85,7 @@ package model.picmanagerModel
 							leftDeleteDays = 0;
 					}
 					
-					if(fattr.hasOwnProperty("roadnum"))
+					if(fattr.hasOwnProperty("roadnum")) 
 					{
 						roadNum = fattr.roadnum;
 						var longside:Number = Math.max(picWidth,picHeight);
@@ -97,7 +97,7 @@ package model.picmanagerModel
 						connectnum = fattr.connectnum;
 						var longside:Number = Math.max(picWidth,picHeight);
 
-						area = Math.floor(fattr.area *  longside/1000 * longside/1000);
+						area = Math.floor(fattr.area *  longside/1000 * longside/1000)/(picWidth*picHeight) * picPhysicWidth * picPhysicHeight/10000;
 						//trace("connectnum:" + connectnum + "," + area);
 					}
 					if(fattr != null && fattr.flag == 1)

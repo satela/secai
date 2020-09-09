@@ -45,7 +45,7 @@ package script.characterpaint
 		private function onShowOrderPanel():void
 		{
 			PaintOrderModel.instance.orderType = OrderConstant.CUTTING;
-			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
+			ViewManager.instance.openView(ViewManager.VIEW_CARVING_ORDER_PANEL,true);
 		}
 	}
 }

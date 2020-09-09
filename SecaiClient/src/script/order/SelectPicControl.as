@@ -122,7 +122,7 @@ package script.order
 				
 				for each(var pic:PicInfoVo in DirectoryFileModel.instance.haselectPic)
 				{
-					if(UtilTool.isValidPic(pic) == false)
+					if(PaintOrderModel.instance.orderType == OrderConstant.PAINTING && UtilTool.isValidPic(pic) == false)
 					{
 						ViewManager.showAlert("只有格式为JPG,JPEG,TIF,TIFF,并且颜色格式为CMYK的图片才能下单");
 						return;
@@ -145,28 +145,7 @@ package script.order
 
 				return;
 			}
-			else if(texture != null && texture.source != null)
-			{
-//				var pixel:Array = texture.source.getPixels(0,0,texture.width,texture.height);
-//				var blackpixel:int = 0;
-//				
-//				for(var i:int=0;i < pixel.length;i+=4)
-//				{
-//					var r:int = pixel[i];
-//					var g:int = pixel[i+1];
-//					var b:int = pixel[i+2];
-//					if(r >= 250 )
-//					{
-//						blackpixel++;
-//					}
-//					
-//				}
-//				if( blackpixel/(pixel.length/4) < 0.15)
-//				{
-//					ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"当前选择的异性切割文件可能不对，确定使用该图片吗",caller:this,callback:confirmChoose});
-//					return;
-//				}
-			}
+			
 			onCloseView();
 		}
 		private function confirmOrderNow(b:Boolean):void

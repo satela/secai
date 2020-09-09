@@ -3,11 +3,15 @@ package {
 	import laya.utils.ClassUtils;
 	import laya.ui.View;
 	import laya.webgl.WebGL;
+	import laya.display.Text;
+	import script.prefabScript.LinkTextControl;
+	import script.prefabScript.TopBannerControl;
+	import laya.html.dom.HTMLDivElement;
+	import script.carving.CarvingOrderControl;
+	import script.order.SelectMaterialControl;
 	import script.characterpaint.CharacterMainControl;
 	import script.characterpaint.CharacterTypeChooseControl;
 	import utils.LoadingPrgControl;
-	import laya.display.Text;
-	import script.prefabScript.LinkTextControl;
 	import script.login.LogPanelControl;
 	import script.login.RegisterCntrol;
 	import script.login.ResetPwdControl;
@@ -20,10 +24,7 @@ package {
 	import script.order.SelectAttchesControl;
 	import script.order.SelectDeliveryControl;
 	import script.order.SelectFactoryControl;
-	import script.order.SelectMaterialControl;
 	import script.order.SelectPicControl;
-	import laya.html.dom.HTMLDivElement;
-	import script.prefabScript.TopBannerControl;
 	import script.order.PaintOrderControl;
 	import script.picUpload.PicManagerControl;
 	import script.picUpload.PictureCheckControl;
@@ -51,7 +52,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/TechorItem.scene";
+		public static var startScene:* = "carving/CarvingOrderPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -61,11 +62,15 @@ package {
 		public static function init():void {
 			//注册Script或者Runtime引用
 			var reg:Function = ClassUtils.regClass;
+			reg("laya.display.Text",Text);
+			reg("script.prefabScript.LinkTextControl",LinkTextControl);
+			reg("script.prefabScript.TopBannerControl",TopBannerControl);
+			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
+			reg("script.carving.CarvingOrderControl",CarvingOrderControl);
+			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 			reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
-			reg("laya.display.Text",Text);
-			reg("script.prefabScript.LinkTextControl",LinkTextControl);
 			reg("script.login.LogPanelControl",LogPanelControl);
 			reg("script.login.RegisterCntrol",RegisterCntrol);
 			reg("script.login.ResetPwdControl",ResetPwdControl);
@@ -78,10 +83,7 @@ package {
 			reg("script.order.SelectAttchesControl",SelectAttchesControl);
 			reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
 			reg("script.order.SelectFactoryControl",SelectFactoryControl);
-			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("script.order.SelectPicControl",SelectPicControl);
-			reg("laya.html.dom.HTMLDivElement",HTMLDivElement);
-			reg("script.prefabScript.TopBannerControl",TopBannerControl);
 			reg("script.order.PaintOrderControl",PaintOrderControl);
 			reg("script.picUpload.PicManagerControl",PicManagerControl);
 			reg("script.picUpload.PictureCheckControl",PictureCheckControl);

@@ -7,10 +7,13 @@ package script
 	import laya.ui.View;
 	import laya.utils.Browser;
 	
+	import script.carving.CarvingOrderControl;
+	
 	import ui.LoginViewUI;
 	import ui.PaintOrderPanelUI;
 	import ui.PicManagePanelUI;
 	import ui.PopUpDialogUI;
+	import ui.carving.CarvingOrderPanelUI;
 	import ui.characterpaint.CharactTypePanelUI;
 	import ui.characterpaint.CharacterPaintUI;
 	import ui.login.LoadingPanelUI;
@@ -90,6 +93,8 @@ package script
 		public static const VIEW_CHARACTER_TYPE_PANEL:String = "VIEW_CHARACTER_TYPE_PANEL";//字牌类型选择界面
 
 
+		public static const VIEW_CARVING_ORDER_PANEL:String = "VIEW_CARVING_ORDER_PANEL";//字牌下单主界面
+
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
 		public var viewDict:Object;
@@ -154,6 +159,7 @@ package script
 			viewDict[VIEW_SELECT_PAYTYPE_PANEL] = ConfirmOrderPanelUI;
 			viewDict[VIEW_CHARACTER_DEMONSTRATE_PANEL] = CharacterPaintUI;
 			viewDict[VIEW_CHARACTER_TYPE_PANEL] = CharactTypePanelUI;
+			viewDict[VIEW_CARVING_ORDER_PANEL] = CarvingOrderPanelUI;
 
 
 		}

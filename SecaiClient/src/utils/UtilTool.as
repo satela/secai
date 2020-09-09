@@ -670,6 +670,12 @@ package utils
 			else return 0;
 		}
 		
+		public static function getCarvingPrice(area:Number,unit:String,unitprice:Number,baseprice:Number):Number
+		{
+			return baseprice + unitprice * area;
+			
+		}
+		
 		public static function getYixingPrice(picinfo:PicInfoVo,basePrice:Number,unitPrice:Number,finalwidth:Number,finalheight:Number):Number
 		{			
 			var linemeter:Number = (picinfo.relatedRoadLength /picinfo.relatedPicWidth)  * finalwidth;
