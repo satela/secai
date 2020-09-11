@@ -31,6 +31,10 @@ package model.orderModel
 		
 		//附件的文件id
 		public var attchFileId:String = "";
+		
+		public var unit_capacity:Number = 0;//正常产能
+		public var unit_urgentCapacity:Number = 0;
+		public var cap_uit:String = "";
 
 		public var attachList:Array;
 		public var selectAttachVoList:Vector.<AttchCatVo>;//选择的配件
