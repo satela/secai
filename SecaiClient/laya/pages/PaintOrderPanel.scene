@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":26,
-    "selecteID":184,
+    "selectedBox":63,
+    "selecteID":92,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080,"fontSize":24},
     "nodeParent":-1,
@@ -852,16 +852,17 @@
                             "x":45,
                             "type":"Box",
                             "searchKey":"Box,batchcomment",
-                            "props":{"y":250,"x":0,"width":1006,"var":"batchcomment","height":25},
+                            "props":{"y":250,"x":0,"width":1006,"visible":false,"var":"batchcomment","height":25},
                             "nodeParent":63,
                             "label":"batchcomment",
-                            "isOpen":false,
+                            "isOpen":true,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":91,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"text":"添加打包备注","fontSize":22,"font":"SimHei","color":"#262B2E"},
@@ -875,6 +876,7 @@
                                         ]
                                 },
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":0,"x":149,"width":857,"height":30,"fontSize":22,"font":"SimHei","color":"#E40020"},
@@ -892,7 +894,7 @@
                             "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,commentall",
-                            "props":{"y":286,"x":0,"width":1280,"var":"commentall","valign":"top","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"备注不能超过10个汉字","height":33,"fontSize":20,"font":"SimHei","color":"#262B2E"},
+                            "props":{"y":286,"x":0,"width":1280,"visible":false,"var":"commentall","valign":"top","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"备注不能超过10个汉字","height":33,"fontSize":20,"font":"SimHei","color":"#262B2E"},
                             "nodeParent":63,
                             "label":"commentall",
                             "isDirectory":false,
