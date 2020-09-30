@@ -52,9 +52,7 @@ package script.order
 			this.addbtn.on(Event.CLICK,this,onAddItemNum);
 			this.hascomment.visible = false;
 			this.addmsg.visible = false;
-			
-			this.timebox.visible = false;
-			
+						
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 80;					
@@ -121,10 +119,7 @@ package script.order
 			else
 				this.architype.height = 80;
 			
-			for(var i:int=0;i < 5;i++)
-			{
-				this["timebtn" + i].on(Event.CLICK,this,onSelectTime,[i]);
-			}
+			
 			
 			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
 			
@@ -146,7 +141,6 @@ package script.order
 			this.ordervo.orderData = null;
 			
 			this.curproductvo = null;
-			this.timebox.visible = false;
 
 			this.yixingimg.visible = false;
 			this.backimg.visible = false;
@@ -155,18 +149,7 @@ package script.order
 			
 		}
 		
-		private function onSelectTime(index:int):void
-		{
-			selectTime = index;
-			
-			discount = PaintOrderModel.instance.getDiscountByDate(selectTime);
-			
-			updatePrice();
-			for(var i:int=0;i < 5;i++)
-			{
-				this["timebtn"+i].selected = i == index;
-			}
-		}
+		
 		private function onLockChange():void
 		{
 			if(locked)
@@ -393,20 +376,20 @@ package script.order
 			fanmianFid = "";
 			updateOrderData(provo);
 			
-			this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
-			this.timebox.visible = true;
-			var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;
-			var nextdays:Array = UtilTool.getNextFiveDays("2020-09-04 12:00:00");
+			//this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
+			//this.timebox.visible = true;
+			//var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;
+			//var nextdays:Array = UtilTool.getNextFiveDays("2020-09-04 12:00:00");
 			
-			for(var i:int=0;i < 5;i++)
-			{
-				this["timebtn"+i].labelColors = colors;
-				this["timebtn"+i].label = nextdays[i] + "";
-			}
-			
-			onSelectTime(0);
-			
-			
+//			for(var i:int=0;i < 5;i++)
+//			{
+//				this["timebtn"+i].labelColors = colors;
+//				this["timebtn"+i].label = nextdays[i] + "";
+//			}
+//			
+//			onSelectTime(0);
+//			
+//			
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
 			
@@ -486,6 +469,7 @@ package script.order
 				tech = tech.replace("小块裁切","小块裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
 			
 			this.architype.text = tech;
+						
 
 			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
@@ -529,6 +513,7 @@ package script.order
 			
 			orderitemdata.prod_name = productVo.prod_name;
 			orderitemdata.prod_code = productVo.prod_code;
+			orderitemdata.material_code = productVo.material_code;
 			
 			orderitemdata.prod_description = "";
 			orderitemdata.LWH = finalWidth.toFixed(2) + "/" + finalHeight.toFixed(2) + "/1";

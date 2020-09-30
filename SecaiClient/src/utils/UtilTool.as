@@ -812,6 +812,52 @@ package utils
 			return arr;
 		}
 		
+		public static function getAmoutByUnit(picwidth:Number,picheight:Number,unit:String):Number
+		{
+						
+			if(unit == OrderConstant.MEASURE_UNIT_FOUR_SIDE)
+			{
+				return 2 * (picwidth + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_SIDE)
+			{
+				return  Math.max(picwidth,picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_TOP_BOTTOM)
+			{
+				return (picwidth + picwidth);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LEFT_RIGHT)
+			{
+				return (picheight + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE)
+			{
+				return Math.max(picwidth,picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_PERIMETER)
+			{
+				return 2 * (picwidth + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_AREA)
+			{
+				return picwidth * picheight;
+			}
+			else if(isMeasureUnitByNum(unit))
+			{				
+				return  1;
+			}
+			else return 0;
+		}
+		
+		public static function needChooseAttachPic(matvo:MaterialItemVo):Boolean
+		{
+			if(matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJZZ || matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJSM)
+				return true;
+			else
+				return false;
+			
+		}
 		public static function convertDateStr(dateStr:String):String{
 			var strArr:Array = dateStr.split(" ");
 			var fStr:String = "{0} {1} {2}";

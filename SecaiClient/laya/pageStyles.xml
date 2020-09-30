@@ -72,4 +72,9 @@
    <item name="characterpaint/BackImgItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="characterpaint/ColorLblItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="characterpaint/CharactTypePanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/PackagePanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/ChooseDeliveryTimePanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SimpleOrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/PackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/OrderPackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

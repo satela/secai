@@ -10,6 +10,8 @@ package model.orderModel
 	import script.ViewManager;
 	import script.order.MaterialItem;
 	import script.order.PicOrderItem;
+	
+	import utils.UtilTool;
 
 	public class PaintOrderModel
 	{
@@ -44,6 +46,11 @@ package model.orderModel
 		public var curSelectProcList:Array;
 		
 		public var batchChangeMatItems:Vector.<PicOrderItem>;
+		
+		public var packageList:Vector.<PackageVo>;
+		//public var orderPackageData:Object;
+		
+		public var finalOrderData:Array;//最终下单数据
 
 		public var allManuFacutreMatProcPrice:Object = {};
 		
@@ -63,6 +70,7 @@ package model.orderModel
 			deliveryList = null;
 			selectDelivery = null;	
 			allManuFacutreMatProcPrice = {};
+			packageList = new Vector.<PackageVo>();
 			
 		}
 		public function initOutputAddr(addrobj:Array):void
@@ -164,7 +172,7 @@ package model.orderModel
 			
 		}
 		
-		public function getCapacityData(orgcode:String,procCode:String,matcode:String,processList:Array):Array
+		public function getCapacityData(orgcode:String,procCode:String,matcode:String):Array
 		{
 			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
 				return [];
@@ -321,6 +329,112 @@ package model.orderModel
 			return 0;
 		}
 		
+		public function addPackage(packagename:String):void
+		{
+			if(packageList == null)
+				packageList = new Vector.<PackageVo>();
+			
+			var pack:PackageVo = new PackageVo();
+			pack.packageName = packagename;
+			packageList.push(pack);
+			
+			//pack.itemlist = new 
+		}
+		
+		public function setPackageData():void
+		{
+			if(finalOrderData == null)
+				return;
+			
+			for(var i:int=0;i < finalOrderData.length;i++)
+			{
+				finalOrderData[i].packageList = [];
+				
+				for(var j:int=0;j < packageList.length;j++)
+				{
+					
+					var packdata:Object = {};
+					packdata.package_name = packageList[j].packageName;
+					packdata.consignee = "";
+					packdata.tel = "";
+					packdata.addr = "";
+					
+					packdata.itemList = [];
+					for(var k:int=0;k < finalOrderData[i].orderItemList.length;k++)
+					{
+						if(finalOrderData[i].orderItemList[k].numlist[j] > 0)
+						{
+							var itemdata:Object = {};
+							itemdata.orderItem_sn = finalOrderData[i].orderItemList[k].item_seq;
+							itemdata.count = finalOrderData[i].orderItemList[k].numlist[j];
+							packdata.itemList.push(itemdata);
+						}
+					}
+					
+					finalOrderData[i].packageList.push(packdata);
+					
+				}
+				for(var k:int=0;k < finalOrderData[i].orderItemList.length;k++)
+				{
+					
+					delete finalOrderData[i].orderItemList[k].numlist;
+				}
+				
+			}
+			
+			
+		}
+		
+		public function getOrderCapcaityData(orderdata:Object):String
+		{
+			var resultdata:Object = {};
+			resultdata.manufacturer_code = orderdata.manufacturer_code;
+			resultdata.orderItemList = [];
+			
+			var orderitems:Array = orderdata.orderItemList;
+			
+			for(var i:int=0;i < orderitems.length;i++)
+			{
+				var itemdata:Object = {};
+				itemdata.orderItem_sn = orderitems[i].orderItem_sn;
+				itemdata.processList = [];
+
+				for(var j:int=0;j < orderitems[i].procInfoList.length;j++)
+				{
+					var procedata:Object = {};
+					procedata.proc_id = orderitems[i].procInfoList[j].proc_Code;
+					var size:Array = orderitems[i].LWH.split("/");
+					
+					var picwidth:Number = parseFloat(size[0]);
+					var picheight:Number = parseFloat(size[1]);
+					
+					procedata.cap_occupy = getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
+					
+					procedata.proc_seq = j+1;
+					
+					itemdata.processList.push(procedata);
+				}
+				resultdata.orderItemList.push(itemdata);
+				
+			}
+			
+			return JSON.stringify(resultdata);
+			
+			
+		}
+		//计算工艺占用产能时
+		public function getProcessNeedCapacity(manufacturerCode:String,matcode:String,picwidth:Number,picheight:Number,processcode:String):Number
+		{
+			var capacitydata:Array = getCapacityData(manufacturerCode,processcode,matcode);
+			
+			var amout:Number = UtilTool.getAmoutByUnit(picwidth/100.0,picheight/100.0,capacitydata[0]);
+			
+			if(capacitydata[1] > 0)
+				return parseFloat((amout/capacitydata[1] as Number).toFixed(2));
+			else
+				return 0;
+			
+		}
 		public function getDiscountByDate(delaydays:int):Number
 		{
 			return [1,0.95,0.9,0.85,0.8][delaydays];

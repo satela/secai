@@ -9,9 +9,9 @@ package model.users
 		public static var ADDRESS_INSERT:String = "insert";
 		public static var ADDRESS_LIST:String = "list";
 
-		public var receiverName:String = "王晓明";
+		public var receiverName:String = "";
 		
-		public var phone:String = "15256565485";
+		public var phone:String = "";
 		
 		public var zoneid:String = "";
 		
@@ -21,7 +21,7 @@ package model.users
 		
 		//public var town:String = "周浦镇";
 		
-		public var address:String = "汇腾南苑612好23号";
+		public var address:String = "";
 		
 		public var id:String;
 		

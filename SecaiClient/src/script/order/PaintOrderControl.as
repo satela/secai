@@ -688,6 +688,23 @@ package script.order
 				return;
 			
 	
+			var itemlist:Array = [];
+			
+			for(var i:int=0;i < arr.length;i++)
+			{
+				itemlist = itemlist.concat(arr[i].orderItemList);
+			}
+			
+			PaintOrderModel.instance.finalOrderData = arr;
+			
+			
+//			for(var i:int=0;i < arr.length;i++)
+//			{
+//				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+//				trace("orderdeldata:" + datas);
+//			}
+	//		ViewManager.instance.openView(ViewManager.VIEW_PACKAGE_ORDER_PANEL,false,itemlist);
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 
 		}

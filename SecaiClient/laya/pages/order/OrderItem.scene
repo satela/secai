@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":51,
-    "selecteID":43,
+    "selectedBox":2,
+    "selecteID":17,
     "searchKey":"Scene",
     "props":{"width":1280,"sceneColor":"#ffffff"},
     "nodeParent":-1,
@@ -136,7 +136,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,total",
-            "props":{"y":17,"x":1109,"width":50,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},
+            "props":{"y":34,"x":1109,"width":50,"var":"total","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},
             "nodeParent":2,
             "label":"total",
             "isDirectory":false,
@@ -395,7 +395,7 @@
             "x":15,
             "type":"Sprite",
             "searchKey":"Sprite,numbox",
-            "props":{"y":13,"x":998,"var":"numbox"},
+            "props":{"y":30,"x":998,"var":"numbox"},
             "nodeParent":2,
             "label":"numbox",
             "isOpen":false,
@@ -442,119 +442,6 @@
                     "compId":34,
                     "child":[
                         ]
-                }]
-        },
-        {
-            "x":15,
-            "type":"Box",
-            "searchKey":"Box,timebox",
-            "props":{"x":973,"var":"timebox","bottom":2},
-            "nodeParent":2,
-            "label":"timebox",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":51,
-            "child":[
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,estimatelbl",
-                    "props":{"y":1,"var":"estimatelbl","text":"预计交付：","fontSize":16,"font":"SimHei"},
-                    "nodeParent":51,
-                    "label":"estimatelbl",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":43,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"HBox",
-                    "searchKey":"HBox",
-                    "props":{"x":80,"space":3},
-                    "nodeParent":51,
-                    "label":"HBox",
-                    "isOpen":true,
-                    "isDirectory":true,
-                    "isAniNode":true,
-                    "hasChild":true,
-                    "compId":44,
-                    "child":[
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,timebtn0",
-                            "props":{"y":0,"x":0,"width":30,"var":"timebtn0","skin":"commers/btn2.png","labelSize":16,"label":"12","height":20},
-                            "nodeParent":44,
-                            "label":"timebtn0",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":45,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,timebtn1",
-                            "props":{"y":0,"x":0,"width":30,"var":"timebtn1","skin":"commers/btn2.png","labelSize":16,"label":"12","height":20},
-                            "nodeParent":44,
-                            "label":"timebtn1",
-                            "isOpen":true,
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":46,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,timebtn2",
-                            "props":{"y":0,"x":0,"width":30,"var":"timebtn2","skin":"commers/btn2.png","labelSize":16,"label":"12","height":20},
-                            "nodeParent":44,
-                            "label":"timebtn2",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":47,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,timebtn3",
-                            "props":{"y":0,"x":0,"width":30,"var":"timebtn3","skin":"commers/btn2.png","labelSize":16,"label":"12","height":20},
-                            "nodeParent":44,
-                            "label":"timebtn3",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":48,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Button",
-                            "searchKey":"Button,timebtn4",
-                            "props":{"y":0,"x":45,"width":30,"var":"timebtn4","skin":"commers/btn2.png","labelSize":16,"label":"12","height":20},
-                            "nodeParent":44,
-                            "label":"timebtn4",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":49,
-                            "child":[
-                                ]
-                        }]
                 }]
         }],
     "animations":[

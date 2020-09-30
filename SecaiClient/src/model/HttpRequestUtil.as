@@ -127,6 +127,9 @@ package model
 		public static const setYixingRelated:String = "file/set-mask-image?";//设置异形关联图片
 		public static const setFanmianRelated:String = "file/set-back-image?";//设置反面关联图片
 		
+		public static const getDeliveryTimeList:String = "business/getAvailablelDeliveryDates?manufacturer_code=";
+		
+		
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)

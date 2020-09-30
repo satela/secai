@@ -655,6 +655,10 @@ package script.order
 				hasFinishAllFlow = true;
 			}
 			
+			if(UtilTool.needChooseAttachPic(matvo as MaterialItemVo))
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,matvo);
+			}
 
 			if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.ATTACH_PEIJIAN)
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_ATTACH,false,matvo);
