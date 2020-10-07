@@ -71,7 +71,7 @@ package script.order
 			var curmat:ProductVo = PaintOrderModel.instance.curSelectMat;
 
 			
-			var maxcutwidth:Number = curmat.mat_width-3;
+			var maxcutwidth:Number = curmat.max_width-3;
 			if(hasFubai)
 				maxcutwidth = 120;
 			
@@ -115,7 +115,7 @@ package script.order
 				
 				for(var i:int=0;i < batchlist.length;i++)
 				{
-					if(batchlist[i].finalWidth + border > curmat.mat_width && batchlist[i].finalHeight + border > curmat.mat_width)
+					if(batchlist[i].finalWidth + border > curmat.max_width && batchlist[i].finalHeight + border > curmat.max_width)
 					{
 						var cutdata:Object = {};
 						cutdata.finalWidth = batchlist[i].finalWidth;

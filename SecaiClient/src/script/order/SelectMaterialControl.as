@@ -142,7 +142,29 @@ package script.order
 			uiSkin.hasSelMat.text = "无";
 			uiSkin.matlist.array = [];
 			
-			uiSkin.tablist.array = PaintOrderModel.instance.productList;
+			var temp:Array = [];
+			for(var i:int=0;i < PaintOrderModel.instance.productList.length;i++)
+			{
+				if(PaintOrderModel.instance.productList[i].matclassname == "户内写真")
+					temp.unshift(PaintOrderModel.instance.productList[i]);
+				else if(PaintOrderModel.instance.productList[i].matclassname == "户外写真")
+				{
+					if(temp.length > 0 && temp[0].matclassname == "户内写真")
+					{
+						var hueni:* = temp.shift();
+						temp.unshift(PaintOrderModel.instance.productList[i]);
+						temp.unshift(hueni);
+
+					}
+					else
+						temp.unshift(PaintOrderModel.instance.productList[i]);
+					
+				}
+				else
+					temp.push(PaintOrderModel.instance.productList[i]);
+
+			}
+			uiSkin.tablist.array = temp;//PaintOrderModel.instance.productList;
 			
 			this.uiSkin.techcontent.vScrollBar.hide = true;
 			this.uiSkin.techcontent.hScrollBar.hide = true;
@@ -183,6 +205,7 @@ package script.order
 			uiSkin.dragImg.on(Event.MOUSE_UP,this,stopDragPanel);
 
 		}
+		
 		
 		private function startDragPanel(e:Event):void
 		{			
@@ -653,6 +676,12 @@ package script.order
 			{
 				//hideItems(firstTechlist[0].x,false,true);
 				hasFinishAllFlow = true;
+			}
+			
+			
+			if(UtilTool.needChooseAttachPic(matvo as MaterialItemVo))
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PIC_TO_ORDER,false,matvo);
 			}
 			
 

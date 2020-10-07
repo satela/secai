@@ -804,6 +804,15 @@ package utils
 			
 		}
 		
+		public static function needChooseAttachPic(matvo:MaterialItemVo):Boolean
+		{
+			if(matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJZZ || matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJSM)
+				return true;
+			else
+				return false;
+			
+		}
+		
 		
 		public static function convertDateStr(dateStr:String):String{
 			var strArr:Array = dateStr.split(" ");

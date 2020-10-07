@@ -332,19 +332,19 @@ package model.orderModel
 		
 		public function checkExceedMaterialSize(material:ProductVo):Boolean
 		{
-			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
-			
-			for(var i:int=0;i < picorderitems.length;i++)
-			{
-				var minside:Number = Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-				var longside:Number = Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-				
-				if(minside > material.max_width || longside > material.max_length)
-					return true;
-				
-				if(minside < material.min_width || longside < material.min_length)
-					return true;
-			}
+//			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
+//			
+//			for(var i:int=0;i < picorderitems.length;i++)
+//			{
+//				var minside:Number = Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+//				var longside:Number = Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+//				
+//				if(minside > material.max_width || longside > material.max_length)
+//					return true;
+//				
+//				if(minside < material.min_width || longside < material.min_length)
+//					return true;
+//			}
 			
 			return false;
 		}

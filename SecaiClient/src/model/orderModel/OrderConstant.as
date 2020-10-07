@@ -31,6 +31,9 @@ package model.orderModel
 		
 		public static const CUTOFF_H_V:String = "SPPJ"; //横向竖直拼接
 		public static const AVERAGE_CUTOFF:String = "SPDFCQ"; //等份裁切
+		
+		public static const ATTACH_PJZZ:String = "SPZZ";//遮罩图片
+		public static const ATTACH_PJSM:String = "SPSM";//双面图片图片
 
 		
 		public static const DOUBLE_SIDE_SAME_TECHNO:String = "SPTE10320";//双面相同

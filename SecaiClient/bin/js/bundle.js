@@ -713,7 +713,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="carving/CarvingOrderPanel.scene";
+	GameConfig.startScene="PaintOrderPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1428,7 +1428,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1765,15 +1764,6 @@ var PaintOrderModel=(function(){
 	}
 
 	__proto.checkExceedMaterialSize=function(material){
-		var picorderitems=this.getCurPicOrderItems();
-		for(var i=0;i < picorderitems.length;i++){
-			var minside=Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-			var longside=Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-			if(minside > material.max_width || longside > material.max_length)
-				return true;
-			if(minside < material.min_width || longside < material.min_length)
-				return true;
-		}
 		return false;
 	}
 
@@ -2345,9 +2335,7 @@ var ProductVo=(function(){
 		this.max_length=0;
 		// 最大长度
 		this.min_width=0;
-		// 最小宽度
-		this.max_width=0;
-		// 最大宽度
+		//public var max_width:Number=0;// 最大宽度
 		this.material_code="";
 		// 材料编码
 		this.material_name="";
@@ -2371,7 +2359,7 @@ var ProductVo=(function(){
 		this.additional_unitfee=0;
 		// 单位附加金额
 		this.is_merchandise=false;
-		this.mat_width=0;
+		this.max_width=0;
 		this.mat_length=0;
 		this.mat_thickness=0;
 		this.prcessCatList=null;
@@ -2437,7 +2425,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border> this.mat_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border> this.max_width)){
 					var peijian="";
 					if(arr[i].selectAttachVoList !=null){
 						for(var j=0;j < arr[i].selectAttachVoList.length;j++){
@@ -2497,7 +2485,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border > this.mat_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border > this.max_width)){
 					var totalprice=0;
 					var priceInfo=PaintOrderModel.instance.getProcePriceUnit(this.manufacturer_code,arr[i].preProc_Code,this.material_code,techlist);
 					if(priceInfo !=null && priceInfo.length==3){
@@ -2537,7 +2525,7 @@ var ProductVo=(function(){
 		var border=UtilTool.getBorderDistance(this.getAllSelectedTech());
 		for(var i=0;i < arr.length;i++){
 			if(arr[i].selected){
-				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.mat_width && picheight+border > this.mat_width)){
+				if(arr[i].preProc_attachmentTypeList.toUpperCase()!="SPPJ" || (arr[i].preProc_attachmentTypeList.toUpperCase()=="SPPJ" && picwidth+border > this.max_width && picheight+border > this.max_width)){
 					var procname=arr[i].preProc_Name+UtilTool.getAttachDesc(arr[i]);
 					if(arr[i].selectAttachVoList !=null && arr[i].selectAttachVoList.length > 0)
 						procname+="("+arr[i].selectAttachVoList[0].accessory_name+")";
@@ -3144,6 +3132,13 @@ var UtilTool=(function(){
 		return false;
 	}
 
+	UtilTool.needChooseAttachPic=function(matvo){
+		if(matvo.preProc_attachmentTypeList.toUpperCase()=="SPZZ" || matvo.preProc_attachmentTypeList.toUpperCase()=="SPSM")
+			return true;
+		else
+		return false;
+	}
+
 	UtilTool.convertDateStr=function(dateStr){
 		var strArr=dateStr.split(" ");
 		var fStr="{0} {1} {2}";
@@ -3215,6 +3210,8 @@ var OrderConstant=(function(){
 	OrderConstant.ATTACH_PEIJIAN="SPPEIJIAN";
 	OrderConstant.CUTOFF_H_V="SPPJ";
 	OrderConstant.AVERAGE_CUTOFF="SPDFCQ";
+	OrderConstant.ATTACH_PJZZ="SPZZ";
+	OrderConstant.ATTACH_PJSM="SPSM";
 	OrderConstant.DOUBLE_SIDE_SAME_TECHNO="SPTE10320";
 	OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO="SPTE10330";
 	OrderConstant.UNNORMAL_CUT_TECHNO="SPTE10420";
@@ -3563,7 +3560,7 @@ var MaterialItemVo=(function(){
 						var vec=[];
 						vec.push(this);
 						var border=UtilTool.getBorderDistance(vec);
-						if(allpics[i].finalWidth+border > curselectProduct.mat_width && allpics[i].finalHeight+border > curselectProduct.mat_width){
+						if(allpics[i].finalWidth+border > curselectProduct.max_width && allpics[i].finalHeight+border > curselectProduct.max_width){
 							hasBeyongd=true;
 							break ;
 						}
@@ -40502,7 +40499,23 @@ var SelectMaterialControl=(function(_super){
 		this.uiSkin.selecttech.text="无";
 		this.uiSkin.hasSelMat.text="无";
 		this.uiSkin.matlist.array=[];
-		this.uiSkin.tablist.array=PaintOrderModel.instance.productList;
+		var temp=[];
+		for(var i=0;i < PaintOrderModel.instance.productList.length;i++){
+			if(PaintOrderModel.instance.productList[i].matclassname=="户内写真")
+				temp.unshift(PaintOrderModel.instance.productList[i]);
+			else if(PaintOrderModel.instance.productList[i].matclassname=="户外写真"){
+				if(temp.length > 0 && temp[0].matclassname=="户内写真"){
+					var hueni=temp.shift();
+					temp.unshift(PaintOrderModel.instance.productList[i]);
+					temp.unshift(hueni);
+				}
+				else
+				temp.unshift(PaintOrderModel.instance.productList[i]);
+			}
+			else
+			temp.push(PaintOrderModel.instance.productList[i]);
+		}
+		this.uiSkin.tablist.array=temp;
 		this.uiSkin.techcontent.vScrollBar.hide=true;
 		this.uiSkin.techcontent.hScrollBar.hide=true;
 		this.uiSkin.subtn.on("click",this,this.onSubItemNum);
@@ -40821,6 +40834,9 @@ var SelectMaterialControl=(function(_super){
 		}
 		else{
 			this.hasFinishAllFlow=true;
+		}
+		if(UtilTool.needChooseAttachPic(matvo)){
+			ViewManager.instance.openView("VIEW_SELECT_PIC_TO_ORDER",false,matvo);
 		}
 		if(matvo.preProc_attachmentTypeList.toLocaleUpperCase()=="SPPEIJIAN")
 			ViewManager.instance.openView("VIEW_SELECT_ATTACH",false,matvo);
@@ -42200,7 +42216,7 @@ var InputCutNumControl=(function(_super){
 		this.uiSkin.productlist.selectEnable=false;
 		var arr=[];
 		var curmat=PaintOrderModel.instance.curSelectMat;
-		var maxcutwidth=curmat.mat_width-3;
+		var maxcutwidth=curmat.max_width-3;
 		if(this.hasFubai)
 			maxcutwidth=120;
 		this.uiSkin.maxtips.text="（单份最大裁切宽度："+maxcutwidth+"cm）";
@@ -42231,7 +42247,7 @@ var InputCutNumControl=(function(_super){
 			var batchlist=PaintOrderModel.instance.batchChangeMatItems;
 			var border=UtilTool.getBorderDistance(PaintOrderModel.instance.curSelectMat.getAllSelectedTech());
 			for(var i=0;i < batchlist.length;i++){
-				if(batchlist[i].finalWidth+border > curmat.mat_width && batchlist[i].finalHeight+border > curmat.mat_width){
+				if(batchlist[i].finalWidth+border > curmat.max_width && batchlist[i].finalHeight+border > curmat.max_width){
 					var cutdata={};
 					cutdata.finalWidth=batchlist[i].finalWidth;
 					cutdata.finalHeight=batchlist[i].finalHeight;
