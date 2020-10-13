@@ -522,7 +522,22 @@ package script.order
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
 			orderitemdata.is_merchandise = 0;
 			orderitemdata.item_status = "1";
-			orderitemdata.comments = this.ordervo.comment;
+			
+			var tempstr:String = "";
+			var hasfinddot:Boolean = false;
+			for(var i:int= this.ordervo.picinfo.directName.length - 1;i >= 0;i--)
+			{
+				if(this.ordervo.picinfo.directName.charAt(i) == "." && hasfinddot == false)
+				{
+					hasfinddot = true;
+				}
+				else if(hasfinddot)
+				{
+					tempstr = this.ordervo.picinfo.directName.charAt(i) + tempstr;
+				}
+			}
+				
+			orderitemdata.comments = tempstr.substr(0,20);// this.ordervo.picinfo.directName.split(".");
 			orderitemdata.imagefile_path = HttpRequestUtil.originPicPicUrl + this.ordervo.picinfo.fid + "." + this.ordervo.picinfo.picClass;
 			orderitemdata.previewImage_path = HttpRequestUtil.biggerPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";

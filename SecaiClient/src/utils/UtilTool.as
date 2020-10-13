@@ -864,6 +864,26 @@ package utils
 			return format(fStr, (strArr[0] as String).split("-").join("/"), strArr[1], "GMT");
 		}
 		
+		public static function getCountDownString(lefttime:int):String
+		{
+			var min:int = Math.floor(lefttime/60);
+			
+			var second:int = lefttime%60;
+			
+			var timestr:String = "";
+			if(min > 9)
+				timestr += min;
+			else
+				timestr += "0" + min;
+			
+			if(second > 9)
+				timestr += ":" + second;
+			else
+				timestr += ":0" + second;
+			
+			return timestr;
+			
+		}
 		/**以前的format文章中的方法*/
 		public static function format(str:String, ...args):String{
 			for(var i:int = 0; i<args.length; i++){

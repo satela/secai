@@ -62,7 +62,7 @@ package script.usercenter
 			//uiSkin.monthCombox.selectedIndex = curmonth;
 			var lastday:Date = new Date(curdate.getTime() - 24 * 3600 * 1000);
 			
-			var param:String = "begindate=" + UtilTool.formatFullDateTime(lastday,false) + " 00:00:00&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59&status=1&curpage=1";
+			var param:String = "begindate=" + UtilTool.formatFullDateTime(lastday,false) + " 00:00:00&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59&status=2&curpage=1";
 			//if(curmonth + 1 < 10 )
 			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
@@ -82,7 +82,7 @@ package script.usercenter
 			uiSkin.ordertotalNum.text = "0";
 			uiSkin.ordertotalMoney.text = "0元";
 			
-			uiSkin.paytype.selectedIndex = 1;
+			uiSkin.paytype.selectedIndex = 2;
 			
 			uiSkin.paytype.on(Event.CHANGE,this,queryOrderList);
 			

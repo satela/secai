@@ -6,8 +6,11 @@ package ui.order {
 
 	public class ChooseDeliveryTimePanelUI extends View {
 		public var paybtn:Button;
-		public var cancelbtn:Button;
+		public var savebtn:Button;
+		public var rawprice:Label;
+		public var disountprice:Label;
 		public var orderlist:List;
+		public var closebtn:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();

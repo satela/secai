@@ -54,6 +54,8 @@ package model.orderModel
 
 		public var allManuFacutreMatProcPrice:Object = {};
 		
+		public var availableDeliveryDates:Object = {};
+		
 		public var orderType:int;//当前下单类型 
 		
 		public function PaintOrderModel()
@@ -71,6 +73,9 @@ package model.orderModel
 			selectDelivery = null;	
 			allManuFacutreMatProcPrice = {};
 			packageList = new Vector.<PackageVo>();
+			finalOrderData = [];
+			availableDeliveryDates = {};
+			
 			
 		}
 		public function initOutputAddr(addrobj:Array):void
@@ -119,16 +124,16 @@ package model.orderModel
 					ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 					return;
 				}
-				var arr:Array = allManuFacutreMatProcPrice[orgcode];
-				for(var i:int=0;i < arr.length;i++)
-				{
-					var matlist:Array = arr[i].mat_list;
-					arr[i].matlist = {};
-					for(var j:int=0;j < matlist.length;j++)
-					{
-						arr[i].matlist[matlist[j].mat_code] = matlist[j];
-					}
-				}
+				//var arr:Array = allManuFacutreMatProcPrice[orgcode];
+//				for(var i:int=0;i < arr.length;i++)
+//				{
+//					var matlist:Array = arr[i].mat_list;
+//					arr[i].matlist = {};
+//					for(var j:int=0;j < matlist.length;j++)
+//					{
+//						arr[i].matlist[matlist[j].mat_code] = matlist[j];
+//					}
+//				}
 			}
 			catch(err:Error)
 			{
@@ -154,12 +159,23 @@ package model.orderModel
 				{
 					if(list[i].proc_code == procCode)
 					{
-						if(list[i].matlist[matcode] != null)
-							return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
-						else
+						//if(list[i].matlist[matcode] != null)
+						//	return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
+						//else
+						//	return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+						if(list[i].mat_code == matcode)
 							return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 					}
 				}
+				
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode && list[i].mat_code == "")
+					{						
+						return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					}
+				}
+				
 				return [];
 			}
 		}
@@ -185,18 +201,29 @@ package model.orderModel
 				
 				for(var i:int=0;i < list.length;i++)
 				{
-					if(list[i].proc_code == procCode)
+					if(list[i].proc_code == procCode && list[i].mat_code == matcode)
 					{
-						if(list[i].matlist[matcode] != null)
-							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
-						else
+//						if(list[i].matlist[matcode] != null)
+//							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+//						else
 							return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+					}
+				}
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode && list[i].mat_code == "")
+					{
+						//						if(list[i].matlist[matcode] != null)
+						//							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+						//						else
+						return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
 					}
 				}
 				return [0,0,0];
 			}
 		}
 		
+		//异形切割的工艺价格寻找加个最高的那个（根据选择的附件材料查找有没有对应的加个，再选择最高的价格)
 		public function getYixingProcPrice(orgcode:String,procCode:String,matcode:String,processList:Array):Array
 		{
 			var allprice:Array = [];
@@ -218,18 +245,23 @@ package model.orderModel
 			{
 				if(list[i].proc_code == procCode)
 				{
-					allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					if(allprice.length == 0)
+						allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 					for(var j:int=0;j < hasselectMat.length;j++)
 					{
-						if(list[i].matlist[hasselectMat[j]] != null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
-							allprice = [list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+						if(list[i].mat_code == hasselectMat[j]  && list[i].unit_procprice > allprice[2])
+							allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 						
 					}
+					if(list[i].mat_code == "" && list[i].unit_procprice > allprice[2])
+					{
+						allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					}
 					
-					return allprice;
 				}
 			}
-			return [];
+			
+			return allprice;
 			
 		}
 		public static var VOCABURARY:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -365,7 +397,7 @@ package model.orderModel
 						if(finalOrderData[i].orderItemList[k].numlist[j] > 0)
 						{
 							var itemdata:Object = {};
-							itemdata.orderItem_sn = finalOrderData[i].orderItemList[k].item_seq;
+							itemdata.orderItem_sn = finalOrderData[i].orderItemList[k].orderItem_sn;
 							itemdata.count = finalOrderData[i].orderItemList[k].numlist[j];
 							packdata.itemList.push(itemdata);
 						}
@@ -397,18 +429,20 @@ package model.orderModel
 			{
 				var itemdata:Object = {};
 				itemdata.orderItem_sn = orderitems[i].orderItem_sn;
+				itemdata.prod_code = orderitems[i].prod_code;
+				
 				itemdata.processList = [];
 
 				for(var j:int=0;j < orderitems[i].procInfoList.length;j++)
 				{
 					var procedata:Object = {};
-					procedata.proc_id = orderitems[i].procInfoList[j].proc_Code;
+					procedata.proc_code = orderitems[i].procInfoList[j].proc_Code;
 					var size:Array = orderitems[i].LWH.split("/");
 					
 					var picwidth:Number = parseFloat(size[0]);
 					var picheight:Number = parseFloat(size[1]);
 					
-					procedata.cap_occupy = getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
+					procedata.cap_occupy = orderitems[i].item_number * getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
 					
 					procedata.proc_seq = j+1;
 					
@@ -434,6 +468,22 @@ package model.orderModel
 			else
 				return 0;
 			
+		}
+		
+		public function getManufacturerCode(orderitemsn:String):String{
+			
+			var arr:Array = finalOrderData;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].orderItem_sn == orderitemsn)
+						return arr[i].manufacturer_code;
+				}
+			}
+			
+			return "";
 		}
 		public function getDiscountByDate(delaydays:int):Number
 		{

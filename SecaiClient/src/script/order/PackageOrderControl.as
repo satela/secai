@@ -5,6 +5,7 @@ package script.order
 	import laya.ui.TextInput;
 	import laya.utils.Handler;
 	
+	import model.HttpRequestUtil;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PackageItem;
 	import model.orderModel.PackageVo;
@@ -27,6 +28,8 @@ package script.order
 		private var param:Object;
 		
 		private var orderDatas:Array;
+		
+		private var requestnum:int = 0;
 		
 		override public function onStart():void
 		{
@@ -127,7 +130,6 @@ package script.order
 			}
 			uiSkin.addpackbtn.x -= 55;
 			
-			PaintOrderModel.instance.packageList.splice(index,1);
 			
 			var arr:Array = orderDatas;
 			
@@ -140,14 +142,16 @@ package script.order
 				}
 				arr[i].numlist[OrderConstant.packagemaxCout - 1] = 0;
 			}
-			if(PaintOrderModel.instance.packageList.length > 1)
-			{				
+			PaintOrderModel.instance.packageList.splice(index,1);
+
+			//if(PaintOrderModel.instance.packageList.length > 1)
+			//{				
 				for(var i:int=0;i < uiSkin.productlist.cells.length;i++)
 				{
 					(uiSkin.productlist.cells[i] as OrderPackItem).deletepack(index);
 				}
-			}
-			
+			//}
+
 		}
 		private function onCloseView():void
 		{
@@ -162,12 +166,62 @@ package script.order
 			
 			ViewManager.instance.closeView(ViewManager.VIEW_PACKAGE_ORDER_PANEL);
 
-			ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,orderDatas);
-			PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
+			var arr:Array = PaintOrderModel.instance.finalOrderData;
+			
+			requestnum = 0;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+				
+				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+
+				
+			}
+			//ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,orderDatas);
+			//PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
 
 		}
 		
-		
+		private function ongetAvailableDateBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var alldates:Array = result as Array;
+				for(var i:int=0;i < alldates.length;i++)
+				{
+					
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+
+					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+					{
+						if(alldates[i].deliveryDateList[j].urgent == false)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						}
+						else
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+						}
+					}										
+					
+				}
+				requestnum++;
+				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
+				{
+					ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,orderDatas);
+					PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
+				}
+			}
+		}
 		private function updateOrderItem(cell:OrderPackItem):void
 		{
 			cell.setData(cell.dataSource);

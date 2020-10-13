@@ -1420,6 +1420,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1566,6 +1567,7 @@ var PaintOrderModel=(function(){
 		this.finalOrderData=null;
 		//最终下单数据
 		this.allManuFacutreMatProcPrice={};
+		this.availableDeliveryDates={};
 		this.orderType=0;
 	}
 
@@ -1581,6 +1583,8 @@ var PaintOrderModel=(function(){
 		this.selectDelivery=null;
 		this.allManuFacutreMatProcPrice={};
 		this.packageList=[];
+		this.finalOrderData=[];
+		this.availableDeliveryDates={};
 	}
 
 	__proto.initOutputAddr=function(addrobj){
@@ -1616,14 +1620,6 @@ var PaintOrderModel=(function(){
 				ViewManager.showAlert("获取生产商工艺价格出错！");
 				ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 				return;
-			};
-			var arr=this.allManuFacutreMatProcPrice[orgcode];
-			for(var i=0;i < arr.length;i++){
-				var matlist=arr[i].mat_list;
-				arr[i].matlist={};
-				for(var j=0;j < matlist.length;j++){
-					arr[i].matlist[matlist[j].mat_code]=matlist[j];
-				}
 			}
 		}
 		catch(err){
@@ -1642,9 +1638,12 @@ var PaintOrderModel=(function(){
 				return this.getYixingProcPrice(orgcode,procCode,matcode,processList);
 			for(var i=0;i < list.length;i++){
 				if(list[i].proc_code==procCode){
-					if(list[i].matlist[matcode] !=null)
-						return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
-					else
+					if(list[i].mat_code==matcode)
+						return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				}
+			}
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode && list[i].mat_code==""){
 					return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				}
 			}
@@ -1664,10 +1663,12 @@ var PaintOrderModel=(function(){
 			if(list==null)
 				return [0,0,0];
 			for(var i=0;i < list.length;i++){
-				if(list[i].proc_code==procCode){
-					if(list[i].matlist[matcode] !=null)
-						return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
-					else
+				if(list[i].proc_code==procCode && list[i].mat_code==matcode){
+					return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+				}
+			}
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode && list[i].mat_code==""){
 					return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
 				}
 			}
@@ -1675,6 +1676,7 @@ var PaintOrderModel=(function(){
 		}
 	}
 
+	//异形切割的工艺价格寻找加个最高的那个（根据选择的附件材料查找有没有对应的加个，再选择最高的价格)
 	__proto.getYixingProcPrice=function(orgcode,procCode,matcode,processList){
 		var allprice=[];
 		var hasselectMat=[];
@@ -1690,15 +1692,18 @@ var PaintOrderModel=(function(){
 			return [];
 		for(var i=0;i < list.length;i++){
 			if(list[i].proc_code==procCode){
-				allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				if(allprice.length==0)
+					allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				for(var j=0;j < hasselectMat.length;j++){
-					if(list[i].matlist[hasselectMat[j]] !=null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
-						allprice=[list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+					if(list[i].mat_code==hasselectMat[j] && list[i].unit_procprice > allprice[2])
+						allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				}
-				return allprice;
+				if(list[i].mat_code=="" && list[i].unit_procprice > allprice[2]){
+					allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				}
 			}
 		}
-		return [];
+		return allprice;
 	}
 
 	__proto.getManuFacturePriority=function(manufacCode){
@@ -1789,7 +1794,7 @@ var PaintOrderModel=(function(){
 				for(var k=0;k < this.finalOrderData[i].orderItemList.length;k++){
 					if(this.finalOrderData[i].orderItemList[k].numlist[j] > 0){
 						var itemdata={};
-						itemdata.orderItem_sn=this.finalOrderData[i].orderItemList[k].item_seq;
+						itemdata.orderItem_sn=this.finalOrderData[i].orderItemList[k].orderItem_sn;
 						itemdata.count=this.finalOrderData[i].orderItemList[k].numlist[j];
 						packdata.itemList.push(itemdata);
 					}
@@ -1810,14 +1815,15 @@ var PaintOrderModel=(function(){
 		for(var i=0;i < orderitems.length;i++){
 			var itemdata={};
 			itemdata.orderItem_sn=orderitems[i].orderItem_sn;
+			itemdata.prod_code=orderitems[i].prod_code;
 			itemdata.processList=[];
 			for(var j=0;j < orderitems[i].procInfoList.length;j++){
 				var procedata={};
-				procedata.proc_id=orderitems[i].procInfoList[j].proc_Code;
+				procedata.proc_code=orderitems[i].procInfoList[j].proc_Code;
 				var size=orderitems[i].LWH.split("/");
 				var picwidth=parseFloat(size[0]);
 				var picheight=parseFloat(size[1]);
-				procedata.cap_occupy=this.getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
+				procedata.cap_occupy=orderitems[i].item_number *this.getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
 				procedata.proc_seq=j+1;
 				itemdata.processList.push(procedata);
 			}
@@ -1834,6 +1840,18 @@ var PaintOrderModel=(function(){
 			return parseFloat((amout/capacitydata [1]).toFixed(2));
 		else
 		return 0;
+	}
+
+	__proto.getManufacturerCode=function(orderitemsn){
+		var arr=this.finalOrderData;
+		for(var i=0;i < arr.length;i++){
+			var orderitems=arr[i].orderItemList;
+			for(var j=0;j < orderitems.length;j++){
+				if(orderitems[j].orderItem_sn==orderitemsn)
+					return arr[i].manufacturer_code;
+			}
+		}
+		return "";
 	}
 
 	__proto.getDiscountByDate=function(delaydays){
@@ -2326,7 +2344,9 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
 	HttpRequestUtil.setYixingRelated="file/set-mask-image?";
 	HttpRequestUtil.setFanmianRelated="file/set-back-image?";
-	HttpRequestUtil.getDeliveryTimeList="business/getAvailablelDeliveryDates?manufacturer_code=";
+	HttpRequestUtil.getDeliveryTimeList="business/getAvailebleDeliveryDates?";
+	HttpRequestUtil.preOccupyCapacity="business/setCapacityPreOccupy?";
+	HttpRequestUtil.getProductUids="account/reserveorder?";
 	return HttpRequestUtil;
 })()
 
@@ -3236,6 +3256,21 @@ var UtilTool=(function(){
 		var strArr=dateStr.split(" ");
 		var fStr="{0} {1} {2}";
 		return UtilTool.format(fStr,(strArr [0]).split("-").join("/"),strArr[1],"GMT");
+	}
+
+	UtilTool.getCountDownString=function(lefttime){
+		var min=Math.floor(lefttime/60);
+		var second=lefttime%60;
+		var timestr="";
+		if(min > 9)
+			timestr+=min;
+		else
+		timestr+="0"+min;
+		if(second > 9)
+			timestr+=":"+second;
+		else
+		timestr+=":0"+second;
+		return timestr;
 	}
 
 	UtilTool.format=function(str,__args){
@@ -28206,6 +28241,7 @@ var EventCenter=(function(_super){
 	EventCenter.START_SELECT_YIXING_PIC="START_SELECT_YIXING_PIC";
 	EventCenter.STOP_SELECT_RELATE_PIC="STOP_SELECT_RELATE_PIC";
 	EventCenter.START_SELECT_BACK_PIC="START_SELECT_BACK_PIC";
+	EventCenter.UPDATE_PRICE_BY_DELIVERYDATE="UPDATE_PRICE_BY_DELIVERYDATE";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -37974,7 +38010,24 @@ var PaintOrderControl=(function(_super){
 			itemlist=itemlist.concat(arr[i].orderItemList);
 		}
 		PaintOrderModel.instance.finalOrderData=arr;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+		var params="count="+itemlist.length;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/reserveorder?",this,this.ongetUidsBack,params,"post");
+	}
+
+	// HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	__proto.ongetUidsBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var ids=result.id;
+			var itemlist=[];
+			for(var i=0;i < PaintOrderModel.instance.finalOrderData.length;i++){
+				itemlist=itemlist.concat(PaintOrderModel.instance.finalOrderData[i].orderItemList);
+			}
+			for(var i=0;i < ids.length;i++){
+				itemlist[i].orderItem_sn=ids[i];
+			}
+			ViewManager.instance.openView("VIEW_PACKAGE_ORDER_PANEL",false,itemlist);
+		}
 	}
 
 	__proto.onSaveOrder=function(){
@@ -38134,6 +38187,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
 		EventCenter.instance.off("PAY_ORDER_SUCESS",this,this.onPaySucess);
 		EventCenter.instance.off("CANCEL_PAY_ORDER",this,this.onCancelPay);
+		PaintOrderModel.instance.resetData();
 		Laya.timer.clear(this,this.onDragMove);
 	}
 
@@ -38313,12 +38367,155 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.uiSkin.orderlist.selectEnable=false;
 		this.uiSkin.orderlist.spaceY=2;
 		this.uiSkin.orderlist.renderHandler=new Handler(this,this.updateOrderItem);
-		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
+		this.uiSkin.savebtn.on("click",this,this.onSaveOrder);
+		this.uiSkin.paybtn.on("click",this,this.onPayOrder);
+		this.uiSkin.closebtn.on("click",this,this.onGiveUpOrder);
 		this.orderDatas=this.param;
 		this.uiSkin.orderlist.array=this.orderDatas;
+		var total=0;
+		for(var i=0;i < this.orderDatas.length;i++){
+			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
+			total+=ordermoney;
+		}
+		this.uiSkin.rawprice.text=total.toFixed(1)+"元";
+		this.uiSkin.disountprice.text=total.toFixed(1)+"元";
+		Laya.timer.loop(1000,this,this.onCountDownTime);
+		EventCenter.instance.on("UPDATE_PRICE_BY_DELIVERYDATE",this,this.updatePrice);
 	}
 
 	//uiSkin.
+	__proto.onCountDownTime=function(){
+		var arr=this.orderDatas;
+		for(var i=0;i < this.orderDatas.length;i++){
+			if(this.orderDatas[i].is_urgent==1 || this.orderDatas[i].delivery_date !=null){
+				if(this.orderDatas[i].lefttime > 0){
+					this.orderDatas[i].lefttime--;
+					if(this.orderDatas[i].lefttime==0){
+						this.orderDatas[i].is_urgent=0;
+						this.orderDatas[i].delivery_date=null;
+						this.orderDatas[i].outtime=true;
+					}
+				}
+			}
+		}
+	}
+
+	__proto.updatePrice=function(){
+		var total=0;
+		for(var i=0;i < this.orderDatas.length;i++){
+			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
+			if(this.orderDatas[i].is_urgent==1 || this.orderDatas[i].delivery_date !=null){
+				ordermoney=ordermoney*this.orderDatas[i].discount;
+			}
+			ordermoney=parseFloat(ordermoney.toFixed(1));
+			total+=ordermoney;
+		}
+		this.uiSkin.disountprice.text=total.toFixed(1)+"元";
+	}
+
+	__proto.onPayOrder=function(){
+		var arr=this.getOrderData();
+		if(arr==null)
+			return;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onPlaceOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalmoney=0;
+			var allorders=[];
+			for(var i=0;i < result.orders.length;i++){
+				var orderdata=JSON.parse(result.orders[i]);
+				totalmoney+=Number(orderdata.money_paidStr);
+				allorders.push(orderdata.order_sn);
+			}
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
+	}
+
+	__proto.getOrderData=function(){
+		var manuarr=PaintOrderModel.instance.finalOrderData;
+		for(var i=0;i < manuarr.length;i++){
+			var itemlist=manuarr[i].orderItemList;
+			var totalprice=0;
+			for(var j=0;j < itemlist.length;j++){
+				if(itemlist[j].is_urgent==null || (itemlist[j].is_urgent==false && itemlist[j].delivery_date==null)){
+					ViewManager.showAlert("有产品未设置交货时间");
+					return null;
+				};
+				var ordermoney=Number(itemlist[j].item_priceStr)*Number(itemlist[j].item_number)*itemlist[j].discount;
+				ordermoney=parseFloat(ordermoney.toFixed(1));
+				totalprice+=ordermoney;
+			}
+			manuarr[i].order_amountStr=totalprice;
+			if((manuarr[i] .order_amountStr)< 2){
+				manuarr[i].order_amountStr=2.00;
+				if(itemlist.length > 0){
+					var eachprice=Number((2/itemlist.length).toFixed(2));
+					var overflow=2-eachprice*itemlist.length;
+					for(var j=0;j < itemlist.length;j++){
+						if(j==0)
+							itemlist[j].item_priceStr=(((eachprice+overflow)/itemlist[j].item_number)).toFixed(2);
+						else
+						itemlist[j].item_priceStr=((eachprice/itemlist[j].item_number)).toFixed(2);
+					}
+				}
+			}
+			manuarr[i].money_paidStr=(manuarr[i] .order_amountStr).toFixed(1);
+			manuarr[i].order_amountStr=(manuarr[i] .order_amountStr).toFixed(1);
+		}
+		for(var i=0;i < manuarr.length;i++){
+			var itemlist=manuarr[i].orderItemList;
+			for(var j=0;j < itemlist.length;j++){
+				delete itemlist[j].outtime;
+				delete itemlist[j].discount;
+			}
+		};
+		var arr=PaintOrderModel.instance.finalOrderData;
+		return arr;
+	}
+
+	__proto.onSaveOrder=function(){
+		var _$this=this;
+		if(Userdata.instance.companyShort==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,function(data){
+				if(this.destroyed)
+					return;
+				var result=JSON.parse(data);
+				if(result.status==0){
+					Userdata.instance.company=result.name;
+					Userdata.instance.companyShort=result.shortname;
+				}
+				_$this.onSaveOrder();
+			}
+			,null,"post");
+			return;
+		};
+		var arr=PaintOrderModel.instance.finalOrderData;
+		if(arr==null)
+			return;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onSaveOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onSaveOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("保存订单成功，您可以到我的订单继续支付");
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
+	__proto.onGiveUpOrder=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:this.confirmClose,ok:"确定",cancel:"取消"});
+	}
+
+	__proto.confirmClose=function(b){
+		if(b){
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
 	__proto.onCloseView=function(){
 		ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
 	}
@@ -38327,7 +38524,10 @@ var ChooseDeliveryTimeControl=(function(_super){
 		cell.setData(cell.dataSource);
 	}
 
-	__proto.updateTotalPrice=function(){}
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("UPDATE_PRICE_BY_DELIVERYDATE",this,this.updatePrice);
+	}
+
 	return ChooseDeliveryTimeControl;
 })(Script)
 
@@ -40589,6 +40789,7 @@ var PackageOrderControl=(function(_super){
 		this.uiSkin=null;
 		this.param=null;
 		this.orderDatas=null;
+		this.requestnum=0;
 		PackageOrderControl.__super.call(this);
 	}
 
@@ -40654,7 +40855,6 @@ var PackageOrderControl=(function(_super){
 			(this.uiSkin.packagebox.getChildAt(i)).x-=55;
 		}
 		this.uiSkin.addpackbtn.x-=55;
-		PaintOrderModel.instance.packageList.splice(index,1);
 		var arr=this.orderDatas;
 		for(var i=0;i < arr.length;i++){
 			arr[i].numlist[0]+=arr[i].numlist[index];
@@ -40663,13 +40863,13 @@ var PackageOrderControl=(function(_super){
 			}
 			arr[i].numlist[21-1]=0;
 		}
-		if(PaintOrderModel.instance.packageList.length > 1){
-			for(var i=0;i < this.uiSkin.productlist.cells.length;i++){
-				(this.uiSkin.productlist.cells [i]).deletepack(index);
-			}
+		PaintOrderModel.instance.packageList.splice(index,1);
+		for(var i=0;i < this.uiSkin.productlist.cells.length;i++){
+			(this.uiSkin.productlist.cells [i]).deletepack(index);
 		}
 	}
 
+	//}
 	__proto.onCloseView=function(){
 		PaintOrderModel.instance.packageList=[];
 		ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
@@ -40678,8 +40878,42 @@ var PackageOrderControl=(function(_super){
 	__proto.onConfirmPackage=function(){
 		PaintOrderModel.instance.setPackageData();
 		ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
-		ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,this.orderDatas);
-		PaintOrderModel.instance.packageList=[];
+		var arr=PaintOrderModel.instance.finalOrderData;
+		this.requestnum=0;
+		for(var i=0;i < arr.length;i++){
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+		}
+	}
+
+	//PaintOrderModel.instance.packageList=new Vector.<PackageVo>();
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			this.requestnum++;
+			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
+				ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,this.orderDatas);
+				PaintOrderModel.instance.packageList=[];
+			}
+		}
 	}
 
 	__proto.updateOrderItem=function(cell){
@@ -41176,7 +41410,7 @@ var MyOrderControl=(function(_super){
 		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
 		var curdate=new Date();
 		var lastday=new Date(curdate.getTime()-24 *3600 *1000);
-		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&status=1&curpage=1";
+		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&status=2&curpage=1";
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 		this.uiSkin.lastyearbtn.on("click",this,this.onLastYear);
 		this.uiSkin.nextyearbtn.on("click",this,this.onNextYear);
@@ -41186,7 +41420,7 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.nexttpage.on("click",this,this.onNextPage);
 		this.uiSkin.ordertotalNum.text="0";
 		this.uiSkin.ordertotalMoney.text="0元";
-		this.uiSkin.paytype.selectedIndex=1;
+		this.uiSkin.paytype.selectedIndex=2;
 		this.uiSkin.paytype.on("change",this,this.queryOrderList);
 		this.uiSkin.orderList.on("mousedown",this,this.onMouseDwons);
 		this.uiSkin.orderList.on("mouseup",this,this.onMouseUpHandler);
@@ -54427,6 +54661,8 @@ var SimpleOrderItemUI=(function(_super){
 		this.proctext=null;
 		this.mattext=null;
 		this.urgentcheck=null;
+		this.urgentdiscount=null;
+		this.paycountdown=null;
 		this.numtxt=null;
 		this.deltime0=null;
 		this.discount0=null;
@@ -54448,7 +54684,7 @@ var SimpleOrderItemUI=(function(_super){
 		this.createView(SimpleOrderItemUI.uiView);
 	}
 
-	SimpleOrderItemUI.uiView={"type":"View","props":{"width":1260,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1260,"skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":86},"compId":3},{"type":"Image","props":{"y":43,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":38,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":4,"x":171,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"Label","props":{"y":36,"x":784,"width":50,"var":"pricetext","text":"12680","fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":11},{"type":"Box","props":{"y":16,"x":449},"compId":13,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":22},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":23},{"type":"Label","props":{"y":1,"x":52,"width":50,"var":"picwidth","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":41},{"type":"Label","props":{"y":38,"x":52,"width":58,"var":"picheight","text":"100","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":42}]},{"type":"VBox","props":{"y":29,"x":554,"space":0},"compId":14,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"proctext","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":27}]},{"type":"Sprite","props":{"y":19,"x":294,"width":153,"height":43},"compId":15,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":153,"var":"mattext","valign":"middle","text":"展架专用布","height":50,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":28}]},{"type":"CheckBox","props":{"y":40,"x":14,"width":16,"skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"height":16},"compId":16},{"type":"CheckBox","props":{"y":38,"x":838,"var":"urgentcheck","skin":"commers/checksingle.png","labelSize":16,"label":"加急"},"compId":45},{"type":"Label","props":{"y":37,"x":1194,"text":"00:00","fontSize":16,"font":"SimHei","color":"#EE2200"},"compId":47},{"type":"Label","props":{"y":35.5,"x":731,"width":40,"var":"numtxt","text":"10","fontSize":16,"font":"SimHei","color":"#262B2E","bold":false,"align":"center"},"compId":48},{"type":"Image","props":{"y":35,"x":740,"width":36,"skin":"commers/inputbg.png","sizeGrid":"2,2,2,2"},"compId":49},{"type":"Button","props":{"y":30,"x":905,"width":50,"var":"deltime0","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21","height":18},"compId":50,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount0","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":51}]},{"type":"Button","props":{"y":30,"x":959,"width":50,"var":"deltime1","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":52,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount1","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":53}]},{"type":"Button","props":{"y":30,"x":1013,"width":50,"var":"deltime2","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":56,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount2","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":57}]},{"type":"Button","props":{"y":30,"x":1066,"width":50,"var":"deltime3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":58,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount3","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":59}]},{"type":"Button","props":{"y":30,"x":1120,"width":50,"var":"deltime4","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":60,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount4","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":61}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/multicheck.png","commers/checksingle.png","commers/btn2.png"],"loadList3D":[]};
+	SimpleOrderItemUI.uiView={"type":"View","props":{"width":1260,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1260,"skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":86},"compId":3},{"type":"Image","props":{"y":43,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":38,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":4,"x":171,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"Label","props":{"y":36,"x":782,"width":62,"var":"pricetext","text":"12680","height":16,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":11},{"type":"Box","props":{"y":16,"x":449},"compId":13,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":22},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":23},{"type":"Label","props":{"y":1,"x":52,"width":50,"var":"picwidth","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":41},{"type":"Label","props":{"y":38,"x":52,"width":58,"var":"picheight","text":"100","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":42}]},{"type":"VBox","props":{"y":29,"x":554,"space":0},"compId":14,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"proctext","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":27}]},{"type":"Sprite","props":{"y":19,"x":294,"width":153,"height":43},"compId":15,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":153,"var":"mattext","valign":"middle","text":"展架专用布","height":50,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":28}]},{"type":"CheckBox","props":{"y":40,"x":14,"width":16,"skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"height":16},"compId":16},{"type":"CheckBox","props":{"y":30,"x":849,"var":"urgentcheck","skin":"commers/checksingle.png","labelSize":16,"label":"加急"},"compId":45,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"urgentdiscount","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":62}]},{"type":"Label","props":{"y":37,"x":1194,"var":"paycountdown","text":"00:00","fontSize":16,"font":"SimHei","color":"#EE2200"},"compId":47},{"type":"Image","props":{"y":35,"x":740,"width":36,"skin":"commers/inputbg.png","sizeGrid":"2,2,2,2"},"compId":49,"child":[{"type":"Label","props":{"y":0,"var":"numtxt","text":"10","right":0,"left":0,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":false,"align":"center"},"compId":48}]},{"type":"Button","props":{"y":30,"x":916,"width":50,"var":"deltime0","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21","height":18},"compId":50,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount0","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":51}]},{"type":"Button","props":{"y":30,"x":970,"width":50,"var":"deltime1","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":52,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount1","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":53}]},{"type":"Button","props":{"y":30,"x":1024,"width":50,"var":"deltime2","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":56,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount2","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":57}]},{"type":"Button","props":{"y":30,"x":1077,"width":50,"var":"deltime3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":58,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount3","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":59}]},{"type":"Button","props":{"y":30,"x":1131,"width":50,"var":"deltime4","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":60,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount4","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":61}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/multicheck.png","commers/checksingle.png","commers/btn2.png"],"loadList3D":[]};
 	return SimpleOrderItemUI;
 })(View)
 
@@ -55455,8 +55691,11 @@ var AddressItemUI=(function(_super){
 var ChooseDeliveryTimePanelUI=(function(_super){
 	function ChooseDeliveryTimePanelUI(){
 		this.paybtn=null;
-		this.cancelbtn=null;
+		this.savebtn=null;
+		this.rawprice=null;
+		this.disountprice=null;
 		this.orderlist=null;
+		this.closebtn=null;
 		ChooseDeliveryTimePanelUI.__super.call(this);
 	}
 
@@ -56077,7 +56316,17 @@ var PicOrderItem=(function(_super){
 		orderitemdata.item_priceStr=this.ordervo.orderPrice.toString();
 		orderitemdata.is_merchandise=0;
 		orderitemdata.item_status="1";
-		orderitemdata.comments=this.ordervo.comment;
+		var tempstr="";
+		var hasfinddot=false;
+		for(var i=this.ordervo.picinfo.directName.length-1;i >=0;i--){
+			if(this.ordervo.picinfo.directName.charAt(i)=="." && hasfinddot==false){
+				hasfinddot=true;
+			}
+			else if(hasfinddot){
+				tempstr=this.ordervo.picinfo.directName.charAt(i)+tempstr;
+			}
+		}
+		orderitemdata.comments=tempstr.substr(0,20);
 		orderitemdata.imagefile_path="http://original-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+"."+this.ordervo.picinfo.picClass;
 		orderitemdata.previewImage_path="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
 		orderitemdata.thumbnails_path="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
@@ -56174,7 +56423,6 @@ var PaintOrderPanelUI=(function(_super){
 		this.copynum=null;
 		this.btnsaveorder=null;
 		this.btnordernow=null;
-		this.emergency=null;
 		PaintOrderPanelUI.__super.call(this);
 	}
 
@@ -60792,31 +61040,114 @@ var OrganizeItem=(function(_super){
 //class script.order.ChooseDelTimeOrderItem extends ui.order.SimpleOrderItemUI
 var ChooseDelTimeOrderItem=(function(_super){
 	function ChooseDelTimeOrderItem(){
+		this.orderdata=null;
+		this.curselectIndex=-1;
 		ChooseDelTimeOrderItem.__super.call(this);
 		for(var i=0;i < 5;i++){
 			this["deltime"+i].on("click",this,this.onSelectTime,[i]);
 		}
 		this.urgentcheck.on("click",this,this.onClickUrgent);
+		Laya.timer.loop(1000,this,this.countDownPayTime);
 	}
 
 	__class(ChooseDelTimeOrderItem,'script.order.ChooseDelTimeOrderItem',_super);
 	var __proto=ChooseDelTimeOrderItem.prototype;
 	__proto.onSelectTime=function(index){
-		for(var i=0;i < 5;i++){
-			this["deltime"+i].selected=i==index;
+		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
+		this.curselectIndex=index;
+		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[index].availableDate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&is_urgent=false&delivery_date="+deliverydate;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyCapacityBack,null,null);
+	}
+
+	__proto.onOccupyCapacityBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			if(result.feedBack==1){
+				for(var i=0;i < 5;i++){
+					this["deltime"+i].selected=i==this.curselectIndex;
+				}
+				this.urgentcheck.selected=false;
+				this.urgentcheck.disabled=false;
+				this.orderdata.outtime=false;
+				this.orderdata.lefttime=180;
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].availableDate;
+				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].discount;
+			}
+			else if(result.newDateList !=null && result.newDateList !=""){
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=result.newDateList;
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < result.newDateList.length;j++){
+					if(result.newDateList[j].urgent==false){
+						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
+					}
+					else{
+						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate=result.newDateList[j];
+					}
+				}
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=null;
+				this.orderdata.discount=1;
+				this.resetDeliveryDates();
+			}
+			this.updatePrice();
+			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
 		}
-		this.urgentcheck.selected=false;
 	}
 
 	__proto.onClickUrgent=function(){
-		if(this.urgentcheck.selected){
-			for(var i=0;i < 5;i++){
-				this["deltime"+i].selected=false;
+		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
+		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&is_urgent=true&delivery_date="+deliverydate;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyUrgentCapacityBack,null,null);
+	}
+
+	// }
+	__proto.onOccupyUrgentCapacityBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			if(result.feedBack==1){
+				for(var i=0;i < 5;i++){
+					this["deltime"+i].selected=false;
+				}
+				this.urgentcheck.selected=true;
+				this.urgentcheck.disabled=true;
+				this.orderdata.outtime=false;
+				this.orderdata.lefttime=180;
+				this.orderdata.is_urgent=1;
+				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
+				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.discount;
 			}
+			else if(result.newDateList !=null && result.newDateList !=""){
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=result.newDateList;
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < result.newDateList.length;j++){
+					if(result.newDateList[j].urgent==false){
+						if(result.newDateList[j].discount==0)
+							result.newDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
+					}
+					else{
+						if(result.newDateList[j].discount==0)
+							result.newDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate=result.newDateList[j];
+					}
+				}
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=null;
+				this.orderdata.discount=1;
+				this.resetDeliveryDates();
+			}
+			this.updatePrice();
+			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
 		}
 	}
 
 	__proto.setData=function(data){
+		this.orderdata=data;
 		this.numindex.text=data.item_seq.toString();
 		this.fileimg.skin=data.previewImage_path;
 		var size=data.LWH.split("/");
@@ -60840,8 +61171,65 @@ var ChooseDelTimeOrderItem=(function(_super){
 			techstr+=data.procInfoList[i].proc_description+"-";
 		}
 		this.proctext.text=techstr.substr(0,techstr.length-1);
-		this.pricetext.text=(Number(data.item_priceStr)*Number(data.item_number)).toFixed(2);
 		this.numtxt.text=data.item_number+"";
+		this.resetDeliveryDates();
+		this.updatePrice();
+	}
+
+	__proto.updatePrice=function(){
+		var rawprice=Number(this.orderdata.item_priceStr)*Number(this.orderdata.item_number);
+		if(this.orderdata.is_urgent==1 || this.orderdata.delivery_date !=null){
+			this.pricetext.text=(rawprice*this.orderdata.discount).toFixed(1);
+		}
+		else
+		this.pricetext.text=rawprice.toFixed(1);
+	}
+
+	__proto.resetDeliveryDates=function(){
+		for(var i=0;i < 5;i++){
+			this["deltime"+i].visible=false;
+			this["deltime"+i].selected=false;
+		};
+		var deliverydatas=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList;
+		for(var i=0;i < deliverydatas.length;i++){
+			if(i < 5){
+				this["deltime"+i].label=(deliverydatas[i] .availableDate).substr(5,5);
+				this["deltime"+i].visible=true;
+				this["discount"+i].text=this.getPayDicountStr(deliverydatas[i].discount);
+				if(this.orderdata.delivery_date==deliverydatas[i].availableDate)
+					this["deltime"+i].selected=true;
+			}
+		}
+		this.urgentcheck.visible=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate !=null;
+		if(this.urgentcheck.visible)
+			this.urgentdiscount.text=this.getPayDicountStr(PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.discount);
+		this.urgentcheck.selected=this.orderdata.is_urgent==1;
+		if(this.urgentcheck.selected)
+			this.urgentcheck.disabled=true;
+	}
+
+	__proto.countDownPayTime=function(){
+		if(this.orderdata !=null){
+			if(this.orderdata.is_urgent==1 || this.orderdata.delivery_date !=null){
+				this.paycountdown.text=UtilTool.getCountDownString(this.orderdata.lefttime);
+			}
+			else if(this.orderdata.outtime)
+			this.paycountdown.text="支付超时";
+			else
+			this.paycountdown.text="00:00";
+		}
+	}
+
+	__proto.getPayDicountStr=function(discount){
+		if(discount < 1){
+			return discount*100+"折";
+		}
+		else if(discount==1){
+			return discount+"";
+		}
+		else{
+			return discount+"倍";
+		}
 	}
 
 	return ChooseDelTimeOrderItem;
@@ -61934,10 +62322,8 @@ var OrderCheckListItem=(function(_super){
 		}
 	}
 
-	__proto.onClickPay=function(){
-		ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(this.paymoney.text),orderid:[this.orderdata.or_id]});
-	}
-
+	__proto.onClickPay=function(){}
+	//ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
 	__proto.onClickRetry=function(){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-exception-order?",this,this.payMoneyBack,"orderid="+this.orderdata.or_id,"post");
 	}
