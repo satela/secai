@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":4,
+    "selectedBox":9,
+    "selecteID":25,
     "searchKey":"View",
     "props":{"width":1280,"sceneColor":"#ffffff","height":140},
     "nodeParent":-1,
@@ -93,13 +93,14 @@
             "props":{"y":0,"x":110,"width":55,"var":"box0","height":140},
             "nodeParent":2,
             "label":"box0",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":9,
             "child":[
                 {
+                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,numinput0",
                     "props":{"y":56,"x":0,"width":50,"var":"numinput0","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},
@@ -113,6 +114,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},
@@ -126,9 +128,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,averagebtn",
-                    "props":{"y":25,"x":7,"width":40,"var":"averagebtn","skin":"commers/btn3.png","sizeGrid":"3,3,3,3","label":"平分","height":20},
+                    "props":{"y":29,"x":7,"width":40,"var":"averagebtn","skin":"commers/btn3.png","sizeGrid":"3,3,3,3","labelColors":"#262B2E,#FFEEEE,#FFEEEE","label":"平分","height":20},
                     "nodeParent":9,
                     "label":"averagebtn",
                     "isDirectory":false,

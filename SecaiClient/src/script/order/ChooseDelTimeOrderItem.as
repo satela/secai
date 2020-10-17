@@ -276,7 +276,7 @@ package script.order
 			{
 				if(i < 5)
 				{
-					this["deltime" + i].label = (deliverydatas[i].availableDate as String).substr(5,5);
+					this["deltime" + i].label = UtilTool.getNextDayStr((deliverydatas[i].availableDate as String) + " 00:00:00");
 					this["deltime" + i].visible = true;
 					this["discount" + i].text = getPayDicountStr(deliverydatas[i].discount);
 					if(orderdata.delivery_date == deliverydatas[i].availableDate)

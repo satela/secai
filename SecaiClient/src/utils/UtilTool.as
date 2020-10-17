@@ -812,6 +812,18 @@ package utils
 			return arr;
 		}
 		
+		public static function getNextDayStr(curday:String):String
+		{
+			var curdate:Date = new Date(Date.parse(convertDateStr(curday)));
+					
+			var date:Date = new Date(curdate.getTime() + 24 * 3600 * 1000);
+			
+			var yearmonth:String = formatFullDateTime(date,false);
+			
+			return yearmonth.substr(5,5);
+		}
+		
+		
 		public static function getAmoutByUnit(picwidth:Number,picheight:Number,unit:String):Number
 		{
 						
