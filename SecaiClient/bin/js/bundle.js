@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -704,6 +704,7 @@ var GameConfig=(function(){
 		reg("script.usercenter.AddressEditControl",AddressEditControl);
 		reg("script.usercenter.OrderDetailControl",OrderDetailControl);
 		reg("script.usercenter.OrganizeMrgControl",OrganizeMrgControl);
+		reg("script.usercenter.TransactionControl",TransactionControl);
 		reg("script.usercenter.UserMainControl",UserMainControl);
 	}
 
@@ -713,7 +714,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PaintOrderPanel.scene";
+	GameConfig.startScene="usercenter/TransactionPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -3058,7 +3059,7 @@ var UtilTool=(function(){
 	}
 
 	UtilTool.isValidPic=function(picInfo){
-		if(picInfo.colorspace.toUpperCase()!="CMYK")
+		if(picInfo.colorspace.toUpperCase()!="CMYK" && picInfo.colorspace.toUpperCase()!="GRAY")
 			return false;
 		var validClass=["JPG","JPEG","TIF","TIFF","ZIP"];
 		if(validClass.indexOf(picInfo.picClass.toLocaleUpperCase())< 0)
@@ -30724,86 +30725,6 @@ var TextureSV=(function(_super){
 
 
 /**
-*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
-*/
-//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
-var MeshQuadTexture=(function(_super){
-	//private static var _num;
-	function MeshQuadTexture(){
-		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
-		if(!laya.webgl.utils.MeshQuadTexture._fixib){
-			this.createQuadIB(MeshQuadTexture._maxIB);
-			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
-			}else {
-			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
-			this._quadNum=MeshQuadTexture._maxIB;
-		}
-	}
-
-	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
-	var __proto=MeshQuadTexture.prototype;
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._vb.destroy();
-		this._vb.deleteBuffer();
-	}
-
-	/**
-	*
-	*@param pos
-	*@param uv
-	*@param color
-	*@param clip ox,oy,xx,xy,yx,yy
-	*@param useTex 是否使用贴图。false的话是给fillRect用的
-	*/
-	__proto.addQuad=function(pos,uv,color,useTex){
-		var vb=this._vb;
-		var vpos=(vb._byteLength >> 2);
-		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
-		var vbdata=vb._floatArray32 || vb.getFloat32Array();
-		var vbu32Arr=vb._uint32Array;
-		var cpos=vpos;
-		var useTexVal=useTex?0xff:0;
-		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vb._upload=true;
-	}
-
-	MeshQuadTexture.getAMesh=function(){
-		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
-			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
-		}
-		return new MeshQuadTexture();
-	}
-
-	MeshQuadTexture.const_stride=24;
-	MeshQuadTexture._fixib=null;
-	MeshQuadTexture._maxIB=16 *1024;
-	MeshQuadTexture._POOL=[];
-	__static(MeshQuadTexture,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1401,4,16,
-		0x1401,4,20];}
-	]);
-	return MeshQuadTexture;
-})(Mesh2D)
-
-
-/**
 *<code>Texture</code> 是一个纹理处理类。
 */
 //class laya.resource.Texture extends laya.events.EventDispatcher
@@ -31133,6 +31054,86 @@ var Texture=(function(_super){
 
 
 /**
+*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*/
+//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
+var MeshQuadTexture=(function(_super){
+	//private static var _num;
+	function MeshQuadTexture(){
+		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
+		if(!laya.webgl.utils.MeshQuadTexture._fixib){
+			this.createQuadIB(MeshQuadTexture._maxIB);
+			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
+			}else {
+			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
+			this._quadNum=MeshQuadTexture._maxIB;
+		}
+	}
+
+	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
+	var __proto=MeshQuadTexture.prototype;
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._vb.destroy();
+		this._vb.deleteBuffer();
+	}
+
+	/**
+	*
+	*@param pos
+	*@param uv
+	*@param color
+	*@param clip ox,oy,xx,xy,yx,yy
+	*@param useTex 是否使用贴图。false的话是给fillRect用的
+	*/
+	__proto.addQuad=function(pos,uv,color,useTex){
+		var vb=this._vb;
+		var vpos=(vb._byteLength >> 2);
+		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
+		var vbdata=vb._floatArray32 || vb.getFloat32Array();
+		var vbu32Arr=vb._uint32Array;
+		var cpos=vpos;
+		var useTexVal=useTex?0xff:0;
+		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vb._upload=true;
+	}
+
+	MeshQuadTexture.getAMesh=function(){
+		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
+			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
+		}
+		return new MeshQuadTexture();
+	}
+
+	MeshQuadTexture.const_stride=24;
+	MeshQuadTexture._fixib=null;
+	MeshQuadTexture._maxIB=16 *1024;
+	MeshQuadTexture._POOL=[];
+	__static(MeshQuadTexture,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1401,4,16,
+		0x1401,4,20];}
+	]);
+	return MeshQuadTexture;
+})(Mesh2D)
+
+
+/**
 *用来画矢量的mesh。顶点格式固定为 x,y,rgba
 */
 //class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
@@ -31203,55 +31204,6 @@ var MeshVG=(function(_super){
 	]);
 	return MeshVG;
 })(Mesh2D)
-
-
-//class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
-var ShaderDefines2D=(function(_super){
-	function ShaderDefines2D(){
-		ShaderDefines2D.__super.call(this,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name,ShaderDefines2D.__int2nameMap);
-	}
-
-	__class(ShaderDefines2D,'laya.webgl.shader.d2.ShaderDefines2D',_super);
-	ShaderDefines2D.__init__=function(){
-		ShaderDefines2D.reg("TEXTURE2D",0x01);
-		ShaderDefines2D.reg("PRIMITIVE",0x04);
-		ShaderDefines2D.reg("GLOW_FILTER",0x08);
-		ShaderDefines2D.reg("BLUR_FILTER",0x10);
-		ShaderDefines2D.reg("COLOR_FILTER",0x20);
-		ShaderDefines2D.reg("COLOR_ADD",0x40);
-		ShaderDefines2D.reg("WORLDMAT",0x80);
-		ShaderDefines2D.reg("FILLTEXTURE",0x100);
-		ShaderDefines2D.reg("FSHIGHPRECISION",0x400);
-	}
-
-	ShaderDefines2D.reg=function(name,value){
-		ShaderDefinesBase._reg(name,value,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name);
-	}
-
-	ShaderDefines2D.toText=function(value,int2name,int2nameMap){
-		return ShaderDefinesBase._toText(value,int2name,int2nameMap);
-	}
-
-	ShaderDefines2D.toInt=function(names){
-		return ShaderDefinesBase._toInt(names,ShaderDefines2D.__name2int);
-	}
-
-	ShaderDefines2D.TEXTURE2D=0x01;
-	ShaderDefines2D.PRIMITIVE=0x04;
-	ShaderDefines2D.FILTERGLOW=0x08;
-	ShaderDefines2D.FILTERBLUR=0x10;
-	ShaderDefines2D.FILTERCOLOR=0x20;
-	ShaderDefines2D.COLORADD=0x40;
-	ShaderDefines2D.WORLDMAT=0x80;
-	ShaderDefines2D.FILLTEXTURE=0x100;
-	ShaderDefines2D.SKINMESH=0x200;
-	ShaderDefines2D.SHADERDEFINE_FSHIGHPRECISION=0x400;
-	ShaderDefines2D.NOOPTMASK=0x08|0x10|0x20|0x100;
-	ShaderDefines2D.__name2int={};
-	ShaderDefines2D.__int2name=[];
-	ShaderDefines2D.__int2nameMap=[];
-	return ShaderDefines2D;
-})(ShaderDefinesBase)
 
 
 /**
@@ -31381,6 +31333,55 @@ var SceneLoader=(function(_super){
 	]);
 	return SceneLoader;
 })(EventDispatcher)
+
+
+//class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
+var ShaderDefines2D=(function(_super){
+	function ShaderDefines2D(){
+		ShaderDefines2D.__super.call(this,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name,ShaderDefines2D.__int2nameMap);
+	}
+
+	__class(ShaderDefines2D,'laya.webgl.shader.d2.ShaderDefines2D',_super);
+	ShaderDefines2D.__init__=function(){
+		ShaderDefines2D.reg("TEXTURE2D",0x01);
+		ShaderDefines2D.reg("PRIMITIVE",0x04);
+		ShaderDefines2D.reg("GLOW_FILTER",0x08);
+		ShaderDefines2D.reg("BLUR_FILTER",0x10);
+		ShaderDefines2D.reg("COLOR_FILTER",0x20);
+		ShaderDefines2D.reg("COLOR_ADD",0x40);
+		ShaderDefines2D.reg("WORLDMAT",0x80);
+		ShaderDefines2D.reg("FILLTEXTURE",0x100);
+		ShaderDefines2D.reg("FSHIGHPRECISION",0x400);
+	}
+
+	ShaderDefines2D.reg=function(name,value){
+		ShaderDefinesBase._reg(name,value,ShaderDefines2D.__name2int,ShaderDefines2D.__int2name);
+	}
+
+	ShaderDefines2D.toText=function(value,int2name,int2nameMap){
+		return ShaderDefinesBase._toText(value,int2name,int2nameMap);
+	}
+
+	ShaderDefines2D.toInt=function(names){
+		return ShaderDefinesBase._toInt(names,ShaderDefines2D.__name2int);
+	}
+
+	ShaderDefines2D.TEXTURE2D=0x01;
+	ShaderDefines2D.PRIMITIVE=0x04;
+	ShaderDefines2D.FILTERGLOW=0x08;
+	ShaderDefines2D.FILTERBLUR=0x10;
+	ShaderDefines2D.FILTERCOLOR=0x20;
+	ShaderDefines2D.COLORADD=0x40;
+	ShaderDefines2D.WORLDMAT=0x80;
+	ShaderDefines2D.FILLTEXTURE=0x100;
+	ShaderDefines2D.SKINMESH=0x200;
+	ShaderDefines2D.SHADERDEFINE_FSHIGHPRECISION=0x400;
+	ShaderDefines2D.NOOPTMASK=0x08|0x10|0x20|0x100;
+	ShaderDefines2D.__name2int={};
+	ShaderDefines2D.__int2name=[];
+	ShaderDefines2D.__int2nameMap=[];
+	return ShaderDefines2D;
+})(ShaderDefinesBase)
 
 
 //class laya.webgl.submit.SubmitTexture extends laya.webgl.submit.Submit
@@ -36223,7 +36224,7 @@ var UserMainControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.panel_main.hScrollBarSkin="";
-		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,null,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
+		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,TransactionPanelUI,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
 		this.btntxtArr=[];
 		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单","","","组织管理","申请列表"];
 		for(var i=0;i < 11;i++){
@@ -37422,6 +37423,23 @@ var PicManagerControl=(function(_super){
 	}
 
 	return PicManagerControl;
+})(Script)
+
+
+//class script.usercenter.TransactionControl extends laya.components.Script
+var TransactionControl=(function(_super){
+	function TransactionControl(){
+		this.uiSkin=null;
+		TransactionControl.__super.call(this);
+	}
+
+	__class(TransactionControl,'script.usercenter.TransactionControl',_super);
+	var __proto=TransactionControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+	}
+
+	return TransactionControl;
 })(Script)
 
 
@@ -54679,6 +54697,26 @@ var CharacterPaintUI=(function(_super){
 })(View)
 
 
+//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
+var AddressMgrPanelUI=(function(_super){
+	function AddressMgrPanelUI(){
+		this.btnaddAddress=null;
+		this.addlist=null;
+		this.numAddress=null;
+		AddressMgrPanelUI.__super.call(this);
+	}
+
+	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
+	var __proto=AddressMgrPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/AddressMgrPanel");
+	}
+
+	return AddressMgrPanelUI;
+})(View)
+
+
 //class script.usercenter.QuestOrderItem extends ui.usercenter.OrderQuestItemUI
 var QuestOrderItem=(function(_super){
 	function QuestOrderItem(){
@@ -54756,26 +54794,6 @@ var QuestOrderItem=(function(_super){
 
 	return QuestOrderItem;
 })(OrderQuestItemUI)
-
-
-//class ui.usercenter.AddressMgrPanelUI extends laya.ui.View
-var AddressMgrPanelUI=(function(_super){
-	function AddressMgrPanelUI(){
-		this.btnaddAddress=null;
-		this.addlist=null;
-		this.numAddress=null;
-		AddressMgrPanelUI.__super.call(this);
-	}
-
-	__class(AddressMgrPanelUI,'ui.usercenter.AddressMgrPanelUI',_super);
-	var __proto=AddressMgrPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("usercenter/AddressMgrPanel");
-	}
-
-	return AddressMgrPanelUI;
-})(View)
 
 
 //class ui.usercenter.OrganizeMgrPanelUI extends laya.ui.View
@@ -55641,6 +55659,27 @@ var PicManagePanelUI=(function(_super){
 	}
 
 	return PicManagePanelUI;
+})(View)
+
+
+//class ui.usercenter.TransactionPanelUI extends laya.ui.View
+var TransactionPanelUI=(function(_super){
+	function TransactionPanelUI(){
+		this.transactionlist=null;
+		this.pagetxt=null;
+		this.prebtn=null;
+		this.nextbtn=null;
+		TransactionPanelUI.__super.call(this);
+	}
+
+	__class(TransactionPanelUI,'ui.usercenter.TransactionPanelUI',_super);
+	var __proto=TransactionPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/TransactionPanel");
+	}
+
+	return TransactionPanelUI;
 })(View)
 
 
@@ -59568,6 +59607,111 @@ var Tree=(function(_super){
 
 
 /**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
+
+
+/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -60519,111 +60663,6 @@ var List=(function(_super){
 
 	return List;
 })(Box)
-
-
-/**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
 
 
 /**
@@ -63633,7 +63672,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,WebGLContext2D,EventCenter]);
+	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,EventCenter,WebGLContext2D]);
 	/**LayaGameStart**/
 	new Main();
 

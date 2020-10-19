@@ -75,4 +75,6 @@
    <item name="carving/CarvingOrderPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="carving/CarvSelectMaterialPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="carving/CarvOrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="usercenter/TransactionPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/TransactionItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

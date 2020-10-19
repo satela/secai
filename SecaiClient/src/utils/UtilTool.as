@@ -702,7 +702,7 @@ package utils
 		
 		public static function isValidPic(picInfo:PicInfoVo):Boolean
 		{
-			if(picInfo.colorspace.toUpperCase() != "CMYK")
+			if(picInfo.colorspace.toUpperCase() != "CMYK" && picInfo.colorspace.toUpperCase() != "GRAY")
 				return false;
 			
 			var validClass:Array = ["JPG","JPEG","TIF","TIFF","ZIP"];

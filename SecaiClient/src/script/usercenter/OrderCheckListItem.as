@@ -5,6 +5,7 @@ package script.usercenter
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.PaintOrderModel;
 	
 	import script.ViewManager;
 	
@@ -165,6 +166,7 @@ package script.usercenter
 		
 		private function onClickPay():void
 		{
+							
 			ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
 
 		}
