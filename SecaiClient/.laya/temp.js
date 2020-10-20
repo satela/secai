@@ -62332,8 +62332,49 @@ var OrderCheckListItem=(function(_super){
 		}
 	}
 
-	__proto.onClickPay=function(){}
-	//ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
+	__proto.onClickPay=function(){
+		var _$this=this;
+		var orderinfo=JSON.parse(this.orderdata.or_text);
+		if(PaintOrderModel.instance.allManuFacutreMatProcPrice[orderinfo.manufacturer_code]==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getmatprocprice?manufacturer_code="+orderinfo.manufacturer_code,this,function(dataStr){
+				PaintOrderModel.instance.initManuFacuturePrice(orderinfo.manufacturer_code,dataStr);
+				PaintOrderModel.instance.finalOrderData=[orderinfo];
+				var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,_$this.ongetAvailableDateBack,{data:datas},"post");
+			},null,null);
+		}
+		else{
+			PaintOrderModel.instance.finalOrderData=[orderinfo];
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+		}
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,PaintOrderModel.instance.finalOrderData[0].orderItemList);
+		}
+	}
+
 	__proto.onClickRetry=function(){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-exception-order?",this,this.payMoneyBack,"orderid="+this.orderdata.or_id,"post");
 	}

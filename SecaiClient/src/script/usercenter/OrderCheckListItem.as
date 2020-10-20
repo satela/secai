@@ -166,9 +166,76 @@ package script.usercenter
 		
 		private function onClickPay():void
 		{
-			//PaintOrderModel.instance.finalOrderData = 
-			//ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(this.paymoney.text),orderid:[orderdata.or_id]});
+			var orderinfo:Object = JSON.parse(orderdata.or_text);
+			
+			if(PaintOrderModel.instance.allManuFacutreMatProcPrice[orderinfo.manufacturer_code] == null)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getManuFactureMatProcPrice + orderinfo.manufacturer_code,this,function(dataStr:*):void{
+					
+					PaintOrderModel.instance.initManuFacuturePrice(orderinfo.manufacturer_code,dataStr);
+					
+					
+					PaintOrderModel.instance.finalOrderData = [orderinfo];
+					
+					var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+					
+					
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
 
+					
+					
+					
+				},null,null);
+			}
+			else
+			{
+				PaintOrderModel.instance.finalOrderData = [orderinfo];
+				
+				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+				
+				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+
+			}
+						
+
+		}
+		
+		private function ongetAvailableDateBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var alldates:Array = result as Array;
+				for(var i:int=0;i < alldates.length;i++)
+				{
+					
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+					
+					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+					{
+						if(alldates[i].deliveryDateList[j].urgent == false)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						}
+						else
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+						}
+					}										
+					
+				}
+				
+				ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,PaintOrderModel.instance.finalOrderData[0].orderItemList);
+				
+			}
 		}
 		
 		private function onClickRetry():void
