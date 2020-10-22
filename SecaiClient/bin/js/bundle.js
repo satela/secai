@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -1429,6 +1429,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1498,6 +1499,9 @@ var Constast=(function(){
 	__class(Constast,'model.Constast');
 	Constast.ACCOUNT_CREATER=1;
 	Constast.ACCOUNT_EMPLOYEE=0;
+	__static(Constast,
+	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单"];}
+	]);
 	return Constast;
 })()
 
@@ -2199,7 +2203,6 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//设置反面关联图片
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2263,6 +2266,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
 	HttpRequestUtil.setYixingRelated="file/set-mask-image?";
 	HttpRequestUtil.setFanmianRelated="file/set-back-image?";
+	HttpRequestUtil.queryTransaction="account/listmoneylog";
 	return HttpRequestUtil;
 })()
 
@@ -36226,7 +36230,7 @@ var UserMainControl=(function(_super){
 		this.uiSkin.panel_main.hScrollBarSkin="";
 		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,TransactionPanelUI,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
 		this.btntxtArr=[];
-		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的订单","","","组织管理","申请列表"];
+		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的账单","","","组织管理","申请列表"];
 		for(var i=0;i < 11;i++){
 			this.uiSkin["btntxt"+i].on("click",this,this.onShowEditView,[i]);
 			this.uiSkin["btntxt"+i].on("mouseover",this,this.onMouseOverHandler);
@@ -37430,6 +37434,10 @@ var PicManagerControl=(function(_super){
 var TransactionControl=(function(_super){
 	function TransactionControl(){
 		this.uiSkin=null;
+		this.curpage=1;
+		this.totalPage=1;
+		this.dateInput=null;
+		this.dateInput2=null;
 		TransactionControl.__super.call(this);
 	}
 
@@ -37437,6 +37445,167 @@ var TransactionControl=(function(_super){
 	var __proto=TransactionControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
+		this.uiSkin.transactionlist.itemRender=TransactionListItem;
+		this.uiSkin.transactionlist.repeatX=1;
+		this.uiSkin.transactionlist.spaceY=5;
+		this.uiSkin.transactionlist.renderHandler=new Handler(this,this.updateTransactList);
+		this.uiSkin.transactionlist.selectEnable=false;
+		this.uiSkin.transactionlist.array=[];
+		this.uiSkin.prebtn.on("click",this,this.onLastPage);
+		this.uiSkin.nextbtn.on("click",this,this.onNextPage);
+		this.uiSkin.btnsearch.on("click",this,this.queryOrderList);
+		this.uiSkin.transactionlist.on("mousedown",this,this.onMouseDwons);
+		this.uiSkin.transactionlist.on("mouseup",this,this.onMouseUpHandler);
+		this.uiSkin.transactionlist.on("mouseover",this,this.onMouseDwons);
+		this.uiSkin.transactionlist.on("mouseout",this,this.onMouseUpHandler);
+		Laya.stage.on("mouseup",this,this.onMouseUpHandler);
+		this.uiSkin.moneytxt.text="--";
+		this.uiSkin.transactionlist.mouseThrough=true;
+		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
+		var curdate=new Date();
+		var lastday=new Date(curdate.getTime()-24 *3600 *1000);
+		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&type=0&curpage=1";
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listmoneylog",this,this.onGetTransactionBack,param,"post");
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+		this.initDateSelector();
+	}
+
+	__proto.getCompanyInfoBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.money=Number(result.balance);
+			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
+		}
+	}
+
+	__proto.onMouseDwons=function(e){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",false);
+	}
+
+	__proto.onMouseUpHandler=function(e){
+		EventCenter.instance.event("PAUSE_SCROLL_VIEW",true);
+	}
+
+	__proto.queryOrderList=function(){
+		this.curpage=1;
+		this.getOrderListAgain();
+	}
+
+	__proto.onLastPage=function(){
+		if(this.curpage > 1){
+			this.curpage--;
+			this.getOrderListAgain();
+		}
+	}
+
+	__proto.onNextPage=function(){
+		if(this.curpage < this.totalPage){
+			this.curpage++;
+			this.getOrderListAgain();
+		}
+	}
+
+	__proto.getOrderListAgain=function(){
+		var curdata=new Date(this.dateInput2.value);
+		var lastdate=new Date(this.dateInput.value);
+		var param="begindate="+this.dateInput.value+" 00:00:00&enddate="+this.dateInput2.value+" 23:59:59&type="+0+"&curpage="+this.curpage;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listmoneylog",this,this.onGetTransactionBack,param,"post");
+	}
+
+	__proto.onGetTransactionBack=function(data){
+		if (data==null || data=="")
+			return;
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalNum=result.total;
+			this.totalPage=Math.ceil(totalNum/30);
+			if(this.totalPage < 1)
+				this.totalPage=1;
+			this.uiSkin.itemNum.text=totalNum+"";
+			this.uiSkin.pagetxt.text=this.curpage+"/"+this.totalPage;
+			this.uiSkin.transactionlist.array=(result.data);
+			this.uiSkin.payamount.text=result.outamount+"";
+			this.uiSkin.reatryamount.text=result.inamount+"";
+		}
+		else
+		ViewManager.showAlert("获取订单失败");
+	}
+
+	__proto.initDateSelector=function(){
+		var _$this=this;
+		var curdate=new Date((new Date()).getTime()-24 *3600 *1000);
+		var lastdate=new Date();
+		this.dateInput=Browser.document.createElement("input");
+		this.dateInput.style="filter:alpha(opacity=100);opacity:100;left:795px;top:240";
+		this.dateInput.style.width=150/Browser.pixelRatio;
+		this.dateInput.style.height=20/Browser.pixelRatio;
+		this.dateInput.type="date";
+		this.dateInput.style.position="absolute";
+		this.dateInput.style.zIndex=999;
+		this.dateInput.value=UtilTool.formatFullDateTime(curdate,false);
+		Browser.document.body.appendChild(this.dateInput);
+		this.dateInput.onchange=function (datestr){
+			if(_$this.dateInput.value=="")
+				return;
+			var curdata=new Date(_$this.dateInput.value);
+			var nextdate=new Date(_$this.dateInput2.value);
+			if(nextdate.getTime()-curdata.getTime()> 31 *24 *3600 *1000){
+				nextdate=new Date(curdata.getTime()+31 *24 *3600 *1000);
+				_$this.dateInput2.value=UtilTool.formatFullDateTime(nextdate,false);
+			}
+			else if(nextdate.getTime()-curdata.getTime()< 0){
+				_$this.dateInput2.value=UtilTool.formatFullDateTime(curdata,false);
+			}
+		}
+		this.dateInput2=Browser.document.createElement("input");
+		this.dateInput2.style="filter:alpha(opacity=100);opacity:100;left:980px;top:240";
+		this.dateInput2.style.width=150/Browser.pixelRatio;
+		this.dateInput2.style.height=20/Browser.pixelRatio;
+		this.dateInput2.type="date";
+		this.dateInput2.style.position="absolute";
+		this.dateInput2.style.zIndex=999;
+		Browser.document.body.appendChild(this.dateInput2);
+		this.dateInput2.value=UtilTool.formatFullDateTime(lastdate,false);
+		this.dateInput2.onchange=function (datestr){
+			if(_$this.dateInput2.value=="")
+				return;
+			var curdata=new Date(_$this.dateInput2.value);
+			var lastdate=new Date(_$this.dateInput.value);
+			if(curdata.getTime()-lastdate.getTime()> 31 *24 *3600 *1000){
+				lastdate=new Date(curdata.getTime()-31 *24 *3600 *1000);
+				_$this.dateInput.value=UtilTool.formatFullDateTime(lastdate,false);
+			}
+			else if(curdata.getTime()-lastdate.getTime()< 0){
+				_$this.dateInput.value=UtilTool.formatFullDateTime(curdata,false);
+			}
+		}
+	}
+
+	__proto.updateDateInputPos=function(){
+		if(this.dateInput !=null){
+			var pt=this.uiSkin.ordertime.localToGlobal(new Point(this.uiSkin.ordertime.x,this.uiSkin.ordertime.y),true);
+			var offset=0;
+			if(Browser.width > Laya.stage.width)
+				offset=(Browser.width-Laya.stage.width)/2;
+			this.dateInput.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput.style.left=(pt.x+15/Browser.pixelRatio+offset)/Browser.pixelRatio+"px";
+			this.dateInput2.style.top=(pt.y-15)/Browser.pixelRatio+"px";
+			this.dateInput2.style.left=(pt.x+205+offset)/Browser.pixelRatio+"px";
+		}
+	}
+
+	//verifycode.style.left=950-uiSkin.mainpanel.hScrollBar.value+"px";
+	__proto.updateTransactList=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onDestroy=function(){
+		Laya.stage.off("mouseup",this,this.onMouseUpHandler);
+		Laya.timer.clearAll(this);
+		if(this.dateInput !=null){
+			Browser.document.body.removeChild(this.dateInput);
+			Browser.document.body.removeChild(this.dateInput2);
+		}
 	}
 
 	return TransactionControl;
@@ -54552,6 +54721,28 @@ var TabChooseBtnUI=(function(_super){
 })(View)
 
 
+//class ui.usercenter.TransactionItemUI extends laya.ui.View
+var TransactionItemUI=(function(_super){
+	function TransactionItemUI(){
+		this.transtype=null;
+		this.transtime=null;
+		this.amounttxt=null;
+		this.orderinfo=null;
+		TransactionItemUI.__super.call(this);
+	}
+
+	__class(TransactionItemUI,'ui.usercenter.TransactionItemUI',_super);
+	var __proto=TransactionItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(TransactionItemUI.uiView);
+	}
+
+	TransactionItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"width":800,"skin":"commers/cutline.png"},"compId":3},{"type":"Label","props":{"x":0,"width":100,"var":"transtype","text":"充值","fontSize":20,"font":"SimSun","align":"center"},"compId":4},{"type":"Label","props":{"y":1,"x":143,"width":250,"var":"transtime","text":"2020-10-12 20:00:00","fontSize":20,"font":"SimSun","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":437,"width":100,"var":"amounttxt","text":"12200.22","fontSize":20,"font":"SimSun","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":580,"width":220,"var":"orderinfo","text":"订单号:1825656565656520","fontSize":20,"font":"SimSun","align":"center"},"compId":7}],"loadList":["commers/cutline.png"],"loadList3D":[]};
+	return TransactionItemUI;
+})(View)
+
+
 //class ui.usercenter.OrganizeMemberItemUI extends laya.ui.View
 var OrganizeMemberItemUI=(function(_super){
 	function OrganizeMemberItemUI(){
@@ -55665,10 +55856,16 @@ var PicManagePanelUI=(function(_super){
 //class ui.usercenter.TransactionPanelUI extends laya.ui.View
 var TransactionPanelUI=(function(_super){
 	function TransactionPanelUI(){
+		this.ordertime=null;
+		this.btnsearch=null;
 		this.transactionlist=null;
+		this.itemNum=null;
 		this.pagetxt=null;
 		this.prebtn=null;
 		this.nextbtn=null;
+		this.moneytxt=null;
+		this.payamount=null;
+		this.reatryamount=null;
 		TransactionPanelUI.__super.call(this);
 	}
 
@@ -56045,28 +56242,6 @@ var SelectFactoryPanelUI=(function(_super){
 })(View)
 
 
-//class ui.order.InputCutNumPanelUI extends laya.ui.View
-var InputCutNumPanelUI=(function(_super){
-	function InputCutNumPanelUI(){
-		this.mainpanel=null;
-		this.productlist=null;
-		this.okbtn=null;
-		this.btnok=null;
-		this.maxtips=null;
-		InputCutNumPanelUI.__super.call(this);
-	}
-
-	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
-	var __proto=InputCutNumPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("order/InputCutNumPanel");
-	}
-
-	return InputCutNumPanelUI;
-})(View)
-
-
 //class script.order.PicOrderItem extends ui.order.OrderItemUI
 var PicOrderItem=(function(_super){
 	function PicOrderItem(vo){
@@ -56309,6 +56484,10 @@ var PicOrderItem=(function(_super){
 				return;
 			}
 		}
+		if(PaintOrderModel.instance.productList==null || PaintOrderModel.instance.productList.length==0){
+			ViewManager.showAlert("未获取到材料列表，请重新选择收货地址或者刷新页面");
+			return;
+		}
 		if(PaintOrderModel.instance.selectAddress==null){
 			ViewManager.showAlert("请先选择收货地址");
 			return;
@@ -56430,6 +56609,28 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
+
+
+//class ui.order.InputCutNumPanelUI extends laya.ui.View
+var InputCutNumPanelUI=(function(_super){
+	function InputCutNumPanelUI(){
+		this.mainpanel=null;
+		this.productlist=null;
+		this.okbtn=null;
+		this.btnok=null;
+		this.maxtips=null;
+		InputCutNumPanelUI.__super.call(this);
+	}
+
+	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
+	var __proto=InputCutNumPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/InputCutNumPanel");
+	}
+
+	return InputCutNumPanelUI;
+})(View)
 
 
 //class ui.PaintOrderPanelUI extends laya.ui.View
@@ -61910,6 +62111,43 @@ var MaterialItem=(function(_super){
 })(MaterialNameItemUI)
 
 
+//class script.usercenter.item.TransactionListItem extends ui.usercenter.TransactionItemUI
+var TransactionListItem=(function(_super){
+	function TransactionListItem(){
+		TransactionListItem.__super.call(this);
+	}
+
+	__class(TransactionListItem,'script.usercenter.item.TransactionListItem',_super);
+	var __proto=TransactionListItem.prototype;
+	__proto.setData=function(data){
+		this.transtype.text=Constast.TYPE_NAME[data.type];
+		this.transtime.text=data.date;
+		this.amounttxt.text=data.amount+"";
+		this.orderinfo.text="";
+		if(data.orid !="0")
+			this.orderinfo.text="订单号:"+data.orid;
+	}
+
+	return TransactionListItem;
+})(TransactionItemUI)
+
+
+//class script.characterpaint.ColorItem extends ui.characterpaint.ColorLblItemUI
+var ColorItem=(function(_super){
+	function ColorItem(){
+		ColorItem.__super.call(this);
+	}
+
+	__class(ColorItem,'script.characterpaint.ColorItem',_super);
+	var __proto=ColorItem.prototype;
+	__proto.setData=function(color){
+		this.lblcolor.bgColor="#"+color;
+	}
+
+	return ColorItem;
+})(ColorLblItemUI)
+
+
 //class script.order.SelectAttachBtn extends ui.order.TabChooseBtnUI
 var SelectAttachBtn=(function(_super){
 	function SelectAttachBtn(){
@@ -61936,22 +62174,6 @@ var SelectAttachBtn=(function(_super){
 
 	return SelectAttachBtn;
 })(TabChooseBtnUI)
-
-
-//class script.characterpaint.ColorItem extends ui.characterpaint.ColorLblItemUI
-var ColorItem=(function(_super){
-	function ColorItem(){
-		ColorItem.__super.call(this);
-	}
-
-	__class(ColorItem,'script.characterpaint.ColorItem',_super);
-	var __proto=ColorItem.prototype;
-	__proto.setData=function(color){
-		this.lblcolor.bgColor="#"+color;
-	}
-
-	return ColorItem;
-})(ColorLblItemUI)
 
 
 //class script.order.AvgCutImage extends ui.order.AvgCutImageItemUI

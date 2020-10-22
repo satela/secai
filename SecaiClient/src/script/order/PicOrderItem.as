@@ -337,6 +337,12 @@ package script.order
 					return;
 				}
 			}
+			
+			if(PaintOrderModel.instance.productList == null || PaintOrderModel.instance.productList.length == 0)
+			{
+				ViewManager.showAlert("未获取到材料列表，请重新选择收货地址或者刷新页面");
+				return;
+			}
 			// TODO Auto Generated method stub
 			if(PaintOrderModel.instance.selectAddress == null)
 			{

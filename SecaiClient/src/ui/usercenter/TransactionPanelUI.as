@@ -5,10 +5,16 @@ package ui.usercenter {
 	import script.usercenter.TransactionControl;
 
 	public class TransactionPanelUI extends View {
+		public var ordertime:Label;
+		public var btnsearch:Button;
 		public var transactionlist:List;
+		public var itemNum:Label;
 		public var pagetxt:Label;
 		public var prebtn:Button;
 		public var nextbtn:Button;
+		public var moneytxt:Label;
+		public var payamount:Label;
+		public var reatryamount:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();
