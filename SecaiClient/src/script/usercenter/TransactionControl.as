@@ -157,13 +157,13 @@ package script.usercenter
 				uiSkin.pagetxt.text = curpage + "/" + totalPage;
 				uiSkin.transactionlist.array = (result.data as Array);
 				
-				uiSkin.payamount.text = result.outamount + "";
-				uiSkin.reatryamount.text = result.inamount + "";
+				uiSkin.payamount.text = result.outamount + "元";
+				uiSkin.reatryamount.text = result.inamount + "元";
 
 				
 			}
 			else
-				ViewManager.showAlert("获取订单失败");
+				ViewManager.showAlert("获取账单失败");
 		}
 		
 		private function initDateSelector():void

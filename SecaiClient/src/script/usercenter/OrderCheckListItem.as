@@ -81,15 +81,23 @@ package script.usercenter
 				this.orderstatus.color = "#52B232";
 				this.payagain.visible = false;
 			}
-			var detail:Object = JSON.parse(orderdata.or_text);
-			this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
-			this.productnum.text = detail.orderItemList.length + "";
-			
-			this.detailbtn.on(Event.CLICK,this,onShowDetail);
-			this.deletebtn.on(Event.CLICK,this,onClickDelete);
-			this.payagain.on(Event.CLICK,this,onClickPay);
-			this.retrybtn.on(Event.CLICK,this,onClickRetry);
+			try
+			{
+				var detail:Object = JSON.parse(orderdata.or_text);
+				this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
+				this.productnum.text = detail.orderItemList.length + "";
+				
+				this.detailbtn.on(Event.CLICK,this,onShowDetail);
+				this.deletebtn.on(Event.CLICK,this,onClickDelete);
+				this.payagain.on(Event.CLICK,this,onClickPay);
+				this.retrybtn.on(Event.CLICK,this,onClickRetry);
 
+			}
+			catch(e)
+			{
+				
+			}
+			
 			TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 
 		}

@@ -1429,7 +1429,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -37524,11 +37523,11 @@ var TransactionControl=(function(_super){
 			this.uiSkin.itemNum.text=totalNum+"";
 			this.uiSkin.pagetxt.text=this.curpage+"/"+this.totalPage;
 			this.uiSkin.transactionlist.array=(result.data);
-			this.uiSkin.payamount.text=result.outamount+"";
-			this.uiSkin.reatryamount.text=result.inamount+"";
+			this.uiSkin.payamount.text=result.outamount+"元";
+			this.uiSkin.reatryamount.text=result.inamount+"元";
 		}
 		else
-		ViewManager.showAlert("获取订单失败");
+		ViewManager.showAlert("获取账单失败");
 	}
 
 	__proto.initDateSelector=function(){
@@ -62485,14 +62484,18 @@ var OrderCheckListItem=(function(_super){
 			this.orderstatus.text="订单异常";
 			this.orderstatus.color="#52B232";
 			this.payagain.visible=false;
-		};
-		var detail=JSON.parse(this.orderdata.or_text);
-		this.paymoney.text=Number(detail.money_paidStr).toFixed(2);
-		this.productnum.text=detail.orderItemList.length+"";
-		this.detailbtn.on("click",this,this.onShowDetail);
-		this.deletebtn.on("click",this,this.onClickDelete);
-		this.payagain.on("click",this,this.onClickPay);
-		this.retrybtn.on("click",this,this.onClickRetry);
+		}
+		try{
+			var detail=JSON.parse(this.orderdata.or_text);
+			this.paymoney.text=Number(detail.money_paidStr).toFixed(2);
+			this.productnum.text=detail.orderItemList.length+"";
+			this.detailbtn.on("click",this,this.onShowDetail);
+			this.deletebtn.on("click",this,this.onClickDelete);
+			this.payagain.on("click",this,this.onClickPay);
+			this.retrybtn.on("click",this,this.onClickRetry);
+		}
+		catch(e){
+		}
 		TipsUtil.getInstance().addTips(this.deletebtn,"未开始生产的订单可原价撤回");
 	}
 
