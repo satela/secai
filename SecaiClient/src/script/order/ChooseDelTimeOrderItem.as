@@ -47,7 +47,7 @@ package script.order
 			
 			var deliverydate:String = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList[index].availableDate;
 
-			var params:String = "orderItem_sn=" + orderdata.orderItem_sn + "&manufacturer_code=" + manucode + "&is_urgent=false&delivery_date=" + deliverydate;
+			var params:String = "orderItem_sn=" + orderdata.orderItem_sn + "&manufacturer_code=" + manucode + "&prod_code=" + orderdata.prod_code + "&is_urgent=0&delivery_date=" + deliverydate;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.preOccupyCapacity + params,this,onOccupyCapacityBack,null,null);
 
@@ -115,7 +115,7 @@ package script.order
 			
 			var deliverydate:String = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate.availableDate;
 			
-			var params:String = "orderItem_sn=" + orderdata.orderItem_sn + "&manufacturer_code=" + manucode + "&is_urgent=true&delivery_date=" + deliverydate;
+			var params:String = "orderItem_sn=" + orderdata.orderItem_sn + "&manufacturer_code=" + manucode + "&prod_code=" + orderdata.prod_code + "&is_urgent=1&delivery_date=" + deliverydate;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.preOccupyCapacity + params,this,onOccupyUrgentCapacityBack,null,null);
 			

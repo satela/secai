@@ -703,7 +703,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderPackageItem.scene";
+	GameConfig.startScene="usercenter/TransactionPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -53707,8 +53707,9 @@ var Texture2D=(function(_super){
 		var mipLevels=header[ETC_HEADER_MIPMAPCOUNT];
 		var width=header[ETC_HEADER_WIDTH];
 		var height=header[ETC_HEADER_HEIGHT];
-		if (this._width!==width || this._height!==height)
-			throw "the width or height is not same with Texture2D.";
+		if (this._width
+			!==width || this._height!==height)
+		throw "the width or height is not same with Texture2D.";
 		var dataOffset=64+header[ETC_HEADER_METADATA];
 		this._upLoadCompressedTexImage2D(arrayBuffer,width,height,mipLevels,dataOffset,4);
 	}
@@ -61066,7 +61067,7 @@ var ChooseDelTimeOrderItem=(function(_super){
 		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
 		this.curselectIndex=index;
 		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[index].availableDate;
-		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&is_urgent=false&delivery_date="+deliverydate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=0&delivery_date="+deliverydate;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyCapacityBack,null,null);
 	}
 
@@ -61110,7 +61111,7 @@ var ChooseDelTimeOrderItem=(function(_super){
 	__proto.onClickUrgent=function(){
 		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
 		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
-		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&is_urgent=true&delivery_date="+deliverydate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=1&delivery_date="+deliverydate;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyUrgentCapacityBack,null,null);
 	}
 
