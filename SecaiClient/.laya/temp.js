@@ -53707,9 +53707,8 @@ var Texture2D=(function(_super){
 		var mipLevels=header[ETC_HEADER_MIPMAPCOUNT];
 		var width=header[ETC_HEADER_WIDTH];
 		var height=header[ETC_HEADER_HEIGHT];
-		if (this._width
-			!==width || this._height!==height)
-		throw "the width or height is not same with Texture2D.";
+		if (this._width!==width || this._height!==height)
+			throw "the width or height is not same with Texture2D.";
 		var dataOffset=64+header[ETC_HEADER_METADATA];
 		this._upLoadCompressedTexImage2D(arrayBuffer,width,height,mipLevels,dataOffset,4);
 	}
