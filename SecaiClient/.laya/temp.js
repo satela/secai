@@ -37049,6 +37049,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.height=fixedheight-125;
 		this.uiSkin.main_panel.hScrollBar.mouseWheelEnable=false;
 		this.uiSkin.seltips.visible=false;
+		this.uiSkin.picList.width=Browser.width;
 		DirectoryFileModel.instance.curFileList=[];
 		DirectoryFileModel.instance.curSelectDir=DirectoryFileModel.instance.rootDir;
 	}
@@ -37061,6 +37062,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.main_panel.height=fixedheight;
 		this.uiSkin.picList.height=fixedheight-125;
 		this.uiSkin.main_panel.width=Browser.width;
+		this.uiSkin.picList.width=Browser.width;
 	}
 
 	__proto.onStartSelectRelate=function(){
@@ -37118,7 +37120,7 @@ var PicManagerControl=(function(_super){
 			return;
 		if(result.status==0){
 			var size=parseInt(result.size)/1024/1024;
-			var maxsize=parseInt(result.maxsize)/1024/1024/1024;
+			var maxsize=parseInt(result.maxsize)/1000/1000/1000;
 			if(parseInt(result.size)< parseInt(result.maxsize))
 				this.uiSkin.prgcap.value=parseInt(result.size)/parseInt(result.maxsize);
 			else
@@ -41759,7 +41761,7 @@ var MyOrderControl=(function(_super){
 	}
 
 	__proto.onshowInputDate=function(viewname){
-		if(this.dateInput !=null && (viewname=="VIEW_ORDER_DETAIL_PANEL" || viewname=="VIEW_SELECT_PAYTYPE_PANEL")){
+		if(this.dateInput !=null && (viewname=="VIEW_ORDER_DETAIL_PANEL" || viewname=="VIEW_SELECT_PAYTYPE_PANEL" || viewname=="VIEW_POPUPDIALOG")){
 			this.dateInput.hidden=false;
 			this.dateInput2.hidden=false;
 		}
@@ -55758,7 +55760,7 @@ var PicShortItemUI=(function(_super){
 		this.createView(PicShortItemUI.uiView);
 	}
 
-	PicShortItemUI.uiView={"type":"View","props":{"width":252,"height":240},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":240},"compId":15},{"type":"Image","props":{"y":85,"x":87,"width":156,"var":"img","skin":"upload/fold.png","height":156,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":46,"x":209,"width":78,"var":"yixingimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":124,"x":209,"width":78,"var":"backimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":164,"wordWrap":false,"width":248,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"scroll","left":2,"height":23,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":7,"var":"btndelete","stateNum":2,"skin":"upload/closebutton.png"},"compId":7},{"type":"Label","props":{"y":184,"wordWrap":true,"width":252,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":44,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":141,"x":9,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":141,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":129,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":6,"x":142,"var":"sel","skin":"upload/imgselect.png"},"compId":12},{"type":"Button","props":{"y":7,"var":"selYixingBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"4,4,4,4","right":4,"labelSize":14,"labelColors":"#444A4E,#444A4E,#444A4E"},"compId":13,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnyxtxt","text":"选择异形","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":18}]},{"type":"Button","props":{"y":86,"var":"selBackBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"2,2,2,2","right":4,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":14,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnfmtxt","text":"选择反面","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":19}]},{"type":"Box","props":{"y":220,"x":2,"var":"countdown"},"compId":22,"child":[{"type":"Label","props":{"x":-2,"wordWrap":false,"width":113,"valign":"middle","text":"自动删除倒计时：","right":137,"overflow":"scroll","left":2,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":20},{"type":"Label","props":{"x":-2,"wordWrap":false,"width":36,"var":"autodellabel","valign":"middle","text":"30天","overflow":"scroll","left":115,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":21}]}],"loadList":["upload/picimg.png","upload/fold.png","upload/closebutton.png","upload/imgselect.png","upload/addimg.png"],"loadList3D":[]};
+	PicShortItemUI.uiView={"type":"View","props":{"width":252,"height":240},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":252,"var":"frame","skin":"upload/picimg.png","sizeGrid":"2,2,2,2","height":240},"compId":15},{"type":"Image","props":{"y":85,"x":87,"width":156,"var":"img","skin":"upload/fold.png","height":156,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Image","props":{"y":46,"x":209,"width":78,"var":"yixingimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":16},{"type":"Image","props":{"y":124,"x":209,"width":78,"var":"backimg","skin":"upload/fold.png","height":78,"anchorY":0.5,"anchorX":0.5},"compId":17},{"type":"Label","props":{"y":164,"wordWrap":false,"width":248,"var":"filename","valign":"middle","text":"名称.jpg 宽 3256 名称","right":2,"overflow":"scroll","left":2,"height":23,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":4},{"type":"Button","props":{"y":5,"x":7,"var":"btndelete","stateNum":2,"skin":"upload/closebutton.png"},"compId":7},{"type":"Label","props":{"y":184,"wordWrap":true,"width":252,"var":"fileinfo","valign":"top","text":"名称.jpg 宽 3256/n可以啊","right":0,"overflow":"scroll","left":0,"height":44,"fontSize":16,"font":"Helvetica","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":141,"x":9,"wordWrap":false,"width":36,"var":"picClassTxt","valign":"middle","text":"JPEG","overflow":"hidden","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"left"},"compId":9},{"type":"Label","props":{"y":141,"wordWrap":false,"width":36,"var":"colorspacetxt","valign":"middle","text":"CMYK","overflow":"hidden","left":129,"height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","bgColor":"#FFFFFFC9","align":"right"},"compId":11},{"type":"Button","props":{"y":6,"x":142,"var":"sel","skin":"upload/imgselect.png"},"compId":12},{"type":"Button","props":{"y":7,"var":"selYixingBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"4,4,4,4","right":4,"labelSize":14,"labelColors":"#444A4E,#444A4E,#444A4E"},"compId":13,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnyxtxt","text":"选择异形","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":18}]},{"type":"Button","props":{"y":86,"var":"selBackBtn","stateNum":1,"skin":"upload/addimg.png","sizeGrid":"2,2,2,2","right":4,"labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":14,"child":[{"type":"Label","props":{"y":56,"x":11,"var":"btnfmtxt","text":"选择反面","fontSize":14,"font":"SimSun","color":"#444a4e"},"compId":19}]},{"type":"Box","props":{"y":220,"x":2,"visible":false,"var":"countdown"},"compId":22,"child":[{"type":"Label","props":{"x":-2,"wordWrap":false,"width":113,"valign":"middle","text":"自动删除倒计时：","right":137,"overflow":"scroll","left":2,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":20},{"type":"Label","props":{"x":-2,"wordWrap":false,"width":36,"var":"autodellabel","valign":"middle","text":"30天","overflow":"scroll","left":115,"height":23,"fontSize":14,"font":"Helvetica","color":"#262B2E","align":"left"},"compId":21}]}],"loadList":["upload/picimg.png","upload/fold.png","upload/closebutton.png","upload/imgselect.png","upload/addimg.png"],"loadList3D":[]};
 	return PicShortItemUI;
 })(View)
 
@@ -62769,7 +62771,6 @@ var PicInfoItem=(function(_super){
 			this.fileinfo.visible=true;
 			this.filename.text=this.picInfo.directName;
 			this.img.x=87;
-			this.countdown.visible=true;
 			this.autodellabel.text=this.picInfo.leftDeleteDays+"天";
 			if(this.picInfo.isProcessing){
 				this.fileinfo.text="处理中...";

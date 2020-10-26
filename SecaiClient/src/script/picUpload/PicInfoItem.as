@@ -72,7 +72,7 @@ package script.picUpload
 				this.fileinfo.visible = true;
 				this.filename.text =  picInfo.directName;
 				this.img.x = 87;
-				this.countdown.visible = true;
+				//this.countdown.visible = true;
 
 				this.autodellabel.text = picInfo.leftDeleteDays + "天";
 				if( picInfo.isProcessing)

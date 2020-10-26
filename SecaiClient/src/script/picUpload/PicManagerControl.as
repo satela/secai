@@ -118,6 +118,8 @@ package script.picUpload
 			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
 			uiSkin.seltips.visible = false;
 			
+			uiSkin.picList.width = Browser.width;
+			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
 			
@@ -135,6 +137,8 @@ package script.picUpload
 			uiSkin.main_panel.height = fixedheight;
 			uiSkin.picList.height =  fixedheight - 125;
 			uiSkin.main_panel.width = Browser.width;
+			uiSkin.picList.width = Browser.width;
+
 
 		}
 		private function onStartSelectRelate():void
@@ -217,7 +221,7 @@ package script.picUpload
 			if(result.status == 0)
 			{
 				var  size:Number = parseInt(result.size)/1024/1024;
-				var maxsize:int = parseInt(result.maxsize)/1024/1024/1024;
+				var maxsize:int = parseInt(result.maxsize)/1000/1000/1000;
 				if( parseInt(result.size) < parseInt(result.maxsize))
 					uiSkin.prgcap.value = parseInt(result.size)/parseInt(result.maxsize);
 				else
