@@ -456,6 +456,47 @@ package model.orderModel
 			
 			
 		}
+		
+		public function getSingleOrderItemCapcaityData(orderItemdata:Object):String
+		{
+			var resultdata:Object = {};
+			resultdata.manufacturer_code = getManufacturerCode(orderItemdata.orderItem_sn);
+			resultdata.orderItemList = [];
+			
+			//var orderitems:Array = orderdata.orderItemList;
+			
+			//for(var i:int=0;i < orderitems.length;i++)
+			//{
+				var itemdata:Object = {};
+				itemdata.orderItem_sn = orderItemdata.orderItem_sn;
+				itemdata.prod_code = orderItemdata.prod_code;
+				
+				itemdata.processList = [];
+				
+				for(var j:int=0;j < orderItemdata.procInfoList.length;j++)
+				{
+					var procedata:Object = {};
+					procedata.proc_code = orderItemdata.procInfoList[j].proc_Code;
+					var size:Array = orderItemdata.LWH.split("/");
+					
+					var picwidth:Number = parseFloat(size[0]);
+					var picheight:Number = parseFloat(size[1]);
+					
+					procedata.cap_occupy = orderItemdata.item_number * getProcessNeedCapacity(resultdata.manufacturer_code,orderItemdata.material_code,picwidth,picheight,orderItemdata.procInfoList[j].proc_Code);
+					
+					procedata.proc_seq = j+1;
+					
+					itemdata.processList.push(procedata);
+				}
+				resultdata.orderItemList.push(itemdata);
+				
+		//	}
+			
+			return JSON.stringify(resultdata);
+			
+			
+		}
+		
 		//计算工艺占用产能时
 		public function getProcessNeedCapacity(manufacturerCode:String,matcode:String,picwidth:Number,picheight:Number,processcode:String):Number
 		{

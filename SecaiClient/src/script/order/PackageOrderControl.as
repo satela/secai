@@ -217,7 +217,7 @@ package script.order
 				requestnum++;
 				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
 				{
-					ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,orderDatas);
+					ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,{orders:orderDatas,delaypay:false});
 					PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
 				}
 			}

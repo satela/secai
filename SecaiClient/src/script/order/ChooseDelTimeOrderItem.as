@@ -15,7 +15,7 @@ package script.order
 	
 	public class ChooseDelTimeOrderItem extends SimpleOrderItemUI
 	{
-		private var orderdata:Object;
+		public var orderdata:Object;
 		
 		private var curselectIndex:int = -1;
 		public function ChooseDelTimeOrderItem()
@@ -263,7 +263,7 @@ package script.order
 			
 		}
 		
-		private function resetDeliveryDates():void
+		public function resetDeliveryDates():void
 		{
 			for(var i:int=0;i < 5;i++)
 			{

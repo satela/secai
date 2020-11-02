@@ -175,13 +175,7 @@ package script.usercenter
 					PaintOrderModel.instance.initManuFacuturePrice(orderinfo.manufacturer_code,dataStr);
 					
 					
-					PaintOrderModel.instance.finalOrderData = [orderinfo];
-					
-					var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
-					
-					
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
-
+					requestAvailableDate(orderinfo);
 					
 					
 					
@@ -189,16 +183,31 @@ package script.usercenter
 			}
 			else
 			{
-				PaintOrderModel.instance.finalOrderData = [orderinfo];
-				
-				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
-				
-				
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+				requestAvailableDate(orderinfo);
 
 			}
 						
 
+		}
+		
+		private function requestAvailableDate(orderinfo:Object):void
+		{
+		
+			var itemlist:Array = orderinfo.orderItemList;
+			for(var i:int=0;i < itemlist.length;i++)
+			{
+				delete itemlist[i].lefttime;
+				delete itemlist[i].delivery_date;
+				delete itemlist[i].is_urgent;
+
+			}
+			PaintOrderModel.instance.finalOrderData = [orderinfo];
+			
+			var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+			
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+			
 		}
 		
 		private function ongetAvailableDateBack(data:*):void
@@ -233,7 +242,7 @@ package script.usercenter
 					
 				}
 				
-				ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,PaintOrderModel.instance.finalOrderData[0].orderItemList);
+				ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,{orders:PaintOrderModel.instance.finalOrderData[0].orderItemList,delaypay:true});
 				
 			}
 		}
@@ -249,7 +258,7 @@ package script.usercenter
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
-				ViewManager.showAlert("订单排产失成功");
+				ViewManager.showAlert("订单排产成功");
 				EventCenter.instance.event(EventCenter.PAY_ORDER_SUCESS);
 				
 			}

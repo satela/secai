@@ -703,7 +703,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/TransactionPanel.scene";
+	GameConfig.startScene="order/ChooseDeliveryTimePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1832,6 +1832,28 @@ var PaintOrderModel=(function(){
 		return JSON.stringify(resultdata);
 	}
 
+	__proto.getSingleOrderItemCapcaityData=function(orderItemdata){
+		var resultdata={};
+		resultdata.manufacturer_code=this.getManufacturerCode(orderItemdata.orderItem_sn);
+		resultdata.orderItemList=[];
+		var itemdata={};
+		itemdata.orderItem_sn=orderItemdata.orderItem_sn;
+		itemdata.prod_code=orderItemdata.prod_code;
+		itemdata.processList=[];
+		for(var j=0;j < orderItemdata.procInfoList.length;j++){
+			var procedata={};
+			procedata.proc_code=orderItemdata.procInfoList[j].proc_Code;
+			var size=orderItemdata.LWH.split("/");
+			var picwidth=parseFloat(size[0]);
+			var picheight=parseFloat(size[1]);
+			procedata.cap_occupy=orderItemdata.item_number *this.getProcessNeedCapacity(resultdata.manufacturer_code,orderItemdata.material_code,picwidth,picheight,orderItemdata.procInfoList[j].proc_Code);
+			procedata.proc_seq=j+1;
+			itemdata.processList.push(procedata);
+		}
+		resultdata.orderItemList.push(itemdata);
+		return JSON.stringify(resultdata);
+	}
+
 	//计算工艺占用产能时
 	__proto.getProcessNeedCapacity=function(manufacturerCode,matcode,picwidth,picheight,processcode){
 		var capacitydata=this.getCapacityData(manufacturerCode,processcode,matcode);
@@ -2317,6 +2339,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.GetAccessorylist="business/accessorylist?";
 	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=";
 	HttpRequestUtil.placeOrder="business/placeorder?";
+	HttpRequestUtil.updateOrder="business/updateorder?";
 	HttpRequestUtil.cancelOrder="business/cancelorder?";
 	HttpRequestUtil.authorUploadUrl="file/authinfo";
 	HttpRequestUtil.noticeServerPreUpload="file/preupload?";
@@ -38366,6 +38389,7 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.uiSkin=null;
 		this.param=null;
 		this.orderDatas=null;
+		this.delaypay=false;
 		ChooseDeliveryTimeControl.__super.call(this);
 	}
 
@@ -38380,11 +38404,14 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.uiSkin.savebtn.on("click",this,this.onSaveOrder);
 		this.uiSkin.paybtn.on("click",this,this.onPayOrder);
 		this.uiSkin.closebtn.on("click",this,this.onGiveUpOrder);
-		this.orderDatas=this.param;
+		this.orderDatas=this.param.orders;
+		this.delaypay=this.param.delaypay;
+		this.uiSkin.savebtn.visible=!this.delaypay;
 		this.uiSkin.orderlist.array=this.orderDatas;
 		var total=0;
 		for(var i=0;i < this.orderDatas.length;i++){
 			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
+			ordermoney=parseFloat(ordermoney.toFixed(1));
 			total+=ordermoney;
 		}
 		this.uiSkin.rawprice.text=total.toFixed(1)+"元";
@@ -38404,6 +38431,44 @@ var ChooseDeliveryTimeControl=(function(_super){
 						this.orderDatas[i].is_urgent=0;
 						this.orderDatas[i].delivery_date=null;
 						this.orderDatas[i].outtime=true;
+						this.retryGetAvailableDate(this.orderDatas[i]);
+					}
+				}
+			}
+		}
+	}
+
+	__proto.retryGetAvailableDate=function(orderdata){
+		var datas=PaintOrderModel.instance.getSingleOrderItemCapcaityData(orderdata);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+				for(var j=0;j < this.uiSkin.orderlist.cells.length;j++){
+					if((this.uiSkin.orderlist.cells [j]).orderdata.orderItem_sn==alldates[i].orderItem_sn){
+						(this.uiSkin.orderlist.cells [j]).resetDeliveryDates;
+						break ;
 					}
 				}
 			}
@@ -38427,7 +38492,24 @@ var ChooseDeliveryTimeControl=(function(_super){
 		var arr=this.getOrderData();
 		if(arr==null)
 			return;
+		if(this.delaypay)
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/updateorder?",this,this.onUpdateOrderBack,{data:JSON.stringify(arr)},"post");
+		else
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onUpdateOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalmoney=0;
+			var allorders=[];
+			for(var i=0;i < result.orders.length;i++){
+				var orderdata=JSON.parse(result.orders[i]);
+				totalmoney+=Number(orderdata.money_paidStr);
+				allorders.push(orderdata.order_sn);
+			}
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
 	}
 
 	__proto.onPlaceOrderBack=function(data){
@@ -38517,7 +38599,11 @@ var ChooseDeliveryTimeControl=(function(_super){
 	}
 
 	__proto.onGiveUpOrder=function(){
-		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:this.confirmClose,ok:"确定",cancel:"取消"});
+		if(!this.delaypay)
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:this.confirmClose,ok:"确定",cancel:"取消"});
+		else{
+			ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
+		}
 	}
 
 	__proto.confirmClose=function(b){
@@ -40920,7 +41006,7 @@ var PackageOrderControl=(function(_super){
 			}
 			this.requestnum++;
 			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
-				ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,this.orderDatas);
+				ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,{orders:this.orderDatas,delaypay:false});
 				PaintOrderModel.instance.packageList=[];
 			}
 		}
@@ -41603,6 +41689,7 @@ var MyOrderControl=(function(_super){
 		var lastdate=new Date(this.dateInput.value);
 		var param="begindate="+this.dateInput.value+" 00:00:00&enddate="+this.dateInput2.value+" 23:59:59&status="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
+		ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
 	}
 
 	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
@@ -62338,16 +62425,24 @@ var OrderCheckListItem=(function(_super){
 		if(PaintOrderModel.instance.allManuFacutreMatProcPrice[orderinfo.manufacturer_code]==null){
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getmatprocprice?manufacturer_code="+orderinfo.manufacturer_code,this,function(dataStr){
 				PaintOrderModel.instance.initManuFacuturePrice(orderinfo.manufacturer_code,dataStr);
-				PaintOrderModel.instance.finalOrderData=[orderinfo];
-				var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,_$this.ongetAvailableDateBack,{data:datas},"post");
+				_$this.requestAvailableDate(orderinfo);
 			},null,null);
 		}
 		else{
-			PaintOrderModel.instance.finalOrderData=[orderinfo];
-			var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+			this.requestAvailableDate(orderinfo);
 		}
+	}
+
+	__proto.requestAvailableDate=function(orderinfo){
+		var itemlist=orderinfo.orderItemList;
+		for(var i=0;i < itemlist.length;i++){
+			delete itemlist[i].lefttime;
+			delete itemlist[i].delivery_date;
+			delete itemlist[i].is_urgent;
+		}
+		PaintOrderModel.instance.finalOrderData=[orderinfo];
+		var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
 	}
 
 	__proto.ongetAvailableDateBack=function(data){
@@ -62371,7 +62466,7 @@ var OrderCheckListItem=(function(_super){
 					}
 				}
 			}
-			ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,PaintOrderModel.instance.finalOrderData[0].orderItemList);
+			ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,{orders:PaintOrderModel.instance.finalOrderData[0].orderItemList,delaypay:true});
 		}
 	}
 
@@ -62382,7 +62477,7 @@ var OrderCheckListItem=(function(_super){
 	__proto.payMoneyBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
-			ViewManager.showAlert("订单排产失成功");
+			ViewManager.showAlert("订单排产成功");
 			EventCenter.instance.event("PAY_ORDER_SUCESS");
 		}
 		else{

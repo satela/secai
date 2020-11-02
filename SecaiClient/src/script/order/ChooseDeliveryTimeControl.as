@@ -22,6 +22,9 @@ package script.order
 		private var param:Object;
 		
 		private var orderDatas:Array;
+		
+		private var delaypay:Boolean = false;
+		
 		public function ChooseDeliveryTimeControl()
 		{
 			super();
@@ -40,7 +43,10 @@ package script.order
 			uiSkin.paybtn.on(Event.CLICK,this,onPayOrder);
 			uiSkin.closebtn.on(Event.CLICK,this,onGiveUpOrder);
 
-			orderDatas = param as Array;
+			orderDatas = param.orders as Array;
+			delaypay = param.delaypay;
+			
+			uiSkin.savebtn.visible = !delaypay;
 			
 			uiSkin.orderlist.array = orderDatas;
 			
@@ -49,7 +55,8 @@ package script.order
 			{
 				var ordermoney:Number = Number(orderDatas[i].item_priceStr) * Number(orderDatas[i].item_number);
 				
-				
+				ordermoney = parseFloat(ordermoney.toFixed(1));
+
 				total += ordermoney;
 			}
 			
@@ -80,10 +87,67 @@ package script.order
 							orderDatas[i].is_urgent = 0;
 							orderDatas[i].delivery_date = null;
 							orderDatas[i].outtime = true;
-
+							retryGetAvailableDate(orderDatas[i]);
 						}
 					}
 				}
+			}
+		}
+		
+		private function retryGetAvailableDate(orderdata:Object):void
+		{
+				
+			var datas:String = PaintOrderModel.instance.getSingleOrderItemCapcaityData(orderdata);
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+
+		}
+		
+		private function ongetAvailableDateBack(data:*):void
+		{
+			if(this.destroyed)
+				return;
+			
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var alldates:Array = result as Array;
+				for(var i:int=0;i < alldates.length;i++)
+				{
+					
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+					
+					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+					{
+						if(alldates[i].deliveryDateList[j].urgent == false)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						}
+						else
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+						}
+					}	
+					
+					for(var j:int=0;j < uiSkin.orderlist.cells.length;j++)
+					{
+						if((uiSkin.orderlist.cells[j] as ChooseDelTimeOrderItem).orderdata.orderItem_sn == alldates[i].orderItem_sn)
+						{
+							(uiSkin.orderlist.cells[j] as ChooseDelTimeOrderItem).resetDeliveryDates;
+							break;
+						}
+					}
+					
+				}
+				
+				
 			}
 		}
 		
@@ -112,10 +176,31 @@ package script.order
 			var arr:Array = getOrderData();
 			if(arr == null)
 				return;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+			
+			if(delaypay)
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.updateOrder,this,onUpdateOrderBack,{data:JSON.stringify(arr)},"post");
+			else				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 
 		}
 		
+		private function onUpdateOrderBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				var totalmoney:Number = 0;
+				var allorders:Array = [];
+				for(var i:int=0;i < result.orders.length;i++)
+				{
+					var orderdata:Object = JSON.parse(result.orders[i]);
+					totalmoney += Number(orderdata.money_paidStr);
+					allorders.push(orderdata.order_sn);
+				}
+				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+				
+			}
+		}
 		private function onPlaceOrderBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -244,7 +329,14 @@ package script.order
 		
 		private function onGiveUpOrder():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:confirmClose,ok:"确定",cancel:"取消"});
+			if(!delaypay)
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:confirmClose,ok:"确定",cancel:"取消"});
+			else
+			{
+				ViewManager.instance.closeView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL);
+				
+			}
+
 		}
 		
 		private function confirmClose(b:Boolean):void

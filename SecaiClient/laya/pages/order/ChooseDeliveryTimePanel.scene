@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":7,
-    "selecteID":42,
+    "selecteID":15,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":43,
+    "maxID":47,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -72,7 +72,7 @@
                             "x":45,
                             "type":"Image",
                             "searchKey":"Image",
-                            "props":{"y":70,"x":0,"width":1280,"skin":"commers/cutline.png","height":1,"alpha":1},
+                            "props":{"y":60,"x":0,"width":1280,"skin":"commers/cutline.png","height":1,"alpha":1},
                             "nodeParent":7,
                             "label":"Image",
                             "isOpen":true,
@@ -212,7 +212,7 @@
                             "x":45,
                             "type":"Box",
                             "searchKey":"Box",
-                            "props":{"y":72,"x":0},
+                            "props":{"y":120,"x":0},
                             "nodeParent":7,
                             "label":"Box",
                             "isOpen":false,
@@ -386,7 +386,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,orderlist",
-                            "props":{"y":125,"x":4,"width":1271,"var":"orderlist","vScrollBarSkin":"upload/vscroll.png","height":620},
+                            "props":{"y":173,"x":4,"width":1271,"var":"orderlist","vScrollBarSkin":"upload/vscroll.png","height":596},
                             "nodeParent":7,
                             "label":"orderlist",
                             "isDirectory":false,
@@ -407,6 +407,62 @@
                             "isAniNode":true,
                             "hasChild":false,
                             "compId":42,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"RadioGroup",
+                            "searchKey":"RadioGroup",
+                            "props":{"y":77,"x":102,"skin":"comp/radiogroup.png","labels":"交期优先,省钱优先(5天内),省钱优先(4天内),省钱优先(3天内),省钱优先(2天内)","labelSize":20,"labelFont":"SimHei"},
+                            "nodeParent":7,
+                            "label":"RadioGroup",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":43,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":77,"x":4,"text":"交付策略:","fontSize":20,"font":"SimHei"},
+                            "nodeParent":7,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":44,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Button",
+                            "searchKey":"Button",
+                            "props":{"y":73,"x":969,"width":80,"skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelStrokeColor":"#749041","labelStroke":1,"labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":30},
+                            "nodeParent":7,
+                            "label":"Button",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":45,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Button",
+                            "searchKey":"Button",
+                            "props":{"y":73,"x":1073,"width":100,"skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelStrokeColor":"#749041","labelStroke":1,"labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"设为默认策略","height":30},
+                            "nodeParent":7,
+                            "label":"Button",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":46,
                             "child":[
                                 ]
                         }]
