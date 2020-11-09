@@ -417,11 +417,12 @@ package model.orderModel
 			
 		}
 		
-		public function getOrderCapcaityData(orderdata:Object):String
+		public function getOrderCapcaityData(orderdata:Object,deliveryprefer:int):String
 		{
 			var resultdata:Object = {};
 			resultdata.manufacturer_code = orderdata.manufacturer_code;
 			resultdata.orderItemList = [];
+			resultdata.delivery_prefer = deliveryprefer;
 			
 			var orderitems:Array = orderdata.orderItemList;
 			
@@ -462,6 +463,8 @@ package model.orderModel
 			var resultdata:Object = {};
 			resultdata.manufacturer_code = getManufacturerCode(orderItemdata.orderItem_sn);
 			resultdata.orderItemList = [];
+			
+			resultdata.delivery_prefer = 0;
 			
 			//var orderitems:Array = orderdata.orderItemList;
 			

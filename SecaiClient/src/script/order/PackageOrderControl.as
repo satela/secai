@@ -171,7 +171,7 @@ package script.order
 			requestnum = 0;
 			for(var i:int=0;i < arr.length;i++)
 			{
-				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i],1);
 				
 				
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
@@ -195,6 +195,8 @@ package script.order
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+					
+					var currentdate:String = alldates[i].current_date;
 
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
 					{
@@ -205,7 +207,7 @@ package script.order
 							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
 						}
-						else
+						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;

@@ -414,7 +414,7 @@
                             "x":45,
                             "type":"RadioGroup",
                             "searchKey":"RadioGroup",
-                            "props":{"y":77,"x":102,"skin":"comp/radiogroup.png","labels":"交期优先,省钱优先(5天内),省钱优先(4天内),省钱优先(3天内),省钱优先(2天内)","labelSize":20,"labelFont":"SimHei"},
+                            "props":{"y":77,"x":102,"skin":"comp/radiogroup.png","labels":"加急当天,交期优先,省钱优先(5天内),省钱优先(4天内),省钱优先(3天内),省钱优先(2天内)","labelSize":20,"labelFont":"SimHei"},
                             "nodeParent":7,
                             "label":"RadioGroup",
                             "isDirectory":false,

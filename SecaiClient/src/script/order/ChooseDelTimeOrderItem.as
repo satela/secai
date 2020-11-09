@@ -77,36 +77,91 @@ package script.order
 					orderdata.discount = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList[curselectIndex].discount;
 					
 				}
-				else if(result.newDateList != null && result.newDateList != "")
+				else
 				{
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = result.newDateList;
-					
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn] = {};
-					//PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].canUrgent = false;
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = [];
-					
-					for(var j:int=0;j < result.newDateList.length;j++)
-					{
-						if(result.newDateList[j].urgent == false)
-						{
-							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
-						}
-						else
-						{
-							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate = result.newDateList[j];
-						}
-					}	
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = result.newDateList;
+//					
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn] = {};
+//					//PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].canUrgent = false;
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = [];
+//					
+//					for(var j:int=0;j < result.newDateList.length;j++)
+//					{
+//						if(result.newDateList[j].urgent == false)
+//						{
+//							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
+//						}
+//						else
+//						{
+//							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate = result.newDateList[j];
+//						}
+//					}	
 					orderdata.is_urgent = 0;
 					orderdata.delivery_date = null;
 					orderdata.discount = 1;
 
-					resetDeliveryDates();
+					//resetDeliveryDates();
+					retryGetAvailableDate();
 				}
 				updatePrice();
 				EventCenter.instance.event(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE);
 
 			}
 		}
+		
+		private function retryGetAvailableDate():void
+		{
+			
+			var datas:String = PaintOrderModel.instance.getSingleOrderItemCapcaityData(orderdata);
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
+			
+		}
+		
+		private function ongetAvailableDateBack(data:*):void
+		{
+			
+			
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var alldates:Array = result as Array;
+				for(var i:int=0;i < alldates.length;i++)
+				{
+					
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+					
+					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+					{
+						if(alldates[i].deliveryDateList[j].urgent == false)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						}
+						else
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+						}
+					}	
+					
+					if(this.destroyed)
+						return;
+					
+					resetDeliveryDates();
+					
+					
+				}
+				
+				
+			}
+		}
+		
 		private function onClickUrgent():void
 		{
 			var manucode:String = PaintOrderModel.instance.getManufacturerCode(orderdata.orderItem_sn);
@@ -151,36 +206,36 @@ package script.order
 					orderdata.discount = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate.discount;
 					
 				}
-				else if(result.newDateList != null && result.newDateList != "")
+				else
 				{
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = result.newDateList;
-					
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn] = {};
-					//PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].canUrgent = false;
-					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = [];
-					
-					for(var j:int=0;j < result.newDateList.length;j++)
-					{
-						if(result.newDateList[j].urgent == false)
-						{
-							if(result.newDateList[j].discount == 0)
-								result.newDateList[j].discount = 1;
-							
-							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
-						}
-						else
-						{
-							if(result.newDateList[j].discount == 0)
-								result.newDateList[j].discount = 1;
-							
-							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate = result.newDateList[j];
-						}
-					}	
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = result.newDateList;
+//					
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn] = {};
+//					//PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].canUrgent = false;
+//					PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = [];
+//					
+//					for(var j:int=0;j < result.newDateList.length;j++)
+//					{
+//						if(result.newDateList[j].urgent == false)
+//						{
+//							if(result.newDateList[j].discount == 0)
+//								result.newDateList[j].discount = 1;
+//							
+//							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
+//						}
+//						else
+//						{
+//							if(result.newDateList[j].discount == 0)
+//								result.newDateList[j].discount = 1;
+//							
+//							PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate = result.newDateList[j];
+//						}
+//					}	
 					orderdata.is_urgent = 0;
 					orderdata.delivery_date = null;
 					orderdata.discount = 1;
-					
-					resetDeliveryDates();
+					retryGetAvailableDate();
+					//resetDeliveryDates();
 				}
 				updatePrice();
 				EventCenter.instance.event(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE);
