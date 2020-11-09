@@ -172,6 +172,12 @@ package script.order
 //				}
 //				trace(data);
 //			});
+			
+			//uiSkin.textTotalPrice.visible = Userdata.instance.accountType == 1;
+			//uiSkin.textDeliveryType.visible = Userdata.instance.accountType == 1;
+			//uiSkin.textPayPrice.visible = Userdata.instance.accountType == 1;
+
+			
 			PaintOrderModel.instance.selectAddress = null;
 
 			resetOrderInfo();
@@ -573,6 +579,8 @@ package script.order
 				if(orderlist[i].checkSel.selected)
 				{
 					orderlist[i].inputnum.text = numstr;
+					
+					orderlist[i].onNumChange();
 				}
 			}
 		}

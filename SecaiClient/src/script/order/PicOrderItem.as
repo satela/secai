@@ -5,6 +5,7 @@ package script.order
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.Userdata;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
@@ -93,6 +94,9 @@ package script.order
 			this.addmsg.underlineColor = "#222222";
 			this.price.text = "0";
 			this.addmsg.on(Event.CLICK,this,onAddComment);
+			
+			//this.price.visible = Userdata.instance.accountType == 1;
+			//this.total.visible = Userdata.instance.accountType == 1;
 			
 			this.mattxt.text = "";
 			this.changemat.underline = true;
@@ -308,7 +312,7 @@ package script.order
 			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
 
 		}
-		private function onNumChange():void
+		public function onNumChange():void
 		{
 			
 			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(1).toString();

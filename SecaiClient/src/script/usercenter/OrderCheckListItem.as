@@ -5,6 +5,7 @@ package script.usercenter
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
 	
 	import script.ViewManager;
@@ -86,6 +87,8 @@ package script.usercenter
 				var detail:Object = JSON.parse(orderdata.or_text);
 				this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
 				this.productnum.text = detail.orderItemList.length + "";
+				
+				//this.paymoney.visible = Userdata.instance.accountType == 1;
 				
 				this.detailbtn.on(Event.CLICK,this,onShowDetail);
 				this.deletebtn.on(Event.CLICK,this,onClickDelete);

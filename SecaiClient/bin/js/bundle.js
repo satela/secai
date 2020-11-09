@@ -714,7 +714,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/TransactionPanel.scene";
+	GameConfig.startScene="order/OrderItem.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1499,7 +1499,7 @@ var Constast=(function(){
 	Constast.ACCOUNT_CREATER=1;
 	Constast.ACCOUNT_EMPLOYEE=0;
 	__static(Constast,
-	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单"];}
+	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款"];}
 	]);
 	return Constast;
 })()
@@ -2209,7 +2209,7 @@ var HttpRequestUtil=(function(){
 	});
 
 	HttpRequestUtil._instance=null;
-	HttpRequestUtil.httpUrl="http://seiuf7.natappfree.cc/";
+	HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
 	HttpRequestUtil.registerUrl="account/create?";
 	HttpRequestUtil.loginInUrl="account/login?";
 	HttpRequestUtil.loginOutUrl="account/logout?";
@@ -36245,6 +36245,7 @@ var UserMainControl=(function(_super){
 		if(Userdata.instance.accountType !=1){
 			this.uiSkin.btntxt9.removeSelf();
 			this.uiSkin.btntxt10.removeSelf();
+			this.uiSkin.btntxt6.removeSelf();
 		}
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		EventCenter.instance.on("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
@@ -37967,6 +37968,7 @@ var PaintOrderControl=(function(_super){
 		for(var i=0;i < this.orderlist.length;i++){
 			if(this.orderlist[i].checkSel.selected){
 				this.orderlist[i].inputnum.text=numstr;
+				this.orderlist[i].onNumChange();
 			}
 		}
 	}

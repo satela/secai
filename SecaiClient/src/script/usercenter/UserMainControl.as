@@ -78,6 +78,7 @@ package script.usercenter
 			{
 				uiSkin.btntxt9.removeSelf();
 				uiSkin.btntxt10.removeSelf();
+				uiSkin.btntxt6.removeSelf();
 			}
 			//uiSkin.btntxt9.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;
 			//uiSkin.btntxt10.visible = Userdata.instance.accountType == Constast.ACCOUNT_CREATER;

@@ -3,6 +3,7 @@ package script.usercenter
 	import laya.events.Event;
 	
 	import model.HttpRequestUtil;
+	import model.Userdata;
 	
 	import script.ViewManager;
 	
@@ -48,6 +49,8 @@ package script.usercenter
 			this.tech.text = techstr.substr(0,techstr.length - 1);
 			
 			this.money.text = (Number(orderdata.item_priceStr) * Number(orderdata.item_number)).toFixed(2);
+			
+			//this.money.visible = Userdata.instance.accountType == 1;
 			
 			if(orderdata.filename != null)
 				this.filename.text = orderdata.filename;

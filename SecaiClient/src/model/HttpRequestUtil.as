@@ -14,7 +14,7 @@ package model
 	{
 		private static var _instance:HttpRequestUtil;
 		
-		public static var httpUrl:String =  "http://seiuf7.natappfree.cc/";//"../scfy/";//http://www.cmyk.com.cn/scfy/" ;//	"http://47.98.218.56/scfy/"; //"http://dhs3iy.natappfree.cc/";//
+		public static var httpUrl:String =  "http://www.cmyk.com.cn/scfy/" ;//	"http://47.98.218.56/scfy/"; //"http://dhs3iy.natappfree.cc/";//
 		
 		public static const registerUrl:String = "account/create?";
 		

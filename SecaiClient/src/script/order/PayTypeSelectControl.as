@@ -31,12 +31,22 @@ package script.order
 			
 			uiSkin.payall.selected = true;
 			
-			uiSkin.paytype.selectedIndex = 0 ;
-			
+			//if(Userdata.instance.accountType == 1)
+				uiSkin.paytype.selectedIndex = 0 ;
+//			else
+//			{
+//				uiSkin.paytype.selectedIndex = 1 ;
+//				uiSkin.paytype.mouseEnabled = false;
+//			}
+//			
 			uiSkin.accountmoney.text = "0元";
 			
 			uiSkin.needpay.text = param.amount + "元";
 			uiSkin.realpay.text =  param.amount + "元";
+			
+			//uiSkin.needpay.visible = Userdata.instance.accountType == 1;
+			//uiSkin.realpay.visible = Userdata.instance.accountType == 1;
+
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
 
