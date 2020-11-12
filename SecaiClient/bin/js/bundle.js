@@ -1580,6 +1580,8 @@ var PaintOrderModel=(function(){
 		this.allManuFacutreMatProcPrice={};
 		this.availableDeliveryDates={};
 		this.orderType=0;
+		//当前下单类型
+		this.curTimePrefer=0;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -1660,10 +1662,6 @@ var PaintOrderModel=(function(){
 			}
 			return [];
 		}
-	}
-
-	__proto.getNeedCapcity=function(allprocess,orgCode,orderitem){
-		return 0;
 	}
 
 	__proto.getCapacityData=function(orgcode,procCode,matcode){
@@ -1818,10 +1816,11 @@ var PaintOrderModel=(function(){
 		}
 	}
 
-	__proto.getOrderCapcaityData=function(orderdata){
+	__proto.getOrderCapcaityData=function(orderdata,deliveryprefer){
 		var resultdata={};
 		resultdata.manufacturer_code=orderdata.manufacturer_code;
 		resultdata.orderItemList=[];
+		resultdata.delivery_prefer=deliveryprefer;
 		var orderitems=orderdata.orderItemList;
 		for(var i=0;i < orderitems.length;i++){
 			var itemdata={};
@@ -1847,6 +1846,7 @@ var PaintOrderModel=(function(){
 		var resultdata={};
 		resultdata.manufacturer_code=this.getManufacturerCode(orderItemdata.orderItem_sn);
 		resultdata.orderItemList=[];
+		resultdata.delivery_prefer=0;
 		var itemdata={};
 		itemdata.orderItem_sn=orderItemdata.orderItem_sn;
 		itemdata.prod_code=orderItemdata.prod_code;
@@ -1885,6 +1885,18 @@ var PaintOrderModel=(function(){
 			}
 		}
 		return "";
+	}
+
+	__proto.getSingleProductOrderData=function(orderitemsn){
+		var arr=this.finalOrderData;
+		for(var i=0;i < arr.length;i++){
+			var orderitems=arr[i].orderItemList;
+			for(var j=0;j < orderitems.length;j++){
+				if(orderitems[j].orderItem_sn==orderitemsn)
+					return orderitems[j];
+			}
+		}
+		return null;
 	}
 
 	__proto.getDiscountByDate=function(delaydays){
@@ -38401,6 +38413,7 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.param=null;
 		this.orderDatas=null;
 		this.delaypay=false;
+		this.requestnum=0;
 		ChooseDeliveryTimeControl.__super.call(this);
 	}
 
@@ -38419,6 +38432,8 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.delaypay=this.param.delaypay;
 		this.uiSkin.savebtn.visible=!this.delaypay;
 		this.uiSkin.orderlist.array=this.orderDatas;
+		this.uiSkin.timepreferRdo.selectedIndex=PaintOrderModel.instance.curTimePrefer-1;
+		this.uiSkin.confirmpreferbtn.on("click",this,this.resetTimePrefer);
 		var total=0;
 		for(var i=0;i < this.orderDatas.length;i++){
 			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
@@ -38534,6 +38549,54 @@ var ChooseDeliveryTimeControl=(function(_super){
 				allorders.push(orderdata.order_sn);
 			}
 			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
+	}
+
+	__proto.resetTimePrefer=function(){
+		var arr=PaintOrderModel.instance.finalOrderData;
+		this.requestnum=0;
+		for(var i=0;i < arr.length;i++){
+			PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i],this.uiSkin.timepreferRdo.selectedIndex+1);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAllAvailableDateBack,{data:datas},"post");
+		}
+	}
+
+	//PaintOrderModel.instance.packageList=new Vector.<PackageVo>();
+	__proto.ongetAllAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				var orderdata=PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+				orderdata.delivery_date=null;
+				orderdata.is_urgent=false;
+				var currentdate=alldates[i].current_date;
+				if(orderdata !=null && alldates[i].default_deliverydate !=null && alldates[i].default_deliverydate !=""){
+					orderdata.delivery_date=alldates[i].default_deliverydate;
+					orderdata.is_urgent=orderdata.delivery_date==currentdate;
+				}
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			this.requestnum++;
+			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
+				this.uiSkin.orderlist.array=this.orderDatas;
+				this.updatePrice();
+			}
 		}
 	}
 
@@ -40920,6 +40983,8 @@ var PackageOrderControl=(function(_super){
 			this.orderDatas[i].numlist=numlist;
 		}
 		this.uiSkin.addpackbtn.on("click",this,this.addnewPack);
+		var defaultPrefer=UtilTool.getLocalVar("timePrefer","0");
+		this.uiSkin.timepreferRdo.selectedIndex=parseInt(defaultPrefer);
 		this.addnewPack();
 		this.uiSkin.productlist.array=this.orderDatas;
 	}
@@ -40988,7 +41053,8 @@ var PackageOrderControl=(function(_super){
 		var arr=PaintOrderModel.instance.finalOrderData;
 		this.requestnum=0;
 		for(var i=0;i < arr.length;i++){
-			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+			PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i],this.uiSkin.timepreferRdo.selectedIndex+1);
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
 		}
 	}
@@ -41002,13 +41068,19 @@ var PackageOrderControl=(function(_super){
 				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
 				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
 				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				var orderdata=PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+				var currentdate=alldates[i].current_date;
+				if(orderdata !=null && alldates[i].default_deliverydate !=null && alldates[i].default_deliverydate !=""){
+					orderdata.delivery_date=alldates[i].default_deliverydate;
+					orderdata.is_urgent=orderdata.delivery_date==currentdate;
+				}
 				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
 					if(alldates[i].deliveryDateList[j].urgent==false){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
 					}
-					else{
+					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
@@ -55804,6 +55876,9 @@ var ChooseDeliveryTimePanelUI=(function(_super){
 		this.disountprice=null;
 		this.orderlist=null;
 		this.closebtn=null;
+		this.timepreferRdo=null;
+		this.confirmpreferbtn=null;
+		this.setdefaultbtn=null;
 		ChooseDeliveryTimePanelUI.__super.call(this);
 	}
 
@@ -56017,6 +56092,7 @@ var PackagePanelUI=(function(_super){
 		this.packagebox=null;
 		this.addpackbtn=null;
 		this.productlist=null;
+		this.timepreferRdo=null;
 		PackagePanelUI.__super.call(this);
 	}
 
@@ -61183,25 +61259,46 @@ var ChooseDelTimeOrderItem=(function(_super){
 				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].availableDate;
 				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].discount;
 			}
-			else if(result.newDateList !=null && result.newDateList !=""){
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=result.newDateList;
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn]={};
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=[];
-				for(var j=0;j < result.newDateList.length;j++){
-					if(result.newDateList[j].urgent==false){
-						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
-					}
-					else{
-						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate=result.newDateList[j];
-					}
-				}
+			else{
 				this.orderdata.is_urgent=0;
 				this.orderdata.delivery_date=null;
 				this.orderdata.discount=1;
-				this.resetDeliveryDates();
+				this.retryGetAvailableDate();
 			}
 			this.updatePrice();
 			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
+		}
+	}
+
+	__proto.retryGetAvailableDate=function(){
+		var datas=PaintOrderModel.instance.getSingleOrderItemCapcaityData(this.orderdata);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+				if(this.destroyed)
+					return;
+				this.resetDeliveryDates();
+			}
 		}
 	}
 
@@ -61228,26 +61325,11 @@ var ChooseDelTimeOrderItem=(function(_super){
 				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
 				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.discount;
 			}
-			else if(result.newDateList !=null && result.newDateList !=""){
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=result.newDateList;
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn]={};
-				PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList=[];
-				for(var j=0;j < result.newDateList.length;j++){
-					if(result.newDateList[j].urgent==false){
-						if(result.newDateList[j].discount==0)
-							result.newDateList[j].discount=1;
-						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList.push(result.newDateList[j]);
-					}
-					else{
-						if(result.newDateList[j].discount==0)
-							result.newDateList[j].discount=1;
-						PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate=result.newDateList[j];
-					}
-				}
+			else{
 				this.orderdata.is_urgent=0;
 				this.orderdata.delivery_date=null;
 				this.orderdata.discount=1;
-				this.resetDeliveryDates();
+				this.retryGetAvailableDate();
 			}
 			this.updatePrice();
 			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
@@ -62452,7 +62534,7 @@ var OrderCheckListItem=(function(_super){
 			delete itemlist[i].is_urgent;
 		}
 		PaintOrderModel.instance.finalOrderData=[orderinfo];
-		var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+		var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo,1);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
 	}
 

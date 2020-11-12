@@ -203,7 +203,7 @@ package script.usercenter
 			}
 			PaintOrderModel.instance.finalOrderData = [orderinfo];
 			
-			var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo);
+			var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo,1);
 			
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");

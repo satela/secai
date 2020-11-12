@@ -10,6 +10,7 @@ package ui.order {
 		public var packagebox:Box;
 		public var addpackbtn:Button;
 		public var productlist:List;
+		public var timepreferRdo:RadioGroup;
 
 		override protected function createChildren():void {
 			super.createChildren();

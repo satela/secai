@@ -58,6 +58,7 @@ package model.orderModel
 		
 		public var orderType:int;//当前下单类型 
 		
+		public var curTimePrefer:int = 0;//当前选择的交付策略
 		public function PaintOrderModel()
 		{
 		}
@@ -180,13 +181,7 @@ package model.orderModel
 			}
 		}
 		
-		public function getNeedCapcity(allprocess:Vector.<MaterialItem>,orgCode:String,orderitem:PicOrderItem):Number
-		{
-			
-			
-			return 0;
-			
-		}
+		
 		
 		public function getCapacityData(orgcode:String,procCode:String,matcode:String):Array
 		{
@@ -529,6 +524,22 @@ package model.orderModel
 			
 			return "";
 		}
+		
+		public function getSingleProductOrderData(orderitemsn:String):Object{
+			
+			var arr:Array = finalOrderData;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].orderItem_sn == orderitemsn)
+						return orderitems[j];
+				}
+			}
+			
+			return null;
+		}		
 		public function getDiscountByDate(delaydays:int):Number
 		{
 			return [1,0.95,0.9,0.85,0.8][delaydays];

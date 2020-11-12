@@ -8,6 +8,7 @@ package script.order
 	
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.PackageVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
 	
@@ -25,6 +26,7 @@ package script.order
 		
 		private var delaypay:Boolean = false;
 		
+		private var requestnum:int = 0;
 		public function ChooseDeliveryTimeControl()
 		{
 			super();
@@ -49,6 +51,10 @@ package script.order
 			uiSkin.savebtn.visible = !delaypay;
 			
 			uiSkin.orderlist.array = orderDatas;
+			
+			uiSkin.timepreferRdo.selectedIndex = PaintOrderModel.instance.curTimePrefer - 1;
+			
+			uiSkin.confirmpreferbtn.on(Event.CLICK,this,resetTimePrefer);
 			
 			var total:Number = 0;
 			for(var i:int=0;i < orderDatas.length;i++)
@@ -217,6 +223,81 @@ package script.order
 				}
 				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
 				
+			}
+		}
+		
+		private function resetTimePrefer():void
+		{
+			var arr:Array = PaintOrderModel.instance.finalOrderData;
+			
+			requestnum = 0;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				
+				PaintOrderModel.instance.curTimePrefer = uiSkin.timepreferRdo.selectedIndex + 1;
+				
+				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i],uiSkin.timepreferRdo.selectedIndex + 1);
+				
+				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAllAvailableDateBack,{data:datas},"post");
+				
+				
+			}
+			//ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,orderDatas);
+			//PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
+			
+		}
+		
+		private function ongetAllAvailableDateBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(!result.hasOwnProperty("status"))
+			{
+				var alldates:Array = result as Array;
+				for(var i:int=0;i < alldates.length;i++)
+				{
+					
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
+					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+					
+					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+					orderdata.delivery_date = null;
+					orderdata.is_urgent = false;
+					
+					var currentdate:String = alldates[i].current_date;
+					
+					if(orderdata != null && alldates[i].default_deliverydate != null && alldates[i].default_deliverydate != "")
+					{
+						orderdata.delivery_date = alldates[i].default_deliverydate;
+						
+						orderdata.is_urgent = orderdata.delivery_date == currentdate;
+					}
+					
+					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+					{
+						if(alldates[i].deliveryDateList[j].urgent == false)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						}
+						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
+						{
+							if(alldates[i].deliveryDateList[j].discount == 0)
+								alldates[i].deliveryDateList[j].discount = 1;
+							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+						}
+					}										
+					
+				}
+				requestnum++;
+				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
+				{
+					uiSkin.orderlist.array = orderDatas;
+					updatePrice();
+				}
 			}
 		}
 		

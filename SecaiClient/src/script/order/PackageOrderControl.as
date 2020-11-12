@@ -16,6 +16,8 @@ package script.order
 	import ui.order.PackageItemUI;
 	import ui.order.PackagePanelUI;
 	
+	import utils.UtilTool;
+	
 	public class PackageOrderControl extends Script
 	{
 		public function PackageOrderControl()
@@ -57,6 +59,11 @@ package script.order
 				
 			}
 			uiSkin.addpackbtn.on(Event.CLICK,this,addnewPack);
+			
+			var defaultPrefer:String = UtilTool.getLocalVar("timePrefer","0");
+
+			uiSkin.timepreferRdo.selectedIndex = parseInt(defaultPrefer);
+			
 			
 			addnewPack();
 			
@@ -171,7 +178,10 @@ package script.order
 			requestnum = 0;
 			for(var i:int=0;i < arr.length;i++)
 			{
-				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i],1);
+				
+				PaintOrderModel.instance.curTimePrefer = uiSkin.timepreferRdo.selectedIndex + 1;
+				
+				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i],uiSkin.timepreferRdo.selectedIndex + 1);
 				
 				
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
@@ -196,7 +206,16 @@ package script.order
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
 					
+					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+					
 					var currentdate:String = alldates[i].current_date;
+
+					if(orderdata != null && alldates[i].default_deliverydate != null && alldates[i].default_deliverydate != "")
+					{
+						orderdata.delivery_date = alldates[i].default_deliverydate;
+					
+						orderdata.is_urgent = orderdata.delivery_date == currentdate;
+					}
 
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
 					{
@@ -211,6 +230,7 @@ package script.order
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
 						}
 					}										

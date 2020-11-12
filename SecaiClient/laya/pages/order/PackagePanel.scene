@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":7,
-    "selecteID":45,
+    "selecteID":43,
     "searchKey":"View",
     "props":{"y":0,"x":0,"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":46,
+    "maxID":48,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -171,13 +171,41 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,productlist",
-                            "props":{"y":125,"x":0,"width":1280,"var":"productlist","vScrollBarSkin":"upload/vscroll.png","repeatX":1,"height":645},
+                            "props":{"y":125,"x":0,"width":1280,"var":"productlist","vScrollBarSkin":"upload/vscroll.png","repeatX":1,"height":589},
                             "nodeParent":7,
                             "label":"productlist",
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
                             "compId":43,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"RadioGroup",
+                            "searchKey":"RadioGroup,timepreferRdo",
+                            "props":{"y":733,"x":110,"var":"timepreferRdo","skin":"comp/radiogroup.png","labels":"加急当天,交期优先,省钱优先(5天内),省钱优先(4天内),省钱优先(3天内),省钱优先(2天内)","labelSize":20,"labelFont":"SimHei"},
+                            "nodeParent":7,
+                            "label":"timepreferRdo",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":46,
+                            "child":[
+                                ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label",
+                            "props":{"y":733,"x":11,"text":"交付策略:","fontSize":20,"font":"SimHei"},
+                            "nodeParent":7,
+                            "label":"Label",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":47,
                             "child":[
                                 ]
                         }]
