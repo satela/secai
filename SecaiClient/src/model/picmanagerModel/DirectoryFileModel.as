@@ -1,5 +1,10 @@
 package model.picmanagerModel
 {
+	import eventUtil.EventCenter;
+	
+	import model.HttpRequestUtil;
+	
+	import utils.UtilTool;
 	
 	public class DirectoryFileModel
 	{
@@ -99,6 +104,54 @@ package model.picmanagerModel
 			}
 			
 			return [0,0];
+		}
+		
+		public function setYingxingImg(picInfo:PicInfoVo):void
+		{
+			var num:int = 0;
+			
+			if(curOperateFile != null && !haselectPic.hasOwnProperty(curOperateFile.fid))
+			{
+				haselectPic[curOperateFile.fid] = curOperateFile;
+			}
+			for each(var picvo in haselectPic)
+			{
+				trace("nums:" + num++);
+				if(DirectoryFileModel.instance.curOperateSelType == 0 && UtilTool.isFitYixing(picvo,picInfo) && picvo.yixingFid == "0")
+				{
+					//trace("sel fid:" + this.picInfo.fid);
+					
+					var params:String = "fid=" + picvo.fid + "&fmaskid=" + picInfo.fid;							
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setYixingRelated,this,onSetRelatedBack,params,"post");
+					
+					DirectoryFileModel.instance.curOperateFile = null;
+					///EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+					
+				}
+				else if(DirectoryFileModel.instance.curOperateSelType == 1 && UtilTool.isFitFanmain(picvo,picInfo) && picvo.backFid == "0")
+				{
+					//trace("sel fid:" + this.picInfo.fid);
+				
+					var params:String = "fid=" + picvo.fid + "&fbackid=" + picInfo.fid;							
+					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setFanmianRelated,this,onSetRelatedBack,params,"post");
+					
+					DirectoryFileModel.instance.curOperateFile = null;
+					//EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+					
+				}
+			}
+		}
+		
+		private function onSetRelatedBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				trace("设置成功");
+				//ViewManager.showAlert("设置成功");
+				EventCenter.instance.event(EventCenter.UPDATE_FILE_LIST);
+				
+			}
 		}
 		
 	}

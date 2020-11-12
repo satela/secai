@@ -296,28 +296,34 @@ package script.picUpload
 					{
 						return;
 					}
-					if(DirectoryFileModel.instance.curOperateSelType == 0 && UtilTool.isFitYixing(DirectoryFileModel.instance.curOperateFile,this.picInfo))
-					{
-						//trace("sel fid:" + this.picInfo.fid);
-						
-						var params:String = "fid=" + DirectoryFileModel.instance.curOperateFile.fid + "&fmaskid=" + this.picInfo.fid;							
-						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setYixingRelated,this,onSetYixingBack,params,"post");
 					
-						DirectoryFileModel.instance.curOperateFile = null;
-						EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
-						
-					}
-					else if(DirectoryFileModel.instance.curOperateSelType == 1 && UtilTool.isFitFanmain(DirectoryFileModel.instance.curOperateFile,this.picInfo))
-					{
-						//trace("sel fid:" + this.picInfo.fid);
-						
-						var params:String = "fid=" + DirectoryFileModel.instance.curOperateFile.fid + "&fbackid=" + this.picInfo.fid;							
-						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setFanmianRelated,this,onSetFanmianBack,params,"post");
-						
-						DirectoryFileModel.instance.curOperateFile = null;
-						EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
-						
-					}
+					DirectoryFileModel.instance.setYingxingImg(this.picInfo);
+					
+					DirectoryFileModel.instance.curOperateFile = null;
+					EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+					
+//					if(DirectoryFileModel.instance.curOperateSelType == 0 && UtilTool.isFitYixing(DirectoryFileModel.instance.curOperateFile,this.picInfo))
+//					{
+//						//trace("sel fid:" + this.picInfo.fid);
+//						
+//						var params:String = "fid=" + DirectoryFileModel.instance.curOperateFile.fid + "&fmaskid=" + this.picInfo.fid;							
+//						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setYixingRelated,this,onSetYixingBack,params,"post");
+//					
+//						DirectoryFileModel.instance.curOperateFile = null;
+//						EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+//						
+//					}
+//					else if(DirectoryFileModel.instance.curOperateSelType == 1 && UtilTool.isFitFanmain(DirectoryFileModel.instance.curOperateFile,this.picInfo))
+//					{
+//						//trace("sel fid:" + this.picInfo.fid);
+//						
+//						var params:String = "fid=" + DirectoryFileModel.instance.curOperateFile.fid + "&fbackid=" + this.picInfo.fid;							
+//						HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setFanmianRelated,this,onSetFanmianBack,params,"post");
+//						
+//						DirectoryFileModel.instance.curOperateFile = null;
+//						EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+//						
+//					}
 					
 					return;
 

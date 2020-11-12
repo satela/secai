@@ -57,6 +57,10 @@ package script.usercenter
 			uiSkin.organizelist.array = temparr;
 			uiSkin.createOrganizePanel.visible = false;
 			
+			uiSkin.setAuthorityPanel.visible = false;
+			uiSkin.closeauthoritybtn.on(Event.CLICK,this,onCloseAuthorityPanel);
+			uiSkin.confirmauthoritybtn.on(Event.CLICK,this,updateMemberAuthority);
+
 			uiSkin.createOrganize.on(Event.CLICK,this,showCretePanel);
 			
 			uiSkin.organizeNameInput.maxChars = 20;
@@ -73,7 +77,10 @@ package script.usercenter
 			EventCenter.instance.on(EventCenter.DELETE_ORGANIZE_BACK,this,refreshOrganize);
 			EventCenter.instance.on(EventCenter.MOVE_MEMBER_DEPT,this,moveMember);
 			EventCenter.instance.on(EventCenter.DELETE_DEPT_MEMBER,this,refreshOrganizeMemebers);
+			
+			EventCenter.instance.on(EventCenter.SET_MEMEBER_AUTHORITY,this,setMemberAuthority);
 
+			
 
 		}
 		
@@ -184,6 +191,95 @@ package script.usercenter
 			
 		}
 		
+		private function setMemberAuthority(data:Object):void
+		{
+			curMemberdata = data;
+			
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrganizeMemberAuthority,this,onGetOrganizeMemberAuthBack,null,"post");
+
+			
+		}
+		
+		private function onGetOrganizeMemberAuthBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				if(curMemberdata)
+				{
+					if(result.users[curMemberdata.uid] != null)
+					{
+						curMemberdata.privileges = result.users[curMemberdata.uid].data;
+						
+						uiSkin.accoutname.text = "设置账号：" + curMemberdata.phonenumber + " 的权限";
+						uiSkin.setAuthorityPanel.visible = true;
+						for(var i:int=1;i < 6;i++)
+						{
+							
+							uiSkin["authorityRdo" + i].selectedIndex = getSinglePrivige(i)[i];
+						}
+					
+					}
+				
+				}
+				
+			}
+		}
+		
+		private function getSinglePrivige(type:int):Object
+		{
+			if(curMemberdata != null && curMemberdata.privileges != null)
+			{
+				for(var i:int=0;i < curMemberdata.privileges.length;i++)
+				{
+					if(curMemberdata.privileges[i].hasOwnProperty(type))
+					{
+						return curMemberdata.privileges[i];
+					}
+				}
+			}
+			
+			return null;
+		}
+		private function onCloseAuthorityPanel():void
+		{
+			uiSkin.setAuthorityPanel.visible = false;
+
+		}
+		
+		private function updateMemberAuthority():void
+		{
+			var postdata:Object = {};
+			postdata.uid = curMemberdata.uid;
+			
+			postdata.privilege = [];
+			for(var i:int=1;i < 6;i++)
+			{
+				var pri:Object = {};
+				pri[i] = uiSkin["authorityRdo" + i].selectedIndex.toString();
+				//pri.value = uiSkin["authorityRdo" + i].selectedIndex;
+				postdata.privilege.push(pri);
+			}
+			uiSkin.setAuthorityPanel.visible = false;
+
+			//var params:String = "dept=" + todept + "&uid=" + curMemberdata.uid;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.setOrganizeMemberAuthority,this,onUpdateOrganizeMemberAuthBack,"data=" + JSON.stringify(postdata),"post");
+		}
+		
+		private function onUpdateOrganizeMemberAuthBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				ViewManager.showAlert("设置成功");
+			}
+			else
+			{
+				ViewManager.showAlert("设置失败");
+
+			}
+		}
 		private function onCloseDistribute():void
 		{
 			uiSkin.distributePanel.visible = false;
@@ -235,6 +331,7 @@ package script.usercenter
 			EventCenter.instance.off(EventCenter.DELETE_ORGANIZE_BACK,this,refreshOrganize);
 			EventCenter.instance.off(EventCenter.MOVE_MEMBER_DEPT,this,moveMember);
 			EventCenter.instance.off(EventCenter.DELETE_DEPT_MEMBER,this,refreshOrganizeMemebers);
+			EventCenter.instance.off(EventCenter.SET_MEMEBER_AUTHORITY,this,setMemberAuthority);
 
 		}
 	}

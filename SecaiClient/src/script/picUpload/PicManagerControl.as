@@ -20,6 +20,7 @@ package script.picUpload
 	import ui.PicManagePanelUI;
 	
 	import utils.UtilTool;
+	import utils.WaitingRespond;
 	
 	public class PicManagerControl extends Script
 	{
@@ -303,7 +304,7 @@ package script.picUpload
 					file.files[i].progress = 0;
 					fileListData.push(file.files[i]);
 				}
-				
+				WaitingRespond.instance.showWaitingView(1000);
 				ViewManager.instance.openView(ViewManager.VIEW_MYPICPANEL,false,fileListData);
 			};
 			//			var fileReader:Object = new  Browser.window.FileReader();

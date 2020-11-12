@@ -19,6 +19,8 @@ package script.usercenter.item
 			
 			this.movebtn.on(Event.CLICK,this,onMoveMember);
 			this.deletebtn.on(Event.CLICK,this,onDeleteMember);
+			this.authoritytxt.on(Event.CLICK,this,onSetAuthority);
+
 
 		}
 		private function onDeleteMember():void
@@ -46,6 +48,12 @@ package script.usercenter.item
 			{
 				EventCenter.instance.event(EventCenter.DELETE_DEPT_MEMBER);
 			}
+		}
+		
+		private function onSetAuthority():void
+		{
+			EventCenter.instance.event(EventCenter.SET_MEMEBER_AUTHORITY,memberdata);
+
 		}
 		private function onMoveMember():void
 		{

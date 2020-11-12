@@ -122,6 +122,10 @@ package model
 		public static const getOrganizeMembers:String = "group/get-deptmember?";//获取组织里的人
 
 		public static const moveOrganizeMembers:String = "group/set-memberdept?";//移动组织里的人
+		
+		public static const setOrganizeMemberAuthority:String = "group/set-member-privilege?";//设置权限
+
+		public static const getOrganizeMemberAuthority:String = "group/get-members-privilege?";//获取权限
 
 		
 		public static const setYixingRelated:String = "file/set-mask-image?";//设置异形关联图片

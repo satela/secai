@@ -16,6 +16,15 @@ package ui.usercenter {
 		public var organizeNameInput:TextInput;
 		public var createBtnOk:Button;
 		public var btncloseCreate:Button;
+		public var setAuthorityPanel:Box;
+		public var confirmauthoritybtn:Button;
+		public var closeauthoritybtn:Button;
+		public var authorityRdo1:RadioGroup;
+		public var authorityRdo2:RadioGroup;
+		public var authorityRdo3:RadioGroup;
+		public var authorityRdo4:RadioGroup;
+		public var authorityRdo5:RadioGroup;
+		public var accoutname:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

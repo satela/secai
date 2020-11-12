@@ -111,17 +111,17 @@ package script
 			
 			Laya.stage.addChild(viewContainer);
 			
-			var screenHeight:int = window.screen.height;
-			var screenWidth:int = window.screen.width;
+			//var screenHeight:int = window.screen.height;
+			//var screenWidth:int = window.screen.width;
 			
 			//if(screenHeight < 1080)
 			//	viewContainer.scaleY = screenHeight/1080;
 			
-			if(screenWidth < 1920)
-			{
+			//if(screenWidth < 1920)
+			//{
 				//viewContainer.scaleX = screenWidth/1920;
 				//viewContainer.x = (1920 - screenWidth)/2;
-			}
+			//}
 
 			
 			openViewList = {};

@@ -714,7 +714,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/OrderItem.scene";
+	GameConfig.startScene="usercenter/OrganizeMgrPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1053,10 +1053,6 @@ var ViewManager=(function(){
 		this.viewDict=null;
 		this.viewContainer=new Sprite();
 		Laya.stage.addChild(this.viewContainer);
-		var screenHeight=window.screen.height;
-		var screenWidth=window.screen.width;
-		if(screenWidth < 1920){
-		}
 		this.openViewList={};
 		this.viewDict=new Object();
 		this.viewDict["VIEW_FIRST_PAGE"]=LoginViewUI;
@@ -1429,6 +1425,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2263,6 +2260,8 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.handleJoinOrganizeRequest="group/handle-req?";
 	HttpRequestUtil.getOrganizeMembers="group/get-deptmember?";
 	HttpRequestUtil.moveOrganizeMembers="group/set-memberdept?";
+	HttpRequestUtil.setOrganizeMemberAuthority="group/set-member-privilege?";
+	HttpRequestUtil.getOrganizeMemberAuthority="group/get-members-privilege?";
 	HttpRequestUtil.setYixingRelated="file/set-mask-image?";
 	HttpRequestUtil.setFanmianRelated="file/set-back-image?";
 	HttpRequestUtil.queryTransaction="account/listmoneylog";
@@ -3441,6 +3440,37 @@ var DirectoryFileModel=(function(){
 			}
 		}
 		return [0,0];
+	}
+
+	__proto.setYingxingImg=function(picInfo){
+		var num=0;
+		if(this.curOperateFile !=null && !this.haselectPic.hasOwnProperty(this.curOperateFile.fid)){
+			this.haselectPic[this.curOperateFile.fid]=this.curOperateFile;
+		}
+		var picvo;
+		for(var $each_picvo in this.haselectPic){
+			picvo=this.haselectPic[$each_picvo];
+			console.log("nums:"+num++);
+			if(model.picmanagerModel.DirectoryFileModel.instance.curOperateSelType==0 && UtilTool.isFitYixing(picvo,picInfo)&& picvo.yixingFid=="0"){
+				var params="fid="+picvo.fid+"&fmaskid="+picInfo.fid;
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-mask-image?",this,this.onSetRelatedBack,params,"post");
+				model.picmanagerModel.DirectoryFileModel.instance.curOperateFile=null;
+			}
+			else if(model.picmanagerModel.DirectoryFileModel.instance.curOperateSelType==1 && UtilTool.isFitFanmain(picvo,picInfo)&& picvo.backFid=="0"){
+				var params="fid="+picvo.fid+"&fbackid="+picInfo.fid;
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-back-image?",this,this.onSetRelatedBack,params,"post");
+				model.picmanagerModel.DirectoryFileModel.instance.curOperateFile=null;
+			}
+		}
+	}
+
+	//EventCenter.instance.event(EventCenter.STOP_SELECT_RELATE_PIC);
+	__proto.onSetRelatedBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			console.log("设置成功");
+			EventCenter.instance.event("UPDATE_FILE_LIST");
+		}
 	}
 
 	//0选择异形 1 选择反面
@@ -28099,6 +28129,7 @@ var EventCenter=(function(_super){
 	EventCenter.REFRESH_JOIN_REQUEST="REFRESH_JOIN_REQUEST";
 	EventCenter.MOVE_MEMBER_DEPT="MOVE_MEMBER_DEPT";
 	EventCenter.DELETE_DEPT_MEMBER="DELETE_DEPT_MEMBER";
+	EventCenter.SET_MEMEBER_AUTHORITY="SET_MEMEBER_AUTHORITY";
 	EventCenter.START_SELECT_YIXING_PIC="START_SELECT_YIXING_PIC";
 	EventCenter.STOP_SELECT_RELATE_PIC="STOP_SELECT_RELATE_PIC";
 	EventCenter.START_SELECT_BACK_PIC="START_SELECT_BACK_PIC";
@@ -35977,6 +36008,9 @@ var OrganizeMrgControl=(function(_super){
 		this.uiSkin.memberlist.array=temparr;
 		this.uiSkin.organizelist.array=temparr;
 		this.uiSkin.createOrganizePanel.visible=false;
+		this.uiSkin.setAuthorityPanel.visible=false;
+		this.uiSkin.closeauthoritybtn.on("click",this,this.onCloseAuthorityPanel);
+		this.uiSkin.confirmauthoritybtn.on("click",this,this.updateMemberAuthority);
 		this.uiSkin.createOrganize.on("click",this,this.showCretePanel);
 		this.uiSkin.organizeNameInput.maxChars=20;
 		this.uiSkin.createBtnOk.on("click",this,this.onConfirmCreateOrganize);
@@ -35989,6 +36023,7 @@ var OrganizeMrgControl=(function(_super){
 		EventCenter.instance.on("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
 		EventCenter.instance.on("MOVE_MEMBER_DEPT",this,this.moveMember);
 		EventCenter.instance.on("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
+		EventCenter.instance.on("SET_MEMEBER_AUTHORITY",this,this.setMemberAuthority);
 	}
 
 	__proto.onGetAllOrganizeBack=function(data){
@@ -36073,6 +36108,65 @@ var OrganizeMrgControl=(function(_super){
 	}
 
 	//trace("arr:"+arr.length);
+	__proto.setMemberAuthority=function(data){
+		this.curMemberdata=data;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-members-privilege?",this,this.onGetOrganizeMemberAuthBack,null,"post");
+	}
+
+	__proto.onGetOrganizeMemberAuthBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(this.curMemberdata){
+				if(result.users[this.curMemberdata.uid] !=null){
+					this.curMemberdata.privileges=result.users[this.curMemberdata.uid].data;
+					this.uiSkin.accoutname.text="设置账号："+this.curMemberdata.phonenumber+" 的权限";
+					this.uiSkin.setAuthorityPanel.visible=true;
+					for(var i=1;i < 6;i++){
+						this.uiSkin["authorityRdo"+i].selectedIndex=this.getSinglePrivige(i)[i];
+					}
+				}
+			}
+		}
+	}
+
+	__proto.getSinglePrivige=function(type){
+		if(this.curMemberdata !=null && this.curMemberdata.privileges !=null){
+			for(var i=0;i < this.curMemberdata.privileges.length;i++){
+				if(this.curMemberdata.privileges[i].hasOwnProperty(type)){
+					return this.curMemberdata.privileges[i];
+				}
+			}
+		}
+		return null;
+	}
+
+	__proto.onCloseAuthorityPanel=function(){
+		this.uiSkin.setAuthorityPanel.visible=false;
+	}
+
+	__proto.updateMemberAuthority=function(){
+		var postdata={};
+		postdata.uid=this.curMemberdata.uid;
+		postdata.privilege=[];
+		for(var i=1;i < 6;i++){
+			var pri={};
+			pri[i]=this.uiSkin["authorityRdo"+i].selectedIndex.toString();
+			postdata.privilege.push(pri);
+		}
+		this.uiSkin.setAuthorityPanel.visible=false;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-member-privilege?",this,this.onUpdateOrganizeMemberAuthBack,"data="+JSON.stringify(postdata),"post");
+	}
+
+	__proto.onUpdateOrganizeMemberAuthBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("设置成功");
+		}
+		else{
+			ViewManager.showAlert("设置失败");
+		}
+	}
+
 	__proto.onCloseDistribute=function(){
 		this.uiSkin.distributePanel.visible=false;
 	}
@@ -36115,6 +36209,7 @@ var OrganizeMrgControl=(function(_super){
 		EventCenter.instance.off("DELETE_ORGANIZE_BACK",this,this.refreshOrganize);
 		EventCenter.instance.off("MOVE_MEMBER_DEPT",this,this.moveMember);
 		EventCenter.instance.off("DELETE_DEPT_MEMBER",this,this.refreshOrganizeMemebers);
+		EventCenter.instance.off("SET_MEMEBER_AUTHORITY",this,this.setMemberAuthority);
 	}
 
 	return OrganizeMrgControl;
@@ -37193,6 +37288,7 @@ var PicManagerControl=(function(_super){
 				_$this.file.files[i].progress=0;
 				_$this.fileListData.push(_$this.file.files[i]);
 			}
+			WaitingRespond.instance.showWaitingView(1000);
 			ViewManager.instance.openView("VIEW_MYPICPANEL",false,_$this.fileListData);
 		};
 	}
@@ -54754,6 +54850,7 @@ var OrganizeMemberItemUI=(function(_super){
 		this.jointime=null;
 		this.deletebtn=null;
 		this.movebtn=null;
+		this.authoritytxt=null;
 		OrganizeMemberItemUI.__super.call(this);
 	}
 
@@ -54764,7 +54861,7 @@ var OrganizeMemberItemUI=(function(_super){
 		this.createView(OrganizeMemberItemUI.uiView);
 	}
 
-	OrganizeMemberItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":706,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"jointime","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"踢除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"movebtn","text":"移动","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrganizeMemberItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":773,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"nickname","valign":"middle","text":"张三","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"account","valign":"middle","text":"13568986989","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":176,"var":"jointime","valign":"middle","text":"2020-05-12 12:00:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Text","props":{"y":3,"x":658,"var":"deletebtn","text":"踢除","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":618,"var":"movebtn","text":"移动","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]},{"type":"Text","props":{"y":3,"x":698,"var":"authoritytxt","text":"权限设置","presetID":1,"fontSize":16,"font":"SimHei","color":"#189ae3","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":15,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":16}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrganizeMemberItemUI;
 })(View)
 
@@ -55004,6 +55101,15 @@ var OrganizeMgrPanelUI=(function(_super){
 		this.organizeNameInput=null;
 		this.createBtnOk=null;
 		this.btncloseCreate=null;
+		this.setAuthorityPanel=null;
+		this.confirmauthoritybtn=null;
+		this.closeauthoritybtn=null;
+		this.authorityRdo1=null;
+		this.authorityRdo2=null;
+		this.authorityRdo3=null;
+		this.authorityRdo4=null;
+		this.authorityRdo5=null;
+		this.accoutname=null;
 		OrganizeMgrPanelUI.__super.call(this);
 	}
 
@@ -61497,6 +61603,7 @@ var MemberItem=(function(_super){
 		MemberItem.__super.call(this);
 		this.movebtn.on("click",this,this.onMoveMember);
 		this.deletebtn.on("click",this,this.onDeleteMember);
+		this.authoritytxt.on("click",this,this.onSetAuthority);
 	}
 
 	__class(MemberItem,'script.usercenter.item.MemberItem',_super);
@@ -61517,6 +61624,10 @@ var MemberItem=(function(_super){
 		if(result.status==0){
 			EventCenter.instance.event("DELETE_DEPT_MEMBER");
 		}
+	}
+
+	__proto.onSetAuthority=function(){
+		EventCenter.instance.event("SET_MEMEBER_AUTHORITY",this.memberdata);
 	}
 
 	__proto.onMoveMember=function(){
@@ -62926,18 +63037,9 @@ var PicInfoItem=(function(_super){
 				if(DirectoryFileModel.instance.curOperateFile.fid==this.picInfo.fid){
 					return;
 				}
-				if(DirectoryFileModel.instance.curOperateSelType==0 && UtilTool.isFitYixing(DirectoryFileModel.instance.curOperateFile,this.picInfo)){
-					var params="fid="+DirectoryFileModel.instance.curOperateFile.fid+"&fmaskid="+this.picInfo.fid;
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-mask-image?",this,this.onSetYixingBack,params,"post");
-					DirectoryFileModel.instance.curOperateFile=null;
-					EventCenter.instance.event("STOP_SELECT_RELATE_PIC");
-				}
-				else if(DirectoryFileModel.instance.curOperateSelType==1 && UtilTool.isFitFanmain(DirectoryFileModel.instance.curOperateFile,this.picInfo)){
-					var params="fid="+DirectoryFileModel.instance.curOperateFile.fid+"&fbackid="+this.picInfo.fid;
-					HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"file/set-back-image?",this,this.onSetFanmianBack,params,"post");
-					DirectoryFileModel.instance.curOperateFile=null;
-					EventCenter.instance.event("STOP_SELECT_RELATE_PIC");
-				}
+				DirectoryFileModel.instance.setYingxingImg(this.picInfo);
+				DirectoryFileModel.instance.curOperateFile=null;
+				EventCenter.instance.event("STOP_SELECT_RELATE_PIC");
 				return;
 			}
 			if(!DirectoryFileModel.instance.haselectPic.hasOwnProperty(this.picInfo.fid)){
