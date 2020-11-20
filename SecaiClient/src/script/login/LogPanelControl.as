@@ -118,6 +118,7 @@ package script.login
 				Userdata.instance.isLogin = true;
 				Userdata.instance.userAccount = uiSKin.input_account.text;
 				Userdata.instance.accountType = result.usertype;
+				Userdata.instance.privilege = result.priv;
 
 				//ViewManager.showAlert("登陆成功");
 				EventCenter.instance.event(EventCenter.LOGIN_SUCESS, uiSKin.input_account.text);

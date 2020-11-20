@@ -8,6 +8,7 @@ package script.order
 	import laya.events.Event;
 	import laya.utils.Browser;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
@@ -32,7 +33,10 @@ package script.order
 			uiSkin.payall.selected = true;
 			
 			//if(Userdata.instance.accountType == 1)
-				uiSkin.paytype.selectedIndex = 0 ;
+			uiSkin.paytype.selectedIndex = 0 ;
+			
+			if(Userdata.instance.accountType == Constast.ACCOUNT_EMPLOYEE && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_SCAN] == "0" && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_AMOUNT] == "1")
+				uiSkin.paytype.selectedIndex = 1;
 //			else
 //			{
 //				uiSkin.paytype.selectedIndex = 1 ;
@@ -44,8 +48,13 @@ package script.order
 			uiSkin.needpay.text = param.amount + "元";
 			uiSkin.realpay.text =  param.amount + "元";
 			
-			//uiSkin.needpay.visible = Userdata.instance.accountType == 1;
-			//uiSkin.realpay.visible = Userdata.instance.accountType == 1;
+			//uiSkin.needpay.visible = !Userdata.instance.isHidePrice();
+			//uiSkin.realpay.visible = !Userdata.instance.isHidePrice();
+			if(Userdata.instance.isHidePrice())
+			{
+				uiSkin.needpay.text = "****";
+				uiSkin.realpay.text = "****";
+			}
 
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
@@ -74,9 +83,12 @@ package script.order
 			var result:Object = JSON.parse(data as String);
 			if(result.status == 0)
 			{
+				
 				Userdata.instance.money = Number(result.balance);
 				uiSkin.accountmoney.text = Userdata.instance.money.toString() + "元";
 				
+				if(Userdata.instance.isHidePrice())
+					uiSkin.accountmoney.text = "****";
 			}
 		}	
 		private function onPayOrder():void
@@ -85,12 +97,23 @@ package script.order
 
 			if(uiSkin.paytype.selectedIndex == 0)
 			{
+				if(Userdata.instance.accountType == Constast.ACCOUNT_EMPLOYEE && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_SCAN] == "0" || Userdata.instance.isHidePrice())
+				{
+					ViewManager.showAlert("您没有在线支付的权限,请联系管理者开放权限");
+					return;
+				}
 				Browser.window.open("about:self","_self").location.href = HttpRequestUtil.httpUrl + HttpRequestUtil.chargeRequest + "amount=0&orderid=" + param.orderid;
 				//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
 				//Browser.window.open(HttpRequestUtil.httpUrl + HttpRequestUtil.chargeRequest + "amount=0&orderid=" + param.orderid,"_blank"); 
 			}
 			else
 			{
+				if(Userdata.instance.accountType == Constast.ACCOUNT_EMPLOYEE && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_AMOUNT] == "0")
+				{
+					ViewManager.showAlert("您没有余额支付的权限,请联系管理者开放权限");
+					return;
+				}
+				
 				if(Userdata.instance.money < param.amount)
 				{
 					ViewManager.showAlert("余额不足");

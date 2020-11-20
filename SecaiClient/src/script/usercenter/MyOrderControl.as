@@ -9,6 +9,7 @@ package script.usercenter
 	import laya.utils.Handler;
 	
 	import model.HttpRequestUtil;
+	import model.Userdata;
 	
 	import script.ViewManager;
 	
@@ -377,6 +378,9 @@ package script.usercenter
 					uiSkin.ordertotalMoney.text = result.amount + "元";
 				else
 					uiSkin.ordertotalMoney.text = "0元";
+				
+				if(Userdata.instance.isHidePrice())
+					uiSkin.ordertotalMoney.text = "****";
 				
 				uiSkin.pagenum.text = curpage + "/" + totalPage;
 				uiSkin.orderList.array = (result.data as Array);

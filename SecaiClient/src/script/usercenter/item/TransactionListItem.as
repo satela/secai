@@ -1,6 +1,7 @@
 package script.usercenter.item
 {
 	import model.Constast;
+	import model.Userdata;
 	
 	import ui.usercenter.TransactionItemUI;
 	
@@ -17,6 +18,9 @@ package script.usercenter.item
 			this.transtime.text = data.date;
 			
 			this.amounttxt.text = data.amount + "";
+			
+			if(Userdata.instance.isHidePrice())
+				this.amounttxt.text = "****";
 			
 			this.orderinfo.text = "";
 			if(data.orid != "0")

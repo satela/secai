@@ -212,6 +212,8 @@ package script.usercenter
 			{
 				Userdata.instance.money = Number(result.balance);
 				uiSkin.moneytxt.text = Userdata.instance.money.toString() + "元";
+				if(Userdata.instance.isHidePrice())
+					uiSkin.moneytxt.text = "****";
 				
 				uiSkin.input_companyname.text = result.name;
 				uiSkin.detail_addr.text = result.addr;

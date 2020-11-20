@@ -173,9 +173,9 @@ package script.order
 //				trace(data);
 //			});
 			
-			//uiSkin.textTotalPrice.visible = Userdata.instance.accountType == 1;
-			//uiSkin.textDeliveryType.visible = Userdata.instance.accountType == 1;
-			//uiSkin.textPayPrice.visible = Userdata.instance.accountType == 1;
+			uiSkin.textTotalPrice.visible = !Userdata.instance.isHidePrice();
+			uiSkin.textDeliveryType.visible = !Userdata.instance.isHidePrice();
+			uiSkin.textPayPrice.visible = !Userdata.instance.isHidePrice();
 
 			
 			PaintOrderModel.instance.selectAddress = null;

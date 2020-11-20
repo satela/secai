@@ -33,6 +33,7 @@ package model
 		public var accountType:int = 0;//1 公司创建者  0 公司职员
 		
 	
+		public var privilege:Object;//用户权限
 		public static function get instance():Userdata
 		{
 			if(_instance == null)
@@ -137,6 +138,16 @@ package model
 			}
 			
 			return validAddList[0];
+		}
+		
+		public function isHidePrice():Boolean
+		{
+			if(accountType == Constast.ACCOUNT_CREATER)
+				return false;
+			if(accountType == Constast.ACCOUNT_EMPLOYEE && privilege[Constast.PRIVILEGE_HIDE_PRICE] == "1")
+				return true;
+			else
+				return false;
 		}
 	}
 }

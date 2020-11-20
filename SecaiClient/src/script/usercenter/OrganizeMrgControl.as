@@ -217,7 +217,7 @@ package script.usercenter
 						for(var i:int=1;i < 6;i++)
 						{
 							
-							uiSkin["authorityRdo" + i].selectedIndex = getSinglePrivige(i)[i];
+							uiSkin["authorityRdo" + i].selectedIndex =  parseInt(curMemberdata.privileges[i]);
 						}
 					
 					}
@@ -227,21 +227,7 @@ package script.usercenter
 			}
 		}
 		
-		private function getSinglePrivige(type:int):Object
-		{
-			if(curMemberdata != null && curMemberdata.privileges != null)
-			{
-				for(var i:int=0;i < curMemberdata.privileges.length;i++)
-				{
-					if(curMemberdata.privileges[i].hasOwnProperty(type))
-					{
-						return curMemberdata.privileges[i];
-					}
-				}
-			}
-			
-			return null;
-		}
+		
 		private function onCloseAuthorityPanel():void
 		{
 			uiSkin.setAuthorityPanel.visible = false;
@@ -253,13 +239,13 @@ package script.usercenter
 			var postdata:Object = {};
 			postdata.uid = curMemberdata.uid;
 			
-			postdata.privilege = [];
+			postdata.privilege = {};
 			for(var i:int=1;i < 6;i++)
 			{
-				var pri:Object = {};
-				pri[i] = uiSkin["authorityRdo" + i].selectedIndex.toString();
+				//var pri:Object = {};
+				postdata.privilege[i] = uiSkin["authorityRdo" + i].selectedIndex.toString();
 				//pri.value = uiSkin["authorityRdo" + i].selectedIndex;
-				postdata.privilege.push(pri);
+				//postdata.privilege.push(pri);
 			}
 			uiSkin.setAuthorityPanel.visible = false;
 

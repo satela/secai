@@ -4,6 +4,7 @@ package script.usercenter
 	import laya.events.Event;
 	import laya.utils.Browser;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
@@ -27,7 +28,7 @@ package script.usercenter
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
 
-			uiSkin.moneytxt.text = "0";
+			uiSkin.moneytxt.text = "--";
 			//uiSkin.moneytxt.text = Userdata.instance.money.toString();
 			
 			uiSkin.chargeinput.restrict = "0-9" + ".";
@@ -47,6 +48,12 @@ package script.usercenter
 			if(uiSkin.chargeinput.text == "0")
 			{
 				ViewManager.showAlert("充值金额不能为0");
+			}
+			
+			if(Userdata.instance.accountType == Constast.ACCOUNT_EMPLOYEE && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_SCAN] == "0")
+			{
+				ViewManager.showAlert("您没有充值的权限,请联系管理者开放权限");
+				return;
 			}
 			
 			var num:Number = Number(uiSkin.chargeinput.text);
@@ -74,6 +81,8 @@ package script.usercenter
 				Userdata.instance.money = Number(result.balance);
 				
 				uiSkin.moneytxt.text = Userdata.instance.money.toString();
+				if(Userdata.instance.isHidePrice())
+					uiSkin.moneytxt.text = "****";
 
 			}
 		}

@@ -714,7 +714,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/OrganizeMgrPanel.scene";
+	GameConfig.startScene="PicManagePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1425,7 +1425,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1495,6 +1494,11 @@ var Constast=(function(){
 	__class(Constast,'model.Constast');
 	Constast.ACCOUNT_CREATER=1;
 	Constast.ACCOUNT_EMPLOYEE=0;
+	Constast.PRIVILEGE_PAYORDER_BY_SCAN=1;
+	Constast.PRIVILEGE_PAYORDER_BY_AMOUNT=2;
+	Constast.PRIVILEGE_HIDE_PRICE=3;
+	Constast.PRIVILEGE_CHECK_ORDERS=4;
+	Constast.PRIVILEGE_CHECK_TRANSACTION=5;
 	__static(Constast,
 	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款"];}
 	]);
@@ -1807,6 +1811,8 @@ var Userdata=(function(){
 		this.defaultAddrid="0";
 		this.loginTime=0;
 		this.accountType=0;
+		//1 公司创建者 0 公司职员
+		this.privilege=null;
 	}
 
 	__class(Userdata,'model.Userdata');
@@ -1870,6 +1876,15 @@ var Userdata=(function(){
 		return validAddList[0];
 	}
 
+	__proto.isHidePrice=function(){
+		if(this.accountType==1)
+			return false;
+		if(this.accountType==0 && this.privilege[3]=="1")
+			return true;
+		else
+		return false;
+	}
+
 	__getset(0,__proto,'passedAddress',function(){
 		if(this.addressList==null || this.addressList.length==0)
 			return [];
@@ -1883,7 +1898,7 @@ var Userdata=(function(){
 		}
 	});
 
-	//1 公司创建者 0 公司职员
+	//用户权限
 	__getset(1,Userdata,'instance',function(){
 		if(Userdata._instance==null)
 			Userdata._instance=new Userdata();
@@ -2247,7 +2262,6 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.cancelExceptOrder="group/cancel-exception-order?";
 	HttpRequestUtil.payExceptOrder="group/pay-exception-order?";
 	HttpRequestUtil.chargeRequest="group/recharge?";
-	HttpRequestUtil.orderOnlinePay="group/recharge?";
 	HttpRequestUtil.payOrderByMoney="group/pay-order?";
 	HttpRequestUtil.checkOrderList="business/list-order?";
 	HttpRequestUtil.getOrderRecordList="account/listorder?";
@@ -35834,6 +35848,7 @@ var MainPageControl=(function(_super){
 			Userdata.instance.userAccount=account;
 			Userdata.instance.isLogin=true;
 			Userdata.instance.accountType=result.usertype;
+			Userdata.instance.privilege=result.priv;
 			this.txtLogin.text=account;
 			this.txtReg.text="[退出]";
 			console.log(Browser.document.cookie.split("; "));
@@ -36122,22 +36137,11 @@ var OrganizeMrgControl=(function(_super){
 					this.uiSkin.accoutname.text="设置账号："+this.curMemberdata.phonenumber+" 的权限";
 					this.uiSkin.setAuthorityPanel.visible=true;
 					for(var i=1;i < 6;i++){
-						this.uiSkin["authorityRdo"+i].selectedIndex=this.getSinglePrivige(i)[i];
+						this.uiSkin["authorityRdo"+i].selectedIndex=parseInt(this.curMemberdata.privileges[i]);
 					}
 				}
 			}
 		}
-	}
-
-	__proto.getSinglePrivige=function(type){
-		if(this.curMemberdata !=null && this.curMemberdata.privileges !=null){
-			for(var i=0;i < this.curMemberdata.privileges.length;i++){
-				if(this.curMemberdata.privileges[i].hasOwnProperty(type)){
-					return this.curMemberdata.privileges[i];
-				}
-			}
-		}
-		return null;
 	}
 
 	__proto.onCloseAuthorityPanel=function(){
@@ -36147,11 +36151,9 @@ var OrganizeMrgControl=(function(_super){
 	__proto.updateMemberAuthority=function(){
 		var postdata={};
 		postdata.uid=this.curMemberdata.uid;
-		postdata.privilege=[];
+		postdata.privilege={};
 		for(var i=1;i < 6;i++){
-			var pri={};
-			pri[i]=this.uiSkin["authorityRdo"+i].selectedIndex.toString();
-			postdata.privilege.push(pri);
+			postdata.privilege[i]=this.uiSkin["authorityRdo"+i].selectedIndex.toString();
 		}
 		this.uiSkin.setAuthorityPanel.visible=false;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/set-member-privilege?",this,this.onUpdateOrganizeMemberAuthBack,"data="+JSON.stringify(postdata),"post");
@@ -36340,8 +36342,9 @@ var UserMainControl=(function(_super){
 		if(Userdata.instance.accountType !=1){
 			this.uiSkin.btntxt9.removeSelf();
 			this.uiSkin.btntxt10.removeSelf();
-			this.uiSkin.btntxt6.removeSelf();
 		}
+		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[5]=="0")
+			this.uiSkin.btntxt6.removeSelf();
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
 		EventCenter.instance.on("PAUSE_SCROLL_VIEW",this,this.onPauseScroll);
 		EventCenter.instance.on("SHOW_CHARGE_VIEW",this,this.showCharge);
@@ -36533,6 +36536,7 @@ var LogPanelControl=(function(_super){
 			Userdata.instance.isLogin=true;
 			Userdata.instance.userAccount=this.uiSKin.input_account.text;
 			Userdata.instance.accountType=result.usertype;
+			Userdata.instance.privilege=result.priv;
 			EventCenter.instance.event("LOGIN_SUCESS",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("useraccount",this.uiSKin.input_account.text);
 			UtilTool.setLocalVar("userpwd",this.uiSKin.input_pwd.text);
@@ -37573,6 +37577,9 @@ var TransactionControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
 			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
+			if(Userdata.instance.isHidePrice()){
+				this.uiSkin.moneytxt.text="****";
+			}
 		}
 	}
 
@@ -37624,6 +37631,10 @@ var TransactionControl=(function(_super){
 			this.uiSkin.transactionlist.array=(result.data);
 			this.uiSkin.payamount.text=result.outamount+"元";
 			this.uiSkin.reatryamount.text=result.inamount+"元";
+			if(Userdata.instance.isHidePrice()){
+				this.uiSkin.payamount.text="****";
+				this.uiSkin.reatryamount.text="****";
+			}
 		}
 		else
 		ViewManager.showAlert("获取账单失败");
@@ -37791,6 +37802,9 @@ var PaintOrderControl=(function(_super){
 		this.uiSkin.panelout.on("dragmove",this,this.onDragMove);
 		if(Userdata.instance.company==null || Userdata.instance.company=="")
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,this.getCompanyInfo,null,"post");
+		this.uiSkin.textTotalPrice.visible=!Userdata.instance.isHidePrice();
+		this.uiSkin.textDeliveryType.visible=!Userdata.instance.isHidePrice();
+		this.uiSkin.textPayPrice.visible=!Userdata.instance.isHidePrice();
 		PaintOrderModel.instance.selectAddress=null;
 		this.resetOrderInfo();
 		if(Userdata.instance.getDefaultAddress()!=null){
@@ -38395,9 +38409,15 @@ var PayTypeSelectControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.payall.selected=true;
 		this.uiSkin.paytype.selectedIndex=0;
+		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0" && Userdata.instance.privilege[2]=="1")
+			this.uiSkin.paytype.selectedIndex=1;
 		this.uiSkin.accountmoney.text="0元";
 		this.uiSkin.needpay.text=this.param.amount+"元";
 		this.uiSkin.realpay.text=this.param.amount+"元";
+		if(Userdata.instance.isHidePrice()){
+			this.uiSkin.needpay.text="****";
+			this.uiSkin.realpay.text="****";
+		}
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
 		this.uiSkin.paybtn.on("click",this,this.onPayOrder);
 		this.uiSkin.cancelbtn.on("click",this,this.onCancel);
@@ -38418,15 +38438,25 @@ var PayTypeSelectControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
 			this.uiSkin.accountmoney.text=Userdata.instance.money.toString()+"元";
+			if(Userdata.instance.isHidePrice())
+				this.uiSkin.accountmoney.text="****";
 		}
 	}
 
 	__proto.onPayOrder=function(){
 		var ordrid=(this.param.orderid).join(",");
 		if(this.uiSkin.paytype.selectedIndex==0){
+			if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0" || Userdata.instance.isHidePrice()){
+				ViewManager.showAlert("您没有在线支付的权限,请联系管理者开放权限");
+				return;
+			}
 			Browser.window.open("about:self","_self").location.href=HttpRequestUtil.httpUrl+"group/recharge?"+"amount=0&orderid="+this.param.orderid;
 		}
 		else{
+			if(Userdata.instance.accountType==0 && Userdata.instance.privilege[2]=="0"){
+				ViewManager.showAlert("您没有余额支付的权限,请联系管理者开放权限");
+				return;
+			}
 			if(Userdata.instance.money < this.param.amount){
 				ViewManager.showAlert("余额不足");
 				return;
@@ -39946,7 +39976,7 @@ var ChargeControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.accout.text=Userdata.instance.userAccount;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
-		this.uiSkin.moneytxt.text="0";
+		this.uiSkin.moneytxt.text="--";
 		this.uiSkin.chargeinput.restrict="0-9"+".";
 		this.uiSkin.chargeinput.maxChars=8;
 		this.uiSkin.tyepgrp.selectedIndex=0;
@@ -39959,6 +39989,10 @@ var ChargeControl=(function(_super){
 		}
 		if(this.uiSkin.chargeinput.text=="0"){
 			ViewManager.showAlert("充值金额不能为0");
+		}
+		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0"){
+			ViewManager.showAlert("您没有充值的权限,请联系管理者开放权限");
+			return;
 		};
 		var num=Number(this.uiSkin.chargeinput.text);
 		Browser.window.open(HttpRequestUtil.httpUrl+"group/recharge?"+"amount="+num+"&orderid=0",null,null,true);
@@ -39977,6 +40011,8 @@ var ChargeControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
 			this.uiSkin.moneytxt.text=Userdata.instance.money.toString();
+			if(Userdata.instance.isHidePrice())
+				this.uiSkin.moneytxt.text="****";
 		}
 	}
 
@@ -41478,6 +41514,8 @@ var EnterPrizeInfoControl=(function(_super){
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
 			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
+			if(Userdata.instance.isHidePrice())
+				this.uiSkin.moneytxt.text="****";
 			this.uiSkin.input_companyname.text=result.name;
 			this.uiSkin.detail_addr.text=result.addr;
 			this.uiSkin.reditcode.text=result.license
@@ -42035,6 +42073,8 @@ var MyOrderControl=(function(_super){
 				this.uiSkin.ordertotalMoney.text=result.amount+"元";
 			else
 			this.uiSkin.ordertotalMoney.text="0元";
+			if(Userdata.instance.isHidePrice())
+				this.uiSkin.ordertotalMoney.text="****";
 			this.uiSkin.pagenum.text=this.curpage+"/"+this.totalPage;
 			this.uiSkin.orderList.array=(result.data);
 		}
@@ -55038,6 +55078,8 @@ var QuestOrderItem=(function(_super){
 		}
 		this.tech.text=techstr.substr(0,techstr.length-1);
 		this.money.text=(Number(orderdata.item_priceStr)*Number(orderdata.item_number)).toFixed(2);
+		if(Userdata.instance.isHidePrice())
+			this.money.text="****";
 		if(orderdata.filename !=null)
 			this.filename.text=orderdata.filename;
 		else
@@ -56411,6 +56453,7 @@ var PicOrderItem=(function(_super){
 		this.addmsg.underlineColor="#222222";
 		this.price.text="0";
 		this.addmsg.on("click",this,this.onAddComment);
+		this.total.visible=!Userdata.instance.isHidePrice();
 		this.mattxt.text="";
 		this.changemat.underline=true;
 		this.changemat.underlineColor="#222222";
@@ -62237,6 +62280,8 @@ var TransactionListItem=(function(_super){
 		this.transtype.text=Constast.TYPE_NAME[data.type];
 		this.transtime.text=data.date;
 		this.amounttxt.text=data.amount+"";
+		if(Userdata.instance.isHidePrice())
+			this.amounttxt.text="****";
 		this.orderinfo.text="";
 		if(data.orid !="0")
 			this.orderinfo.text="订单号:"+data.orid;
@@ -62604,6 +62649,8 @@ var OrderCheckListItem=(function(_super){
 			var detail=JSON.parse(this.orderdata.or_text);
 			this.paymoney.text=Number(detail.money_paidStr).toFixed(2);
 			this.productnum.text=detail.orderItemList.length+"";
+			if(Userdata.instance.isHidePrice())
+				this.paymoney.text="****";
 			this.detailbtn.on("click",this,this.onShowDetail);
 			this.deletebtn.on("click",this,this.onClickDelete);
 			this.payagain.on("click",this,this.onClickPay);

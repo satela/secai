@@ -132,6 +132,7 @@ package script {
 				Userdata.instance.userAccount = account;
 				Userdata.instance.isLogin = true;
 				Userdata.instance.accountType = result.usertype;
+				Userdata.instance.privilege = result.priv;
 				
 				txtLogin.text =  account;
 				txtReg.text = "[退出]";

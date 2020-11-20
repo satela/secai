@@ -88,6 +88,8 @@ package script.usercenter
 				this.paymoney.text = Number(detail.money_paidStr).toFixed(2);
 				this.productnum.text = detail.orderItemList.length + "";
 				
+				if(Userdata.instance.isHidePrice())
+					this.paymoney.text = "****";
 				//this.paymoney.visible = Userdata.instance.accountType == 1;
 				
 				this.detailbtn.on(Event.CLICK,this,onShowDetail);

@@ -96,7 +96,7 @@ package script.order
 			this.addmsg.on(Event.CLICK,this,onAddComment);
 			
 			//this.price.visible = Userdata.instance.accountType == 1;
-			//this.total.visible = Userdata.instance.accountType == 1;
+			this.total.visible = !Userdata.instance.isHidePrice();
 			
 			this.mattxt.text = "";
 			this.changemat.underline = true;

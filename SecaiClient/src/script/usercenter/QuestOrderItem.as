@@ -50,7 +50,8 @@ package script.usercenter
 			
 			this.money.text = (Number(orderdata.item_priceStr) * Number(orderdata.item_number)).toFixed(2);
 			
-			//this.money.visible = Userdata.instance.accountType == 1;
+			if(Userdata.instance.isHidePrice())
+				this.money.text = "****";
 			
 			if(orderdata.filename != null)
 				this.filename.text = orderdata.filename;

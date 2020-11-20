@@ -88,7 +88,10 @@ package script.usercenter
 				Userdata.instance.money = Number(result.balance);
 				
 				uiSkin.moneytxt.text = Userdata.instance.money.toString() + "元";
-				
+				if(Userdata.instance.isHidePrice())
+				{
+					uiSkin.moneytxt.text = "****";
+				}
 			}
 		}
 		
@@ -160,6 +163,13 @@ package script.usercenter
 				uiSkin.payamount.text = result.outamount + "元";
 				uiSkin.reatryamount.text = result.inamount + "元";
 
+				
+				if(Userdata.instance.isHidePrice())
+				{
+					uiSkin.payamount.text = "****";
+					uiSkin.reatryamount.text = "****";
+
+				}
 				
 			}
 			else

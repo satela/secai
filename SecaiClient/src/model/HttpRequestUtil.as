@@ -96,7 +96,7 @@ package model
 		
 		public static const chargeRequest:String = "group/recharge?";//账户充值
 		
-		public static const orderOnlinePay:String = "group/recharge?";//订单在线支付  orderid 在线支付 
+		//public static const orderOnlinePay:String = "group/recharge?";//订单在线支付  orderid 在线支付 
 
 		public static const payOrderByMoney:String = "group/pay-order?";//余额支付orderid
 
