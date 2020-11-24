@@ -40,12 +40,17 @@ package script.order
 			
 			//updatePrice();
 			
+			if(this["deltime"+index].selected)
+				return;
+			
+			resetDeliveryTime();
 
 			var manucode:String = PaintOrderModel.instance.getManufacturerCode(orderdata.orderItem_sn);
 			
 			curselectIndex = index;
 			
 			var deliverydate:String = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList[index].availableDate;
+			
 
 			var params:String = "orderItem_sn=" + orderdata.orderItem_sn + "&manufacturer_code=" + manucode + "&prod_code=" + orderdata.prod_code + "&is_urgent=0&delivery_date=" + deliverydate;
 			
@@ -54,6 +59,24 @@ package script.order
 			
 		}
 		
+		private function resetDeliveryTime():void
+		{
+			orderdata.is_urgent = false;
+			orderdata.delivery_date = null;
+			
+			orderdata.outtime = false;
+			orderdata.lefttime = 0;
+			
+			orderdata.discount = 1;
+			
+			for(var i:int=0;i < 5;i++)
+			{
+				this["deltime"+i].selected = false;
+			}
+			
+			this.urgentcheck.selected = false;
+			this.urgentcheck.disabled = false;
+		}
 		private function onOccupyCapacityBack(data:*):void
 		{
 			var result:Object = JSON.parse(data);
@@ -166,6 +189,7 @@ package script.order
 		{
 			var manucode:String = PaintOrderModel.instance.getManufacturerCode(orderdata.orderItem_sn);
 			
+			resetDeliveryTime();
 			//curselectIndex = index;
 			
 			var deliverydate:String = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate.availableDate;
@@ -334,7 +358,7 @@ package script.order
 					this["deltime" + i].label = UtilTool.getNextDayStr((deliverydatas[i].availableDate as String) + " 00:00:00");
 					this["deltime" + i].visible = true;
 					this["discount" + i].text = getPayDicountStr(deliverydatas[i].discount);
-					if(orderdata.delivery_date == deliverydatas[i].availableDate)
+					if(orderdata.delivery_date == deliverydatas[i].availableDate && orderdata.is_urgent != true)
 						this["deltime" + i].selected = true;
 					
 				}
@@ -346,6 +370,8 @@ package script.order
 			this.urgentcheck.selected = orderdata.is_urgent == 1;
 			if(this.urgentcheck.selected)
 				this.urgentcheck.disabled = true;
+			else
+				this.urgentcheck.disabled = false;
 
 		}
 		private function countDownPayTime():void

@@ -185,7 +185,7 @@
                             "x":45,
                             "type":"RadioGroup",
                             "searchKey":"RadioGroup,timepreferRdo",
-                            "props":{"y":733,"x":110,"var":"timepreferRdo","skin":"comp/radiogroup.png","labels":"加急当天,交期优先,省钱优先(5天内),省钱优先(4天内),省钱优先(3天内),省钱优先(2天内)","labelSize":20,"labelFont":"SimHei"},
+                            "props":{"y":733,"x":110,"var":"timepreferRdo","skin":"comp/radiogroup.png","labels":"加急当天,交期优先,省钱优先(2天内),省钱优先(3天内),省钱优先(4天内),省钱优先(5天内)","labelSize":20,"labelFont":"SimHei"},
                             "nodeParent":7,
                             "label":"timepreferRdo",
                             "isDirectory":false,

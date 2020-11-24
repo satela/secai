@@ -18,7 +18,7 @@
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
-	import org.osmf.layout.ScaleMode;
+	//import org.osmf.layout.ScaleMode;
 	
 	import script.ViewManager;
 	

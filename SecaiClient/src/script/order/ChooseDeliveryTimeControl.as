@@ -6,6 +6,7 @@ package script.order
 	import laya.events.Event;
 	import laya.utils.Handler;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	import model.orderModel.PackageVo;
@@ -73,6 +74,7 @@ package script.order
 			Laya.timer.loop(1000,this,onCountDownTime);
 			
 			EventCenter.instance.on(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE,this,updatePrice);
+			updatePrice();
 			//uiSkin.
 			
 			
@@ -146,7 +148,7 @@ package script.order
 					{
 						if((uiSkin.orderlist.cells[j] as ChooseDelTimeOrderItem).orderdata.orderItem_sn == alldates[i].orderItem_sn)
 						{
-							(uiSkin.orderlist.cells[j] as ChooseDelTimeOrderItem).resetDeliveryDates;
+							(uiSkin.orderlist.cells[j] as ChooseDelTimeOrderItem).resetDeliveryDates();
 							break;
 						}
 					}
@@ -226,15 +228,39 @@ package script.order
 			}
 		}
 		
+		private function resetDeliveryTime():void
+		{
+			for(var i:int=0;i < orderDatas.length;i++)
+			{
+				orderDatas[i].is_urgent = false;
+				orderDatas[i].delivery_date = null;
+				
+				orderDatas[i].outtime = false;
+				orderDatas[i].lefttime = 0;
+				
+				orderDatas[i].discount = 1;
+				
+			}
+			uiSkin.orderlist.array = orderDatas;
+			updatePrice();
+			
+			
+		}
 		private function resetTimePrefer():void
 		{
 			var arr:Array = PaintOrderModel.instance.finalOrderData;
 			
 			requestnum = 0;
+			
+			PaintOrderModel.instance.curTimePrefer = uiSkin.timepreferRdo.selectedIndex + 1;
+
+			resetDeliveryTime();
+			//if(PaintOrderModel.instance.curTimePrefer == uiSkin.timepreferRdo.selectedIndex + 1)
+			//	return;
+
 			for(var i:int=0;i < arr.length;i++)
 			{
 				
-				PaintOrderModel.instance.curTimePrefer = uiSkin.timepreferRdo.selectedIndex + 1;
 				
 				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i],uiSkin.timepreferRdo.selectedIndex + 1);
 				
@@ -267,11 +293,14 @@ package script.order
 					
 					var currentdate:String = alldates[i].current_date;
 					
-					if(orderdata != null && alldates[i].default_deliverydate != null && alldates[i].default_deliverydate != "")
+					if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
 					{
-						orderdata.delivery_date = alldates[i].default_deliverydate;
+						orderdata.delivery_date = alldates[i].default_deliveryDate;
 						
-						orderdata.is_urgent = orderdata.delivery_date == currentdate;
+						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+						
+						orderdata.lefttime = 180;
+
 					}
 					
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
@@ -281,14 +310,27 @@ package script.order
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
 							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
 						}
 						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
+							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
 						}
+						
+						
 					}										
 					
 				}

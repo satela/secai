@@ -5,6 +5,7 @@ package script.order
 	import laya.ui.TextInput;
 	import laya.utils.Handler;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PackageItem;
@@ -171,7 +172,6 @@ package script.order
 
 			PaintOrderModel.instance.setPackageData();
 			
-			ViewManager.instance.closeView(ViewManager.VIEW_PACKAGE_ORDER_PANEL);
 
 			var arr:Array = PaintOrderModel.instance.finalOrderData;
 			
@@ -210,11 +210,12 @@ package script.order
 					
 					var currentdate:String = alldates[i].current_date;
 
-					if(orderdata != null && alldates[i].default_deliverydate != null && alldates[i].default_deliverydate != "")
+					if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
 					{
-						orderdata.delivery_date = alldates[i].default_deliverydate;
+						orderdata.delivery_date = alldates[i].default_deliveryDate;
 					
-						orderdata.is_urgent = orderdata.delivery_date == currentdate;
+						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+						orderdata.lefttime = 180;
 					}
 
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
@@ -225,20 +226,34 @@ package script.order
 								alldates[i].deliveryDateList[j].discount = 1;
 							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent == false)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
 						}
 						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
 							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
 						}
+						
+						
 					}										
 					
 				}
 				requestnum++;
 				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
 				{
+					ViewManager.instance.closeView(ViewManager.VIEW_PACKAGE_ORDER_PANEL);
+
 					ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,{orders:orderDatas,delaypay:false});
 					PaintOrderModel.instance.packageList = new Vector.<PackageVo>();
 				}

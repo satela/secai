@@ -1501,6 +1501,8 @@ var Constast=(function(){
 	__class(Constast,'model.Constast');
 	Constast.ACCOUNT_CREATER=1;
 	Constast.ACCOUNT_EMPLOYEE=0;
+	Constast.ORDER_TIME_PREFER_URGENT=1;
+	Constast.ORDER_TIME_PREFER_EARLY=2;
 	return Constast;
 })()
 
@@ -38444,6 +38446,7 @@ var ChooseDeliveryTimeControl=(function(_super){
 		this.uiSkin.disountprice.text=total.toFixed(1)+"元";
 		Laya.timer.loop(1000,this,this.onCountDownTime);
 		EventCenter.instance.on("UPDATE_PRICE_BY_DELIVERYDATE",this,this.updatePrice);
+		this.updatePrice();
 	}
 
 	//uiSkin.
@@ -38493,7 +38496,7 @@ var ChooseDeliveryTimeControl=(function(_super){
 				}
 				for(var j=0;j < this.uiSkin.orderlist.cells.length;j++){
 					if((this.uiSkin.orderlist.cells [j]).orderdata.orderItem_sn==alldates[i].orderItem_sn){
-						(this.uiSkin.orderlist.cells [j]).resetDeliveryDates;
+						(this.uiSkin.orderlist.cells [j]).resetDeliveryDates();
 						break ;
 					}
 				}
@@ -38552,11 +38555,24 @@ var ChooseDeliveryTimeControl=(function(_super){
 		}
 	}
 
+	__proto.resetDeliveryTime=function(){
+		for(var i=0;i < this.orderDatas.length;i++){
+			this.orderDatas[i].is_urgent=false;
+			this.orderDatas[i].delivery_date=null;
+			this.orderDatas[i].outtime=false;
+			this.orderDatas[i].lefttime=0;
+			this.orderDatas[i].discount=1;
+		}
+		this.uiSkin.orderlist.array=this.orderDatas;
+		this.updatePrice();
+	}
+
 	__proto.resetTimePrefer=function(){
 		var arr=PaintOrderModel.instance.finalOrderData;
 		this.requestnum=0;
+		PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
+		this.resetDeliveryTime();
 		for(var i=0;i < arr.length;i++){
-			PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
 			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i],this.uiSkin.timepreferRdo.selectedIndex+1);
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAllAvailableDateBack,{data:datas},"post");
 		}
@@ -38575,19 +38591,26 @@ var ChooseDeliveryTimeControl=(function(_super){
 				orderdata.delivery_date=null;
 				orderdata.is_urgent=false;
 				var currentdate=alldates[i].current_date;
-				if(orderdata !=null && alldates[i].default_deliverydate !=null && alldates[i].default_deliverydate !=""){
-					orderdata.delivery_date=alldates[i].default_deliverydate;
-					orderdata.is_urgent=orderdata.delivery_date==currentdate;
+				if(orderdata !=null && alldates[i].default_deliveryDate !=null && alldates[i].default_deliveryDate !=""){
+					orderdata.delivery_date=alldates[i].default_deliveryDate;
+					orderdata.is_urgent=(orderdata.delivery_date==currentdate && PaintOrderModel.instance.curTimePrefer==1);
+					orderdata.lefttime=180;
 				}
 				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
 					if(alldates[i].deliveryDateList[j].urgent==false){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
 					}
 					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
 					}
 				}
@@ -41049,7 +41072,6 @@ var PackageOrderControl=(function(_super){
 
 	__proto.onConfirmPackage=function(){
 		PaintOrderModel.instance.setPackageData();
-		ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
 		var arr=PaintOrderModel.instance.finalOrderData;
 		this.requestnum=0;
 		for(var i=0;i < arr.length;i++){
@@ -41070,25 +41092,33 @@ var PackageOrderControl=(function(_super){
 				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
 				var orderdata=PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
 				var currentdate=alldates[i].current_date;
-				if(orderdata !=null && alldates[i].default_deliverydate !=null && alldates[i].default_deliverydate !=""){
-					orderdata.delivery_date=alldates[i].default_deliverydate;
-					orderdata.is_urgent=orderdata.delivery_date==currentdate;
+				if(orderdata !=null && alldates[i].default_deliveryDate !=null && alldates[i].default_deliveryDate !=""){
+					orderdata.delivery_date=alldates[i].default_deliveryDate;
+					orderdata.is_urgent=(orderdata.delivery_date==currentdate && PaintOrderModel.instance.curTimePrefer==1);
+					orderdata.lefttime=180;
 				}
 				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
 					if(alldates[i].deliveryDateList[j].urgent==false){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
 					}
 					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
 						if(alldates[i].deliveryDateList[j].discount==0)
 							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
 						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
 					}
 				}
 			}
 			this.requestnum++;
 			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
+				ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
 				ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,{orders:this.orderDatas,delaypay:false});
 				PaintOrderModel.instance.packageList=[];
 			}
@@ -61237,11 +61267,27 @@ var ChooseDelTimeOrderItem=(function(_super){
 	__class(ChooseDelTimeOrderItem,'script.order.ChooseDelTimeOrderItem',_super);
 	var __proto=ChooseDelTimeOrderItem.prototype;
 	__proto.onSelectTime=function(index){
+		if(this["deltime"+index].selected)
+			return;
+		this.resetDeliveryTime();
 		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
 		this.curselectIndex=index;
 		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[index].availableDate;
 		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=0&delivery_date="+deliverydate;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyCapacityBack,null,null);
+	}
+
+	__proto.resetDeliveryTime=function(){
+		this.orderdata.is_urgent=false;
+		this.orderdata.delivery_date=null;
+		this.orderdata.outtime=false;
+		this.orderdata.lefttime=0;
+		this.orderdata.discount=1;
+		for(var i=0;i < 5;i++){
+			this["deltime"+i].selected=false;
+		}
+		this.urgentcheck.selected=false;
+		this.urgentcheck.disabled=false;
 	}
 
 	__proto.onOccupyCapacityBack=function(data){
@@ -61304,6 +61350,7 @@ var ChooseDelTimeOrderItem=(function(_super){
 
 	__proto.onClickUrgent=function(){
 		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
+		this.resetDeliveryTime();
 		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
 		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=1&delivery_date="+deliverydate;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyUrgentCapacityBack,null,null);
@@ -61386,7 +61433,7 @@ var ChooseDelTimeOrderItem=(function(_super){
 				this["deltime"+i].label=UtilTool.getNextDayStr((deliverydatas[i] .availableDate)+" 00:00:00");
 				this["deltime"+i].visible=true;
 				this["discount"+i].text=this.getPayDicountStr(deliverydatas[i].discount);
-				if(this.orderdata.delivery_date==deliverydatas[i].availableDate)
+				if(this.orderdata.delivery_date==deliverydatas[i].availableDate && this.orderdata.is_urgent !=true)
 					this["deltime"+i].selected=true;
 			}
 		}
@@ -61396,6 +61443,8 @@ var ChooseDelTimeOrderItem=(function(_super){
 		this.urgentcheck.selected=this.orderdata.is_urgent==1;
 		if(this.urgentcheck.selected)
 			this.urgentcheck.disabled=true;
+		else
+		this.urgentcheck.disabled=false;
 	}
 
 	__proto.countDownPayTime=function(){
