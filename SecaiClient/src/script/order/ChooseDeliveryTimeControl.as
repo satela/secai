@@ -17,6 +17,8 @@ package script.order
 	
 	import ui.order.ChooseDeliveryTimePanelUI;
 	
+	import utils.UtilTool;
+	
 	public class ChooseDeliveryTimeControl extends Script
 	{
 		private var uiSkin:ChooseDeliveryTimePanelUI;
@@ -56,7 +58,8 @@ package script.order
 			uiSkin.timepreferRdo.selectedIndex = PaintOrderModel.instance.curTimePrefer - 1;
 			
 			uiSkin.confirmpreferbtn.on(Event.CLICK,this,resetTimePrefer);
-			
+			uiSkin.setdefaultbtn.on(Event.CLICK,this,setDefaultTimePrefer);
+
 			var total:Number = 0;
 			for(var i:int=0;i < orderDatas.length;i++)
 			{
@@ -245,6 +248,12 @@ package script.order
 			updatePrice();
 			
 			
+		}
+		
+		private function setDefaultTimePrefer():void
+		{
+			UtilTool.setLocalVar("timePrefer",uiSkin.timepreferRdo.selectedIndex);
+			ViewManager.showAlert("设置成功");
 		}
 		private function resetTimePrefer():void
 		{

@@ -61,7 +61,7 @@ package script.order
 			}
 			uiSkin.addpackbtn.on(Event.CLICK,this,addnewPack);
 			
-			var defaultPrefer:String = UtilTool.getLocalVar("timePrefer","0");
+			var defaultPrefer:String = UtilTool.getLocalVar("timePrefer","1");
 
 			uiSkin.timepreferRdo.selectedIndex = parseInt(defaultPrefer);
 			
@@ -168,10 +168,7 @@ package script.order
 		}
 		
 		private function onConfirmPackage():void
-		{
-
-			PaintOrderModel.instance.setPackageData();
-			
+		{			
 
 			var arr:Array = PaintOrderModel.instance.finalOrderData;
 			
@@ -252,6 +249,8 @@ package script.order
 				requestnum++;
 				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
 				{
+					PaintOrderModel.instance.setPackageData();
+
 					ViewManager.instance.closeView(ViewManager.VIEW_PACKAGE_ORDER_PANEL);
 
 					ViewManager.instance.openView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL,false,{orders:orderDatas,delaypay:false});
