@@ -16,6 +16,7 @@ package script.usercenter
 	{
 		private var uiSkin:ChargePanelUI;
 
+		private var curactinfo;
 		public function ChargeControl()
 		{
 			super();
@@ -35,7 +36,15 @@ package script.usercenter
 			uiSkin.chargeinput.maxChars = 8;
 			uiSkin.tyepgrp.selectedIndex = 0;
 			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
+
 			uiSkin.confirmcharge.on(Event.CLICK,this,onChargeNow);
+			
+			uiSkin.actpanel.visible = false;
+			uiSkin.chargeamount.restrict = "0-9";
+			uiSkin.chargeamount.maxChars = 4;
+			
+			uiSkin.joinact.on(Event.CLICK,this,onjoinActivity);
 		}
 		
 		private function onChargeNow():void
@@ -73,6 +82,50 @@ package script.usercenter
 			}
 
 		}
+		
+		private function getActivityInfoBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				if(result.data != null && result.data.length > 0)
+				{
+					curactinfo = result.data[0];
+					
+					uiSkin.actpanel.visible = true;
+					uiSkin.paytype.selectedIndex = 0 ;
+					var actinfo:Object = result.data[0];
+					uiSkin.acttitle.text = actinfo.ra_name;
+					uiSkin.actrule.text = "活动规则：" + actinfo.ra_text;
+					uiSkin.chargeamount.text = "1"; 
+				}
+			}
+		}
+		
+		private function onjoinActivity():void
+		{
+			if(uiSkin.chargeamount.text == "" || uiSkin.chargeamount.text == "0")
+			{
+				ViewManager.showAlert("请输入充值金额");
+				return;
+			}
+			var num:int = parseInt(uiSkin.chargeamount.text) * 1000;
+			
+			var params:String = "rid=" + curactinfo.ra_id + "&amount=" + num;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.joinChargeActivity,this,joinActBack,params,"post");
+
+		}
+		private function joinActBack(data:Object):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				Browser.window.open(HttpRequestUtil.httpUrl + HttpRequestUtil.payChargeActivity + "rarid=" +result.data.rar_id,null,null,true);
+
+			}
+			
+		}
+		
 		private function getCompanyInfoBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);

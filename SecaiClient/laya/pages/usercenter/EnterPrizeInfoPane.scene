@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":173,
-    "selecteID":175,
+    "selectedBox":177,
+    "selecteID":182,
     "searchKey":"View",
     "props":{"width":950,"sceneColor":"#ffffff","height":900},
     "nodeParent":-1,
-    "maxID":177,
+    "maxID":183,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -62,78 +62,164 @@
         },
         {
             "x":15,
-            "type":"Label",
-            "searchKey":"Label,servicetxt",
-            "props":{"y":197,"x":220,"var":"servicetxt","text":"1325969696","fontSize":22,"font":"Helvetica","color":"#ef130f","bold":false},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":130,"x":5},
             "nodeParent":2,
-            "label":"servicetxt",
-            "isDirectory":false,
+            "label":"Box",
+            "isOpen":true,
+            "isDirectory":true,
             "isAniNode":true,
-            "hasChild":false,
-            "compId":5,
+            "hasChild":true,
+            "compId":177,
             "child":[
-                ],
-            "$HIDDEN":false
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,chargebtn",
+                    "props":{"y":0,"x":334,"width":92,"var":"chargebtn","skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"充值","height":44},
+                    "nodeParent":177,
+                    "label":"chargebtn",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":114,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":8,"width":150,"text":"账户余额：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
+                    "nodeParent":177,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":6,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,moneytxt",
+                    "props":{"y":8,"x":215,"width":117,"var":"moneytxt","text":"12500.00元","height":20,"fontSize":20,"font":"Helvetica","color":"#52B232","bold":false},
+                    "nodeParent":177,
+                    "label":"moneytxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":7,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":8,"x":434,"width":132,"text":"活动余额：","height":24,"fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
+                    "nodeParent":177,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":179,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,actMoney",
+                    "props":{"y":8,"x":563,"width":118,"var":"actMoney","text":"100000.00元","height":20,"fontSize":20,"font":"Helvetica","color":"#52B232","bold":false},
+                    "nodeParent":177,
+                    "label":"actMoney",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":180,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"y":8,"x":680,"width":132,"text":"冻结余额：","height":24,"fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
+                    "nodeParent":177,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":181,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,frezeMoney",
+                    "props":{"y":8,"x":809,"width":100,"var":"frezeMoney","text":"100000.00元","height":20,"fontSize":20,"font":"Helvetica","color":"#e72210","bold":false},
+                    "nodeParent":177,
+                    "label":"frezeMoney",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":182,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                }]
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,chargebtn",
-            "props":{"y":130,"x":377,"width":92,"var":"chargebtn","skin":"commers/btn2.png","sizeGrid":"4,4,4,4","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"充值","height":44},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":197,"x":30},
             "nodeParent":2,
-            "label":"chargebtn",
-            "isDirectory":false,
+            "label":"Box",
+            "isOpen":null,
+            "isDirectory":true,
             "isAniNode":true,
-            "hasChild":false,
-            "compId":114,
+            "hasChild":true,
+            "compId":178,
             "child":[
-                ],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Label",
-            "searchKey":"Label",
-            "props":{"y":138,"x":5,"width":150,"text":"账户余额：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
-            "nodeParent":2,
-            "label":"Label",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":6,
-            "child":[
-                ],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Label",
-            "searchKey":"Label,moneytxt",
-            "props":{"y":138,"x":220,"width":117,"var":"moneytxt","text":"0.00元","height":20,"fontSize":20,"font":"Helvetica","color":"#52B232","bold":false},
-            "nodeParent":2,
-            "label":"moneytxt",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":7,
-            "child":[
-                ],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Label",
-            "searchKey":"Label",
-            "props":{"y":197,"x":30,"width":150,"text":"我的服务店：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
-            "nodeParent":2,
-            "label":"Label",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":9,
-            "child":[
-                ],
-            "$HIDDEN":false
+                {
+                    "type":"Label",
+                    "searchKey":"Label,servicetxt",
+                    "props":{"x":190,"var":"servicetxt","text":"1325969696","fontSize":22,"font":"Helvetica","color":"#ef130f","bold":false},
+                    "nodeParent":178,
+                    "label":"servicetxt",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":5,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                },
+                {
+                    "type":"Label",
+                    "searchKey":"Label",
+                    "props":{"width":150,"text":"我的服务店：","fontSize":24,"font":"SimHei","color":"#262B2E","bold":false,"align":"right"},
+                    "nodeParent":178,
+                    "label":"Label",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":9,
+                    "child":[
+                        ],
+                    "$HIDDEN":false
+                }]
         },
         {
             "x":15,
@@ -169,7 +255,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label",
-            "props":{"y":300,"x":35,"text":"企业信息","fontSize":22,"font":"SimHei","color":"#5B6779","bold":true},
+            "props":{"y":301,"x":35,"text":"企业信息","fontSize":22,"font":"SimHei","color":"#5B6779","bold":true},
             "nodeParent":2,
             "label":"Label",
             "isDirectory":false,
@@ -187,14 +273,13 @@
             "props":{"y":753,"x":19},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":131,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":10,"x":17,"text":"企业统一征信代码：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -209,7 +294,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,reditcode",
                     "props":{"y":-3,"x":250,"width":380,"var":"reditcode","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业征信代码","height":50,"fontSize":20,"font":"SimHei"},
@@ -224,7 +308,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -247,14 +330,13 @@
             "props":{"y":412,"x":19},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":136,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":10,"x":17,"text":"企业简称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -269,7 +351,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,shortname",
                     "props":{"y":-3,"x":187,"width":380,"var":"shortname","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业简称（限6个子以内）","height":50,"fontSize":20,"font":"SimHei"},
@@ -284,7 +365,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -307,14 +387,13 @@
             "props":{"y":353,"x":19},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":13,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":10,"x":17,"text":"企业名称：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -329,7 +408,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,input_companyname",
                     "props":{"y":-3,"x":187,"width":380,"var":"input_companyname","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业全称","height":50,"fontSize":20,"font":"SimHei"},
@@ -344,7 +422,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -359,7 +436,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,changeNameBtn",
                     "props":{"y":4,"x":600,"width":138,"var":"changeNameBtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"修改公司名称","height":40},
@@ -373,7 +449,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,applybtn",
                     "props":{"y":4,"x":600,"width":138,"var":"applybtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"申请加入","height":40},
@@ -612,14 +687,13 @@
             "props":{"y":673,"x":19},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":126,
             "child":[
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":10,"x":17,"text":"营业执照：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -634,7 +708,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"TextInput",
                     "searchKey":"TextInput,txt_license",
                     "props":{"y":-3,"x":187,"width":440,"var":"txt_license","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#FF0000","prompt":"请上传企业执照(限JPG图片，尺寸不超过6m)","height":50,"fontSize":20,"font":"SimHei"},
@@ -649,7 +722,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -664,7 +736,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,btn_uplicense",
                     "props":{"y":0.5,"x":656,"width":142,"var":"btn_uplicense","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","labelAlign":"center","label":"上传执照","height":42},
@@ -1116,14 +1187,13 @@
             "props":{"y":0,"x":0,"var":"applyJoinPanel","top":0,"right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"applyJoinPanel",
-            "isOpen":true,
+            "isOpen":false,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":159,
             "child":[
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"mouseEnabled":true,"left":0,"bottom":0,"alpha":0.6},
@@ -1138,7 +1208,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Image",
                     "searchKey":"Image",
                     "props":{"y":300,"width":850,"skin":"commers/grayback.jpg","sizeGrid":"2,2,2,2","right":50,"mouseEnabled":true,"left":50,"height":186,"alpha":1},
@@ -1152,20 +1221,18 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":320,"x":191},
                     "nodeParent":159,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":162,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":10,"x":17,"text":"创建者账号：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -1180,7 +1247,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,createAccountInput",
                             "props":{"y":-3,"x":187,"width":380,"var":"createAccountInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入公司创建者账号","height":50,"fontSize":20,"font":"SimHei"},
@@ -1195,7 +1261,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":14,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -1212,7 +1277,6 @@
                     "$HIDDEN":false
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,applyokbtn",
                     "props":{"y":435,"x":406,"width":138,"var":"applyokbtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"确定","height":40},
@@ -1226,7 +1290,6 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Button",
                     "searchKey":"Button,closeapplybtn",
                     "props":{"y":311,"x":872,"var":"closeapplybtn","skin":"commers/btnclose.png","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},
@@ -1241,20 +1304,18 @@
                         ]
                 },
                 {
-                    "x":30,
                     "type":"Box",
                     "searchKey":"Box",
                     "props":{"y":376,"x":191},
                     "nodeParent":159,
                     "label":"Box",
-                    "isOpen":true,
+                    "isOpen":false,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":173,
                     "child":[
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":11,"x":17,"text":"姓名：","fontSize":24,"font":"SimHei","color":"#262B2E"},
@@ -1269,7 +1330,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,commentInput",
                             "props":{"y":-2,"x":187,"width":380,"var":"commentInput","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请填写您的姓名","height":50,"fontSize":20,"font":"SimHei"},
@@ -1284,7 +1344,6 @@
                             "$HIDDEN":false
                         },
                         {
-                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":15,"x":0,"text":"*","fontSize":22,"color":"#E40020"},
@@ -1300,7 +1359,7 @@
                         }],
                     "$HIDDEN":false
                 }],
-            "$HIDDEN":false
+            "$HIDDEN":true
         }],
     "animations":[
         {

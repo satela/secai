@@ -133,6 +133,13 @@ package model
 		
 		public static const queryTransaction:String = "account/listmoneylog";
 		
+		//充值活动
+		public static const getChargeActivity:String = "group/get-activities?"; //获取正在进行的活动
+		public static const joinChargeActivity:String = "group/join-activity?"; //参与进行的活动
+		public static const payChargeActivity:String = "group/pay-activity?"; //活动付款
+
+		
+		
 		public static function get instance():HttpRequestUtil
 		{
 			if(_instance == null)

@@ -703,7 +703,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="PicManagePanel.scene";
+	GameConfig.startScene="usercenter/ChargePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1414,6 +1414,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2203,6 +2204,7 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
+	//活动付款
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2268,6 +2270,9 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.setYixingRelated="file/set-mask-image?";
 	HttpRequestUtil.setFanmianRelated="file/set-back-image?";
 	HttpRequestUtil.queryTransaction="account/listmoneylog";
+	HttpRequestUtil.getChargeActivity="group/get-activities?";
+	HttpRequestUtil.joinChargeActivity="group/join-activity?";
+	HttpRequestUtil.payChargeActivity="group/pay-activity?";
 	return HttpRequestUtil;
 })()
 
@@ -39969,7 +39974,12 @@ var ChargeControl=(function(_super){
 		this.uiSkin.chargeinput.restrict="0-9"+".";
 		this.uiSkin.chargeinput.maxChars=8;
 		this.uiSkin.tyepgrp.selectedIndex=0;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
 		this.uiSkin.confirmcharge.on("click",this,this.onChargeNow);
+		this.uiSkin.actpanel.visible=false;
+		this.uiSkin.chargeamount.restrict="0-9";
+		this.uiSkin.chargeamount.maxChars=4;
+		this.uiSkin.joinact.on("click",this,this.onjoinActivity);
 	}
 
 	__proto.onChargeNow=function(){
@@ -39992,6 +40002,38 @@ var ChargeControl=(function(_super){
 	__proto.confirmSucess=function(result){
 		if(result){
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+		}
+	}
+
+	__proto.getActivityInfoBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(result.data !=null && result.data.length > 0){
+				this.curactinfo=result.data[0];
+				this.uiSkin.actpanel.visible=true;
+				this.uiSkin.paytype.selectedIndex=0;
+				var actinfo=result.data[0];
+				this.uiSkin.acttitle.text=actinfo.ra_name;
+				this.uiSkin.actrule.text="活动规则："+actinfo.ra_text;
+				this.uiSkin.chargeamount.text="1";
+			}
+		}
+	}
+
+	__proto.onjoinActivity=function(){
+		if(this.uiSkin.chargeamount.text=="" || this.uiSkin.chargeamount.text=="0"){
+			ViewManager.showAlert("请输入充值金额");
+			return;
+		};
+		var num=parseInt(this.uiSkin.chargeamount.text)*1000;
+		var params="rid="+this.curactinfo.ra_id+"&amount="+num;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-activity?",this,this.joinActBack,params,"post");
+	}
+
+	__proto.joinActBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Browser.window.open(HttpRequestUtil.httpUrl+"group/pay-activity?"+"rarid="+result.data.rar_id,null,null,true);
 		}
 	}
 
@@ -55441,9 +55483,11 @@ var AddCommentPanelUI=(function(_super){
 //class ui.usercenter.EnterPrizeInfoPaneUI extends laya.ui.View
 var EnterPrizeInfoPaneUI=(function(_super){
 	function EnterPrizeInfoPaneUI(){
-		this.servicetxt=null;
 		this.chargebtn=null;
 		this.moneytxt=null;
+		this.actMoney=null;
+		this.frezeMoney=null;
+		this.servicetxt=null;
 		this.account=null;
 		this.reditcode=null;
 		this.shortname=null;
@@ -56230,11 +56274,19 @@ var BuyProductPanelUI=(function(_super){
 //class ui.usercenter.ChargePanelUI extends laya.ui.View
 var ChargePanelUI=(function(_super){
 	function ChargePanelUI(){
+		this.confirmcharge=null;
 		this.accout=null;
 		this.moneytxt=null;
+		this.actMoney=null;
+		this.frezeMoney=null;
 		this.chargeinput=null;
 		this.tyepgrp=null;
-		this.confirmcharge=null;
+		this.actpanel=null;
+		this.acttitle=null;
+		this.actrule=null;
+		this.chargeamount=null;
+		this.paytype=null;
+		this.joinact=null;
 		ChargePanelUI.__super.call(this);
 	}
 

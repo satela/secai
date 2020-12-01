@@ -5,11 +5,19 @@ package ui.usercenter {
 	import script.usercenter.ChargeControl;
 
 	public class ChargePanelUI extends View {
+		public var confirmcharge:Button;
 		public var accout:Label;
 		public var moneytxt:Label;
+		public var actMoney:Label;
+		public var frezeMoney:Label;
 		public var chargeinput:TextInput;
 		public var tyepgrp:RadioGroup;
-		public var confirmcharge:Button;
+		public var actpanel:Image;
+		public var acttitle:Label;
+		public var actrule:Label;
+		public var chargeamount:TextInput;
+		public var paytype:RadioGroup;
+		public var joinact:Button;
 
 		override protected function createChildren():void {
 			super.createChildren();
