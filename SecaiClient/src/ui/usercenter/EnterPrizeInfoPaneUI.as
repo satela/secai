@@ -5,12 +5,12 @@ package ui.usercenter {
 	import script.usercenter.EnterPrizeInfoControl;
 
 	public class EnterPrizeInfoPaneUI extends View {
+		public var account:Label;
 		public var chargebtn:Button;
 		public var moneytxt:Label;
 		public var actMoney:Label;
 		public var frezeMoney:Label;
 		public var servicetxt:Label;
-		public var account:Label;
 		public var reditcode:TextInput;
 		public var shortname:TextInput;
 		public var input_companyname:TextInput;

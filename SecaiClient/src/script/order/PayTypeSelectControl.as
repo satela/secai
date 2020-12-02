@@ -85,6 +85,10 @@ package script.order
 			{
 				
 				Userdata.instance.money = Number(result.balance);
+				
+				Userdata.instance.actMoney = Number(result.activity_balance);
+				Userdata.instance.frezeMoney = Number(result.activity_locked_balance);
+				
 				uiSkin.accountmoney.text = Userdata.instance.money.toString() + "元";
 				
 				if(Userdata.instance.isHidePrice())

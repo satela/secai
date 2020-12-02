@@ -41,7 +41,7 @@ package script.usercenter
 			uiSkin.confirmcharge.on(Event.CLICK,this,onChargeNow);
 			
 			uiSkin.actpanel.visible = false;
-			uiSkin.chargeamount.restrict = "0-9";
+			//uiSkin.chargeamount.restrict = "0-9";
 			uiSkin.chargeamount.maxChars = 4;
 			
 			uiSkin.joinact.on(Event.CLICK,this,onjoinActivity);
@@ -109,8 +109,9 @@ package script.usercenter
 				ViewManager.showAlert("请输入充值金额");
 				return;
 			}
-			var num:int = parseInt(uiSkin.chargeamount.text) * 1000;
-			
+			//var num:int = parseInt(uiSkin.chargeamount.text);// * 1000;
+			var num:Number = parseFloat(uiSkin.chargeamount.text);// * 1000;
+
 			var params:String = "rid=" + curactinfo.ra_id + "&amount=" + num;
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.joinChargeActivity,this,joinActBack,params,"post");
 
@@ -121,6 +122,7 @@ package script.usercenter
 			if(result.status == 0)
 			{
 				Browser.window.open(HttpRequestUtil.httpUrl + HttpRequestUtil.payChargeActivity + "rarid=" +result.data.rar_id,null,null,true);
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
 
 			}
 			
@@ -132,10 +134,18 @@ package script.usercenter
 			if(result.status == 0)
 			{
 				Userdata.instance.money = Number(result.balance);
-				
-				uiSkin.moneytxt.text = Userdata.instance.money.toString();
+				Userdata.instance.actMoney = Number(result.activity_balance);
+				Userdata.instance.frezeMoney = Number(result.activity_locked_balance);
+
+				uiSkin.moneytxt.text = Userdata.instance.money.toString() + "元";
+				uiSkin.actMoney.text = Userdata.instance.actMoney.toString() + "元";
+				uiSkin.frezeMoney.text = Userdata.instance.frezeMoney.toString() + "元";
 				if(Userdata.instance.isHidePrice())
+				{
 					uiSkin.moneytxt.text = "****";
+					uiSkin.actMoney.text = "****";
+					uiSkin.frezeMoney.text = "****";
+				}
 
 			}
 		}

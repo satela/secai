@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":29,
-    "selecteID":33,
+    "selectedBox":18,
+    "selecteID":15,
     "searchKey":"View",
     "props":{"width":800,"sceneColor":"#ffffff","height":800},
     "nodeParent":-1,
@@ -92,13 +92,14 @@
             "props":{"y":43,"x":300},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":20,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"text":"账户余额：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -112,9 +113,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,moneytxt",
-                    "props":{"x":90,"width":150,"var":"moneytxt","text":"132.58元","height":18,"fontSize":18,"color":"#ee130f"},
+                    "props":{"x":90,"width":150,"var":"moneytxt","text":"132.58元","height":18,"fontSize":18,"color":"#2fa334"},
                     "nodeParent":20,
                     "label":"moneytxt",
                     "isDirectory":false,
@@ -132,16 +134,17 @@
             "props":{"y":77,"x":50},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":18,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,actMoney",
-                    "props":{"x":90,"width":150,"var":"actMoney","text":"132.58元","height":18,"fontSize":18,"color":"#ee130f"},
+                    "props":{"x":90,"width":150,"var":"actMoney","text":"132.58元","height":18,"fontSize":18,"color":"#2fa334"},
                     "nodeParent":18,
                     "label":"actMoney",
                     "isDirectory":false,
@@ -152,6 +155,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"text":"活动余额：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -172,16 +176,17 @@
             "props":{"y":77,"x":300},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":22,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,frezeMoney",
-                    "props":{"x":90,"width":150,"var":"frezeMoney","text":"132.58元","height":18,"fontSize":18,"color":"#287c35"},
+                    "props":{"x":90,"width":150,"var":"frezeMoney","text":"132.58元","height":18,"fontSize":18,"color":"#f83606"},
                     "nodeParent":22,
                     "label":"frezeMoney",
                     "isDirectory":false,
@@ -192,6 +197,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"text":"冻结金额：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -203,7 +209,8 @@
                     "compId":24,
                     "child":[
                         ]
-                }]
+                }],
+            "$HIDDEN":false
         },
         {
             "x":15,

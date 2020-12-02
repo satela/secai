@@ -714,7 +714,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="usercenter/ChargePanel.scene";
+	GameConfig.startScene="usercenter/EnterPrizeInfoPane.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1501,7 +1501,7 @@ var Constast=(function(){
 	Constast.PRIVILEGE_CHECK_ORDERS=4;
 	Constast.PRIVILEGE_CHECK_TRANSACTION=5;
 	__static(Constast,
-	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款"];}
+	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值"];}
 	]);
 	return Constast;
 })()
@@ -1808,6 +1808,9 @@ var Userdata=(function(){
 		this.defaultAddId="";
 		//默认收货地址
 		this.money=NaN;
+		this.actMoney=NaN;
+		//活动返现
+		this.frezeMoney=NaN;
 		this.isLogin=false;
 		this.defaultAddrid="0";
 		this.loginTime=0;
@@ -1822,6 +1825,8 @@ var Userdata=(function(){
 		this.addressList=[];
 		this.isLogin=false;
 		this.money=0;
+		this.actMoney=0;
+		this.frezeMoney=0;
 		this.accountType=0;
 	}
 
@@ -37581,6 +37586,8 @@ var TransactionControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
+			Userdata.instance.actMoney=Number(result.activity_balance);
+			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
 			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
 			if(Userdata.instance.isHidePrice()){
 				this.uiSkin.moneytxt.text="****";
@@ -38442,6 +38449,8 @@ var PayTypeSelectControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
+			Userdata.instance.actMoney=Number(result.activity_balance);
+			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
 			this.uiSkin.accountmoney.text=Userdata.instance.money.toString()+"元";
 			if(Userdata.instance.isHidePrice())
 				this.uiSkin.accountmoney.text="****";
@@ -39988,7 +39997,6 @@ var ChargeControl=(function(_super){
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
 		this.uiSkin.confirmcharge.on("click",this,this.onChargeNow);
 		this.uiSkin.actpanel.visible=false;
-		this.uiSkin.chargeamount.restrict="0-9";
 		this.uiSkin.chargeamount.maxChars=4;
 		this.uiSkin.joinact.on("click",this,this.onjoinActivity);
 	}
@@ -40036,7 +40044,7 @@ var ChargeControl=(function(_super){
 			ViewManager.showAlert("请输入充值金额");
 			return;
 		};
-		var num=parseInt(this.uiSkin.chargeamount.text)*1000;
+		var num=parseFloat(this.uiSkin.chargeamount.text);
 		var params="rid="+this.curactinfo.ra_id+"&amount="+num;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-activity?",this,this.joinActBack,params,"post");
 	}
@@ -40045,6 +40053,7 @@ var ChargeControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Browser.window.open(HttpRequestUtil.httpUrl+"group/pay-activity?"+"rarid="+result.data.rar_id,null,null,true);
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"是否支付成功？",caller:this,callback:this.confirmSucess,ok:"是",cancel:"否"});
 		}
 	}
 
@@ -40052,9 +40061,16 @@ var ChargeControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
-			this.uiSkin.moneytxt.text=Userdata.instance.money.toString();
-			if(Userdata.instance.isHidePrice())
+			Userdata.instance.actMoney=Number(result.activity_balance);
+			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
+			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
+			this.uiSkin.actMoney.text=Userdata.instance.actMoney.toString()+"元";
+			this.uiSkin.frezeMoney.text=Userdata.instance.frezeMoney.toString()+"元";
+			if(Userdata.instance.isHidePrice()){
 				this.uiSkin.moneytxt.text="****";
+				this.uiSkin.actMoney.text="****";
+				this.uiSkin.frezeMoney.text="****";
+			}
 		}
 	}
 
@@ -41555,9 +41571,16 @@ var EnterPrizeInfoControl=(function(_super){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			Userdata.instance.money=Number(result.balance);
+			Userdata.instance.actMoney=Number(result.activity_balance);
+			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
 			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
-			if(Userdata.instance.isHidePrice())
+			this.uiSkin.actMoney.text=Userdata.instance.actMoney.toString()+"元";
+			this.uiSkin.frezeMoney.text=Userdata.instance.frezeMoney.toString()+"元";
+			if(Userdata.instance.isHidePrice()){
 				this.uiSkin.moneytxt.text="****";
+				this.uiSkin.actMoney.text="****";
+				this.uiSkin.frezeMoney.text="****";
+			}
 			this.uiSkin.input_companyname.text=result.name;
 			this.uiSkin.detail_addr.text=result.addr;
 			this.uiSkin.reditcode.text=result.license
@@ -55494,12 +55517,12 @@ var AddCommentPanelUI=(function(_super){
 //class ui.usercenter.EnterPrizeInfoPaneUI extends laya.ui.View
 var EnterPrizeInfoPaneUI=(function(_super){
 	function EnterPrizeInfoPaneUI(){
+		this.account=null;
 		this.chargebtn=null;
 		this.moneytxt=null;
 		this.actMoney=null;
 		this.frezeMoney=null;
 		this.servicetxt=null;
-		this.account=null;
 		this.reditcode=null;
 		this.shortname=null;
 		this.input_companyname=null;

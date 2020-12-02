@@ -24,6 +24,10 @@ package model
 		
 		public var money:Number;
 		
+		public var actMoney:Number;//活动返现
+		
+		public var frezeMoney:Number;
+		
 		public var isLogin:Boolean = false;
 		
 		public var defaultAddrid:String = "0";
@@ -50,6 +54,8 @@ package model
 			addressList = [];
 			isLogin = false;
 			money = 0;
+			actMoney = 0;
+			frezeMoney = 0;
 			accountType = 0;
 			
 		}
