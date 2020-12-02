@@ -18,7 +18,7 @@ package model.orderModel
 		public var manufacturer_code:String;//输出中心编码
 		public var manufacturer_name:String;//输出中心编码
 
-
+		
 		public var editWidth:Number;
 		
 		public var editHeight:Number;

@@ -804,6 +804,71 @@ package utils
 			
 		}
 		
+
+		public static function getNextFiveDays(curday:String):Array
+		{
+			var curdate:Date = new Date(Date.parse(convertDateStr(curday)));
+			var arr:Array = [];
+			
+			for(var i:int=1;i <= 5;i++)
+			{
+				var date:Date = new Date(curdate.getTime() + 24 * 3600 * i * 1000);
+				arr.push(date.getDate());
+			}
+			
+			return arr;
+		}
+		
+		public static function getNextDayStr(curday:String):String
+		{
+			var curdate:Date = new Date(Date.parse(convertDateStr(curday)));
+					
+			var date:Date = new Date(curdate.getTime() + 24 * 3600 * 1000);
+			
+			var yearmonth:String = formatFullDateTime(date,false);
+			
+			return yearmonth.substr(5,5);
+		}
+		
+		
+		public static function getAmoutByUnit(picwidth:Number,picheight:Number,unit:String):Number
+		{
+						
+			if(unit == OrderConstant.MEASURE_UNIT_FOUR_SIDE)
+			{
+				return 2 * (picwidth + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_SIDE)
+			{
+				return  Math.max(picwidth,picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_TOP_BOTTOM)
+			{
+				return (picwidth + picwidth);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LEFT_RIGHT)
+			{
+				return (picheight + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_LONG_TWO_SIDE)
+			{
+				return Math.max(picwidth,picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_PERIMETER)
+			{
+				return 2 * (picwidth + picheight);
+			}
+			else if(unit == OrderConstant.MEASURE_UNIT_AREA)
+			{
+				return picwidth * picheight;
+			}
+			else if(isMeasureUnitByNum(unit))
+			{				
+				return  1;
+			}
+			else return 0;
+		}
+		
 		public static function needChooseAttachPic(matvo:MaterialItemVo):Boolean
 		{
 			if(matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJZZ || matvo.preProc_attachmentTypeList.toUpperCase() == OrderConstant.ATTACH_PJSM)
@@ -813,13 +878,32 @@ package utils
 			
 		}
 		
-		
 		public static function convertDateStr(dateStr:String):String{
 			var strArr:Array = dateStr.split(" ");
 			var fStr:String = "{0} {1} {2}";
 			return format(fStr, (strArr[0] as String).split("-").join("/"), strArr[1], "GMT");
 		}
-		
+
+		public static function getCountDownString(lefttime:int):String
+		{
+			var min:int = Math.floor(lefttime/60);
+			
+			var second:int = lefttime%60;
+			
+			var timestr:String = "";
+			if(min > 9)
+				timestr += min;
+			else
+				timestr += "0" + min;
+			
+			if(second > 9)
+				timestr += ":" + second;
+			else
+				timestr += ":0" + second;
+			
+			return timestr;
+			
+		}
 		/**以前的format文章中的方法*/
 		public static function format(str:String, ...args):String{
 			for(var i:int = 0; i<args.length; i++){

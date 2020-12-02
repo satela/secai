@@ -361,6 +361,7 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;
 						outputitem.holaday.text = "";
+						outputitem.outicon.skin = "commers/" + OrderConstant.OUTPUT_ICON[i];
 						
 					}
 
@@ -695,10 +696,55 @@ package script.order
 				return;
 			
 	
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+			var itemlist:Array = [];
+			
+			for(var i:int=0;i < arr.length;i++)
+			{
+				itemlist = itemlist.concat(arr[i].orderItemList);
+			}
+			
+			PaintOrderModel.instance.finalOrderData = arr;
+			
+			
+//			for(var i:int=0;i < arr.length;i++)
+//			{
+//				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
+//				//trace("orderdeldata:" + datas);
+//			}
+			
+			var params:String = "count=" + itemlist.length;
+			
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProductUids,this,ongetUidsBack,params,"post");
+			
+			
+		//	HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 
 		}
 		
+		private function ongetUidsBack(data:*):void
+		{
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				var ids:Array = result.id;
+				
+				var itemlist:Array = [];
+				
+				for(var i:int=0;i < PaintOrderModel.instance.finalOrderData.length;i++)
+				{
+					itemlist = itemlist.concat(PaintOrderModel.instance.finalOrderData[i].orderItemList);
+				}
+				
+				
+				for(var i:int=0;i < ids.length;i++)
+				{
+					itemlist[i].orderItem_sn = ids[i];
+				}
+				
+				ViewManager.instance.openView(ViewManager.VIEW_PACKAGE_ORDER_PANEL,false,itemlist);
+
+			}
+		}
 		private function onSaveOrder():void
 		{
 			if(Userdata.instance.companyShort == null)
@@ -912,6 +958,8 @@ package script.order
 			EventCenter.instance.off(EventCenter.BATCH_CHANGE_PRODUCT_NUM,this,changeProductNum);
 			EventCenter.instance.off(EventCenter.PAY_ORDER_SUCESS,this,onPaySucess);
 			EventCenter.instance.off(EventCenter.CANCEL_PAY_ORDER,this,onCancelPay);
+
+			PaintOrderModel.instance.resetData();
 
 			Laya.timer.clear(this,onDragMove);
 

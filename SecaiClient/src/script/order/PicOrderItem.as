@@ -16,6 +16,8 @@ package script.order
 	
 	import ui.order.OrderItemUI;
 	
+	import utils.UtilTool;
+	
 	public class PicOrderItem extends OrderItemUI
 	{
 		public var ordervo:PicOrderItemVo;
@@ -27,6 +29,12 @@ package script.order
 		private var curproductvo:ProductVo;
 		
 		private var fanmianFid:String;
+		
+		private var normaldeliTime:Number;
+		
+		private var selectTime:int = 0;
+		
+		public var discount:Number = 1;
 		
 		public function PicOrderItem(vo:PicOrderItemVo)
 		{
@@ -45,6 +53,7 @@ package script.order
 			this.addbtn.on(Event.CLICK,this,onAddItemNum);
 			this.hascomment.visible = false;
 			this.addmsg.visible = false;
+						
 			if(ordervo.picinfo.picWidth > ordervo.picinfo.picHeight)
 			{
 				this.fileimg.width = 80;					
@@ -114,6 +123,8 @@ package script.order
 			else
 				this.architype.height = 80;
 			
+			
+			
 			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
 			
 			if(this.architype.height > 80)
@@ -134,13 +145,15 @@ package script.order
 			this.ordervo.orderData = null;
 			
 			this.curproductvo = null;
-			
+
 			this.yixingimg.visible = false;
 			this.backimg.visible = false;
 			this.yingxback.visible = false;
 			
 			
 		}
+		
+		
 		private function onLockChange():void
 		{
 			if(locked)
@@ -275,6 +288,7 @@ package script.order
 			this.numbox.y = (this.height)/2 - 12;
 			this.price.y = (this.height - this.price.height)/2;
 			this.total.y = (this.height - this.total.height)/2;
+			
 			this.operatebox.y = (this.height - this.operatebox.height)/2 - 10;
 
 		}
@@ -301,12 +315,12 @@ package script.order
 //					area = 0.1;
 //				
 				if(curproductvo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area * discount).toFixed(1);
 				else
-					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
+					this.price.text = (curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter * discount).toFixed(1);
 				
 				
-				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
+				this.total.text = (parseInt(this.inputnum.text) *curproductvo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo) * discount).toFixed(1) + "";
 
 			}
 			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
@@ -315,7 +329,7 @@ package script.order
 		public function onNumChange():void
 		{
 			
-			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice).toFixed(1).toString();
+			this.total.text = (parseInt(this.inputnum.text) * this.ordervo.orderPrice * discount).toFixed(1).toString();
 			if(this.ordervo.orderData)
 			this.ordervo.orderData.item_number = parseInt(this.inputnum.text);
 			EventCenter.instance.event(EventCenter.UPDATE_ORDER_ITEM_TECH);
@@ -371,6 +385,21 @@ package script.order
 			curproductvo = provo;
 			fanmianFid = "";
 			updateOrderData(provo);
+			
+			//this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
+			//this.timebox.visible = true;
+			//var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;
+			//var nextdays:Array = UtilTool.getNextFiveDays("2020-09-04 12:00:00");
+			
+//			for(var i:int=0;i < 5;i++)
+//			{
+//				this["timebtn"+i].labelColors = colors;
+//				this["timebtn"+i].label = nextdays[i] + "";
+//			}
+//			
+//			onSelectTime(0);
+//			
+//			
 			var area:Number = (finalHeight * finalWidth)/10000;
 			var perimeter:Number = (finalHeight + finalWidth)*2/100;
 			
@@ -428,12 +457,12 @@ package script.order
 //				area = 0.1;
 			
 			if(provo.measure_unit == OrderConstant.MEASURE_UNIT_AREA)
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/area * discount).toFixed(1);
 			else
-				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter).toFixed(1);
+				this.price.text = (provo.getTotalPrice(finalWidth/100,finalHeight/100,true,ordervo)/perimeter * discount).toFixed(1);
 
 			
-			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo)).toFixed(1) + "";
+			this.total.text = (parseInt(this.inputnum.text) *provo.getTotalPrice(finalWidth/100,finalHeight/100,false,ordervo) *  discount).toFixed(1) + "";
 			
 			this.mattxt.text = provo.prod_name;
 			var lastheight:int = this.height;
@@ -450,6 +479,7 @@ package script.order
 				tech = tech.replace("小块裁切","小块裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
 			
 			this.architype.text = tech;
+						
 
 			if(this.architype.textField.textHeight > 80)
 				this.architype.height = this.architype.textField.textHeight;
@@ -470,7 +500,8 @@ package script.order
 		
 		public function getPrice():Number
 		{			
-			return parseInt(this.inputnum.text) * this.ordervo.orderPrice;
+			//return parseInt(this.inputnum.text) * this.ordervo.orderPrice * discount;
+			return parseFloat(this.total.text);
 		}
 		public function updateOrderData(productVo:ProductVo)
 		{
@@ -492,6 +523,7 @@ package script.order
 			
 			orderitemdata.prod_name = productVo.prod_name;
 			orderitemdata.prod_code = productVo.prod_code;
+			orderitemdata.material_code = productVo.material_code;
 			
 			orderitemdata.prod_description = "";
 			orderitemdata.LWH = finalWidth.toFixed(2) + "/" + finalHeight.toFixed(2) + "/1";
@@ -500,7 +532,22 @@ package script.order
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
 			orderitemdata.is_merchandise = 0;
 			orderitemdata.item_status = "1";
-			orderitemdata.comments = this.ordervo.comment;
+			
+			var tempstr:String = "";
+			var hasfinddot:Boolean = false;
+			for(var i:int= this.ordervo.picinfo.directName.length - 1;i >= 0;i--)
+			{
+				if(this.ordervo.picinfo.directName.charAt(i) == "." && hasfinddot == false)
+				{
+					hasfinddot = true;
+				}
+				else if(hasfinddot)
+				{
+					tempstr = this.ordervo.picinfo.directName.charAt(i) + tempstr;
+				}
+			}
+				
+			orderitemdata.comments = tempstr.substr(0,20);// this.ordervo.picinfo.directName.split(".");
 			orderitemdata.imagefile_path = HttpRequestUtil.originPicPicUrl + this.ordervo.picinfo.fid + "." + this.ordervo.picinfo.picClass;
 			orderitemdata.previewImage_path = HttpRequestUtil.biggerPicUrl + this.ordervo.picinfo.fid + ".jpg";
 			orderitemdata.thumbnails_path = HttpRequestUtil.smallerrPicUrl + this.ordervo.picinfo.fid + ".jpg";

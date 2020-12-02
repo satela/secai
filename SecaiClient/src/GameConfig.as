@@ -18,8 +18,10 @@ package {
 	import script.MainPageControl;
 	import utils.AddMsgControl;
 	import script.order.AvgCutPanelControl;
+	import script.order.ChooseDeliveryTimeControl;
 	import script.order.PayTypeSelectControl;
 	import script.order.InputCutNumControl;
+	import script.order.PackageOrderControl;
 	import script.order.SelectAddressControl;
 	import script.order.SelectAttchesControl;
 	import script.order.SelectDeliveryControl;
@@ -78,8 +80,10 @@ package {
 			reg("script.MainPageControl",MainPageControl);
 			reg("utils.AddMsgControl",AddMsgControl);
 			reg("script.order.AvgCutPanelControl",AvgCutPanelControl);
+			reg("script.order.ChooseDeliveryTimeControl",ChooseDeliveryTimeControl);
 			reg("script.order.PayTypeSelectControl",PayTypeSelectControl);
 			reg("script.order.InputCutNumControl",InputCutNumControl);
+			reg("script.order.PackageOrderControl",PackageOrderControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);
 			reg("script.order.SelectAttchesControl",SelectAttchesControl);
 			reg("script.order.SelectDeliveryControl",SelectDeliveryControl);

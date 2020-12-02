@@ -16,6 +16,10 @@ package model
 
 		public static const TYPE_NAME:Array = ["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值"];
 
+		
+		public static const ORDER_TIME_PREFER_URGENT = 1;//加急当天
+		
+		public static const ORDER_TIME_PREFER_EARLY = 2;//交期优先
 
 	}
 }

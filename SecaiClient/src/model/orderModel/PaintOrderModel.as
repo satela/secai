@@ -8,7 +8,10 @@ package model.orderModel
 	import model.users.FactoryInfoVo;
 	
 	import script.ViewManager;
+	import script.order.MaterialItem;
 	import script.order.PicOrderItem;
+	
+	import utils.UtilTool;
 
 	public class PaintOrderModel
 	{
@@ -43,10 +46,19 @@ package model.orderModel
 		public var curSelectProcList:Array;
 		
 		public var batchChangeMatItems:Vector.<PicOrderItem>;
+		
+		public var packageList:Vector.<PackageVo>;
+		//public var orderPackageData:Object;
+		
+		public var finalOrderData:Array;//最终下单数据
 
 		public var allManuFacutreMatProcPrice:Object = {};
 		
+		public var availableDeliveryDates:Object = {};
+		
 		public var orderType:int;//当前下单类型 
+		
+		public var curTimePrefer:int = 0;//当前选择的交付策略
 		public function PaintOrderModel()
 		{
 		}
@@ -61,6 +73,10 @@ package model.orderModel
 			deliveryList = null;
 			selectDelivery = null;	
 			allManuFacutreMatProcPrice = {};
+			packageList = new Vector.<PackageVo>();
+			finalOrderData = [];
+			availableDeliveryDates = {};
+			
 			
 		}
 		public function initOutputAddr(addrobj:Array):void
@@ -109,16 +125,16 @@ package model.orderModel
 					ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 					return;
 				}
-				var arr:Array = allManuFacutreMatProcPrice[orgcode];
-				for(var i:int=0;i < arr.length;i++)
-				{
-					var matlist:Array = arr[i].mat_list;
-					arr[i].matlist = {};
-					for(var j:int=0;j < matlist.length;j++)
-					{
-						arr[i].matlist[matlist[j].mat_code] = matlist[j];
-					}
-				}
+				//var arr:Array = allManuFacutreMatProcPrice[orgcode];
+//				for(var i:int=0;i < arr.length;i++)
+//				{
+//					var matlist:Array = arr[i].mat_list;
+//					arr[i].matlist = {};
+//					for(var j:int=0;j < matlist.length;j++)
+//					{
+//						arr[i].matlist[matlist[j].mat_code] = matlist[j];
+//					}
+//				}
 			}
 			catch(err:Error)
 			{
@@ -144,16 +160,65 @@ package model.orderModel
 				{
 					if(list[i].proc_code == procCode)
 					{
-						if(list[i].matlist[matcode] != null)
-							return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
-						else
+						//if(list[i].matlist[matcode] != null)
+						//	return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
+						//else
+						//	return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+						if(list[i].mat_code == matcode)
 							return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 					}
 				}
+				
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode && list[i].mat_code == "")
+					{						
+						return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					}
+				}
+				
 				return [];
 			}
 		}
 		
+		
+		
+		public function getCapacityData(orgcode:String,procCode:String,matcode:String):Array
+		{
+			if(allManuFacutreMatProcPrice == null || allManuFacutreMatProcPrice[orgcode] == null)
+				return [];
+			else
+			{
+				var list:Array = allManuFacutreMatProcPrice[orgcode];
+				if(list == null)
+					return [0,0,0];
+							
+				
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode && list[i].mat_code == matcode)
+					{
+//						if(list[i].matlist[matcode] != null)
+//							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+//						else
+							return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+					}
+				}
+				for(var i:int=0;i < list.length;i++)
+				{
+					if(list[i].proc_code == procCode && list[i].mat_code == "")
+					{
+						//						if(list[i].matlist[matcode] != null)
+						//							return [list[i].cap_unit,list[i].matlist[matcode].unit_capacity,list[i].matlist[matcode].unit_urgentcapacity];
+						//						else
+						return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+					}
+				}
+				return [0,0,0];
+			}
+		}
+		
+		//异形切割的工艺价格寻找加个最高的那个（根据选择的附件材料查找有没有对应的加个，再选择最高的价格)
 		public function getYixingProcPrice(orgcode:String,procCode:String,matcode:String,processList:Array):Array
 		{
 			var allprice:Array = [];
@@ -175,18 +240,23 @@ package model.orderModel
 			{
 				if(list[i].proc_code == procCode)
 				{
-					allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					if(allprice.length == 0)
+						allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 					for(var j:int=0;j < hasselectMat.length;j++)
 					{
-						if(list[i].matlist[hasselectMat[j]] != null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
-							allprice = [list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+						if(list[i].mat_code == hasselectMat[j]  && list[i].unit_procprice > allprice[2])
+							allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 						
 					}
+					if(list[i].mat_code == "" && list[i].unit_procprice > allprice[2])
+					{
+						allprice = [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+					}
 					
-					return allprice;
 				}
 			}
-			return [];
+			
+			return allprice;
 			
 		}
 		public static var VOCABURARY:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -348,5 +418,201 @@ package model.orderModel
 			
 			return false;
 		}
+		public function getManuFactureIndex(manucode:String):int
+		{
+			for(var i:int=0;i < outPutAddr.length;i++)
+			{
+				if(manucode == (outPutAddr[i] as FactoryInfoVo).org_code)
+					return i;
+			}
+			
+			return 0;
+		}
+		
+		public function addPackage(packagename:String):void
+		{
+			if(packageList == null)
+				packageList = new Vector.<PackageVo>();
+			
+			var pack:PackageVo = new PackageVo();
+			pack.packageName = packagename;
+			packageList.push(pack);
+			
+			//pack.itemlist = new 
+		}
+		
+		public function setPackageData():void
+		{
+			if(finalOrderData == null)
+				return;
+			
+			for(var i:int=0;i < finalOrderData.length;i++)
+			{
+				finalOrderData[i].packageList = [];
+				
+				for(var j:int=0;j < packageList.length;j++)
+				{
+					
+					var packdata:Object = {};
+					packdata.package_name = packageList[j].packageName;
+					packdata.consignee = "";
+					packdata.tel = "";
+					packdata.addr = "";
+					
+					packdata.itemList = [];
+					for(var k:int=0;k < finalOrderData[i].orderItemList.length;k++)
+					{
+						if(finalOrderData[i].orderItemList[k].numlist[j] > 0)
+						{
+							var itemdata:Object = {};
+							itemdata.orderItem_sn = finalOrderData[i].orderItemList[k].orderItem_sn;
+							itemdata.count = finalOrderData[i].orderItemList[k].numlist[j];
+							packdata.itemList.push(itemdata);
+						}
+					}
+					
+					finalOrderData[i].packageList.push(packdata);
+					
+				}
+				for(var k:int=0;k < finalOrderData[i].orderItemList.length;k++)
+				{
+					
+					delete finalOrderData[i].orderItemList[k].numlist;
+				}
+				
+			}
+			
+			
+		}
+		
+		public function getOrderCapcaityData(orderdata:Object,deliveryprefer:int):String
+		{
+			var resultdata:Object = {};
+			resultdata.manufacturer_code = orderdata.manufacturer_code;
+			resultdata.orderItemList = [];
+			resultdata.delivery_prefer = deliveryprefer;
+			
+			var orderitems:Array = orderdata.orderItemList;
+			
+			for(var i:int=0;i < orderitems.length;i++)
+			{
+				var itemdata:Object = {};
+				itemdata.orderItem_sn = orderitems[i].orderItem_sn;
+				itemdata.prod_code = orderitems[i].prod_code;
+				
+				itemdata.processList = [];
+
+				for(var j:int=0;j < orderitems[i].procInfoList.length;j++)
+				{
+					var procedata:Object = {};
+					procedata.proc_code = orderitems[i].procInfoList[j].proc_Code;
+					var size:Array = orderitems[i].LWH.split("/");
+					
+					var picwidth:Number = parseFloat(size[0]);
+					var picheight:Number = parseFloat(size[1]);
+					
+					procedata.cap_occupy = orderitems[i].item_number * getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
+					
+					procedata.proc_seq = j+1;
+					
+					itemdata.processList.push(procedata);
+				}
+				resultdata.orderItemList.push(itemdata);
+				
+			}
+			
+			return JSON.stringify(resultdata);
+			
+			
+		}
+		
+		public function getSingleOrderItemCapcaityData(orderItemdata:Object):String
+		{
+			var resultdata:Object = {};
+			resultdata.manufacturer_code = getManufacturerCode(orderItemdata.orderItem_sn);
+			resultdata.orderItemList = [];
+			
+			resultdata.delivery_prefer = 0;
+			
+			//var orderitems:Array = orderdata.orderItemList;
+			
+			//for(var i:int=0;i < orderitems.length;i++)
+			//{
+				var itemdata:Object = {};
+				itemdata.orderItem_sn = orderItemdata.orderItem_sn;
+				itemdata.prod_code = orderItemdata.prod_code;
+				
+				itemdata.processList = [];
+				
+				for(var j:int=0;j < orderItemdata.procInfoList.length;j++)
+				{
+					var procedata:Object = {};
+					procedata.proc_code = orderItemdata.procInfoList[j].proc_Code;
+					var size:Array = orderItemdata.LWH.split("/");
+					
+					var picwidth:Number = parseFloat(size[0]);
+					var picheight:Number = parseFloat(size[1]);
+					
+					procedata.cap_occupy = orderItemdata.item_number * getProcessNeedCapacity(resultdata.manufacturer_code,orderItemdata.material_code,picwidth,picheight,orderItemdata.procInfoList[j].proc_Code);
+					
+					procedata.proc_seq = j+1;
+					
+					itemdata.processList.push(procedata);
+				}
+				resultdata.orderItemList.push(itemdata);
+				
+		//	}
+			
+			return JSON.stringify(resultdata);
+			
+			
+		}
+		
+		//计算工艺占用产能时
+		public function getProcessNeedCapacity(manufacturerCode:String,matcode:String,picwidth:Number,picheight:Number,processcode:String):Number
+		{
+			var capacitydata:Array = getCapacityData(manufacturerCode,processcode,matcode);
+			
+			var amout:Number = UtilTool.getAmoutByUnit(picwidth/100.0,picheight/100.0,capacitydata[0]);
+			
+			if(capacitydata[1] > 0)
+				return parseFloat((amout/capacitydata[1] as Number).toFixed(2));
+			else
+				return 0;
+			
+		}
+		
+		public function getManufacturerCode(orderitemsn:String):String{
+			
+			var arr:Array = finalOrderData;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].orderItem_sn == orderitemsn)
+						return arr[i].manufacturer_code;
+				}
+			}
+			
+			return "";
+		}
+		
+		public function getSingleProductOrderData(orderitemsn:String):Object{
+			
+			var arr:Array = finalOrderData;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].orderItem_sn == orderitemsn)
+						return orderitems[j];
+				}
+			}
+			
+			return null;
+		}		
+		
 	}
 }

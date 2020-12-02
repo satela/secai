@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -670,8 +670,10 @@ var GameConfig=(function(){
 		reg("script.MainPageControl",MainPageControl);
 		reg("utils.AddMsgControl",AddMsgControl);
 		reg("script.order.AvgCutPanelControl",AvgCutPanelControl);
+		reg("script.order.ChooseDeliveryTimeControl",ChooseDeliveryTimeControl);
 		reg("script.order.PayTypeSelectControl",PayTypeSelectControl);
 		reg("script.order.InputCutNumControl",InputCutNumControl);
+		reg("script.order.PackageOrderControl",PackageOrderControl);
 		reg("script.order.SelectAddressControl",SelectAddressControl);
 		reg("script.order.SelectAttchesControl",SelectAttchesControl);
 		reg("script.order.SelectDeliveryControl",SelectDeliveryControl);
@@ -1072,6 +1074,8 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_CHARACTER_DEMONSTRATE_PANEL"]=CharacterPaintUI;
 		this.viewDict["VIEW_CHARACTER_TYPE_PANEL"]=CharactTypePanelUI;
 		this.viewDict["VIEW_CARVING_ORDER_PANEL"]=CarvingOrderPanelUI;
+		this.viewDict["VIEW_CHOOSE_DELIVERY_TIME_PANEL"]=ChooseDeliveryTimePanelUI;
+		this.viewDict["VIEW_PACKAGE_ORDER_PANEL"]=PackagePanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1149,6 +1153,8 @@ var ViewManager=(function(){
 	ViewManager.VIEW_SELECT_PAYTYPE_PANEL="VIEW_SELECT_PAYTYPE_PANEL";
 	ViewManager.VIEW_CHARACTER_DEMONSTRATE_PANEL="VIEW_CHARACTER_DEMONSTRATE_PANEL";
 	ViewManager.VIEW_CHARACTER_TYPE_PANEL="VIEW_CHARACTER_TYPE_PANEL";
+	ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL="VIEW_CHOOSE_DELIVERY_TIME_PANEL";
+	ViewManager.VIEW_PACKAGE_ORDER_PANEL="VIEW_PACKAGE_ORDER_PANEL";
 	ViewManager.VIEW_CARVING_ORDER_PANEL="VIEW_CARVING_ORDER_PANEL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
@@ -1394,7 +1400,7 @@ var Main=(function(){
 		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"])Laya["PhysicsDebugDraw"].enable();
 		if (GameConfig.stat)Stat.show();
 		Laya.alertGlobalError=true;
-		ResourceVersion.enable("version.json",Handler.create(this,this.onVersionLoaded),2);
+		ResourceVersion.enable("version.json?"+(new Date()).getTime().toString(),Handler.create(this,this.onVersionLoaded),2);
 		Laya.stage.on("resize",this,this.onResizeBrower);
 	}
 
@@ -1489,10 +1495,26 @@ var Constast=(function(){
 	Constast.PRIVILEGE_HIDE_PRICE=3;
 	Constast.PRIVILEGE_CHECK_ORDERS=4;
 	Constast.PRIVILEGE_CHECK_TRANSACTION=5;
+	Constast.ORDER_TIME_PREFER_URGENT=1;
+	Constast.ORDER_TIME_PREFER_EARLY=2;
 	__static(Constast,
 	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值"];}
 	]);
 	return Constast;
+})()
+
+
+//class model.orderModel.PackageVo
+var PackageVo=(function(){
+	function PackageVo(){
+		this.packageName="";
+		this.address=null;
+		this.itemlist=null;
+		this.itemlist=[];
+	}
+
+	__class(PackageVo,'model.orderModel.PackageVo');
+	return PackageVo;
 })()
 
 
@@ -1550,8 +1572,15 @@ var PaintOrderModel=(function(){
 		//选择的配送方式
 		this.curSelectProcList=null;
 		this.batchChangeMatItems=null;
+		this.packageList=null;
+		//public var orderPackageData:Object;
+		this.finalOrderData=null;
+		//最终下单数据
 		this.allManuFacutreMatProcPrice={};
+		this.availableDeliveryDates={};
 		this.orderType=0;
+		//当前下单类型
+		this.curTimePrefer=0;
 	}
 
 	__class(PaintOrderModel,'model.orderModel.PaintOrderModel');
@@ -1565,6 +1594,9 @@ var PaintOrderModel=(function(){
 		this.deliveryList=null;
 		this.selectDelivery=null;
 		this.allManuFacutreMatProcPrice={};
+		this.packageList=[];
+		this.finalOrderData=[];
+		this.availableDeliveryDates={};
 	}
 
 	__proto.initOutputAddr=function(addrobj){
@@ -1600,14 +1632,6 @@ var PaintOrderModel=(function(){
 				ViewManager.showAlert("获取生产商工艺价格出错！");
 				ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
 				return;
-			};
-			var arr=this.allManuFacutreMatProcPrice[orgcode];
-			for(var i=0;i < arr.length;i++){
-				var matlist=arr[i].mat_list;
-				arr[i].matlist={};
-				for(var j=0;j < matlist.length;j++){
-					arr[i].matlist[matlist[j].mat_code]=matlist[j];
-				}
 			}
 		}
 		catch(err){
@@ -1626,9 +1650,12 @@ var PaintOrderModel=(function(){
 				return this.getYixingProcPrice(orgcode,procCode,matcode,processList);
 			for(var i=0;i < list.length;i++){
 				if(list[i].proc_code==procCode){
-					if(list[i].matlist[matcode] !=null)
-						return [list[i].measure_unit,list[i].matlist[matcode].baseprice,list[i].matlist[matcode].unit_procprice];
-					else
+					if(list[i].mat_code==matcode)
+						return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				}
+			}
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode && list[i].mat_code==""){
 					return [list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				}
 			}
@@ -1636,6 +1663,28 @@ var PaintOrderModel=(function(){
 		}
 	}
 
+	__proto.getCapacityData=function(orgcode,procCode,matcode){
+		if(this.allManuFacutreMatProcPrice==null || this.allManuFacutreMatProcPrice[orgcode]==null)
+			return [];
+		else{
+			var list=this.allManuFacutreMatProcPrice[orgcode];
+			if(list==null)
+				return [0,0,0];
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode && list[i].mat_code==matcode){
+					return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+				}
+			}
+			for(var i=0;i < list.length;i++){
+				if(list[i].proc_code==procCode && list[i].mat_code==""){
+					return [list[i].cap_unit,list[i].unit_capacity,list[i].unit_urgentcapacity];
+				}
+			}
+			return [0,0,0];
+		}
+	}
+
+	//异形切割的工艺价格寻找加个最高的那个（根据选择的附件材料查找有没有对应的加个，再选择最高的价格)
 	__proto.getYixingProcPrice=function(orgcode,procCode,matcode,processList){
 		var allprice=[];
 		var hasselectMat=[];
@@ -1651,15 +1700,18 @@ var PaintOrderModel=(function(){
 			return [];
 		for(var i=0;i < list.length;i++){
 			if(list[i].proc_code==procCode){
-				allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				if(allprice.length==0)
+					allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				for(var j=0;j < hasselectMat.length;j++){
-					if(list[i].matlist[hasselectMat[j]] !=null && list[i].matlist[hasselectMat[j]].unit_procprice > allprice[2])
-						allprice=[list[i].measure_unit,list[i].matlist[hasselectMat[j]].baseprice,list[i].matlist[hasselectMat[j]].unit_procprice];
+					if(list[i].mat_code==hasselectMat[j] && list[i].unit_procprice > allprice[2])
+						allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
 				}
-				return allprice;
+				if(list[i].mat_code=="" && list[i].unit_procprice > allprice[2]){
+					allprice=[list[i].measure_unit,list[i].baseprice,list[i].unit_procprice];
+				}
 			}
 		}
-		return [];
+		return allprice;
 	}
 
 	__proto.getManuFacturePriority=function(manufacCode){
@@ -1760,6 +1812,134 @@ var PaintOrderModel=(function(){
 
 	__proto.checkExceedMaterialSize=function(material){
 		return false;
+	}
+
+	__proto.getManuFactureIndex=function(manucode){
+		for(var i=0;i < this.outPutAddr.length;i++){
+			if(manucode==(this.outPutAddr [i]).org_code)
+				return i;
+		}
+		return 0;
+	}
+
+	__proto.addPackage=function(packagename){
+		if(this.packageList==null)
+			this.packageList=[];
+		var pack=new PackageVo();
+		pack.packageName=packagename;
+		this.packageList.push(pack);
+	}
+
+	//pack.itemlist=new
+	__proto.setPackageData=function(){
+		if(this.finalOrderData==null)
+			return;
+		for(var i=0;i < this.finalOrderData.length;i++){
+			this.finalOrderData[i].packageList=[];
+			for(var j=0;j < this.packageList.length;j++){
+				var packdata={};
+				packdata.package_name=this.packageList[j].packageName;
+				packdata.consignee="";
+				packdata.tel="";
+				packdata.addr="";
+				packdata.itemList=[];
+				for(var k=0;k < this.finalOrderData[i].orderItemList.length;k++){
+					if(this.finalOrderData[i].orderItemList[k].numlist[j] > 0){
+						var itemdata={};
+						itemdata.orderItem_sn=this.finalOrderData[i].orderItemList[k].orderItem_sn;
+						itemdata.count=this.finalOrderData[i].orderItemList[k].numlist[j];
+						packdata.itemList.push(itemdata);
+					}
+				}
+				this.finalOrderData[i].packageList.push(packdata);
+			}
+			for(var k=0;k < this.finalOrderData[i].orderItemList.length;k++){
+				delete this.finalOrderData[i].orderItemList[k].numlist;
+			}
+		}
+	}
+
+	__proto.getOrderCapcaityData=function(orderdata,deliveryprefer){
+		var resultdata={};
+		resultdata.manufacturer_code=orderdata.manufacturer_code;
+		resultdata.orderItemList=[];
+		resultdata.delivery_prefer=deliveryprefer;
+		var orderitems=orderdata.orderItemList;
+		for(var i=0;i < orderitems.length;i++){
+			var itemdata={};
+			itemdata.orderItem_sn=orderitems[i].orderItem_sn;
+			itemdata.prod_code=orderitems[i].prod_code;
+			itemdata.processList=[];
+			for(var j=0;j < orderitems[i].procInfoList.length;j++){
+				var procedata={};
+				procedata.proc_code=orderitems[i].procInfoList[j].proc_Code;
+				var size=orderitems[i].LWH.split("/");
+				var picwidth=parseFloat(size[0]);
+				var picheight=parseFloat(size[1]);
+				procedata.cap_occupy=orderitems[i].item_number *this.getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
+				procedata.proc_seq=j+1;
+				itemdata.processList.push(procedata);
+			}
+			resultdata.orderItemList.push(itemdata);
+		}
+		return JSON.stringify(resultdata);
+	}
+
+	__proto.getSingleOrderItemCapcaityData=function(orderItemdata){
+		var resultdata={};
+		resultdata.manufacturer_code=this.getManufacturerCode(orderItemdata.orderItem_sn);
+		resultdata.orderItemList=[];
+		resultdata.delivery_prefer=0;
+		var itemdata={};
+		itemdata.orderItem_sn=orderItemdata.orderItem_sn;
+		itemdata.prod_code=orderItemdata.prod_code;
+		itemdata.processList=[];
+		for(var j=0;j < orderItemdata.procInfoList.length;j++){
+			var procedata={};
+			procedata.proc_code=orderItemdata.procInfoList[j].proc_Code;
+			var size=orderItemdata.LWH.split("/");
+			var picwidth=parseFloat(size[0]);
+			var picheight=parseFloat(size[1]);
+			procedata.cap_occupy=orderItemdata.item_number *this.getProcessNeedCapacity(resultdata.manufacturer_code,orderItemdata.material_code,picwidth,picheight,orderItemdata.procInfoList[j].proc_Code);
+			procedata.proc_seq=j+1;
+			itemdata.processList.push(procedata);
+		}
+		resultdata.orderItemList.push(itemdata);
+		return JSON.stringify(resultdata);
+	}
+
+	//计算工艺占用产能时
+	__proto.getProcessNeedCapacity=function(manufacturerCode,matcode,picwidth,picheight,processcode){
+		var capacitydata=this.getCapacityData(manufacturerCode,processcode,matcode);
+		var amout=UtilTool.getAmoutByUnit(picwidth/100.0,picheight/100.0,capacitydata[0]);
+		if(capacitydata[1] > 0)
+			return parseFloat((amout/capacitydata [1]).toFixed(2));
+		else
+		return 0;
+	}
+
+	__proto.getManufacturerCode=function(orderitemsn){
+		var arr=this.finalOrderData;
+		for(var i=0;i < arr.length;i++){
+			var orderitems=arr[i].orderItemList;
+			for(var j=0;j < orderitems.length;j++){
+				if(orderitems[j].orderItem_sn==orderitemsn)
+					return arr[i].manufacturer_code;
+			}
+		}
+		return "";
+	}
+
+	__proto.getSingleProductOrderData=function(orderitemsn){
+		var arr=this.finalOrderData;
+		for(var i=0;i < arr.length;i++){
+			var orderitems=arr[i].orderItemList;
+			for(var j=0;j < orderitems.length;j++){
+				if(orderitems[j].orderItem_sn==orderitemsn)
+					return orderitems[j];
+			}
+		}
+		return null;
 	}
 
 	__getset(1,PaintOrderModel,'instance',function(){
@@ -2209,7 +2389,6 @@ var HttpRequestUtil=(function(){
 		this.newRequest(url,caller,complete,param,"arraybuffer");
 	}
 
-	//活动付款
 	__getset(1,HttpRequestUtil,'instance',function(){
 		if(HttpRequestUtil._instance==null)
 			HttpRequestUtil._instance=new HttpRequestUtil();
@@ -2246,6 +2425,7 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.GetAccessorylist="business/accessorylist?";
 	HttpRequestUtil.getDeliveryList="business/deliverylist?manufacturer_code=";
 	HttpRequestUtil.placeOrder="business/placeorder?";
+	HttpRequestUtil.updateOrder="business/updateorder?";
 	HttpRequestUtil.cancelOrder="business/cancelorder?";
 	HttpRequestUtil.authorUploadUrl="file/authinfo";
 	HttpRequestUtil.noticeServerPreUpload="file/preupload?";
@@ -2278,6 +2458,9 @@ var HttpRequestUtil=(function(){
 	HttpRequestUtil.getChargeActivity="group/get-activities?";
 	HttpRequestUtil.joinChargeActivity="group/join-activity?";
 	HttpRequestUtil.payChargeActivity="group/pay-activity?";
+	HttpRequestUtil.getDeliveryTimeList="business/getAvailebleDeliveryDates?";
+	HttpRequestUtil.preOccupyCapacity="business/setCapacityPreOccupy?";
+	HttpRequestUtil.getProductUids="account/reserveorder?";
 	return HttpRequestUtil;
 })()
 
@@ -3148,6 +3331,51 @@ var UtilTool=(function(){
 		return false;
 	}
 
+	UtilTool.getNextFiveDays=function(curday){
+		var curdate=new Date(Date.parse(UtilTool.convertDateStr(curday)));
+		var arr=[];
+		for(var i=1;i <=5;i++){
+			var date=new Date(curdate.getTime()+24 *3600 *i *1000);
+			arr.push(date.getDate());
+		}
+		return arr;
+	}
+
+	UtilTool.getNextDayStr=function(curday){
+		var curdate=new Date(Date.parse(UtilTool.convertDateStr(curday)));
+		var date=new Date(curdate.getTime()+24 *3600 *1000);
+		var yearmonth=UtilTool.formatFullDateTime(date,false);
+		return yearmonth.substr(5,5);
+	}
+
+	UtilTool.getAmoutByUnit=function(picwidth,picheight,unit){
+		if(unit=="周长米"){
+			return 2 *(picwidth+picheight);
+		}
+		else if(unit=="长度米"){
+			return Math.max(picwidth,picheight);
+		}
+		else if(unit=="上下米"){
+			return (picwidth+picwidth);
+		}
+		else if(unit=="左右米"){
+			return (picheight+picheight);
+		}
+		else if(unit=="宽边米"){
+			return Math.max(picwidth,picheight);
+		}
+		else if(unit=="米"){
+			return 2 *(picwidth+picheight);
+		}
+		else if(unit=="平方米"){
+			return picwidth *picheight;
+		}
+		else if(UtilTool.isMeasureUnitByNum(unit)){
+			return 1;
+		}
+		else return 0;
+	}
+
 	UtilTool.needChooseAttachPic=function(matvo){
 		if(matvo.preProc_attachmentTypeList.toUpperCase()=="SPZZ" || matvo.preProc_attachmentTypeList.toUpperCase()=="SPSM")
 			return true;
@@ -3159,6 +3387,21 @@ var UtilTool=(function(){
 		var strArr=dateStr.split(" ");
 		var fStr="{0} {1} {2}";
 		return UtilTool.format(fStr,(strArr [0]).split("-").join("/"),strArr[1],"GMT");
+	}
+
+	UtilTool.getCountDownString=function(lefttime){
+		var min=Math.floor(lefttime/60);
+		var second=lefttime%60;
+		var timestr="";
+		if(min > 9)
+			timestr+=min;
+		else
+		timestr+="0"+min;
+		if(second > 9)
+			timestr+=":"+second;
+		else
+		timestr+=":0"+second;
+		return timestr;
 	}
 
 	UtilTool.format=function(str,__args){
@@ -3224,10 +3467,10 @@ var OrderConstant=(function(){
 	OrderConstant.ATTACH_JPG="SPJPG";
 	OrderConstant.ATTACH_PNG="SPPNG";
 	OrderConstant.ATTACH_PEIJIAN="SPPEIJIAN";
-	OrderConstant.CUTOFF_H_V="SPPJ";
-	OrderConstant.AVERAGE_CUTOFF="SPDFCQ";
 	OrderConstant.ATTACH_PJZZ="SPZZ";
 	OrderConstant.ATTACH_PJSM="SPSM";
+	OrderConstant.CUTOFF_H_V="SPPJ";
+	OrderConstant.AVERAGE_CUTOFF="SPDFCQ";
 	OrderConstant.DOUBLE_SIDE_SAME_TECHNO="SPTE10320";
 	OrderConstant.DOUBLE_SIDE_UNSAME_TECHNO="SPTE10330";
 	OrderConstant.UNNORMAL_CUT_TECHNO="SPTE10420";
@@ -3243,6 +3486,10 @@ var OrderConstant=(function(){
 	OrderConstant.DFCQ_MAX_WIDTH=240;
 	OrderConstant.DFCQ_MAX_HEIGHT=120;
 	OrderConstant.CUT_PRIOR_WIDTH=120;
+	OrderConstant.packagemaxCout=21;
+	__static(OrderConstant,
+	['OUTPUT_ICON',function(){return this.OUTPUT_ICON=["star.png","circle.png","square.png"];},'OUTPUT_COLOR',function(){return this.OUTPUT_COLOR=["#FF0000","#0d6a27","#3f48cc"];}
+	]);
 	return OrderConstant;
 })()
 
@@ -3250,12 +3497,12 @@ var OrderConstant=(function(){
 //class model.users.AddressVo
 var AddressVo=(function(){
 	function AddressVo(data){
-		this.receiverName="王晓明";
-		this.phone="15256565485";
+		this.receiverName="";
+		this.phone="";
 		this.zoneid="";
 		this.searchZoneid="";
 		//public var town:String="周浦镇";
-		this.address="汇腾南苑612好23号";
+		this.address="";
 		this.id=null;
 		this.preAddName=null;
 		this.status=0;
@@ -3385,6 +3632,18 @@ var ErrorCode=(function(){
 
 	]);
 	return ErrorCode;
+})()
+
+
+//class model.orderModel.PackageItem
+var PackageItem=(function(){
+	function PackageItem(){
+		this.itemId=null;
+		this.itemCount=0;
+	}
+
+	__class(PackageItem,'model.orderModel.PackageItem');
+	return PackageItem;
 })()
 
 
@@ -3526,6 +3785,10 @@ var MaterialItemVo=(function(){
 		this.attchMentFileId="";
 		//附件的文件id
 		this.attchFileId="";
+		this.unit_capacity=0;
+		//正常产能
+		this.unit_urgentCapacity=0;
+		this.cap_uit="";
 		this.attachList=null;
 		this.selectAttachVoList=null;
 		//选择的配件
@@ -28146,6 +28409,7 @@ var EventCenter=(function(_super){
 	EventCenter.START_SELECT_YIXING_PIC="START_SELECT_YIXING_PIC";
 	EventCenter.STOP_SELECT_RELATE_PIC="STOP_SELECT_RELATE_PIC";
 	EventCenter.START_SELECT_BACK_PIC="START_SELECT_BACK_PIC";
+	EventCenter.UPDATE_PRICE_BY_DELIVERYDATE="UPDATE_PRICE_BY_DELIVERYDATE";
 	EventCenter._eventCenter=null;
 	EventCenter.__init$=function(){
 		//class SingleForcer
@@ -30745,32 +31009,6 @@ var Loader=(function(_super){
 })(EventDispatcher)
 
 
-//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
-var TextureSV=(function(_super){
-	function TextureSV(subID){
-		this.u_colorMatrix=null;
-		this.strength=0;
-		this.blurInfo=null;
-		this.colorMat=null;
-		this.colorAlpha=null;
-		(subID===void 0)&& (subID=0);
-		TextureSV.__super.call(this,0x01,subID);
-		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
-	}
-
-	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
-	var __proto=TextureSV.prototype;
-	// ,'clipDir',3,'clipRect',4];
-	__proto.clear=function(){
-		this.texture=null;
-		this.shader=null;
-		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
-	}
-
-	return TextureSV;
-})(Value2D)
-
-
 /**
 *<code>Texture</code> 是一个纹理处理类。
 */
@@ -31100,6 +31338,32 @@ var Texture=(function(_super){
 })(EventDispatcher)
 
 
+//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
+var TextureSV=(function(_super){
+	function TextureSV(subID){
+		this.u_colorMatrix=null;
+		this.strength=0;
+		this.blurInfo=null;
+		this.colorMat=null;
+		this.colorAlpha=null;
+		(subID===void 0)&& (subID=0);
+		TextureSV.__super.call(this,0x01,subID);
+		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
+	}
+
+	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
+	var __proto=TextureSV.prototype;
+	// ,'clipDir',3,'clipRect',4];
+	__proto.clear=function(){
+		this.texture=null;
+		this.shader=null;
+		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
+	}
+
+	return TextureSV;
+})(Value2D)
+
+
 /**
 *drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
 */
@@ -31177,79 +31441,6 @@ var MeshQuadTexture=(function(_super){
 		0x1401,4,20];}
 	]);
 	return MeshQuadTexture;
-})(Mesh2D)
-
-
-/**
-*用来画矢量的mesh。顶点格式固定为 x,y,rgba
-*/
-//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
-var MeshVG=(function(_super){
-	function MeshVG(){
-		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
-	}
-
-	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
-	var __proto=MeshVG.prototype;
-	/**
-	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
-	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
-	*@param rgba rgba颜色
-	*@param ib index数组。
-	*/
-	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
-		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
-		var f32pos=startpos >> 2;
-		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
-		var vbu32Arr=this._vb._uint32Array;
-		var ci=0;
-		var sz=points.length / 2;
-		for (var i=0;i < sz;i++){
-			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
-			vbu32Arr[f32pos++]=rgba;
-		}
-		this._vb.setNeedUpload();
-		this._ib.append(new Uint16Array(ib));
-		this._ib.setNeedUpload();
-		this.vertNum+=sz;
-		this.indexNum+=ib.length;
-	}
-
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this._ib.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshVG._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._ib.destroy();
-		this._vb.destroy();
-		this._ib.disposeResource();
-		this._vb.deleteBuffer();
-	}
-
-	MeshVG.getAMesh=function(){
-		if (laya.webgl.utils.MeshVG._POOL.length){
-			return laya.webgl.utils.MeshVG._POOL.pop();
-		}
-		return new MeshVG();
-	}
-
-	MeshVG.const_stride=12;
-	MeshVG._POOL=[];
-	__static(MeshVG,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,2,0,
-		0x1401,4,8];}
-	]);
-	return MeshVG;
 })(Mesh2D)
 
 
@@ -31380,6 +31571,79 @@ var SceneLoader=(function(_super){
 	]);
 	return SceneLoader;
 })(EventDispatcher)
+
+
+/**
+*用来画矢量的mesh。顶点格式固定为 x,y,rgba
+*/
+//class laya.webgl.utils.MeshVG extends laya.webgl.utils.Mesh2D
+var MeshVG=(function(_super){
+	function MeshVG(){
+		MeshVG.__super.call(this,laya.webgl.utils.MeshVG.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshVG._fixattriInfo);
+	}
+
+	__class(MeshVG,'laya.webgl.utils.MeshVG',_super);
+	var __proto=MeshVG.prototype;
+	/**
+	*往矢量mesh中添加顶点和index。会把rgba和points在mesh中合并。
+	*@param points 顶点数组，只包含x,y。[x,y,x,y...]
+	*@param rgba rgba颜色
+	*@param ib index数组。
+	*/
+	__proto.addVertAndIBToMesh=function(ctx,points,rgba,ib){
+		var startpos=this._vb.needSize(points.length / 2 *MeshVG.const_stride);
+		var f32pos=startpos >> 2;
+		var vbdata=this._vb._floatArray32 || this._vb.getFloat32Array();
+		var vbu32Arr=this._vb._uint32Array;
+		var ci=0;
+		var sz=points.length / 2;
+		for (var i=0;i < sz;i++){
+			vbdata[f32pos++]=points[ci];vbdata[f32pos++]=points[ci+1];ci+=2;
+			vbu32Arr[f32pos++]=rgba;
+		}
+		this._vb.setNeedUpload();
+		this._ib.append(new Uint16Array(ib));
+		this._ib.setNeedUpload();
+		this.vertNum+=sz;
+		this.indexNum+=ib.length;
+	}
+
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this._ib.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshVG._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._ib.destroy();
+		this._vb.destroy();
+		this._ib.disposeResource();
+		this._vb.deleteBuffer();
+	}
+
+	MeshVG.getAMesh=function(){
+		if (laya.webgl.utils.MeshVG._POOL.length){
+			return laya.webgl.utils.MeshVG._POOL.pop();
+		}
+		return new MeshVG();
+	}
+
+	MeshVG.const_stride=12;
+	MeshVG._POOL=[];
+	__static(MeshVG,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,2,0,
+		0x1401,4,8];}
+	]);
+	return MeshVG;
+})(Mesh2D)
 
 
 //class laya.webgl.shader.d2.ShaderDefines2D extends laya.webgl.shader.ShaderDefinesBase
@@ -37157,6 +37421,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.main_panel.width=Browser.width;
 		this.uiSkin.main_panel.hScrollBarSkin="";
 		this.uiSkin.picList.height=fixedheight-125;
+		this.uiSkin.picList.width=Browser.width;
 		this.uiSkin.main_panel.hScrollBar.mouseWheelEnable=false;
 		this.uiSkin.seltips.visible=false;
 		this.uiSkin.picList.width=Browser.width;
@@ -37173,6 +37438,7 @@ var PicManagerControl=(function(_super){
 		this.uiSkin.picList.height=fixedheight-125;
 		this.uiSkin.main_panel.width=Browser.width;
 		this.uiSkin.picList.width=Browser.width;
+		this.uiSkin.picList.refresh();
 	}
 
 	__proto.onStartSelectRelate=function(){
@@ -37927,6 +38193,7 @@ var PaintOrderControl=(function(_super){
 					outputitem.qqContact.on("click",this,this.onClickOpenQQ);
 					outputitem.factorytxt.text=PaintOrderModel.instance.selectFactoryAddress[i].name;
 					outputitem.holaday.text="";
+					outputitem.outicon.skin="commers/"+OrderConstant.OUTPUT_ICON[i];
 				}
 				this.uiSkin.fengeimg.y=this.fengeoriginy+(PaintOrderModel.instance.outPutAddr.length-1)*40+(PaintOrderModel.instance.outPutAddr.length-2)*this.uiSkin.outputbox.space;
 				this.uiSkin.floatpt.y=this.floatpyy+(PaintOrderModel.instance.outPutAddr.length-1)*40+(PaintOrderModel.instance.outPutAddr.length-2)*this.uiSkin.outputbox.space;
@@ -38163,7 +38430,29 @@ var PaintOrderControl=(function(_super){
 		var arr=this.getOrderData();
 		if(arr==null)
 			return;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+		var itemlist=[];
+		for(var i=0;i < arr.length;i++){
+			itemlist=itemlist.concat(arr[i].orderItemList);
+		}
+		PaintOrderModel.instance.finalOrderData=arr;
+		var params="count="+itemlist.length;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/reserveorder?",this,this.ongetUidsBack,params,"post");
+	}
+
+	// HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	__proto.ongetUidsBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var ids=result.id;
+			var itemlist=[];
+			for(var i=0;i < PaintOrderModel.instance.finalOrderData.length;i++){
+				itemlist=itemlist.concat(PaintOrderModel.instance.finalOrderData[i].orderItemList);
+			}
+			for(var i=0;i < ids.length;i++){
+				itemlist[i].orderItem_sn=ids[i];
+			}
+			ViewManager.instance.openView("VIEW_PACKAGE_ORDER_PANEL",false,itemlist);
+		}
 	}
 
 	__proto.onSaveOrder=function(){
@@ -38323,6 +38612,7 @@ var PaintOrderControl=(function(_super){
 		EventCenter.instance.off("BATCH_CHANGE_PRODUCT_NUM",this,this.changeProductNum);
 		EventCenter.instance.off("PAY_ORDER_SUCESS",this,this.onPaySucess);
 		EventCenter.instance.off("CANCEL_PAY_ORDER",this,this.onCancelPay);
+		PaintOrderModel.instance.resetData();
 		Laya.timer.clear(this,this.onDragMove);
 	}
 
@@ -38500,6 +38790,329 @@ var PayTypeSelectControl=(function(_super){
 	}
 
 	return PayTypeSelectControl;
+})(Script)
+
+
+//class script.order.ChooseDeliveryTimeControl extends laya.components.Script
+var ChooseDeliveryTimeControl=(function(_super){
+	function ChooseDeliveryTimeControl(){
+		this.uiSkin=null;
+		this.param=null;
+		this.orderDatas=null;
+		this.delaypay=false;
+		this.requestnum=0;
+		ChooseDeliveryTimeControl.__super.call(this);
+	}
+
+	__class(ChooseDeliveryTimeControl,'script.order.ChooseDeliveryTimeControl',_super);
+	var __proto=ChooseDeliveryTimeControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.orderlist.itemRender=ChooseDelTimeOrderItem;
+		this.uiSkin.orderlist.selectEnable=false;
+		this.uiSkin.orderlist.spaceY=2;
+		this.uiSkin.orderlist.renderHandler=new Handler(this,this.updateOrderItem);
+		this.uiSkin.savebtn.on("click",this,this.onSaveOrder);
+		this.uiSkin.paybtn.on("click",this,this.onPayOrder);
+		this.uiSkin.closebtn.on("click",this,this.onGiveUpOrder);
+		this.orderDatas=this.param.orders;
+		this.delaypay=this.param.delaypay;
+		this.uiSkin.savebtn.visible=!this.delaypay;
+		this.uiSkin.orderlist.array=this.orderDatas;
+		this.uiSkin.timepreferRdo.selectedIndex=PaintOrderModel.instance.curTimePrefer-1;
+		this.uiSkin.confirmpreferbtn.on("click",this,this.resetTimePrefer);
+		this.uiSkin.setdefaultbtn.on("click",this,this.setDefaultTimePrefer);
+		var total=0;
+		for(var i=0;i < this.orderDatas.length;i++){
+			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
+			ordermoney=parseFloat(ordermoney.toFixed(1));
+			total+=ordermoney;
+		}
+		this.uiSkin.rawprice.text=total.toFixed(1)+"元";
+		this.uiSkin.disountprice.text=total.toFixed(1)+"元";
+		Laya.timer.loop(1000,this,this.onCountDownTime);
+		EventCenter.instance.on("UPDATE_PRICE_BY_DELIVERYDATE",this,this.updatePrice);
+		this.updatePrice();
+	}
+
+	//uiSkin.
+	__proto.onCountDownTime=function(){
+		var arr=this.orderDatas;
+		for(var i=0;i < this.orderDatas.length;i++){
+			if(this.orderDatas[i].is_urgent==1 || this.orderDatas[i].delivery_date !=null){
+				if(this.orderDatas[i].lefttime > 0){
+					this.orderDatas[i].lefttime--;
+					if(this.orderDatas[i].lefttime==0){
+						this.orderDatas[i].is_urgent=0;
+						this.orderDatas[i].delivery_date=null;
+						this.orderDatas[i].outtime=true;
+						this.retryGetAvailableDate(this.orderDatas[i]);
+					}
+				}
+			}
+		}
+	}
+
+	__proto.retryGetAvailableDate=function(orderdata){
+		var datas=PaintOrderModel.instance.getSingleOrderItemCapcaityData(orderdata);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+				for(var j=0;j < this.uiSkin.orderlist.cells.length;j++){
+					if((this.uiSkin.orderlist.cells [j]).orderdata.orderItem_sn==alldates[i].orderItem_sn){
+						(this.uiSkin.orderlist.cells [j]).resetDeliveryDates();
+						break ;
+					}
+				}
+			}
+		}
+	}
+
+	__proto.updatePrice=function(){
+		var total=0;
+		for(var i=0;i < this.orderDatas.length;i++){
+			var ordermoney=Number(this.orderDatas[i].item_priceStr)*Number(this.orderDatas[i].item_number);
+			if(this.orderDatas[i].is_urgent==1 || this.orderDatas[i].delivery_date !=null){
+				ordermoney=ordermoney*this.orderDatas[i].discount;
+			}
+			ordermoney=parseFloat(ordermoney.toFixed(1));
+			total+=ordermoney;
+		}
+		this.uiSkin.disountprice.text=total.toFixed(1)+"元";
+	}
+
+	__proto.onPayOrder=function(){
+		var arr=this.getOrderData();
+		if(arr==null)
+			return;
+		if(this.delaypay)
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/updateorder?",this,this.onUpdateOrderBack,{data:JSON.stringify(arr)},"post");
+		else
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onUpdateOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalmoney=0;
+			var allorders=[];
+			for(var i=0;i < result.orders.length;i++){
+				var orderdata=JSON.parse(result.orders[i]);
+				totalmoney+=Number(orderdata.money_paidStr);
+				allorders.push(orderdata.order_sn);
+			}
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
+	}
+
+	__proto.onPlaceOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			var totalmoney=0;
+			var allorders=[];
+			for(var i=0;i < result.orders.length;i++){
+				var orderdata=JSON.parse(result.orders[i]);
+				totalmoney+=Number(orderdata.money_paidStr);
+				allorders.push(orderdata.order_sn);
+			}
+			ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+		}
+	}
+
+	__proto.resetDeliveryTime=function(){
+		for(var i=0;i < this.orderDatas.length;i++){
+			this.orderDatas[i].is_urgent=false;
+			this.orderDatas[i].delivery_date=null;
+			this.orderDatas[i].outtime=false;
+			this.orderDatas[i].lefttime=0;
+			this.orderDatas[i].discount=1;
+		}
+		this.uiSkin.orderlist.array=this.orderDatas;
+		this.updatePrice();
+	}
+
+	__proto.setDefaultTimePrefer=function(){
+		UtilTool.setLocalVar("timePrefer",this.uiSkin.timepreferRdo.selectedIndex);
+		ViewManager.showAlert("设置成功");
+	}
+
+	__proto.resetTimePrefer=function(){
+		var arr=PaintOrderModel.instance.finalOrderData;
+		this.requestnum=0;
+		PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
+		this.resetDeliveryTime();
+		for(var i=0;i < arr.length;i++){
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i],this.uiSkin.timepreferRdo.selectedIndex+1);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAllAvailableDateBack,{data:datas},"post");
+		}
+	}
+
+	//PaintOrderModel.instance.packageList=new Vector.<PackageVo>();
+	__proto.ongetAllAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				var orderdata=PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+				orderdata.delivery_date=null;
+				orderdata.is_urgent=false;
+				var currentdate=alldates[i].current_date;
+				if(orderdata !=null && alldates[i].default_deliveryDate !=null && alldates[i].default_deliveryDate !=""){
+					orderdata.delivery_date=alldates[i].default_deliveryDate;
+					orderdata.is_urgent=(orderdata.delivery_date==currentdate && PaintOrderModel.instance.curTimePrefer==1);
+					orderdata.lefttime=180;
+				}
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			this.requestnum++;
+			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
+				this.uiSkin.orderlist.array=this.orderDatas;
+				this.updatePrice();
+			}
+		}
+	}
+
+	__proto.getOrderData=function(){
+		var manuarr=PaintOrderModel.instance.finalOrderData;
+		for(var i=0;i < manuarr.length;i++){
+			var itemlist=manuarr[i].orderItemList;
+			var totalprice=0;
+			for(var j=0;j < itemlist.length;j++){
+				if(itemlist[j].is_urgent==null || (itemlist[j].is_urgent==false && itemlist[j].delivery_date==null)){
+					ViewManager.showAlert("有产品未设置交货时间");
+					return null;
+				};
+				var ordermoney=Number(itemlist[j].item_priceStr)*Number(itemlist[j].item_number)*itemlist[j].discount;
+				ordermoney=parseFloat(ordermoney.toFixed(1));
+				totalprice+=ordermoney;
+			}
+			manuarr[i].order_amountStr=totalprice;
+			if((manuarr[i] .order_amountStr)< 2){
+				manuarr[i].order_amountStr=2.00;
+				if(itemlist.length > 0){
+					var eachprice=Number((2/itemlist.length).toFixed(2));
+					var overflow=2-eachprice*itemlist.length;
+					for(var j=0;j < itemlist.length;j++){
+						if(j==0)
+							itemlist[j].item_priceStr=(((eachprice+overflow)/itemlist[j].item_number)).toFixed(2);
+						else
+						itemlist[j].item_priceStr=((eachprice/itemlist[j].item_number)).toFixed(2);
+					}
+				}
+			}
+			manuarr[i].money_paidStr=(manuarr[i] .order_amountStr).toFixed(1);
+			manuarr[i].order_amountStr=(manuarr[i] .order_amountStr).toFixed(1);
+		}
+		for(var i=0;i < manuarr.length;i++){
+			var itemlist=manuarr[i].orderItemList;
+			for(var j=0;j < itemlist.length;j++){
+				delete itemlist[j].outtime;
+				delete itemlist[j].discount;
+			}
+		};
+		var arr=PaintOrderModel.instance.finalOrderData;
+		return arr;
+	}
+
+	__proto.onSaveOrder=function(){
+		var _$this=this;
+		if(Userdata.instance.companyShort==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?" ,this,function(data){
+				if(this.destroyed)
+					return;
+				var result=JSON.parse(data);
+				if(result.status==0){
+					Userdata.instance.company=result.name;
+					Userdata.instance.companyShort=result.shortname;
+				}
+				_$this.onSaveOrder();
+			}
+			,null,"post");
+			return;
+		};
+		var arr=PaintOrderModel.instance.finalOrderData;
+		if(arr==null)
+			return;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/placeorder?",this,this.onSaveOrderBack,{data:JSON.stringify(arr)},"post");
+	}
+
+	__proto.onSaveOrderBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			ViewManager.showAlert("保存订单成功，您可以到我的订单继续支付");
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
+	__proto.onGiveUpOrder=function(){
+		if(!this.delaypay)
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"确定关闭页面不保存订单吗？",caller:this,callback:this.confirmClose,ok:"确定",cancel:"取消"});
+		else{
+			ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
+		}
+	}
+
+	__proto.confirmClose=function(b){
+		if(b){
+			ViewManager.instance.openView("VIEW_FIRST_PAGE",true);
+		}
+	}
+
+	__proto.onCloseView=function(){
+		ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
+	}
+
+	__proto.updateOrderItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.onDestroy=function(){
+		EventCenter.instance.off("UPDATE_PRICE_BY_DELIVERYDATE",this,this.updatePrice);
+	}
+
+	return ChooseDeliveryTimeControl;
 })(Script)
 
 
@@ -41432,6 +42045,163 @@ var SelectMaterialControl=(function(_super){
 })(Script)
 
 
+//class script.order.PackageOrderControl extends laya.components.Script
+var PackageOrderControl=(function(_super){
+	function PackageOrderControl(){
+		this.uiSkin=null;
+		this.param=null;
+		this.orderDatas=null;
+		this.requestnum=0;
+		PackageOrderControl.__super.call(this);
+	}
+
+	__class(PackageOrderControl,'script.order.PackageOrderControl',_super);
+	var __proto=PackageOrderControl.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.productlist.itemRender=OrderPackItem;
+		this.uiSkin.productlist.selectEnable=false;
+		this.uiSkin.productlist.spaceY=2;
+		this.uiSkin.productlist.renderHandler=new Handler(this,this.updateOrderItem);
+		this.uiSkin.cancelbtn.on("click",this,this.onCloseView);
+		this.uiSkin.okbtn.on("click",this,this.onConfirmPackage);
+		this.orderDatas=this.param;
+		for(var i=0;i < this.orderDatas.length;i++){
+			var numlist=[];
+			numlist.push(this.orderDatas[i].item_number);
+			for(var j=1;j < 21;j++){
+				numlist.push(0);
+			}
+			this.orderDatas[i].numlist=numlist;
+		}
+		this.uiSkin.addpackbtn.on("click",this,this.addnewPack);
+		var defaultPrefer=UtilTool.getLocalVar("timePrefer","1");
+		this.uiSkin.timepreferRdo.selectedIndex=parseInt(defaultPrefer);
+		this.addnewPack();
+		this.uiSkin.productlist.array=this.orderDatas;
+	}
+
+	__proto.addnewPack=function(){
+		if(this.uiSkin.packagebox.numChildren >=21)
+			return;
+		var packitem=new PackageItemUI();
+		packitem.packname.maxChars=6;
+		packitem.packname.focus=true;
+		packitem.packname.select();
+		this.uiSkin.packagebox.addChild(packitem);
+		packitem.packname.on("input",this,this.onchangePackName,[packitem.packname,this.uiSkin.packagebox.numChildren-1]);
+		packitem.delbtn.on("click",this,this.ondeletepack,[packitem,this.uiSkin.packagebox.numChildren-1]);
+		packitem.x=(this.uiSkin.packagebox.numChildren-1)*55;
+		this.uiSkin.addpackbtn.x=110+this.uiSkin.packagebox.numChildren*55;
+		packitem.packname.text="包裹"+this.uiSkin.packagebox.numChildren;
+		PaintOrderModel.instance.addPackage("包裹"+this.uiSkin.packagebox.numChildren);
+		if(PaintOrderModel.instance.packageList.length > 1){
+			for(var i=0;i < this.uiSkin.productlist.cells.length;i++){
+				(this.uiSkin.productlist.cells [i]).addpacakge();
+			}
+		}
+		if(this.uiSkin.packagebox.numChildren >=21)
+			this.uiSkin.addpackbtn.visible=false;
+	}
+
+	__proto.onchangePackName=function(nametext,index){
+		if(PaintOrderModel.instance.packageList[index] !=null)
+			PaintOrderModel.instance.packageList[index].packageName=nametext.text;
+	}
+
+	__proto.ondeletepack=function(packitem,index){
+		index=this.uiSkin.packagebox.getChildIndex(packitem);
+		if(index==0)
+			return;
+		packitem.removeSelf();
+		this.uiSkin.addpackbtn.visible=true;
+		for(var i=index;i < this.uiSkin.packagebox.numChildren;i++){
+			(this.uiSkin.packagebox.getChildAt(i)).x-=55;
+		}
+		this.uiSkin.addpackbtn.x-=55;
+		var arr=this.orderDatas;
+		for(var i=0;i < arr.length;i++){
+			arr[i].numlist[0]+=arr[i].numlist[index];
+			for(var j=index;j < 21-1;j++){
+				arr[i].numlist[j]=arr[i].numlist[j+1];
+			}
+			arr[i].numlist[21-1]=0;
+		}
+		PaintOrderModel.instance.packageList.splice(index,1);
+		for(var i=0;i < this.uiSkin.productlist.cells.length;i++){
+			(this.uiSkin.productlist.cells [i]).deletepack(index);
+		}
+	}
+
+	//}
+	__proto.onCloseView=function(){
+		PaintOrderModel.instance.packageList=[];
+		ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
+	}
+
+	__proto.onConfirmPackage=function(){
+		var arr=PaintOrderModel.instance.finalOrderData;
+		this.requestnum=0;
+		for(var i=0;i < arr.length;i++){
+			PaintOrderModel.instance.curTimePrefer=this.uiSkin.timepreferRdo.selectedIndex+1;
+			var datas=PaintOrderModel.instance.getOrderCapcaityData(arr[i],this.uiSkin.timepreferRdo.selectedIndex+1);
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+		}
+	}
+
+	//PaintOrderModel.instance.packageList=new Vector.<PackageVo>();
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				var orderdata=PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+				var currentdate=alldates[i].current_date;
+				if(orderdata !=null && alldates[i].default_deliveryDate !=null && alldates[i].default_deliveryDate !=""){
+					orderdata.delivery_date=alldates[i].default_deliveryDate;
+					orderdata.is_urgent=(orderdata.delivery_date==currentdate && PaintOrderModel.instance.curTimePrefer==1);
+					orderdata.lefttime=180;
+				}
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
+					}
+					else if(currentdate==alldates[i].deliveryDateList[j].availableDate){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						if(orderdata.delivery_date==alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent){
+							orderdata.discount=alldates[i].deliveryDateList[j].discount;
+						}
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			this.requestnum++;
+			if(this.requestnum==PaintOrderModel.instance.finalOrderData.length){
+				PaintOrderModel.instance.setPackageData();
+				ViewManager.instance.closeView("VIEW_PACKAGE_ORDER_PANEL");
+				ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,{orders:this.orderDatas,delaypay:false});
+				PaintOrderModel.instance.packageList=[];
+			}
+		}
+	}
+
+	__proto.updateOrderItem=function(cell){
+		cell.setData(cell.dataSource);
+	}
+
+	return PackageOrderControl;
+})(Script)
+
+
 //class script.usercenter.EnterPrizeInfoControl extends laya.components.Script
 var EnterPrizeInfoControl=(function(_super){
 	function EnterPrizeInfoControl(){
@@ -41927,7 +42697,7 @@ var MyOrderControl=(function(_super){
 		Laya.timer.frameLoop(1,this,this.updateDateInputPos);
 		var curdate=new Date();
 		var lastday=new Date(curdate.getTime()-24 *3600 *1000);
-		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&status=1&curpage=1";
+		var param="begindate="+UtilTool.formatFullDateTime(lastday,false)+" 00:00:00&enddate="+UtilTool.formatFullDateTime(new Date(),false)+" 23:59:59&status=2&curpage=1";
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
 		this.uiSkin.lastyearbtn.on("click",this,this.onLastYear);
 		this.uiSkin.nextyearbtn.on("click",this,this.onNextYear);
@@ -41937,7 +42707,7 @@ var MyOrderControl=(function(_super){
 		this.uiSkin.nexttpage.on("click",this,this.onNextPage);
 		this.uiSkin.ordertotalNum.text="0";
 		this.uiSkin.ordertotalMoney.text="0元";
-		this.uiSkin.paytype.selectedIndex=1;
+		this.uiSkin.paytype.selectedIndex=2;
 		this.uiSkin.paytype.on("change",this,this.queryOrderList);
 		this.uiSkin.orderList.on("mousedown",this,this.onMouseDwons);
 		this.uiSkin.orderList.on("mouseup",this,this.onMouseUpHandler);
@@ -42110,6 +42880,7 @@ var MyOrderControl=(function(_super){
 		var lastdate=new Date(this.dateInput.value);
 		var param="begindate="+this.dateInput.value+" 00:00:00&enddate="+this.dateInput2.value+" 23:59:59&status="+this.uiSkin.paytype.selectedIndex+"&curpage="+this.curpage;
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"account/listorder?",this,this.onGetOrderListBack,param,"post");
+		ViewManager.instance.closeView("VIEW_CHOOSE_DELIVERY_TIME_PANEL");
 	}
 
 	//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
@@ -55260,6 +56031,150 @@ var LoadingPanelUI=(function(_super){
 })(View)
 
 
+//class ui.order.SimpleOrderItemUI extends laya.ui.View
+var SimpleOrderItemUI=(function(_super){
+	function SimpleOrderItemUI(){
+		this.fileimg=null;
+		this.numindex=null;
+		this.filename=null;
+		this.pricetext=null;
+		this.picwidth=null;
+		this.picheight=null;
+		this.proctext=null;
+		this.mattext=null;
+		this.urgentcheck=null;
+		this.urgentdiscount=null;
+		this.paycountdown=null;
+		this.numtxt=null;
+		this.deltime0=null;
+		this.discount0=null;
+		this.deltime1=null;
+		this.discount1=null;
+		this.deltime2=null;
+		this.discount2=null;
+		this.deltime3=null;
+		this.discount3=null;
+		this.deltime4=null;
+		this.discount4=null;
+		SimpleOrderItemUI.__super.call(this);
+	}
+
+	__class(SimpleOrderItemUI,'ui.order.SimpleOrderItemUI',_super);
+	var __proto=SimpleOrderItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(SimpleOrderItemUI.uiView);
+	}
+
+	SimpleOrderItemUI.uiView={"type":"View","props":{"width":1260,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1260,"skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":86},"compId":3},{"type":"Image","props":{"y":43,"x":109,"width":80,"var":"fileimg","skin":"comp/image.png","height":80,"anchorY":0.5,"anchorX":0.5},"compId":4},{"type":"Label","props":{"y":38,"x":35,"width":30,"var":"numindex","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":8},{"type":"Label","props":{"y":4,"x":171,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":9},{"type":"Label","props":{"y":36,"x":782,"width":62,"var":"pricetext","text":"12680","height":16,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},"compId":11},{"type":"Box","props":{"y":16,"x":449},"compId":13,"child":[{"type":"Label","props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":22},{"type":"Label","props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":23},{"type":"Label","props":{"y":1,"x":52,"width":50,"var":"picwidth","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":41},{"type":"Label","props":{"y":38,"x":52,"width":58,"var":"picheight","text":"100","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},"compId":42}]},{"type":"VBox","props":{"y":29,"x":554,"space":0},"compId":14,"child":[{"type":"Label","props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"proctext","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":27}]},{"type":"Sprite","props":{"y":19,"x":294,"width":153,"height":43},"compId":15,"child":[{"type":"Label","props":{"y":0,"x":0,"wordWrap":true,"width":153,"var":"mattext","valign":"middle","text":"展架专用布","height":50,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},"compId":28}]},{"type":"CheckBox","props":{"y":40,"x":14,"width":16,"skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"height":16},"compId":16},{"type":"CheckBox","props":{"y":30,"x":849,"var":"urgentcheck","skin":"commers/checksingle.png","labelSize":16,"label":"加急"},"compId":45,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"urgentdiscount","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":62}]},{"type":"Label","props":{"y":37,"x":1194,"var":"paycountdown","text":"00:00","fontSize":16,"font":"SimHei","color":"#EE2200"},"compId":47},{"type":"Image","props":{"y":35,"x":740,"width":36,"skin":"commers/inputbg.png","sizeGrid":"2,2,2,2"},"compId":49,"child":[{"type":"Label","props":{"y":0,"var":"numtxt","text":"10","right":0,"left":0,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":false,"align":"center"},"compId":48}]},{"type":"Button","props":{"y":30,"x":916,"width":50,"var":"deltime0","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21","height":18},"compId":50,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount0","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":51}]},{"type":"Button","props":{"y":30,"x":970,"width":50,"var":"deltime1","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":52,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount1","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":53}]},{"type":"Button","props":{"y":30,"x":1024,"width":50,"var":"deltime2","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":56,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount2","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":57}]},{"type":"Button","props":{"y":30,"x":1077,"width":50,"var":"deltime3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":58,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount3","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":59}]},{"type":"Button","props":{"y":30,"x":1131,"width":50,"var":"deltime4","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},"compId":60,"child":[{"type":"Label","props":{"y":21,"x":0,"width":50,"var":"discount4","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},"compId":61}]}],"loadList":["commers/inputbg.png","comp/image.png","commers/multicheck.png","commers/checksingle.png","commers/btn2.png"],"loadList3D":[]};
+	return SimpleOrderItemUI;
+})(View)
+
+
+//class ui.order.OrderPackageItemUI extends laya.ui.View
+var OrderPackageItemUI=(function(_super){
+	function OrderPackageItemUI(){
+		this.fileimg=null;
+		this.filenametxt=null;
+		this.mattext=null;
+		this.box0=null;
+		this.numinput0=null;
+		this.averagebtn=null;
+		this.box1=null;
+		this.numinput1=null;
+		this.addbtn1=null;
+		this.subbtn1=null;
+		this.box2=null;
+		this.numinput2=null;
+		this.addbtn2=null;
+		this.subbtn2=null;
+		this.box3=null;
+		this.numinput3=null;
+		this.addbtn3=null;
+		this.subbtn3=null;
+		this.box4=null;
+		this.numinput4=null;
+		this.addbtn4=null;
+		this.subbtn4=null;
+		this.box5=null;
+		this.numinput5=null;
+		this.addbtn5=null;
+		this.subbtn5=null;
+		this.box6=null;
+		this.numinput6=null;
+		this.addbtn6=null;
+		this.subbtn6=null;
+		this.box7=null;
+		this.numinput7=null;
+		this.addbtn7=null;
+		this.subbtn7=null;
+		this.box8=null;
+		this.numinput8=null;
+		this.addbtn8=null;
+		this.subbtn8=null;
+		this.box9=null;
+		this.numinput9=null;
+		this.addbtn9=null;
+		this.subbtn9=null;
+		this.box10=null;
+		this.numinput10=null;
+		this.addbtn10=null;
+		this.subbtn10=null;
+		this.box11=null;
+		this.numinput11=null;
+		this.addbtn11=null;
+		this.subbtn11=null;
+		this.box12=null;
+		this.numinput12=null;
+		this.addbtn12=null;
+		this.subbtn12=null;
+		this.box13=null;
+		this.numinput13=null;
+		this.addbtn13=null;
+		this.subbtn13=null;
+		this.box14=null;
+		this.numinput14=null;
+		this.addbtn14=null;
+		this.subbtn14=null;
+		this.box15=null;
+		this.numinput15=null;
+		this.addbtn15=null;
+		this.subbtn15=null;
+		this.box16=null;
+		this.numinput16=null;
+		this.addbtn16=null;
+		this.subbtn16=null;
+		this.box17=null;
+		this.numinput17=null;
+		this.addbtn17=null;
+		this.subbtn17=null;
+		this.box18=null;
+		this.numinput18=null;
+		this.addbtn18=null;
+		this.subbtn18=null;
+		this.box19=null;
+		this.numinput19=null;
+		this.addbtn19=null;
+		this.subbtn19=null;
+		this.box20=null;
+		this.numinput20=null;
+		this.addbtn20=null;
+		this.subbtn20=null;
+		OrderPackageItemUI.__super.call(this);
+	}
+
+	__class(OrderPackageItemUI,'ui.order.OrderPackageItemUI',_super);
+	var __proto=OrderPackageItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(OrderPackageItemUI.uiView);
+	}
+
+	OrderPackageItemUI.uiView={"type":"View","props":{"width":1280,"height":140},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1280,"skin":"upload/inoutbg.png","sizeGrid":"3,3,3,3","height":140},"compId":133},{"type":"Image","props":{"y":52,"x":52,"width":100,"var":"fileimg","skin":"comp/image.png","height":100,"anchorY":0.5,"anchorX":0.5},"compId":3},{"type":"Label","props":{"y":103,"x":0,"width":105,"var":"filenametxt","text":"文件名各","overflow":"scroll","height":14,"fontSize":14,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":122,"x":0,"width":106,"var":"mattext","text":"户内写真","overflow":"scroll","height":14,"fontSize":14,"font":"SimHei","align":"center"},"compId":5},{"type":"Image","props":{"x":110,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":7},{"type":"Box","props":{"y":0,"x":110,"width":55,"var":"box0","height":140},"compId":9,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput0","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":6},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":8},{"type":"Button","props":{"y":29,"x":7,"width":40,"var":"averagebtn","skin":"commers/btn3.png","sizeGrid":"3,3,3,3","labelColors":"#262B2E,#FFEEEE,#FFEEEE","label":"平分","height":20},"compId":25}]},{"type":"Box","props":{"y":0,"x":165,"width":55,"var":"box1","height":140},"compId":28,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput1","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":29},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":30},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn1","skin":"order/addbtn.png"},"compId":31},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn1","skin":"order/subtbn.png"},"compId":32}]},{"type":"Box","props":{"y":0,"x":220,"width":55,"var":"box2","height":140},"compId":38,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput2","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":39},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":40},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn2","skin":"order/addbtn.png"},"compId":41},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn2","skin":"order/subtbn.png"},"compId":42}]},{"type":"Box","props":{"y":0,"x":275,"width":55,"var":"box3","height":140},"compId":43,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput3","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":44},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":45},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn3","skin":"order/addbtn.png"},"compId":46},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn3","skin":"order/subtbn.png"},"compId":47}]},{"type":"Box","props":{"y":0,"x":330,"width":55,"var":"box4","height":140},"compId":48,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput4","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":49},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":50},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn4","skin":"order/addbtn.png"},"compId":51},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn4","skin":"order/subtbn.png"},"compId":52}]},{"type":"Box","props":{"y":0,"x":385,"width":55,"var":"box5","height":140},"compId":53,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput5","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":54},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":55},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn5","skin":"order/addbtn.png"},"compId":56},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn5","skin":"order/subtbn.png"},"compId":57}]},{"type":"Box","props":{"y":0,"x":440,"width":55,"var":"box6","height":140},"compId":58,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput6","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":59},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":60},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn6","skin":"order/addbtn.png"},"compId":61},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn6","skin":"order/subtbn.png"},"compId":62}]},{"type":"Box","props":{"y":0,"x":495,"width":55,"var":"box7","height":140},"compId":63,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput7","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":64},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":65},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn7","skin":"order/addbtn.png"},"compId":66},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn7","skin":"order/subtbn.png"},"compId":67}]},{"type":"Box","props":{"y":0,"x":550,"width":55,"var":"box8","height":140},"compId":68,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput8","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":69},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":70},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn8","skin":"order/addbtn.png"},"compId":71},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn8","skin":"order/subtbn.png"},"compId":72}]},{"type":"Box","props":{"y":0,"x":605,"width":55,"var":"box9","height":140},"compId":73,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput9","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":74},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":75},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn9","skin":"order/addbtn.png"},"compId":76},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn9","skin":"order/subtbn.png"},"compId":77}]},{"type":"Box","props":{"y":0,"x":660,"width":55,"var":"box10","height":140},"compId":78,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput10","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":79},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":80},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn10","skin":"order/addbtn.png"},"compId":81},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn10","skin":"order/subtbn.png"},"compId":82}]},{"type":"Box","props":{"y":0,"x":715,"width":55,"var":"box11","height":140},"compId":83,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput11","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":84},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":85},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn11","skin":"order/addbtn.png"},"compId":86},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn11","skin":"order/subtbn.png"},"compId":87}]},{"type":"Box","props":{"y":0,"x":770,"width":55,"var":"box12","height":140},"compId":88,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput12","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":89},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":90},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn12","skin":"order/addbtn.png"},"compId":91},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn12","skin":"order/subtbn.png"},"compId":92}]},{"type":"Box","props":{"y":0,"x":825,"width":55,"var":"box13","height":140},"compId":93,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput13","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":94},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":95},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn13","skin":"order/addbtn.png"},"compId":96},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn13","skin":"order/subtbn.png"},"compId":97}]},{"type":"Box","props":{"y":0,"x":880,"width":55,"var":"box14","height":140},"compId":98,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput14","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":99},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":100},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn14","skin":"order/addbtn.png"},"compId":101},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn14","skin":"order/subtbn.png"},"compId":102}]},{"type":"Box","props":{"y":0,"x":935,"width":55,"var":"box15","height":140},"compId":103,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput15","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":104},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":105},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn15","skin":"order/addbtn.png"},"compId":106},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn15","skin":"order/subtbn.png"},"compId":107}]},{"type":"Box","props":{"y":0,"x":990,"width":55,"var":"box16","height":140},"compId":108,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput16","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":109},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":110},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn16","skin":"order/addbtn.png"},"compId":111},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn16","skin":"order/subtbn.png"},"compId":112}]},{"type":"Box","props":{"y":0,"x":1045,"width":55,"var":"box17","height":140},"compId":113,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput17","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":114},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":115},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn17","skin":"order/addbtn.png"},"compId":116},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn17","skin":"order/subtbn.png"},"compId":117}]},{"type":"Box","props":{"y":0,"x":1100,"width":55,"var":"box18","height":140},"compId":118,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput18","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":119},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":120},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn18","skin":"order/addbtn.png"},"compId":121},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn18","skin":"order/subtbn.png"},"compId":122}]},{"type":"Box","props":{"y":0,"x":1155,"width":55,"var":"box19","height":140},"compId":123,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput19","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":124},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":125},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn19","skin":"order/addbtn.png"},"compId":126},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn19","skin":"order/subtbn.png"},"compId":127}]},{"type":"Box","props":{"y":0,"x":1210,"width":55,"var":"box20","height":140},"compId":128,"child":[{"type":"TextInput","props":{"y":56,"x":0,"width":50,"var":"numinput20","type":"number","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","font":"SimHei","align":"center"},"compId":129},{"type":"Image","props":{"x":53,"width":140,"skin":"commers/cutline.png","rotation":90},"compId":130},{"type":"Button","props":{"y":25,"x":18,"var":"addbtn20","skin":"order/addbtn.png"},"compId":131},{"type":"Button","props":{"y":84,"x":18,"var":"subbtn20","skin":"order/subtbn.png"},"compId":132}]}],"loadList":["upload/inoutbg.png","comp/image.png","commers/cutline.png","commers/inputbg.png","commers/btn3.png","order/addbtn.png","order/subtbn.png"],"loadList3D":[]};
+	return OrderPackageItemUI;
+})(View)
+
+
 //class ui.order.MaterialNameItemUI extends laya.ui.View
 var MaterialNameItemUI=(function(_super){
 	function MaterialNameItemUI(){
@@ -55653,6 +56568,7 @@ var OutPutCenterUI=(function(_super){
 		this.factorytxt=null;
 		this.checkselect=null;
 		this.holaday=null;
+		this.outicon=null;
 		OutPutCenterUI.__super.call(this);
 	}
 
@@ -55663,7 +56579,7 @@ var OutPutCenterUI=(function(_super){
 		this.createView(OutPutCenterUI.uiView);
 	}
 
-	OutPutCenterUI.uiView={"type":"View","props":{"width":0,"height":40},"compId":2,"child":[{"type":"Box","props":{"y":0,"x":0},"compId":3,"child":[{"type":"Button","props":{"y":0,"x":600,"width":128,"visible":false,"var":"qqContact","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"qq交谈","height":40},"compId":5},{"type":"Text","props":{"y":5,"x":68,"var":"factorytxt","text":"更改输出中心","presetID":1,"fontSize":22,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"txttype":2,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"CheckBox","props":{"y":11,"x":19,"var":"checkselect","skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"mouseEnabled":false,"labelSize":20},"compId":8},{"type":"Label","props":{"y":5,"x":284,"var":"holaday","text":"放假时间20200122-1220","fontSize":22,"font":"SimHei","color":"#e8100c"},"compId":9}]}],"loadList":["commers/btn1.png","prefabs/LinksText.prefab","commers/multicheck.png"],"loadList3D":[]};
+	OutPutCenterUI.uiView={"type":"View","props":{"width":0,"height":40},"compId":2,"child":[{"type":"Box","props":{"y":0,"x":0},"compId":3,"child":[{"type":"Button","props":{"y":0,"x":600,"width":128,"visible":false,"var":"qqContact","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"qq交谈","height":40},"compId":5},{"type":"Text","props":{"y":5,"x":78,"var":"factorytxt","text":"更改输出中心","presetID":1,"fontSize":22,"font":"SimHei","color":"#39B25A","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"txttype":2,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"CheckBox","props":{"y":11,"x":19,"var":"checkselect","skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"mouseEnabled":false,"labelSize":20},"compId":8},{"type":"Label","props":{"y":5,"x":284,"var":"holaday","text":"放假时间20200122-1220","fontSize":22,"font":"SimHei","color":"#e8100c"},"compId":9},{"type":"Image","props":{"y":5,"x":41,"width":30,"var":"outicon","skin":"commers/circle.png","height":30},"compId":11}]}],"loadList":["commers/btn1.png","prefabs/LinksText.prefab","commers/multicheck.png","commers/circle.png"],"loadList3D":[]};
 	return OutPutCenterUI;
 })(View)
 
@@ -56229,6 +57145,32 @@ var AddressItemUI=(function(_super){
 })(View)
 
 
+//class ui.order.ChooseDeliveryTimePanelUI extends laya.ui.View
+var ChooseDeliveryTimePanelUI=(function(_super){
+	function ChooseDeliveryTimePanelUI(){
+		this.paybtn=null;
+		this.savebtn=null;
+		this.rawprice=null;
+		this.disountprice=null;
+		this.orderlist=null;
+		this.closebtn=null;
+		this.timepreferRdo=null;
+		this.confirmpreferbtn=null;
+		this.setdefaultbtn=null;
+		ChooseDeliveryTimePanelUI.__super.call(this);
+	}
+
+	__class(ChooseDeliveryTimePanelUI,'ui.order.ChooseDeliveryTimePanelUI',_super);
+	var __proto=ChooseDeliveryTimePanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/ChooseDeliveryTimePanel");
+	}
+
+	return ChooseDeliveryTimePanelUI;
+})(View)
+
+
 //class ui.order.AverageCutPanelUI extends laya.ui.View
 var AverageCutPanelUI=(function(_super){
 	function AverageCutPanelUI(){
@@ -56324,6 +57266,26 @@ var ChargePanelUI=(function(_super){
 })(View)
 
 
+//class ui.usercenter.OderDetailPanelUI extends laya.ui.View
+var OderDetailPanelUI=(function(_super){
+	function OderDetailPanelUI(){
+		this.closebtn=null;
+		this.orderoanel=null;
+		this.orderbox=null;
+		OderDetailPanelUI.__super.call(this);
+	}
+
+	__class(OderDetailPanelUI,'ui.usercenter.OderDetailPanelUI',_super);
+	var __proto=OderDetailPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/OderDetailPanel");
+	}
+
+	return OderDetailPanelUI;
+})(View)
+
+
 //class ui.picManager.PicCheckPanelUI extends laya.ui.View
 var PicCheckPanelUI=(function(_super){
 	function PicCheckPanelUI(){
@@ -56385,6 +57347,49 @@ var ProductItemUI=(function(_super){
 
 	ProductItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":314,"var":"pimg","height":417},"compId":3}],"loadList":[],"loadList3D":[]};
 	return ProductItemUI;
+})(View)
+
+
+//class ui.order.PackageItemUI extends laya.ui.View
+var PackageItemUI=(function(_super){
+	function PackageItemUI(){
+		this.packname=null;
+		this.delbtn=null;
+		PackageItemUI.__super.call(this);
+	}
+
+	__class(PackageItemUI,'ui.order.PackageItemUI',_super);
+	var __proto=PackageItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(PackageItemUI.uiView);
+	}
+
+	PackageItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"width":55,"skin":"commers/inputbg.png","sizeGrid":"2,2,2,2","height":50},"compId":3,"child":[{"type":"TextInput","props":{"y":0,"x":0,"wordWrap":true,"width":55,"var":"packname","text":"浦东南汇包裹","skin":"comp/textinput.png","height":50,"sizeGrid":"6,15,7,14"},"compId":6},{"type":"Button","props":{"var":"delbtn","skin":"commers/btnclose.png","right":0},"compId":5}]}],"loadList":["commers/inputbg.png","comp/textinput.png","commers/btnclose.png"],"loadList3D":[]};
+	return PackageItemUI;
+})(View)
+
+
+//class ui.order.PackagePanelUI extends laya.ui.View
+var PackagePanelUI=(function(_super){
+	function PackagePanelUI(){
+		this.okbtn=null;
+		this.cancelbtn=null;
+		this.packagebox=null;
+		this.addpackbtn=null;
+		this.productlist=null;
+		this.timepreferRdo=null;
+		PackagePanelUI.__super.call(this);
+	}
+
+	__class(PackagePanelUI,'ui.order.PackagePanelUI',_super);
+	var __proto=PackagePanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/PackagePanel");
+	}
+
+	return PackagePanelUI;
 })(View)
 
 
@@ -56466,6 +57471,9 @@ var PicOrderItem=(function(_super){
 		this.finalHeight=NaN;
 		this.curproductvo=null;
 		this.fanmianFid=null;
+		this.normaldeliTime=NaN;
+		this.selectTime=0;
+		this.discount=1;
 		PicOrderItem.__super.call(this);
 		this.ordervo=vo;
 		this.initItem();
@@ -56670,16 +57678,16 @@ var PicOrderItem=(function(_super){
 			var area=(this.finalHeight *this.finalWidth)/10000;
 			var perimeter=(this.finalHeight+this.finalWidth)*2/100;
 			if(this.curproductvo.measure_unit=="平方米")
-				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area).toFixed(1);
+				this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area *this.discount).toFixed(1);
 			else
-			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter).toFixed(1);
-			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)).toFixed(1)+"";
+			this.price.text=(this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter *this.discount).toFixed(1);
+			this.total.text=(parseInt(this.inputnum.text)*this.curproductvo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)*this.discount).toFixed(1)+"";
 		}
 		EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
 	}
 
 	__proto.onNumChange=function(){
-		this.total.text=(parseInt(this.inputnum.text)*this.ordervo.orderPrice).toFixed(1).toString();
+		this.total.text=(parseInt(this.inputnum.text)*this.ordervo.orderPrice *this.discount).toFixed(1).toString();
 		if(this.ordervo.orderData)
 			this.ordervo.orderData.item_number=parseInt(this.inputnum.text);
 		EventCenter.instance.event("UPDATE_ORDER_ITEM_TECH");
@@ -56753,10 +57761,10 @@ var PicOrderItem=(function(_super){
 				this.yingxback.skin="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+yixingqiegeImg+".jpg";
 		}
 		if(provo.measure_unit=="平方米")
-			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area).toFixed(1);
+			this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/area *this.discount).toFixed(1);
 		else
-		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter).toFixed(1);
-		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)).toFixed(1)+"";
+		this.price.text=(provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,true,this.ordervo)/perimeter *this.discount).toFixed(1);
+		this.total.text=(parseInt(this.inputnum.text)*provo.getTotalPrice(this.finalWidth/100,this.finalHeight/100,false,this.ordervo)*this.discount).toFixed(1)+"";
 		this.mattxt.text=provo.prod_name;
 		var lastheight=this.height;
 		var tech=provo.getTechDes(false,this.finalWidth,this.finalHeight);
@@ -56781,7 +57789,7 @@ var PicOrderItem=(function(_super){
 	}
 
 	__proto.getPrice=function(){
-		return parseInt(this.inputnum.text)*this.ordervo.orderPrice;
+		return parseFloat(this.total.text);
 	}
 
 	__proto.updateOrderData=function(productVo){
@@ -56795,6 +57803,7 @@ var PicOrderItem=(function(_super){
 		var orderitemdata={};
 		orderitemdata.prod_name=productVo.prod_name;
 		orderitemdata.prod_code=productVo.prod_code;
+		orderitemdata.material_code=productVo.material_code;
 		orderitemdata.prod_description="";
 		orderitemdata.LWH=this.finalWidth.toFixed(2)+"/"+this.finalHeight.toFixed(2)+"/1";
 		orderitemdata.weightStr=1;
@@ -56802,7 +57811,17 @@ var PicOrderItem=(function(_super){
 		orderitemdata.item_priceStr=this.ordervo.orderPrice.toString();
 		orderitemdata.is_merchandise=0;
 		orderitemdata.item_status="1";
-		orderitemdata.comments=this.ordervo.comment;
+		var tempstr="";
+		var hasfinddot=false;
+		for(var i=this.ordervo.picinfo.directName.length-1;i >=0;i--){
+			if(this.ordervo.picinfo.directName.charAt(i)=="." && hasfinddot==false){
+				hasfinddot=true;
+			}
+			else if(hasfinddot){
+				tempstr=this.ordervo.picinfo.directName.charAt(i)+tempstr;
+			}
+		}
+		orderitemdata.comments=tempstr.substr(0,20);
 		orderitemdata.imagefile_path="http://original-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+"."+this.ordervo.picinfo.picClass;
 		orderitemdata.previewImage_path="http://large-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
 		orderitemdata.thumbnails_path="http://small-thumbnail-image.oss-cn-hangzhou.aliyuncs.com/"+this.ordervo.picinfo.fid+".jpg";
@@ -61833,6 +62852,230 @@ var OrganizeItem=(function(_super){
 })(OrganizeItemUI)
 
 
+//class script.order.ChooseDelTimeOrderItem extends ui.order.SimpleOrderItemUI
+var ChooseDelTimeOrderItem=(function(_super){
+	function ChooseDelTimeOrderItem(){
+		this.orderdata=null;
+		this.curselectIndex=-1;
+		ChooseDelTimeOrderItem.__super.call(this);
+		for(var i=0;i < 5;i++){
+			this["deltime"+i].on("click",this,this.onSelectTime,[i]);
+		}
+		this.urgentcheck.on("click",this,this.onClickUrgent);
+		Laya.timer.loop(1000,this,this.countDownPayTime);
+	}
+
+	__class(ChooseDelTimeOrderItem,'script.order.ChooseDelTimeOrderItem',_super);
+	var __proto=ChooseDelTimeOrderItem.prototype;
+	__proto.onSelectTime=function(index){
+		if(this["deltime"+index].selected)
+			return;
+		this.resetDeliveryTime();
+		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
+		this.curselectIndex=index;
+		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[index].availableDate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=0&delivery_date="+deliverydate;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyCapacityBack,null,null);
+	}
+
+	__proto.resetDeliveryTime=function(){
+		this.orderdata.is_urgent=false;
+		this.orderdata.delivery_date=null;
+		this.orderdata.outtime=false;
+		this.orderdata.lefttime=0;
+		this.orderdata.discount=1;
+		for(var i=0;i < 5;i++){
+			this["deltime"+i].selected=false;
+		}
+		this.urgentcheck.selected=false;
+		this.urgentcheck.disabled=false;
+	}
+
+	__proto.onOccupyCapacityBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			if(result.feedBack==1){
+				for(var i=0;i < 5;i++){
+					this["deltime"+i].selected=i==this.curselectIndex;
+				}
+				this.urgentcheck.selected=false;
+				this.urgentcheck.disabled=false;
+				this.orderdata.outtime=false;
+				this.orderdata.lefttime=180;
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].availableDate;
+				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList[this.curselectIndex].discount;
+			}
+			else{
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=null;
+				this.orderdata.discount=1;
+				this.retryGetAvailableDate();
+			}
+			this.updatePrice();
+			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
+		}
+	}
+
+	__proto.retryGetAvailableDate=function(){
+		var datas=PaintOrderModel.instance.getSingleOrderItemCapcaityData(this.orderdata);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+				if(this.destroyed)
+					return;
+				this.resetDeliveryDates();
+			}
+		}
+	}
+
+	__proto.onClickUrgent=function(){
+		var manucode=PaintOrderModel.instance.getManufacturerCode(this.orderdata.orderItem_sn);
+		this.resetDeliveryTime();
+		var deliverydate=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
+		var params="orderItem_sn="+this.orderdata.orderItem_sn+"&manufacturer_code="+manucode+"&prod_code="+this.orderdata.prod_code+"&is_urgent=1&delivery_date="+deliverydate;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/setCapacityPreOccupy?"+params,this,this.onOccupyUrgentCapacityBack,null,null);
+	}
+
+	// }
+	__proto.onOccupyUrgentCapacityBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			if(result.feedBack==1){
+				for(var i=0;i < 5;i++){
+					this["deltime"+i].selected=false;
+				}
+				this.urgentcheck.selected=true;
+				this.urgentcheck.disabled=true;
+				this.orderdata.outtime=false;
+				this.orderdata.lefttime=180;
+				this.orderdata.is_urgent=1;
+				this.orderdata.delivery_date=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.availableDate;
+				this.orderdata.discount=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.discount;
+			}
+			else{
+				this.orderdata.is_urgent=0;
+				this.orderdata.delivery_date=null;
+				this.orderdata.discount=1;
+				this.retryGetAvailableDate();
+			}
+			this.updatePrice();
+			EventCenter.instance.event("UPDATE_PRICE_BY_DELIVERYDATE");
+		}
+	}
+
+	__proto.setData=function(data){
+		this.orderdata=data;
+		this.numindex.text=data.item_seq.toString();
+		this.fileimg.skin=data.previewImage_path;
+		var size=data.LWH.split("/");
+		var picwidth=parseFloat(size[0]);
+		var picheight=parseFloat(size[1]);
+		if(picwidth > picheight){
+			this.fileimg.width=80;
+			this.fileimg.height=80/picwidth *picheight;
+		}
+		else{
+			this.fileimg.height=80;
+			this.fileimg.width=80/picheight *picwidth;
+		}
+		this.filename.text=data.filename;
+		this.mattext.text=data.prod_name;
+		this.picwidth.text=size[0];
+		this.picheight.text=size[1];
+		var techstr="";
+		if(data.procInfoList !=null){
+			for(var i=0;i < data.procInfoList.length;i++)
+			techstr+=data.procInfoList[i].proc_description+"-";
+		}
+		this.proctext.text=techstr.substr(0,techstr.length-1);
+		this.numtxt.text=data.item_number+"";
+		this.resetDeliveryDates();
+		this.updatePrice();
+	}
+
+	__proto.updatePrice=function(){
+		var rawprice=Number(this.orderdata.item_priceStr)*Number(this.orderdata.item_number);
+		if(this.orderdata.is_urgent==1 || this.orderdata.delivery_date !=null){
+			this.pricetext.text=(rawprice*this.orderdata.discount).toFixed(1);
+		}
+		else
+		this.pricetext.text=rawprice.toFixed(1);
+	}
+
+	__proto.resetDeliveryDates=function(){
+		for(var i=0;i < 5;i++){
+			this["deltime"+i].visible=false;
+			this["deltime"+i].selected=false;
+		};
+		var deliverydatas=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].deliveryDateList;
+		for(var i=0;i < deliverydatas.length;i++){
+			if(i < 5){
+				this["deltime"+i].label=UtilTool.getNextDayStr((deliverydatas[i] .availableDate)+" 00:00:00");
+				this["deltime"+i].visible=true;
+				this["discount"+i].text=this.getPayDicountStr(deliverydatas[i].discount);
+				if(this.orderdata.delivery_date==deliverydatas[i].availableDate && this.orderdata.is_urgent !=true)
+					this["deltime"+i].selected=true;
+			}
+		}
+		this.urgentcheck.visible=PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate !=null;
+		if(this.urgentcheck.visible)
+			this.urgentdiscount.text=this.getPayDicountStr(PaintOrderModel.instance.availableDeliveryDates[this.orderdata.orderItem_sn].urgentDate.discount);
+		this.urgentcheck.selected=this.orderdata.is_urgent==1;
+		if(this.urgentcheck.selected)
+			this.urgentcheck.disabled=true;
+		else
+		this.urgentcheck.disabled=false;
+	}
+
+	__proto.countDownPayTime=function(){
+		if(this.orderdata !=null){
+			if(this.orderdata.is_urgent==1 || this.orderdata.delivery_date !=null){
+				this.paycountdown.text=UtilTool.getCountDownString(this.orderdata.lefttime);
+			}
+			else if(this.orderdata.outtime)
+			this.paycountdown.text="支付超时";
+			else
+			this.paycountdown.text="00:00";
+		}
+	}
+
+	__proto.getPayDicountStr=function(discount){
+		if(discount < 1){
+			return discount*100+"折";
+		}
+		else if(discount==1){
+			return discount+"";
+		}
+		else{
+			return discount+"倍";
+		}
+	}
+
+	return ChooseDelTimeOrderItem;
+})(SimpleOrderItemUI)
+
+
 //class script.usercenter.item.ApplyJoinItem extends ui.usercenter.ApplyJoinItemUI
 var ApplyJoinItem=(function(_super){
 	function ApplyJoinItem(){
@@ -62277,6 +63520,134 @@ var CityAreaItem=(function(_super){
 
 	return CityAreaItem;
 })(CityAreaItemUI)
+
+
+//class script.order.OrderPackItem extends ui.order.OrderPackageItemUI
+var OrderPackItem=(function(_super){
+	function OrderPackItem(){
+		this.orderdata=null;
+		OrderPackItem.__super.call(this);
+		this.numinput0.type="";
+		this.numinput0.restrict="0-9";
+		this.numinput0.mouseEnabled=false;
+		for(var i=1;i < 21;i++){
+			this["box"+i].visible=false;
+			(this ["numinput"+i]).type="";
+			(this ["numinput"+i]).restrict="0-9";
+			(this ["numinput"+i]).on("input",this,this.onChangeNums,[i]);
+			(this ["numinput"+i]).on("focus",this,this.onSelectInput,[i]);
+			this["addbtn"+i].on("click",this,this.onaddnum,[i]);
+			this["subbtn"+i].on("click",this,this.onsubnum,[i]);
+		}
+		this.averagebtn.on("click",this,this.onAverageNum);
+	}
+
+	__class(OrderPackItem,'script.order.OrderPackItem',_super);
+	var __proto=OrderPackItem.prototype;
+	__proto.setData=function(data){
+		this.orderdata=data;
+		this.fileimg.skin=data.previewImage_path;
+		var size=data.LWH.split("/");
+		var picwidth=parseFloat(size[0]);
+		var picheight=parseFloat(size[1]);
+		if(picwidth > picheight){
+			this.fileimg.width=100;
+			this.fileimg.height=100/picwidth *picheight;
+		}
+		else{
+			this.fileimg.height=100;
+			this.fileimg.width=100/picheight *picwidth;
+		}
+		this.filenametxt.text=data.filename;
+		this.mattext.text=data.prod_name;
+		for(var i=0;i < 21;i++){
+			(this ["numinput"+i]).text=data.numlist[i]+""
+		}
+	}
+
+	__proto.onAverageNum=function(){
+		var total=0;
+		for(var i=0;i < this.orderdata.numlist.length;i++)
+		total+=this.orderdata.numlist[i];
+		var average=Math.floor(total/PaintOrderModel.instance.packageList.length);
+		var left=total-average*PaintOrderModel.instance.packageList.length;
+		this.orderdata.numlist[0]=average+left;
+		for(var i=1;i < PaintOrderModel.instance.packageList.length;i++)
+		this.orderdata.numlist[i]=average;
+		for(var i=0;i < 21;i++){
+			this["numinput"+i].text=this.orderdata.numlist[i]+"";
+		}
+	}
+
+	__proto.onChangeNums=function(index){
+		var curnumInput=(this ["numinput"+index]);
+		if(curnumInput.text==""){
+			curnumInput.text="0";
+		};
+		var curnum=parseInt(curnumInput.text);
+		var othertotal=0;
+		var maxnum=this.orderdata.numlist[0]+this.orderdata.numlist[index];
+		if(curnum > maxnum){
+			curnum=maxnum;
+			this.orderdata.numlist[0]=0;
+			this.orderdata.numlist[index]=curnum;
+			this.numinput0.text="0";
+			curnumInput.text=curnum+"";
+		}
+		else{
+			this.orderdata.numlist[0]=maxnum-curnum;
+			this.orderdata.numlist[index]=curnum;
+			this.numinput0.text=this.orderdata.numlist[0]+"";
+		}
+	}
+
+	__proto.onSelectInput=function(index){
+		(this ["numinput"+index]).select();
+	}
+
+	__proto.addpacakge=function(){
+		var curpackcount=PaintOrderModel.instance.packageList.length-1;
+		this["box"+curpackcount].visible=true;
+		this["numinput"+curpackcount].text="0";
+	}
+
+	__proto.deletepack=function(packindex){
+		if(this.orderdata==null)
+			return;
+		for(var i=0;i < 21;i++){
+			this["box"+i].visible=i < PaintOrderModel.instance.packageList.length;
+			this["numinput"+i].text=this.orderdata.numlist[i]+"";
+		}
+	}
+
+	__proto.onaddnum=function(index){
+		if(this.orderdata.numlist[0] > 0){
+			var curnum=parseInt(this["numinput"+index].text);
+			curnum++;
+			this.orderdata.numlist[index]=curnum;
+			this["numinput"+index].text=curnum+"";
+			var firstnum=parseInt(this.numinput0.text);
+			firstnum--;
+			this.orderdata.numlist[0]=firstnum;
+			this.numinput0.text=firstnum+"";
+		}
+	}
+
+	__proto.onsubnum=function(index){
+		var curnum=parseInt(this["numinput"+index].text);
+		if(curnum < 1)
+			return;
+		curnum--;
+		this.orderdata.numlist[index]=curnum;
+		this["numinput"+index].text=curnum+"";
+		var firstnum=parseInt(this.numinput0.text);
+		firstnum++;
+		this.orderdata.numlist[0]=firstnum;
+		this.numinput0.text=firstnum+"";
+	}
+
+	return OrderPackItem;
+})(OrderPackageItemUI)
 
 
 //class script.order.MaterialItem extends ui.order.MaterialNameItemUI
@@ -62772,7 +64143,54 @@ var OrderCheckListItem=(function(_super){
 	}
 
 	__proto.onClickPay=function(){
-		ViewManager.instance.openView("VIEW_SELECT_PAYTYPE_PANEL",false,{amount:Number(this.paymoney.text),orderid:[this.orderdata.or_id]});
+		var _$this=this;
+		var orderinfo=JSON.parse(this.orderdata.or_text);
+		if(PaintOrderModel.instance.allManuFacutreMatProcPrice[orderinfo.manufacturer_code]==null){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getmatprocprice?manufacturer_code="+orderinfo.manufacturer_code,this,function(dataStr){
+				PaintOrderModel.instance.initManuFacuturePrice(orderinfo.manufacturer_code,dataStr);
+				_$this.requestAvailableDate(orderinfo);
+			},null,null);
+		}
+		else{
+			this.requestAvailableDate(orderinfo);
+		}
+	}
+
+	__proto.requestAvailableDate=function(orderinfo){
+		var itemlist=orderinfo.orderItemList;
+		for(var i=0;i < itemlist.length;i++){
+			delete itemlist[i].lefttime;
+			delete itemlist[i].delivery_date;
+			delete itemlist[i].is_urgent;
+		}
+		PaintOrderModel.instance.finalOrderData=[orderinfo];
+		var datas=PaintOrderModel.instance.getOrderCapcaityData(orderinfo,1);
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"business/getAvailebleDeliveryDates?",this,this.ongetAvailableDateBack,{data:datas},"post");
+	}
+
+	__proto.ongetAvailableDateBack=function(data){
+		var result=JSON.parse(data);
+		if(!result.hasOwnProperty("status")){
+			var alldates=result;
+			for(var i=0;i < alldates.length;i++){
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn]={};
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent=false;
+				PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList=[];
+				for(var j=0;j < alldates[i].deliveryDateList.length;j++){
+					if(alldates[i].deliveryDateList[j].urgent==false){
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+					}
+					else{
+						if(alldates[i].deliveryDateList[j].discount==0)
+							alldates[i].deliveryDateList[j].discount=1;
+						PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate=alldates[i].deliveryDateList[j];
+					}
+				}
+			}
+			ViewManager.instance.openView("VIEW_CHOOSE_DELIVERY_TIME_PANEL",false,{orders:PaintOrderModel.instance.finalOrderData[0].orderItemList,delaypay:true});
+		}
 	}
 
 	__proto.onClickRetry=function(){
@@ -62782,7 +64200,7 @@ var OrderCheckListItem=(function(_super){
 	__proto.payMoneyBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
-			ViewManager.showAlert("订单排产失成功");
+			ViewManager.showAlert("订单排产成功");
 			EventCenter.instance.event("PAY_ORDER_SUCESS");
 		}
 		else{
@@ -64113,7 +65531,7 @@ var RadioGroup=(function(_super){
 })(UIGroup)
 
 
-	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,LoaderManager,LocalStorage,SceneUtils,GraphicAnimation,Path,Timer,EventCenter,WebGLContext2D]);
+	Laya.__init([EventDispatcher,CharBook,CallLater,View,GameConfig,SceneUtils,LoaderManager,LocalStorage,GraphicAnimation,Path,Timer,EventCenter,WebGLContext2D]);
 	/**LayaGameStart**/
 	new Main();
 

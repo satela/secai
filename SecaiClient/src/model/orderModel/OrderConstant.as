@@ -29,12 +29,13 @@ package model.orderModel
 		public static const ATTACH_PNG:String = "SPPNG";
 		public static const ATTACH_PEIJIAN:String = "SPPEIJIAN";
 		
-		public static const CUTOFF_H_V:String = "SPPJ"; //横向竖直拼接
-		public static const AVERAGE_CUTOFF:String = "SPDFCQ"; //等份裁切
-		
 		public static const ATTACH_PJZZ:String = "SPZZ";//遮罩图片
 		public static const ATTACH_PJSM:String = "SPSM";//双面图片图片
 
+
+		public static const CUTOFF_H_V:String = "SPPJ"; //横向竖直拼接
+		public static const AVERAGE_CUTOFF:String = "SPDFCQ"; //等份裁切
+	
 		
 		public static const DOUBLE_SIDE_SAME_TECHNO:String = "SPTE10320";//双面相同
 		public static const DOUBLE_SIDE_UNSAME_TECHNO:String = "SPTE10330";//双面不同
@@ -60,6 +61,11 @@ package model.orderModel
 		public static const DFCQ_MAX_HEIGHT:int = 120; //等分裁切 最大高度
 
 		public static const CUT_PRIOR_WIDTH:int = 120;//优先裁切宽度
+		public static const OUTPUT_ICON:Array=["star.png","circle.png","square.png"];
+		public static const OUTPUT_COLOR:Array=["#FF0000","#0d6a27","#3f48cc"];
+		
+		public static const packagemaxCout:int = 21;
+
 
 
 	}

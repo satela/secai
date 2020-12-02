@@ -18,7 +18,7 @@
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
-	import org.osmf.layout.ScaleMode;
+	//import org.osmf.layout.ScaleMode;
 	
 	import script.ViewManager;
 	
@@ -111,7 +111,7 @@
 			Laya.alertGlobalError = true;
 			
 			//激活资源版本控制，版本文件由发布功能生成
-			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
+			ResourceVersion.enable("version.json?" + (new Date()).getTime().toString(), Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 			
 			

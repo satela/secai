@@ -63,7 +63,7 @@ package script.usercenter
 			//uiSkin.monthCombox.selectedIndex = curmonth;
 			var lastday:Date = new Date(curdate.getTime() - 24 * 3600 * 1000);
 			
-			var param:String = "begindate=" + UtilTool.formatFullDateTime(lastday,false) + " 00:00:00&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59&status=1&curpage=1";
+			var param:String = "begindate=" + UtilTool.formatFullDateTime(lastday,false) + " 00:00:00&enddate=" + UtilTool.formatFullDateTime(new Date(),false) + " 23:59:59&status=2&curpage=1";
 			//if(curmonth + 1 < 10 )
 			//	param = "begindate=" + curyear + "0" + (curmonth + 1) + "enddate=" + curyear + "0" + (curmonth + 1) + "&type=2&curpage=1";
 			
@@ -83,7 +83,7 @@ package script.usercenter
 			uiSkin.ordertotalNum.text = "0";
 			uiSkin.ordertotalMoney.text = "0元";
 			
-			uiSkin.paytype.selectedIndex = 1;
+			uiSkin.paytype.selectedIndex = 2;
 			
 			uiSkin.paytype.on(Event.CHANGE,this,queryOrderList);
 			
@@ -358,6 +358,8 @@ package script.usercenter
 			
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getOrderRecordList,this,onGetOrderListBack,param,"post");
+			ViewManager.instance.closeView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL);
+
 			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.checkOrderList,this,onGetOrderListBack,null,"post");
 		}
 		private function onGetOrderListBack(data:Object):void

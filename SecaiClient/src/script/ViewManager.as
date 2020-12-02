@@ -22,8 +22,10 @@ package script
 	import ui.login.ResetPwdPanelUI;
 	import ui.order.AddCommentPanelUI;
 	import ui.order.AverageCutPanelUI;
+	import ui.order.ChooseDeliveryTimePanelUI;
 	import ui.order.ConfirmOrderPanelUI;
 	import ui.order.InputCutNumPanelUI;
+	import ui.order.PackagePanelUI;
 	import ui.order.SelectAddressPanelUI;
 	import ui.order.SelectAttchPanelUI;
 	import ui.order.SelectDeliveryPanelUI;
@@ -91,6 +93,11 @@ package script
 		public static const VIEW_CHARACTER_DEMONSTRATE_PANEL:String = "VIEW_CHARACTER_DEMONSTRATE_PANEL";//字牌展示界面
 
 		public static const VIEW_CHARACTER_TYPE_PANEL:String = "VIEW_CHARACTER_TYPE_PANEL";//字牌类型选择界面
+		
+		public static const VIEW_CHOOSE_DELIVERY_TIME_PANEL:String = "VIEW_CHOOSE_DELIVERY_TIME_PANEL";//选择交付时间界面
+
+
+		public static const VIEW_PACKAGE_ORDER_PANEL:String = "VIEW_PACKAGE_ORDER_PANEL";//订单打包设置界面
 
 
 		public static const VIEW_CARVING_ORDER_PANEL:String = "VIEW_CARVING_ORDER_PANEL";//字牌下单主界面
@@ -160,6 +167,8 @@ package script
 			viewDict[VIEW_CHARACTER_DEMONSTRATE_PANEL] = CharacterPaintUI;
 			viewDict[VIEW_CHARACTER_TYPE_PANEL] = CharactTypePanelUI;
 			viewDict[VIEW_CARVING_ORDER_PANEL] = CarvingOrderPanelUI;
+			viewDict[VIEW_CHOOSE_DELIVERY_TIME_PANEL] = ChooseDeliveryTimePanelUI;
+			viewDict[VIEW_PACKAGE_ORDER_PANEL] = PackagePanelUI;
 
 
 		}

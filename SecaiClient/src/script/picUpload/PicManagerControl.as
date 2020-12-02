@@ -70,8 +70,10 @@ package script.picUpload
 			uiSkin.flder0.visible = false;
 			uiSkin.flder1.visible = false;
 			uiSkin.flder2.visible = false;
+			
+			
 			for(var i=0;i < 3;i++)
-			uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
+				uiSkin["flder" + i].on(Event.CLICK,this,onClickTopDirectLbl,[i]);
 
 			//uiSkin.btnprevfolder.on(Event.CLICK,this,onClickParentFolder);
 			
@@ -115,7 +117,10 @@ package script.picUpload
 			uiSkin.main_panel.height = fixedheight;
 			uiSkin.main_panel.width = Browser.width;
 			uiSkin.main_panel.hScrollBarSkin = "";
+
 			uiSkin.picList.height =  fixedheight - 125;
+			uiSkin.picList.width = Browser.width;
+			
 			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
 			uiSkin.seltips.visible = false;
 			
@@ -140,7 +145,7 @@ package script.picUpload
 			uiSkin.main_panel.width = Browser.width;
 			uiSkin.picList.width = Browser.width;
 
-
+			uiSkin.picList.refresh();
 		}
 		private function onStartSelectRelate():void
 		{

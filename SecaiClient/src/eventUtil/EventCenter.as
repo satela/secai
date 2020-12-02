@@ -83,6 +83,7 @@ package eventUtil
 		public static const STOP_SELECT_RELATE_PIC:String = "STOP_SELECT_RELATE_PIC";//结束选择关联图
 		public static const START_SELECT_BACK_PIC:String = "START_SELECT_BACK_PIC";//开始选择反面图
 
+		public static const UPDATE_PRICE_BY_DELIVERYDATE = "UPDATE_PRICE_BY_DELIVERYDATE";//更新价格，选择交货时间
 		private static var _eventCenter:EventCenter;
 		
 	
