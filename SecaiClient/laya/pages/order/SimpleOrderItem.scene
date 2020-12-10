@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":4,
+    "selectedBox":65,
+    "selecteID":62,
     "searchKey":"View",
-    "props":{"width":1260,"sceneColor":"#fbf6f6","height":0},
+    "props":{"width":1260,"sceneColor":"#fbf6f6","height":86},
     "nodeParent":-1,
-    "maxID":63,
+    "maxID":94,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -18,15 +18,41 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"y":0,"x":0,"width":1260,"skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":86},
+            "props":{"y":0,"x":0,"width":1260,"skin":"commers1/inputbg.png","sizeGrid":"5,5,5,5","height":86},
             "nodeParent":2,
             "label":"Image",
-            "isDirectory":false,
+            "isOpen":false,
+            "isDirectory":true,
             "isAniNode":true,
-            "hasChild":false,
+            "hasChild":true,
             "compId":3,
             "child":[
-                ],
+                {
+                    "type":"Sprite",
+                    "searchKey":"Sprite",
+                    "props":{"y":0,"x":0},
+                    "nodeParent":3,
+                    "label":"Sprite",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":69,
+                    "child":[
+                        {
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"width":1260,"lineWidth":1,"height":86,"fillColor":"#eff4ef"},
+                            "nodeParent":69,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":67,
+                            "child":[
+                                ]
+                        }]
+                }],
             "$LOCKED":false,
             "$HIDDEN":false
         },
@@ -62,10 +88,24 @@
         {
             "x":15,
             "type":"Label",
-            "searchKey":"Label,filename",
-            "props":{"y":4,"x":171,"wordWrap":true,"width":118,"var":"filename","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":82,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+            "searchKey":"Label,proctext",
+            "props":{"y":2,"x":558,"wordWrap":true,"width":176,"var":"proctext","valign":"middle","text":"户外材料--白胶车贴","overflow":"scroll","height":80,"fontSize":16,"font":"Arial","color":"#262B2E","align":"center"},
             "nodeParent":2,
-            "label":"filename",
+            "label":"proctext",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":27,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Label",
+            "searchKey":"Label,filenametxt",
+            "props":{"y":7,"x":171,"wordWrap":true,"width":118,"var":"filenametxt","valign":"middle","text":"PP纸无背胶（海报、展架）.tif","overflow":"hidden","height":71,"fontSize":16,"font":"Arial","color":"#262B2E","align":"center"},
+            "nodeParent":2,
+            "label":"filenametxt",
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
@@ -77,7 +117,7 @@
             "x":15,
             "type":"Label",
             "searchKey":"Label,pricetext",
-            "props":{"y":36,"x":782,"width":62,"var":"pricetext","text":"12680","height":16,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":true,"align":"center"},
+            "props":{"y":36,"x":782,"width":62,"var":"pricetext","text":"12680","height":16,"fontSize":16,"font":"Arial","color":"#262B2E","bold":true,"align":"center"},
             "nodeParent":2,
             "label":"pricetext",
             "isDirectory":false,
@@ -94,16 +134,17 @@
             "props":{"y":16,"x":449},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":13,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                    "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"Arial","color":"#262B2E","align":"center"},
                     "nodeParent":13,
                     "label":"Label",
                     "isDirectory":false,
@@ -114,9 +155,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                    "props":{"y":38,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"Arial","color":"#262B2E","align":"center"},
                     "nodeParent":13,
                     "label":"Label",
                     "isDirectory":false,
@@ -127,9 +169,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,picwidth",
-                    "props":{"y":1,"x":52,"width":50,"var":"picwidth","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},
+                    "props":{"y":1,"x":52,"width":50,"var":"picwidth","text":"10000","height":21,"fontSize":16,"font":"Arial","color":"#262B2E","align":"left"},
                     "nodeParent":13,
                     "label":"picwidth",
                     "isDirectory":false,
@@ -140,9 +183,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label,picheight",
-                    "props":{"y":38,"x":52,"width":58,"var":"picheight","text":"100","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"left"},
+                    "props":{"y":38,"x":52,"width":58,"var":"picheight","text":"100","height":21,"fontSize":16,"font":"Arial","color":"#262B2E","align":"left"},
                     "nodeParent":13,
                     "label":"picheight",
                     "isDirectory":false,
@@ -152,35 +196,6 @@
                     "child":[
                         ]
                 }]
-        },
-        {
-            "x":15,
-            "type":"VBox",
-            "searchKey":"VBox",
-            "props":{"y":29,"x":554,"space":0},
-            "nodeParent":2,
-            "label":"VBox",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":14,
-            "child":[
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,proctext",
-                    "props":{"y":7,"x":0,"wordWrap":true,"width":176,"var":"proctext","valign":"top","text":"户外材料--白胶车贴","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
-                    "nodeParent":14,
-                    "label":"proctext",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":27,
-                    "child":[
-                        ]
-                }],
-            "$HIDDEN":false
         },
         {
             "x":15,
@@ -199,7 +214,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,mattext",
-                    "props":{"y":0,"x":0,"wordWrap":true,"width":153,"var":"mattext","valign":"middle","text":"展架专用布","height":50,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                    "props":{"y":0,"x":0,"wordWrap":true,"width":153,"var":"mattext","valign":"middle","text":"展架专用布","height":50,"fontSize":16,"font":"Arial","color":"#262B2E","align":"center"},
                     "nodeParent":15,
                     "label":"mattext",
                     "isDirectory":false,
@@ -214,7 +229,7 @@
             "x":15,
             "type":"CheckBox",
             "searchKey":"CheckBox",
-            "props":{"y":40,"x":14,"width":16,"skin":"commers/multicheck.png","scaleY":1,"scaleX":1,"height":16},
+            "props":{"y":40,"x":14,"width":16,"skin":"commers1/multicheck.png","scaleY":1,"scaleX":1,"height":16},
             "nodeParent":2,
             "label":"CheckBox",
             "isDirectory":false,
@@ -223,34 +238,6 @@
             "compId":16,
             "child":[
                 ]
-        },
-        {
-            "x":15,
-            "type":"CheckBox",
-            "searchKey":"CheckBox,urgentcheck",
-            "props":{"y":30,"x":849,"var":"urgentcheck","skin":"commers/checksingle.png","labelSize":16,"label":"加急"},
-            "nodeParent":2,
-            "label":"urgentcheck",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":45,
-            "child":[
-                {
-                    "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,urgentdiscount",
-                    "props":{"y":21,"x":0,"width":50,"var":"urgentdiscount","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":45,
-                    "label":"urgentdiscount",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":62,
-                    "child":[
-                        ]
-                }]
         },
         {
             "x":15,
@@ -270,7 +257,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"y":35,"x":740,"width":36,"skin":"commers/inputbg.png","sizeGrid":"2,2,2,2"},
+            "props":{"y":35,"x":740,"width":36,"skin":"commers1/inputbg.png","sizeGrid":"2,2,2,2"},
             "nodeParent":2,
             "label":"Image",
             "isOpen":true,
@@ -283,7 +270,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,numtxt",
-                    "props":{"y":0,"var":"numtxt","text":"10","right":0,"left":0,"fontSize":16,"font":"SimHei","color":"#262B2E","bold":false,"align":"center"},
+                    "props":{"y":0,"var":"numtxt","text":"10","right":0,"left":0,"fontSize":16,"font":"Arial","color":"#262B2E","bold":false,"align":"center"},
                     "nodeParent":49,
                     "label":"numtxt",
                     "isDirectory":false,
@@ -296,142 +283,424 @@
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,deltime0",
-            "props":{"y":30,"x":916,"width":50,"var":"deltime0","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21","height":18},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":838},
             "nodeParent":2,
-            "label":"deltime0",
+            "label":"Box",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":50,
+            "compId":65,
             "child":[
                 {
                     "x":30,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,urgentback",
+                    "props":{"y":0,"x":0,"var":"urgentback"},
+                    "nodeParent":65,
+                    "label":"urgentback",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":71,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":71,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":72,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
                     "type":"Label",
-                    "searchKey":"Label,discount0",
-                    "props":{"y":21,"x":0,"width":50,"var":"discount0","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":50,
-                    "label":"discount0",
+                    "searchKey":"Label,urgentdiscount",
+                    "props":{"y":33,"x":3,"width":50,"var":"urgentdiscount","text":"1折","strokeColor":"#262d2a","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                    "nodeParent":65,
+                    "label":"urgentdiscount",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
-                    "compId":51,
+                    "compId":62,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"CheckBox",
+                    "searchKey":"CheckBox,urgentcheck",
+                    "props":{"x":6,"var":"urgentcheck","top":15,"skin":"commers1/checksingle.png","labelSize":16,"labelColors":"#223344,#223344,#FFFFFF","label":"加急"},
+                    "nodeParent":65,
+                    "label":"urgentcheck",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":45,
                     "child":[
                         ]
                 }]
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,deltime1",
-            "props":{"y":30,"x":970,"width":50,"var":"deltime1","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":903},
             "nodeParent":2,
-            "label":"deltime1",
+            "label":"Box",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":52,
+            "compId":70,
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,discount1",
-                    "props":{"y":21,"x":0,"width":50,"var":"discount1","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":52,
-                    "label":"discount1",
-                    "isDirectory":false,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,timeback0",
+                    "props":{"var":"timeback0"},
+                    "nodeParent":70,
+                    "label":"timeback0",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":53,
+                    "hasChild":true,
+                    "compId":68,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":68,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":66,
+                            "child":[
+                                ]
+                        }],
+                    "$HIDDEN":false
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,deltime0",
+                    "props":{"y":12,"x":5,"width":50,"var":"deltime0","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#223344,#223344,#FFFFFF","label":"10-21","height":18},
+                    "nodeParent":70,
+                    "label":"deltime0",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":50,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,discount0",
+                            "props":{"y":21,"x":0,"width":50,"var":"discount0","text":"0.95折","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                            "nodeParent":50,
+                            "label":"discount0",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":51,
+                            "child":[
+                                ]
+                        }]
                 }]
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,deltime2",
-            "props":{"y":30,"x":1024,"width":50,"var":"deltime2","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":960},
             "nodeParent":2,
-            "label":"deltime2",
+            "label":"Box",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":56,
+            "compId":73,
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,discount2",
-                    "props":{"y":21,"x":0,"width":50,"var":"discount2","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":56,
-                    "label":"discount2",
-                    "isDirectory":false,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,timeback1",
+                    "props":{"var":"timeback1"},
+                    "nodeParent":73,
+                    "label":"timeback1",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":57,
+                    "hasChild":true,
+                    "compId":74,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":74,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":75,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,deltime1",
+                    "props":{"y":12,"x":5,"width":50,"var":"deltime1","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#223344,#223344,#FFFFFF","label":"10-21","height":18},
+                    "nodeParent":73,
+                    "label":"deltime1",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":76,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,discount1",
+                            "props":{"y":21,"x":0,"width":50,"var":"discount1","text":"0.95折","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                            "nodeParent":76,
+                            "label":"discount1",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":77,
+                            "child":[
+                                ]
+                        }]
                 }]
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,deltime3",
-            "props":{"y":30,"x":1077,"width":50,"var":"deltime3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":1017},
             "nodeParent":2,
-            "label":"deltime3",
+            "label":"Box",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":58,
+            "compId":78,
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,discount3",
-                    "props":{"y":21,"x":0,"width":50,"var":"discount3","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":58,
-                    "label":"discount3",
-                    "isDirectory":false,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,timeback2",
+                    "props":{"var":"timeback2"},
+                    "nodeParent":78,
+                    "label":"timeback2",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":59,
+                    "hasChild":true,
+                    "compId":79,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":79,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":80,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,deltime2",
+                    "props":{"y":12,"x":5,"width":50,"var":"deltime2","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#223344,#223344,#FFFFFF","label":"10-21","height":18},
+                    "nodeParent":78,
+                    "label":"deltime2",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":81,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,discount2",
+                            "props":{"y":21,"x":0,"width":50,"var":"discount2","text":"0.95折","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                            "nodeParent":81,
+                            "label":"discount2",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":82,
+                            "child":[
+                                ]
+                        }]
                 }]
         },
         {
             "x":15,
-            "type":"Button",
-            "searchKey":"Button,deltime4",
-            "props":{"y":30,"x":1131,"width":50,"var":"deltime4","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"10-21"},
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":1073},
             "nodeParent":2,
-            "label":"deltime4",
+            "label":"Box",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
-            "compId":60,
+            "compId":83,
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label,discount4",
-                    "props":{"y":21,"x":0,"width":50,"var":"discount4","text":"0.95折","fontSize":16,"font":"SimHei","align":"center"},
-                    "nodeParent":60,
-                    "label":"discount4",
-                    "isDirectory":false,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,timeback3",
+                    "props":{"var":"timeback3"},
+                    "nodeParent":83,
+                    "label":"timeback3",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":61,
+                    "hasChild":true,
+                    "compId":84,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":84,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":85,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,deltime3",
+                    "props":{"y":12,"x":5,"width":50,"var":"deltime3","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#223344,#223344,#FFFFFF","label":"10-21","height":18},
+                    "nodeParent":83,
+                    "label":"deltime3",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":86,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,discount3",
+                            "props":{"y":21,"x":0,"width":50,"var":"discount3","text":"0.95折","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                            "nodeParent":86,
+                            "label":"discount3",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":87,
+                            "child":[
+                                ]
+                        }]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Box",
+            "searchKey":"Box",
+            "props":{"y":18,"x":1130},
+            "nodeParent":2,
+            "label":"Box",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":88,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Sprite",
+                    "searchKey":"Sprite,timeback4",
+                    "props":{"var":"timeback4"},
+                    "nodeParent":88,
+                    "label":"timeback4",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":89,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Rect",
+                            "searchKey":"Rect",
+                            "props":{"y":0,"x":0,"width":60,"lineWidth":1,"height":56,"fillColor":"#6a9a2d"},
+                            "nodeParent":89,
+                            "label":"Rect",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":90,
+                            "child":[
+                                ]
+                        }]
+                },
+                {
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,deltime4",
+                    "props":{"y":12,"x":5,"width":50,"var":"deltime4","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","rotation":0,"labelSize":16,"labelFont":"SimHei","labelColors":"#223344,#223344,#FFFFFF","label":"10-21","height":18},
+                    "nodeParent":88,
+                    "label":"deltime4",
+                    "isOpen":true,
+                    "isDirectory":true,
+                    "isAniNode":true,
+                    "hasChild":true,
+                    "compId":91,
+                    "child":[
+                        {
+                            "x":45,
+                            "type":"Label",
+                            "searchKey":"Label,discount4",
+                            "props":{"y":21,"x":0,"width":50,"var":"discount4","text":"0.95折","fontSize":16,"font":"SimHei","color":"#f6620e","align":"center"},
+                            "nodeParent":91,
+                            "label":"discount4",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":92,
+                            "child":[
+                                ]
+                        }]
                 }]
         }],
     "animations":[

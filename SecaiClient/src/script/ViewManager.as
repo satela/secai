@@ -227,5 +227,22 @@ package script
 			EventCenter.instance.event(EventCenter.COMMON_CLOSE_PANEL_VIEW,viewClass);
 
 		}
+		
+		public function getTopViewName():String
+		{
+			var curview:View = viewContainer.getChildAt(viewContainer.numChildren - 1) as View;
+			
+			var viewname:String = "";
+			for(var viewclass in openViewList)
+			{
+				if(openViewList[viewclass] == curview)
+				{
+					viewname = viewclass;
+					break;
+				}
+			}
+			
+			return viewname;
+		}
 	}
 }

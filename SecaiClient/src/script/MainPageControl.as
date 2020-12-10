@@ -64,7 +64,7 @@ package script {
 			paintOrderBtn.on(Event.CLICK,this,onShowPaintOrder);
 
 			var diaokeOrderBtn:Button = this.owner["characBtn"];
-			diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
+			//diaokeOrderBtn.on(Event.CLICK,this,onShowChracterTypePanel);
 
 			
 			var btnUserCenter:Button = this.owner["btnUserCenter"];
@@ -194,6 +194,9 @@ package script {
 		
 		private function onShowPaintOrder():void
 		{
+//			ViewManager.showAlert("服务器升级中，预计14:00恢复，请谅解！");
+//			return;
+			
 			if(Userdata.instance.isLogin)
 			{
 				PaintOrderModel.instance.orderType = OrderConstant.PAINTING;

@@ -119,12 +119,11 @@ package script.picUpload
 			uiSkin.main_panel.hScrollBarSkin = "";
 
 			uiSkin.picList.height =  fixedheight - 125;
-			uiSkin.picList.width = Browser.width;
 			
 			uiSkin.main_panel.hScrollBar.mouseWheelEnable = false;
 			uiSkin.seltips.visible = false;
 			
-			uiSkin.picList.width = Browser.width;
+			uiSkin.picList.width = Browser.width > 1920 ? 1920: Browser.width;
 			
 			DirectoryFileModel.instance.curFileList = [];
 			DirectoryFileModel.instance.curSelectDir = DirectoryFileModel.instance.rootDir;
@@ -143,7 +142,7 @@ package script.picUpload
 			uiSkin.main_panel.height = fixedheight;
 			uiSkin.picList.height =  fixedheight - 125;
 			uiSkin.main_panel.width = Browser.width;
-			uiSkin.picList.width = Browser.width;
+			uiSkin.picList.width = Browser.width > 1920 ? 1920: Browser.width;
 
 			uiSkin.picList.refresh();
 		}
@@ -340,6 +339,8 @@ package script.picUpload
 						
 			PaintOrderModel.instance.orderType = OrderConstant.PAINTING;
 			
+//			ViewManager.showAlert("服务器升级中，预计14:00恢复，请谅解！");
+//			return;
 			ViewManager.instance.openView(ViewManager.VIEW_PAINT_ORDER,true);
 		}
 		

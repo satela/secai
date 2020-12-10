@@ -9,6 +9,8 @@ package model
 		public var version:String = "";
 		private static var _instance:Userdata;
 		
+		public var curRandomStr:String;
+		
 		public var userId:int;
 		public var userSession:String;
 		

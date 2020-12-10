@@ -9,6 +9,7 @@ package script.order
 	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PackageVo;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
@@ -30,6 +31,14 @@ package script.order
 		private var delaypay:Boolean = false;
 		
 		private var requestnum:int = 0;
+		
+		private var curclicknum:int = 0;
+		
+		private var FORBIDTIME:Array = [0,30000,60000,180000];
+		
+		private var canoccypay:Boolean = true;
+		
+		private var leftforbidtime:int = 0;
 		public function ChooseDeliveryTimeControl()
 		{
 			super();
@@ -57,8 +66,9 @@ package script.order
 			
 			uiSkin.timepreferRdo.selectedIndex = PaintOrderModel.instance.curTimePrefer - 1;
 			
-			uiSkin.confirmpreferbtn.on(Event.CLICK,this,resetTimePrefer);
+			//uiSkin.confirmpreferbtn.on(Event.CLICK,this,resetTimePrefer);
 			uiSkin.setdefaultbtn.on(Event.CLICK,this,setDefaultTimePrefer);
+			uiSkin.timepreferRdo.on(Event.CHANGE,this,resetTimePrefer);
 
 			var total:Number = 0;
 			for(var i:int=0;i < orderDatas.length;i++)
@@ -72,12 +82,15 @@ package script.order
 			
 			uiSkin.rawprice.text = total.toFixed(1) + "元";
 			uiSkin.disountprice.text = total.toFixed(1) + "元";
+			uiSkin.countdown.visible = false;
 
 			
 			Laya.timer.loop(1000,this,onCountDownTime);
 			
 			EventCenter.instance.on(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE,this,updatePrice);
 			updatePrice();
+			
+
 			//uiSkin.
 			
 			
@@ -102,6 +115,17 @@ package script.order
 						}
 					}
 				}
+			}
+			if(leftforbidtime > 0)
+			{
+				leftforbidtime--;
+				uiSkin.countdown.text = "（" + leftforbidtime + "秒之后可重新选择交付策略）";
+				uiSkin.countdown.visible = true;
+			}
+			else
+			{
+				uiSkin.countdown.visible = false;
+
 			}
 		}
 		
@@ -208,7 +232,12 @@ package script.order
 					totalmoney += Number(orderdata.money_paidStr);
 					allorders.push(orderdata.order_sn);
 				}
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+				
+				var paylefttime:int = getPayLeftTime();
+				if(paylefttime > 0)
+					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders,lefttime:paylefttime});
+				else
+					ViewManager.showAlert("支付超时，请重新选择交付时间");
 				
 			}
 		}
@@ -226,9 +255,31 @@ package script.order
 					totalmoney += Number(orderdata.money_paidStr);
 					allorders.push(orderdata.order_sn);
 				}
-				ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders});
+				var paylefttime:int = getPayLeftTime();
+				if(paylefttime > 0)
+					ViewManager.instance.openView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL,false,{amount:Number(totalmoney.toFixed(2)),orderid:allorders,lefttime:paylefttime});
+				else
+					ViewManager.showAlert("支付超时，请重新选择交付时间");
 				
 			}
+		}
+		
+		private function getPayLeftTime():int
+		{
+			var arr:Array = orderDatas;
+			var leftime:int = 0;
+			for(var i:int=0;i < orderDatas.length;i++)
+			{
+				if(orderDatas[i].is_urgent == 1  ||  orderDatas[i].delivery_date != null)
+				{
+					if(orderDatas[i].lefttime < leftime || leftime == 0)
+					{
+						leftime = orderDatas[i].lefttime;
+					}
+				}
+			}
+			
+			return leftime;
 		}
 		
 		private function resetDeliveryTime():void
@@ -257,6 +308,23 @@ package script.order
 		}
 		private function resetTimePrefer():void
 		{
+			
+			if(canoccypay == false)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"您操作的太频繁了，请稍后再试"});
+				//uiSkin.timepreferRdo.selectedIndex = PaintOrderModel.instance.curTimePrefer - 1;
+				return;
+			}
+			canoccypay = false;
+			curclicknum++;
+			
+			uiSkin.timepreferRdo.mouseEnabled = false;
+			if(curclicknum > 3)
+				curclicknum = 3;
+			
+			leftforbidtime = FORBIDTIME[curclicknum]/1000;
+			
+			Laya.timer.once(FORBIDTIME[curclicknum],this,enableClickOccupy);
 			var arr:Array = PaintOrderModel.instance.finalOrderData;
 			
 			requestnum = 0;
@@ -283,6 +351,12 @@ package script.order
 			
 		}
 		
+		private function enableClickOccupy():void
+		{
+			canoccypay = true;
+			uiSkin.timepreferRdo.mouseEnabled = true;
+
+		}
 		private function ongetAllAvailableDateBack(data:*):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -308,7 +382,7 @@ package script.order
 						
 						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
 						
-						orderdata.lefttime = 180;
+						orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
 
 					}
 					
@@ -368,6 +442,11 @@ package script.order
 						return null;
 					}
 					
+					if(itemlist[j].discount == null)
+					{
+						ViewManager.showAlert("请重新选择交货时间");
+						return null;
+					}
 					var ordermoney:Number = Number(itemlist[j].item_priceStr) * Number(itemlist[j].item_number) * itemlist[j].discount;
 					
 					ordermoney = parseFloat(ordermoney.toFixed(1));
@@ -411,7 +490,7 @@ package script.order
 				for(var j:int=0;j < itemlist.length;j++)
 				{										
 					delete itemlist[j].outtime;
-					delete itemlist[j].discount;
+					//delete itemlist[j].discount;
 										
 				}
 			}
@@ -490,6 +569,7 @@ package script.order
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE,this,updatePrice);
+			Laya.timer.clearAll(this);
 
 		}
 	}

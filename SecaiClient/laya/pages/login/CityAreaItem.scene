@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,bg",
-            "props":{"var":"bg","top":0,"skin":"commers/grayback.jpg","right":0,"left":0,"bottom":0},
+            "props":{"var":"bg","top":0,"skin":"commers1/grayback.jpg","right":0,"left":0,"bottom":0},
             "nodeParent":2,
             "label":"bg",
             "isDirectory":false,

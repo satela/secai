@@ -16,11 +16,17 @@ package script.order
 	
 	import ui.order.ConfirmOrderPanelUI;
 	
+	import utils.UtilTool;
+	
 	public class PayTypeSelectControl extends Script
 	{
 		private var uiSkin:ConfirmOrderPanelUI;
 		
 		public var param:Object;
+		
+		public var paylefttime:int = 0;
+		
+		
 		public function PayTypeSelectControl()
 		{
 			super();
@@ -48,6 +54,9 @@ package script.order
 			uiSkin.needpay.text = param.amount + "元";
 			uiSkin.realpay.text =  param.amount + "元";
 			
+			paylefttime = param.lefttime;
+			uiSkin.paytime.text = UtilTool.getCountDownString(paylefttime);
+			Laya.timer.loop(1000,this,countdownpay);
 			//uiSkin.needpay.visible = !Userdata.instance.isHidePrice();
 			//uiSkin.realpay.visible = !Userdata.instance.isHidePrice();
 			if(Userdata.instance.isHidePrice())
@@ -72,6 +81,21 @@ package script.order
 
 
 		}
+		
+		private function countdownpay():void
+		{
+			if(paylefttime > 0)
+			{
+				paylefttime--;
+				uiSkin.paytime.text = UtilTool.getCountDownString(paylefttime);
+			}
+			else
+			{
+				ViewManager.instance.closeView(ViewManager.VIEW_SELECT_PAYTYPE_PANEL);
+			}
+		}
+		
+		
 		private function onResizeBrower():void
 		{
 			uiSkin.mainpanel.height = Browser.height;
@@ -123,7 +147,7 @@ package script.order
 					ViewManager.showAlert("余额不足");
 					return;
 				}
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + ordrid,"post");
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + ordrid + "&kind=0","post");
 
 			}
 		}
@@ -167,6 +191,7 @@ package script.order
 		public override function  onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
+			Laya.timer.clearAll(this);
 		}
 	}
 }

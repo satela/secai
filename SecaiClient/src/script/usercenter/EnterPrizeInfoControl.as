@@ -131,6 +131,8 @@ package script.usercenter
 			
 			uiSkin.commentInput.maxChars = 8;
 			
+			uiSkin.moneytxt.text = "0元";
+			
 			uiSkin.applyokbtn.on(Event.CLICK,this,onJoinOrganize);
 			//uiSkin.chongzhi1.on(Event.CLICK,this,onCharge);
 

@@ -123,7 +123,7 @@ package script.order
 			else
 				this.architype.height = 80;
 			
-			
+			this.manuicon.visible = false;
 			
 			//this.changearchitxt.y = this.architype.y + this.architype.height - 15;
 			
@@ -149,7 +149,8 @@ package script.order
 			this.yixingimg.visible = false;
 			this.backimg.visible = false;
 			this.yingxback.visible = false;
-			
+			this.manuicon.visible = false;
+
 			
 		}
 		
@@ -158,12 +159,12 @@ package script.order
 		{
 			if(locked)
 			{
-				this.lockratio.skin = "commers/unlock.png";
+				this.lockratio.skin = "commers1/unlock.png";
 				locked = false;
 			}
 			else
 			{
-				this.lockratio.skin = "commers/lock.png";
+				this.lockratio.skin = "commers1/lock.png";
 				locked = true;
 			}
 		}
@@ -386,6 +387,9 @@ package script.order
 			fanmianFid = "";
 			updateOrderData(provo);
 			
+			this.manuicon.visible = true;
+
+			 this.manuicon.skin = "commers1/" + OrderConstant.OUTPUT_ICON[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)]
 			//this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
 			//this.timebox.visible = true;
 			//var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;

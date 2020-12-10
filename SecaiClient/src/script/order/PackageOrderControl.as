@@ -76,8 +76,14 @@ package script.order
 		private function addnewPack():void
 		{
 			
-			if(uiSkin.packagebox.numChildren >= OrderConstant.packagemaxCout)
-				return;
+			
+//			if(uiSkin.packagebox.numChildren >= OrderConstant.packagemaxCout)
+//				return;
+//			if(uiSkin.packagebox.numChildren >= 1)
+//			{
+//				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"功能开发中，敬请期待！"});
+//				return;
+//			}
 			
 			var packitem:PackageItemUI = new PackageItemUI();
 			
@@ -212,7 +218,7 @@ package script.order
 						orderdata.delivery_date = alldates[i].default_deliveryDate;
 					
 						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
-						orderdata.lefttime = 180;
+						orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
 					}
 
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)

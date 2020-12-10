@@ -78,4 +78,8 @@
    <item name="usercenter/TransactionPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="usercenter/TransactionItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="ChargeAdvertisePanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/SimpleOrderItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/OrderPackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/PackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="order/ChooseDeliveryTimePanel.scene" props="" ifExport="分离模式" aName=""/>
 </page>

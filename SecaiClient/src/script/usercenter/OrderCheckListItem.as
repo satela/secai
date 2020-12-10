@@ -4,6 +4,7 @@ package script.usercenter
 	
 	import laya.events.Event;
 	
+	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	import model.orderModel.PaintOrderModel;
@@ -13,6 +14,7 @@ package script.usercenter
 	import ui.usercenter.OrderListItemUI;
 	
 	import utils.TipsUtil;
+	import utils.UtilTool;
 	
 	public class OrderCheckListItem extends OrderListItemUI
 	{
@@ -217,7 +219,10 @@ package script.usercenter
 			}
 			PaintOrderModel.instance.finalOrderData = [orderinfo];
 			
-			var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo,1);
+			var defaultPrefer:String = UtilTool.getLocalVar("timePrefer","1");
+			PaintOrderModel.instance.curTimePrefer = parseInt(defaultPrefer) + 1;
+
+			var datas:String = PaintOrderModel.instance.getOrderCapcaityData(orderinfo,parseInt(defaultPrefer) + 1);
 			
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryTimeList,this,ongetAvailableDateBack,{data:datas},"post");
@@ -226,6 +231,7 @@ package script.usercenter
 		
 		private function ongetAvailableDateBack(data:*):void
 		{
+			var result:Object = JSON.parse(data as String);
 			var result:Object = JSON.parse(data as String);
 			if(!result.hasOwnProperty("status"))
 			{
@@ -237,6 +243,18 @@ package script.usercenter
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
 					
+					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+					
+					var currentdate:String = alldates[i].current_date;
+					
+					if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
+					{
+						orderdata.delivery_date = alldates[i].default_deliveryDate;
+						
+						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+						orderdata.lefttime = 180;
+					}
+					
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
 					{
 						if(alldates[i].deliveryDateList[j].urgent == false)
@@ -245,13 +263,26 @@ package script.usercenter
 								alldates[i].deliveryDateList[j].discount = 1;
 							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent == false)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
 						}
-						else
+						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
+							
+							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+							{
+								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+							}
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
 						}
+						
+						
 					}										
 					
 				}

@@ -361,7 +361,7 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;
 						outputitem.holaday.text = "";
-						outputitem.outicon.skin = "commers/" + OrderConstant.OUTPUT_ICON[i];
+						outputitem.outicon.skin = "commers1/" + OrderConstant.OUTPUT_ICON[i];
 						
 					}
 

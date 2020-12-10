@@ -36,7 +36,7 @@ package script.usercenter
 			uiSkin.chargeinput.maxChars = 8;
 			uiSkin.tyepgrp.selectedIndex = 0;
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
 
 			uiSkin.confirmcharge.on(Event.CLICK,this,onChargeNow);
 			

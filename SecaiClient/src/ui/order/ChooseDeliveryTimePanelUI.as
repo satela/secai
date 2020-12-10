@@ -12,8 +12,8 @@ package ui.order {
 		public var orderlist:List;
 		public var closebtn:Button;
 		public var timepreferRdo:RadioGroup;
-		public var confirmpreferbtn:Button;
 		public var setdefaultbtn:Button;
+		public var countdown:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

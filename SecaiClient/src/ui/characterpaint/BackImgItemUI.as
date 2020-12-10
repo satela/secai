@@ -7,7 +7,7 @@ package ui.characterpaint {
 		public var img:Image;
 		public var frame:Image;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"width":80,"var":"img","skin":"textureU3d/stone/stone1.jpg","height":80},"compId":3},{"type":"Image","props":{"width":82,"var":"frame","skin":"commers/inputfocus.png","sizeGrid":"3,3,3,3","height":82},"compId":4}],"loadList":["textureU3d/stone/stone1.jpg","commers/inputfocus.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"width":80,"var":"img","skin":"textureU3d/stone/stone1.jpg","height":80},"compId":3},{"type":"Image","props":{"width":82,"var":"frame","skin":"commers1/inputfocus.png","sizeGrid":"3,3,3,3","height":82},"compId":4}],"loadList":["textureU3d/stone/stone1.jpg","commers1/inputfocus.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

@@ -50,7 +50,7 @@ package script.picUpload
 			
 			if(picInfo.picType == 0 || !UtilTool.checkFileIsImg(picInfo))
 			{
-				this.img.skin = "upload/fold.png";
+				this.img.skin = "upload1/fold.png";
 				this.filename.text = picInfo.directName;
 				this.fileinfo.visible = false;
 				this.picClassTxt.visible = false;
@@ -78,7 +78,7 @@ package script.picUpload
 				if( picInfo.isProcessing)
 				{
 					this.fileinfo.text = "处理中...";
-					this.img.skin = "upload/fold.png";
+					this.img.skin = "upload1/fold.png";
 					this.picClassTxt.visible = false;
 					this.colorspacetxt.visible = false;
 					
@@ -114,7 +114,7 @@ package script.picUpload
 
 				}
 				
-				if(this.img.skin != "upload/fold.png")
+				if(this.img.skin != "upload1/fold.png")
 					Laya.loader.clearTextureRes(this.img.skin);
 
 				this.img.skin = null;				
@@ -137,7 +137,7 @@ package script.picUpload
 					this.yixingimg.skin = HttpRequestUtil.smallerrPicUrl + picInfo.yixingFid + ".jpg";
 					
 					this.selYixingBtn.visible = false;
-					this.selYixingBtn.skin = "upload/deletbtn.png";
+					this.selYixingBtn.skin = "upload1/deletbtn.png";
 					this.btnyxtxt.text = "取消异形";
 					this.btnyxtxt.color = "#FFFFFF";
 
@@ -146,7 +146,7 @@ package script.picUpload
 				{
 					this.selYixingBtn.visible = true;
 					this.btnyxtxt.text = "选择异形";
-					this.selYixingBtn.skin = "upload/addimg.png";
+					this.selYixingBtn.skin = "upload1/addimg.png";
 					this.btnyxtxt.color = "#444A4E";
 
 				}
@@ -157,7 +157,7 @@ package script.picUpload
 					this.selBackBtn.visible = false;
 					this.btnfmtxt.text = "取消反面";
 					
-					this.selBackBtn.skin = "upload/deletbtn.png";
+					this.selBackBtn.skin = "upload1/deletbtn.png";
 					this.btnfmtxt.color = "#FFFFFF";
 
 				}
@@ -166,7 +166,7 @@ package script.picUpload
 					this.selBackBtn.visible = true;
 					this.btnfmtxt.text = "选择反面";
 					
-					this.selBackBtn.skin = "upload/addimg.png";
+					this.selBackBtn.skin = "upload1/addimg.png";
 					this.btnfmtxt.color = "#444A4E";
 				}
 				

@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,backimg",
-            "props":{"y":0,"x":0,"width":160,"var":"backimg","skin":"commers/choosebg.png","sizeGrid":"8,8,8,8","height":36},
+            "props":{"y":0,"x":0,"width":160,"var":"backimg","skin":"commers1/choosebg.png","sizeGrid":"8,8,8,8","height":36},
             "nodeParent":2,
             "label":"backimg",
             "isOpen":true,

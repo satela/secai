@@ -17,7 +17,7 @@ package script.order
 		{
 			factorydata = facvo;
 			this.selbtn.label = factorydata.name;
-			this.selbtn.skin = "commers/btn3.png";
+			this.selbtn.skin = "commers1/btn3.png";
 			setSelected(factorydata == PaintOrderModel.instance.selectFactoryInMat);
 		}
 		

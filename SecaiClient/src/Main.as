@@ -18,8 +18,6 @@
 	import model.HttpRequestUtil;
 	import model.Userdata;
 	
-	//import org.osmf.layout.ScaleMode;
-	
 	import script.ViewManager;
 	
 	import ui.LoginViewUI;
@@ -65,7 +63,9 @@
 			Laya.alertGlobalError = true;
 			
 			//激活资源版本控制，版本文件由发布功能生成
-			ResourceVersion.enable("version.json", Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
+			Userdata.instance.curRandomStr = "version.json?" + (new Date()).getTime().toString();
+			
+			ResourceVersion.enable(Userdata.instance.curRandomStr, Handler.create(this, this.onVersionLoaded), ResourceVersion.FILENAME_VERSION);
 			Laya.stage.on(Event.RESIZE,this,onResizeBrower);
 //			var screenHeight:int = window.screen.height;
 //			var screenWidth:int = window.screen.width;
@@ -119,9 +119,11 @@
 		private function onVersionLoaded(e:Event):void {
 			//激活大小图映射，加载小图的时候，如果发现小图在大图合集里面，则优先加载大图合集，而不是小图
 			
-			Userdata.instance.version = Laya.loader.getRes('version.json');
+			Userdata.instance.version =  Laya.loader.getRes(Userdata.instance.curRandomStr);
 			console.log("版本号:" + Userdata.instance.version);
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/order.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/upload.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/usercenter.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/mainpage.atlas?" + Userdata.instance.version,type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/order1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/upload1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/usercenter1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/mainpage1.atlas?" + Userdata.instance.version,type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+
+			//Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers1.atlas",type:Loader.ATLAS},{url:"res/atlas/order1.atlas",type:Loader.ATLAS},{url:"res/atlas/upload1.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter1.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage1.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 		}
 		
@@ -141,7 +143,7 @@
 			else
 				HttpRequestUtil.httpUrl =  "http://www.cmyk.com.cn/scfy/";
 			
-			HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
+			//HttpRequestUtil.httpUrl = "http://47.111.13.238/scfy/";
 			
 			ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE);
 			

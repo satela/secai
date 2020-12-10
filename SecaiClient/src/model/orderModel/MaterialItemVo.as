@@ -122,7 +122,6 @@ package model.orderModel
 						}
 						if(hasBeyongd == true)
 							return this._nextMatList;
-						var tempmat:Vector.<MaterialItemVo> = new Vector.<MaterialItemVo>();
 						
 						return this._nextMatList[0].nextMatList;
 					}					

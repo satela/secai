@@ -6,6 +6,7 @@ package script.order
 	import laya.ui.CheckBox;
 	
 	import model.HttpRequestUtil;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	import model.orderModel.PicOrderItemVo;
 	
@@ -72,10 +73,13 @@ package script.order
 			for(var i:int=0;i < 5;i++)
 			{
 				this["deltime"+i].selected = false;
+				this["timeback"+i].visible = false;
 			}
 			
 			this.urgentcheck.selected = false;
 			this.urgentcheck.disabled = false;
+			
+			this.urgentback.visible = this.urgentcheck.selected;
 		}
 		private function onOccupyCapacityBack(data:*):void
 		{
@@ -87,13 +91,16 @@ package script.order
 					for(var i:int=0;i < 5;i++)
 					{
 						this["deltime"+i].selected = i == curselectIndex;
+						this["timeback"+i].visible = this["deltime"+i].selected;
+
 					}
 					
 					this.urgentcheck.selected = false;
 					this.urgentcheck.disabled = false;
+					this.urgentback.visible = this.urgentcheck.selected;
 
 					orderdata.outtime = false;
-					orderdata.lefttime = 180;
+					orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
 					
 					orderdata.is_urgent = 0;
 					orderdata.delivery_date = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList[curselectIndex].availableDate;
@@ -217,13 +224,16 @@ package script.order
 					for(var i:int=0;i < 5;i++)
 					{
 						this["deltime"+i].selected = false;
+						this["timeback"+i].visible = false;
+
 					}
 					
 					this.urgentcheck.selected = true;
 					this.urgentcheck.disabled = true;
-					
+					this.urgentback.visible = this.urgentcheck.selected;
+
 					orderdata.outtime = false;
-					orderdata.lefttime = 180;
+					orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
 					
 					orderdata.is_urgent = 1;
 					orderdata.delivery_date = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate.availableDate;
@@ -296,7 +306,7 @@ package script.order
 				
 			}
 			
-			this.filename.text = data.filename;
+			this.filenametxt.text = data.filename;
 			
 			this.mattext.text = data.prod_name;
 			
@@ -348,6 +358,8 @@ package script.order
 			{
 				this["deltime" + i].visible = false;
 				this["deltime" + i].selected = false;
+				this["timeback"+i].visible = false;
+
 			}
 			
 			var deliverydatas:Array = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList;
@@ -359,11 +371,17 @@ package script.order
 					this["deltime" + i].visible = true;
 					this["discount" + i].text = getPayDicountStr(deliverydatas[i].discount);
 					if(orderdata.delivery_date == deliverydatas[i].availableDate && orderdata.is_urgent != true)
+					{
 						this["deltime" + i].selected = true;
+						this["timeback"+i].visible = this["deltime"+i].selected;
+					}
 					
 				}
 			}
 			this.urgentcheck.visible = PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate != null;
+			
+			this.urgentdiscount.visible = this.urgentcheck.visible;
+
 			if(this.urgentcheck.visible)
 				this.urgentdiscount.text = getPayDicountStr(PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate.discount);
 			
@@ -372,6 +390,8 @@ package script.order
 				this.urgentcheck.disabled = true;
 			else
 				this.urgentcheck.disabled = false;
+			this.urgentback.visible = this.urgentcheck.selected;
+
 
 		}
 		private function countDownPayTime():void

@@ -104,6 +104,8 @@ package script.usercenter
 			Laya.stage.on(Event.MOUSE_UP,this,onMouseUpHandler);
 			
 			EventCenter.instance.on(EventCenter.DELETE_ORDER_BACK,this,getOrderListAgain);
+			EventCenter.instance.on(EventCenter.CANCEL_PAY_ORDER,this,onCancelPayOrder);
+
 			
 			this.initDateSelector();
 		}
@@ -118,7 +120,8 @@ package script.usercenter
 		}
 		private function onshowInputDate(viewname:String):void
 		{
-			if(dateInput != null && (viewname == ViewManager.VIEW_ORDER_DETAIL_PANEL || viewname == ViewManager.VIEW_SELECT_PAYTYPE_PANEL || viewname == ViewManager.VIEW_POPUPDIALOG))
+			//if(dateInput != null && (viewname == ViewManager.VIEW_ORDER_DETAIL_PANEL || viewname == ViewManager.VIEW_SELECT_PAYTYPE_PANEL || viewname == ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL || viewname == ViewManager.VIEW_CHANGEPWD ))
+			if(ViewManager.instance.getTopViewName() == ViewManager.VIEW_USERCENTER)
 			{
 				dateInput.hidden = false;
 				dateInput2.hidden = false;
@@ -395,6 +398,10 @@ package script.usercenter
 			cell.setData(cell.dataSource);
 		}
 		
+		private function onCancelPayOrder():void
+		{
+			ViewManager.instance.closeView(ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL);
+		}
 		public override function onDestroy():void
 		{
 			Laya.stage.off(Event.MOUSE_UP,this,onMouseUpHandler);

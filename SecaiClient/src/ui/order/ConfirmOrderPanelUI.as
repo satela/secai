@@ -6,6 +6,8 @@ package ui.order {
 
 	public class ConfirmOrderPanelUI extends View {
 		public var mainpanel:Panel;
+		public var countdownbox:Box;
+		public var paytime:Label;
 		public var cancelbtn:Button;
 		public var paybtn:Button;
 		public var accountmoney:Label;

@@ -65,6 +65,9 @@ package model.orderModel
 		public static const OUTPUT_COLOR:Array=["#FF0000","#0d6a27","#3f48cc"];
 		
 		public static const packagemaxCout:int = 21;
+		
+		public static const OCCUPY_CAPACITY_COUNTDOWN:int = 150;
+		
 
 
 

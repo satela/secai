@@ -573,6 +573,12 @@ package model.orderModel
 		{
 			var capacitydata:Array = getCapacityData(manufacturerCode,processcode,matcode);
 			
+			if(capacitydata.length < 3)
+				return 0;
+			
+			if(capacitydata[1] == 0 || capacitydata[1] == null)
+				return 0;
+			
 			var amout:Number = UtilTool.getAmoutByUnit(picwidth/100.0,picheight/100.0,capacitydata[0]);
 			
 			if(capacitydata[1] > 0)

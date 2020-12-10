@@ -48,7 +48,7 @@ package script.picUpload
 
 			if(picInfo.picType == 0 || !UtilTool.checkFileIsImg(picInfo))
 			{
-				this.img.skin = "upload/fold.png";
+				this.img.skin = "upload1/fold.png";
 				this.filename.text = picInfo.directName;
 				this.fileinfo.visible = false;
 				this.picClassTxt.visible = false;
@@ -66,7 +66,7 @@ package script.picUpload
 				if( picInfo.isProcessing)
 				{
 					this.fileinfo.text = "处理中...";
-					this.img.skin = "upload/fold.png";
+					this.img.skin = "upload1/fold.png";
 					this.picClassTxt.visible = false;
 					this.colorspacetxt.visible = false;
 					
@@ -102,7 +102,7 @@ package script.picUpload
 					
 				}
 				
-				if(this.img.skin != "upload/fold.png")
+				if(this.img.skin != "upload1/fold.png")
 					Laya.loader.clearTextureRes(this.img.skin);
 				
 				this.img.skin = null;				
