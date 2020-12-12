@@ -217,8 +217,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.ui.IRender');
+Laya.interface('laya.ui.ISelect');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -674,6 +674,7 @@ var GameConfig=(function(){
 		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 		reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
+		reg("script.activity.ActivityAdvertiseController",ActivityAdvertiseController);
 		reg("utils.LoadingPrgControl",LoadingPrgControl);
 		reg("script.login.LogPanelControl",LogPanelControl);
 		reg("script.login.RegisterCntrol",RegisterCntrol);
@@ -716,7 +717,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/ConfirmOrderPanel.scene";
+	GameConfig.startScene="LoginView.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1087,6 +1088,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_CARVING_ORDER_PANEL"]=CarvingOrderPanelUI;
 		this.viewDict["VIEW_CHOOSE_DELIVERY_TIME_PANEL"]=ChooseDeliveryTimePanelUI;
 		this.viewDict["VIEW_PACKAGE_ORDER_PANEL"]=PackagePanelUI;
+		this.viewDict["VIEW_ACTIVITY_ADVETISE_PANEL"]=ChargeAdvertisePanelUI;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1179,6 +1181,7 @@ var ViewManager=(function(){
 	ViewManager.VIEW_CHOOSE_DELIVERY_TIME_PANEL="VIEW_CHOOSE_DELIVERY_TIME_PANEL";
 	ViewManager.VIEW_PACKAGE_ORDER_PANEL="VIEW_PACKAGE_ORDER_PANEL";
 	ViewManager.VIEW_CARVING_ORDER_PANEL="VIEW_CARVING_ORDER_PANEL";
+	ViewManager.VIEW_ACTIVITY_ADVETISE_PANEL="VIEW_ACTIVITY_ADVETISE_PANEL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
 	return ViewManager;
 })()
@@ -1431,7 +1434,12 @@ var Main=(function(){
 	__proto.onVersionLoaded=function(e){
 		Userdata.instance.version=Laya.loader.getRes(Userdata.instance.curRandomStr);
 		console.log("版本号:"+Userdata.instance.version);
-		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers1.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/order1.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/upload1.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/usercenter1.atlas?"+Userdata.instance.version,type:"atlas"},{url:"res/atlas/mainpage1.atlas?"+Userdata.instance.version,type:"atlas"}],Handler.create(this,this.onLoadedComp),null,"atlas");
+		Laya.loader.load([{url:"res/atlas/comp.atlas",type:"atlas"},{url:"res/atlas/commers1.atlas?"+Userdata.instance.version,type:"atlas"},
+		{url:"res/atlas/order1.atlas?"+Userdata.instance.version,type:"atlas"},
+		{url:"res/atlas/upload1.atlas?"+Userdata.instance.version,type:"atlas"},
+		{url:"res/atlas/usercenter1.atlas?"+Userdata.instance.version,type:"atlas"},
+		{url:"res/atlas/mainpage1.atlas?"+Userdata.instance.version,type:"atlas"},
+		{url:"res/atlas/chargeact.atlas?"+Userdata.instance.version,type:"atlas"},],Handler.create(this,this.onLoadedComp),null,"atlas");
 	}
 
 	//Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers1.atlas",type:Loader.ATLAS},{url:"res/atlas/order1.atlas",type:Loader.ATLAS},{url:"res/atlas/upload1.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter1.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage1.atlas",type:Loader.ATLAS}],Handler.create(this,onLoadedComp),null,Loader.ATLAS);
@@ -1445,6 +1453,7 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
+		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -2015,6 +2024,8 @@ var Userdata=(function(){
 		this.accountType=0;
 		//1 公司创建者 0 公司职员
 		this.privilege=null;
+		//用户权限
+		this.hashowact=false;
 	}
 
 	__class(Userdata,'model.Userdata');
@@ -2102,7 +2113,6 @@ var Userdata=(function(){
 		}
 	});
 
-	//用户权限
 	__getset(1,Userdata,'instance',function(){
 		if(Userdata._instance==null)
 			Userdata._instance=new Userdata();
@@ -3657,7 +3667,12 @@ var ErrorCode=(function(){
 			211:"你已加入公司",
 			754:"该公司不存在",
 			753:"你已申请过加入公司",
-			758:"组织里有用户不能删除"
+			758:"组织里有用户不能删除",
+			1001:"活动不存在",
+			1002:"活动已结束",
+			1003:"充值金额必须是1000的倍数",
+			1004:"活动余额不足",
+			1005:"充值金额超过公司上限"
 	};}
 
 	]);
@@ -36074,6 +36089,7 @@ var MainPageControl=(function(_super){
 		this.txtLogin=null;
 		this.txtReg=null;
 		this.versioninfo=null;
+		this.actbtn=null;
 		MainPageControl.__super.call(this);
 		MouseManager.multiTouchEnabled=false;
 	}
@@ -36101,6 +36117,9 @@ var MainPageControl=(function(_super){
 		this.versioninfo.y=Laya.stage.height-this.versioninfo.height;
 		var btnlinkto=this.owner["linktobus"];
 		btnlinkto.on("click",this,this.onOpenGongshang);
+		this.actbtn=this.owner["btnact"];
+		this.actbtn.visible=false;
+		this.actbtn.on("click",this,this.onGotoCharge);
 		(this.owner).linkicp.on("click",this,this.onOpenOficial);
 		EventCenter.instance.on("LOGIN_SUCESS",this,this.onSucessLogin);
 		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
@@ -36112,6 +36131,7 @@ var MainPageControl=(function(_super){
 		else{
 			this.txtLogin.text=Userdata.instance.userAccount;
 			this.txtReg.text="[退出]";
+			this.getActivityInfo();
 		}
 	}
 
@@ -36132,6 +36152,29 @@ var MainPageControl=(function(_super){
 		}
 	}
 
+	__proto.onGotoCharge=function(){
+		ViewManager.instance.openView("VIEW_USERCENTER",true,5);
+	}
+
+	__proto.getActivityInfo=function(){
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
+	}
+
+	__proto.getActivityInfoBack=function(data){
+		if(this.destroyed)
+			return;
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(result.data !=null && result.data.length > 0){
+				this.actbtn.visible=true;
+				if(!Userdata.instance.hashowact){
+					ViewManager.instance.openView("VIEW_ACTIVITY_ADVETISE_PANEL",false,result.data[0]);
+					Userdata.instance.hashowact=true;
+				}
+			}
+		}
+	}
+
 	__proto.onLoginBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
@@ -36145,6 +36188,7 @@ var MainPageControl=(function(_super){
 			console.log(Browser.document.cookie.split("; "));
 			Userdata.instance.loginTime=(new Date()).getTime();
 			UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
+			this.getActivityInfo();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
 		}
 	}
@@ -36946,6 +36990,40 @@ var AddMsgControl=(function(_super){
 	}
 
 	return AddMsgControl;
+})(Script)
+
+
+//class script.activity.ActivityAdvertiseController extends laya.components.Script
+var ActivityAdvertiseController=(function(_super){
+	function ActivityAdvertiseController(){
+		this.uiSkin=null;
+		this.param=null;
+		ActivityAdvertiseController.__super.call(this);
+	}
+
+	__class(ActivityAdvertiseController,'script.activity.ActivityAdvertiseController',_super);
+	var __proto=ActivityAdvertiseController.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.mainview.scaleX=0.2;
+		this.uiSkin.mainview.scaleY=0.2;
+		Tween.to(this.uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
+		if(this.param !=null){
+			this.uiSkin.ruletxt.text=this.param.ra_text;
+		}
+		this.uiSkin.gotocharge.on("click",this,this.gotoChargePanel);
+		this.uiSkin.closebtn.on("click",this,this.closeView);
+	}
+
+	__proto.gotoChargePanel=function(){
+		ViewManager.instance.openView("VIEW_USERCENTER",true,5);
+	}
+
+	__proto.closeView=function(){
+		ViewManager.instance.closeView("VIEW_ACTIVITY_ADVETISE_PANEL");
+	}
+
+	return ActivityAdvertiseController;
 })(Script)
 
 
@@ -38726,6 +38804,9 @@ var PayTypeSelectControl=(function(_super){
 	var __proto=PayTypeSelectControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
+		this.uiSkin.mainview.scaleX=0.2;
+		this.uiSkin.mainview.scaleY=0.2;
+		Tween.to(this.uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
 		this.uiSkin.payall.selected=true;
 		this.uiSkin.paytype.selectedIndex=0;
 		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0" && Userdata.instance.privilege[2]=="1")
@@ -38772,8 +38853,11 @@ var PayTypeSelectControl=(function(_super){
 			Userdata.instance.actMoney=Number(result.activity_balance);
 			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
 			this.uiSkin.accountmoney.text=Userdata.instance.money.toString()+"元";
-			if(Userdata.instance.isHidePrice())
+			this.uiSkin.actmoney.text=Userdata.instance.actMoney.toString()+"元";
+			if(Userdata.instance.isHidePrice()){
 				this.uiSkin.accountmoney.text="****";
+				this.uiSkin.actmoney.text="****";
+			}
 		}
 	}
 
@@ -38791,11 +38875,16 @@ var PayTypeSelectControl=(function(_super){
 				ViewManager.showAlert("您没有余额支付的权限,请联系管理者开放权限");
 				return;
 			}
-			if(Userdata.instance.money < this.param.amount){
-				ViewManager.showAlert("余额不足");
+			if(this.uiSkin.paytype.selectedIndex==1 && Userdata.instance.money < this.param.amount){
+				ViewManager.showAlert("账户余额不足");
 				return;
 			}
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-order?",this,this.payMoneyBack,"orderid="+ordrid+"&kind=0","post");
+			if(this.uiSkin.paytype.selectedIndex==2 && Userdata.instance.actMoney < this.param.amount){
+				ViewManager.showAlert("活动余额不足");
+				return;
+			};
+			var paykind=this.uiSkin.paytype.selectedIndex-1;
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/pay-order?",this,this.payMoneyBack,"orderid="+ordrid+"&kind="+paykind ,"post");
 		}
 	}
 
@@ -39774,6 +39863,9 @@ var PopUpWindowControl=(function(_super){
 	var __proto=PopUpWindowControl.prototype;
 	__proto.onStart=function(){
 		this.uiSkin=this.owner;
+		this.uiSkin.mainview.scaleX=0.2;
+		this.uiSkin.mainview.scaleY=0.2;
+		Tween.to(this.uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
 		this.uiSkin.closebtn.on("click",this,this.onCloseScene);
 		this.uiSkin.msgtxt.text=this.param.msg;
 		if(this.param.ok !=null)
@@ -40691,9 +40783,14 @@ var ChargeControl=(function(_super){
 		this.uiSkin.moneytxt.text="--";
 		this.uiSkin.chargeinput.restrict="0-9"+".";
 		this.uiSkin.chargeinput.maxChars=8;
-		this.uiSkin.tyepgrp.selectedIndex=0;
+		this.uiSkin.paytypezfb.selected=true;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
 		this.uiSkin.confirmcharge.on("click",this,this.onChargeNow);
 		this.uiSkin.actpanel.visible=false;
+		this.uiSkin.noactbox.visible=false;
+		for(var i=0;i < 7;i++){
+			this.uiSkin["moneybtn"+i].on("click",this,this.onChangeMoney,[i]);
+		}
 		this.uiSkin.chargeamount.maxChars=4;
 		this.uiSkin.joinact.on("click",this,this.onjoinActivity);
 	}
@@ -40721,18 +40818,25 @@ var ChargeControl=(function(_super){
 		}
 	}
 
+	__proto.onChangeMoney=function(index){
+		var numarr=[1000,2000,3000,5000,10000,20000,50000];
+		this.uiSkin.chargeamount.text=numarr[index].toString();
+	}
+
 	__proto.getActivityInfoBack=function(data){
 		var result=JSON.parse(data);
 		if(result.status==0){
 			if(result.data !=null && result.data.length > 0){
 				this.curactinfo=result.data[0];
 				this.uiSkin.actpanel.visible=true;
-				this.uiSkin.paytype.selectedIndex=0;
+				this.uiSkin.zhiufbaobtn.selected=true;
 				var actinfo=result.data[0];
 				this.uiSkin.acttitle.text=actinfo.ra_name;
 				this.uiSkin.actrule.text="活动规则："+actinfo.ra_text;
 				this.uiSkin.chargeamount.text="1";
 			}
+			else
+			this.uiSkin.noactbox.visible=true;
 		}
 	}
 
@@ -49914,6 +50018,7 @@ var LoginViewUI=(function(_super){
 		this.paintOrderBtn=null;
 		this.btnproduct=null;
 		this.btnUserCenter=null;
+		this.btnact=null;
 		this.txt_login=null;
 		this.txt_reg=null;
 		this.characBtn=null;
@@ -49930,7 +50035,7 @@ var LoginViewUI=(function(_super){
 		this.createView(LoginViewUI.uiView);
 	}
 
-	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage1/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers1/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":654,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":879,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":991,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1104,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59},{"type":"Text","props":{"y":34,"x":766,"width":92,"var":"characBtn","text":"字牌雕刻","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":70,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":71}]},{"type":"Label","props":{"y":150,"x":375,"visible":false,"text":"升级导致错误，正在抓紧修复，预计14点恢复访问，由升级期间导致的价格差异，我们后续做出弥补。 由此带来的不便，深感抱歉。","fontSize":20,"font":"SimHei","color":"#ff0905"},"compId":72}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers1/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers1/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage1/mainbg.jpg","commers1/logotxt.png","prefabs/LinksText.prefab","commers1/blackbg.png","commers1/lz2.jpg"],"loadList3D":[]};
+	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage1/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers1/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":654,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":879,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":991,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1104,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1238,"width":92,"var":"btnact","text":"充值活动","strokeColor":"#FFFAB1A0","stroke":3,"presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#FF2400","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":73,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":74},{"type":"Image","props":{"y":0,"x":-27,"skin":"chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png"},"compId":75}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59},{"type":"Text","props":{"y":34,"x":766,"width":92,"var":"characBtn","text":"字牌雕刻","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":70,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":71}]},{"type":"Label","props":{"y":150,"x":375,"visible":false,"text":"升级导致错误，正在抓紧修复，预计14点恢复访问，由升级期间导致的价格差异，我们后续做出弥补。 由此带来的不便，深感抱歉。","fontSize":20,"font":"SimHei","color":"#ff0905"},"compId":72}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers1/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers1/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage1/mainbg.jpg","commers1/logotxt.png","prefabs/LinksText.prefab","chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png","commers1/blackbg.png","commers1/lz2.jpg"],"loadList3D":[]};
 	return LoginViewUI;
 })(Scene)
 
@@ -56715,14 +56820,37 @@ var LogPanelUI=(function(_super){
 })(View)
 
 
+//class ui.ChargeAdvertisePanelUI extends laya.ui.View
+var ChargeAdvertisePanelUI=(function(_super){
+	function ChargeAdvertisePanelUI(){
+		this.mainview=null;
+		this.closebtn=null;
+		this.ruletxt=null;
+		this.gotocharge=null;
+		ChargeAdvertisePanelUI.__super.call(this);
+	}
+
+	__class(ChargeAdvertisePanelUI,'ui.ChargeAdvertisePanelUI',_super);
+	var __proto=ChargeAdvertisePanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("ChargeAdvertisePanel");
+	}
+
+	return ChargeAdvertisePanelUI;
+})(View)
+
+
 //class ui.order.ConfirmOrderPanelUI extends laya.ui.View
 var ConfirmOrderPanelUI=(function(_super){
 	function ConfirmOrderPanelUI(){
 		this.mainpanel=null;
+		this.mainview=null;
 		this.countdownbox=null;
 		this.paytime=null;
 		this.cancelbtn=null;
 		this.paybtn=null;
+		this.actmoney=null;
 		this.accountmoney=null;
 		this.needpay=null;
 		this.payall=null;
@@ -56768,6 +56896,7 @@ var ApplyJoinMgrPanelUI=(function(_super){
 var PopUpDialogUI=(function(_super){
 	function PopUpDialogUI(){
 		this.mainpanel=null;
+		this.mainview=null;
 		this.msgtxt=null;
 		this.okbtn=null;
 		this.cancelbtn=null;
@@ -56878,7 +57007,7 @@ var OrderListItemUI=(function(_super){
 		this.createView(OrderListItemUI.uiView);
 	}
 
-	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":838,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"17.88","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":496,"width":106,"var":"orderstatus","valign":"middle","text":"已支付","height":26,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":642,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":685,"var":"deletebtn","text":"撤回","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":727,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]},{"type":"Text","props":{"y":3,"x":727,"var":"retrybtn","text":"重试","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":15,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":16}]}],"loadList":["commers1/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	OrderListItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":838,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","height":28},"compId":12},{"type":"Label","props":{"y":0,"x":0,"width":108,"var":"orderid","valign":"middle","text":"18014398509481987","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":3},{"type":"Label","props":{"y":0,"x":148,"width":161,"var":"ordertime","valign":"middle","text":"2019-05-22 15:30:00","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":4},{"type":"Label","props":{"y":0,"x":328,"width":63,"var":"productnum","valign":"middle","text":"1","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":5},{"type":"Label","props":{"y":0,"x":412,"width":74,"var":"paymoney","valign":"middle","text":"0","height":29,"fontSize":16,"font":"SimHei","align":"center"},"compId":6},{"type":"Label","props":{"y":0,"x":496,"width":106,"var":"orderstatus","valign":"middle","text":"已支付","height":26,"fontSize":16,"font":"SimHei","align":"center"},"compId":7},{"type":"Text","props":{"y":3,"x":642,"var":"detailbtn","text":"详情","presetID":1,"fontSize":16,"font":"SimHei","color":"#0022EE","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"y":3,"x":685,"var":"deletebtn","text":"撤回","presetID":1,"fontSize":16,"font":"SimHei","color":"#ef0e0b","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":11}]},{"type":"Text","props":{"y":3,"x":727,"var":"payagain","text":"支付","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":13,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":14}]},{"type":"Text","props":{"y":3,"x":727,"var":"retrybtn","text":"重试","presetID":1,"fontSize":16,"font":"SimHei","color":"52B232","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":15,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":16}]}],"loadList":["commers1/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
 	return OrderListItemUI;
 })(View)
 
@@ -57353,13 +57482,22 @@ var ChargePanelUI=(function(_super){
 		this.actMoney=null;
 		this.frezeMoney=null;
 		this.chargeinput=null;
-		this.tyepgrp=null;
+		this.paytypezfb=null;
 		this.actpanel=null;
+		this.actbox=null;
 		this.acttitle=null;
 		this.actrule=null;
 		this.chargeamount=null;
-		this.paytype=null;
+		this.zhiufbaobtn=null;
 		this.joinact=null;
+		this.moneybtn0=null;
+		this.moneybtn1=null;
+		this.moneybtn2=null;
+		this.moneybtn3=null;
+		this.moneybtn4=null;
+		this.moneybtn5=null;
+		this.moneybtn6=null;
+		this.noactbox=null;
 		ChargePanelUI.__super.call(this);
 	}
 
@@ -57567,6 +57705,28 @@ var SelectFactoryPanelUI=(function(_super){
 	}
 
 	return SelectFactoryPanelUI;
+})(View)
+
+
+//class ui.order.InputCutNumPanelUI extends laya.ui.View
+var InputCutNumPanelUI=(function(_super){
+	function InputCutNumPanelUI(){
+		this.mainpanel=null;
+		this.productlist=null;
+		this.okbtn=null;
+		this.btnok=null;
+		this.maxtips=null;
+		InputCutNumPanelUI.__super.call(this);
+	}
+
+	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
+	var __proto=InputCutNumPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("order/InputCutNumPanel");
+	}
+
+	return InputCutNumPanelUI;
 })(View)
 
 
@@ -57956,28 +58116,6 @@ var PicOrderItem=(function(_super){
 
 	return PicOrderItem;
 })(OrderItemUI)
-
-
-//class ui.order.InputCutNumPanelUI extends laya.ui.View
-var InputCutNumPanelUI=(function(_super){
-	function InputCutNumPanelUI(){
-		this.mainpanel=null;
-		this.productlist=null;
-		this.okbtn=null;
-		this.btnok=null;
-		this.maxtips=null;
-		InputCutNumPanelUI.__super.call(this);
-	}
-
-	__class(InputCutNumPanelUI,'ui.order.InputCutNumPanelUI',_super);
-	var __proto=InputCutNumPanelUI.prototype;
-	__proto.createChildren=function(){
-		laya.display.Scene.prototype.createChildren.call(this);
-		this.loadScene("order/InputCutNumPanel");
-	}
-
-	return InputCutNumPanelUI;
-})(View)
 
 
 //class ui.PaintOrderPanelUI extends laya.ui.View
@@ -61155,111 +61293,6 @@ var Tree=(function(_super){
 
 
 /**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
-
-
-/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -62211,6 +62244,111 @@ var List=(function(_super){
 
 	return List;
 })(Box)
+
+
+/**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
 
 
 /**
@@ -64151,6 +64289,79 @@ var DeliveryTypeItem=(function(_super){
 })(OrderAddressItemUI)
 
 
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(){
+		this.techmainvo=null;
+		this.isSelected=false;
+		this.processCatVo=null;
+		this.attachVo=null;
+		TechBoxItem.__super.call(this);
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.processCatVo=null;
+		this.techmainvo=tvo;
+		this.initView();
+		if(tvo.selected)
+			this.setSelected(true);
+		else
+		this.setSelected(false);
+		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
+			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
+				this.techBtn.disabled=true;
+				this.mouseEnabled=!this.techBtn.disabled;
+				this.grayimg.visible=!this.mouseEnabled;
+				return;
+			}
+		}
+		this.techBtn.disabled=false;
+		this.mouseEnabled=true;
+		this.grayimg.visible=false;
+	}
+
+	__proto.setAttachVo=function(attachvo){
+		this.processCatVo=null;
+		this.techmainvo=null;
+		this.attachVo=attachvo;
+		this.techBtn.label=this.attachVo.accessory_name;
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.techmainvo=null;
+		this.processCatVo=pvo;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
+	}
+
+	// setSelected(false);
+	__proto.initView=function(){
+		this.techBtn.label=this.techmainvo.preProc_Name;
+	}
+
+	__proto.setSelected=function(sel){
+		this.techBtn.selected=sel;;
+		this.isSelected=sel;
+	}
+
+	__proto.setTechSelected=function(sel){
+		if(this.techmainvo !=null){
+			this.techmainvo.selected=sel;
+			this.techmainvo.attchMentFileId="";
+			this.techmainvo.attchFileId="";
+			this.techmainvo.selectAttachVoList=null;
+		}
+		else
+		this.processCatVo.selected=sel;
+	}
+
+	__proto.onClickTech=function(index){}
+	return TechBoxItem;
+})(TechorItemUI)
+
+
 //class script.usercenter.OrderCheckListItem extends ui.usercenter.OrderListItemUI
 var OrderCheckListItem=(function(_super){
 	function OrderCheckListItem(){
@@ -64349,79 +64560,6 @@ var OrderCheckListItem=(function(_super){
 
 	return OrderCheckListItem;
 })(OrderListItemUI)
-
-
-//class script.order.TechBoxItem extends ui.order.TechorItemUI
-var TechBoxItem=(function(_super){
-	function TechBoxItem(){
-		this.techmainvo=null;
-		this.isSelected=false;
-		this.processCatVo=null;
-		this.attachVo=null;
-		TechBoxItem.__super.call(this);
-	}
-
-	__class(TechBoxItem,'script.order.TechBoxItem',_super);
-	var __proto=TechBoxItem.prototype;
-	__proto.setData=function(tvo){
-		this.processCatVo=null;
-		this.techmainvo=tvo;
-		this.initView();
-		if(tvo.selected)
-			this.setSelected(true);
-		else
-		this.setSelected(false);
-		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
-			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
-				this.techBtn.disabled=true;
-				this.mouseEnabled=!this.techBtn.disabled;
-				this.grayimg.visible=!this.mouseEnabled;
-				return;
-			}
-		}
-		this.techBtn.disabled=false;
-		this.mouseEnabled=true;
-		this.grayimg.visible=false;
-	}
-
-	__proto.setAttachVo=function(attachvo){
-		this.processCatVo=null;
-		this.techmainvo=null;
-		this.attachVo=attachvo;
-		this.techBtn.label=this.attachVo.accessory_name;
-		this.setSelected(false);
-	}
-
-	__proto.setProcessData=function(pvo){
-		this.techmainvo=null;
-		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name.split("-")[0];
-	}
-
-	// setSelected(false);
-	__proto.initView=function(){
-		this.techBtn.label=this.techmainvo.preProc_Name;
-	}
-
-	__proto.setSelected=function(sel){
-		this.techBtn.selected=sel;;
-		this.isSelected=sel;
-	}
-
-	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null){
-			this.techmainvo.selected=sel;
-			this.techmainvo.attchMentFileId="";
-			this.techmainvo.attchFileId="";
-			this.techmainvo.selectAttachVoList=null;
-		}
-		else
-		this.processCatVo.selected=sel;
-	}
-
-	__proto.onClickTech=function(index){}
-	return TechBoxItem;
-})(TechorItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI

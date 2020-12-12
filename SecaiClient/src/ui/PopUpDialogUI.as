@@ -6,6 +6,7 @@ package ui {
 
 	public class PopUpDialogUI extends View {
 		public var mainpanel:Panel;
+		public var mainview:Image;
 		public var msgtxt:Label;
 		public var okbtn:Button;
 		public var cancelbtn:Button;

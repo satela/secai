@@ -11,6 +11,7 @@ package {
 	import script.order.SelectMaterialControl;
 	import script.characterpaint.CharacterMainControl;
 	import script.characterpaint.CharacterTypeChooseControl;
+	import script.activity.ActivityAdvertiseController;
 	import utils.LoadingPrgControl;
 	import script.login.LogPanelControl;
 	import script.login.RegisterCntrol;
@@ -55,7 +56,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "usercenter/ChargePanel.scene";
+		public static var startScene:* = "order/ChooseDeliveryTimePanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -73,6 +74,7 @@ package {
 			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 			reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
+			reg("script.activity.ActivityAdvertiseController",ActivityAdvertiseController);
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
 			reg("script.login.LogPanelControl",LogPanelControl);
 			reg("script.login.RegisterCntrol",RegisterCntrol);

@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":25,
+    "selectedBox":46,
+    "selecteID":40,
     "searchKey":"View",
     "props":{"width":800,"sceneColor":"#ffffff","height":800},
     "nodeParent":-1,
-    "maxID":50,
+    "maxID":52,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -131,7 +131,7 @@
             "x":15,
             "type":"Box",
             "searchKey":"Box",
-            "props":{"y":77,"x":50,"visible":false},
+            "props":{"y":77,"x":50,"visible":true},
             "nodeParent":2,
             "label":"Box",
             "isOpen":true,
@@ -173,7 +173,7 @@
             "x":15,
             "type":"Box",
             "searchKey":"Box",
-            "props":{"y":77,"x":300,"visible":false},
+            "props":{"y":77,"x":300,"visible":true},
             "nodeParent":2,
             "label":"Box",
             "isOpen":true,
@@ -259,13 +259,14 @@
             "props":{"y":112,"x":300},
             "nodeParent":2,
             "label":"Box",
-            "isOpen":null,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":19,
             "child":[
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"text":"充值方式：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -279,17 +280,32 @@
                         ]
                 },
                 {
-                    "type":"RadioGroup",
-                    "searchKey":"RadioGroup,tyepgrp",
-                    "props":{"x":98,"width":140,"var":"tyepgrp","space":5,"skin":"commers1/checksingle.png","labels":"支付宝","labelSize":18,"labelFont":"SimHei","labelColors":"#262b2e,#262b2e,#262b2e","height":21},
+                    "x":30,
+                    "type":"Button",
+                    "searchKey":"Button,paytypezfb",
+                    "props":{"y":-7,"x":90,"width":80,"var":"paytypezfb","stateNum":"2","skin":"commers1/按钮1.png","height":30},
                     "nodeParent":19,
-                    "label":"tyepgrp",
-                    "isDirectory":false,
+                    "label":"paytypezfb",
+                    "isOpen":true,
+                    "isDirectory":true,
                     "isAniNode":true,
-                    "hasChild":false,
-                    "compId":11,
+                    "hasChild":true,
+                    "compId":50,
                     "child":[
-                        ]
+                        {
+                            "x":45,
+                            "type":"Image",
+                            "searchKey":"Image",
+                            "props":{"y":3,"x":8,"skin":"chargeact/支付宝.jpg"},
+                            "nodeParent":50,
+                            "label":"Image",
+                            "isDirectory":false,
+                            "isAniNode":true,
+                            "hasChild":false,
+                            "compId":51,
+                            "child":[
+                                ]
+                        }]
                 }]
         },
         {
@@ -312,13 +328,14 @@
                     "props":{"y":-15,"x":10,"var":"actbox"},
                     "nodeParent":25,
                     "label":"actbox",
-                    "isOpen":null,
+                    "isOpen":true,
                     "isDirectory":true,
                     "isAniNode":true,
                     "hasChild":true,
                     "compId":46,
                     "child":[
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,acttitle",
                             "props":{"x":14,"var":"acttitle","text":"充值返现活动","fontSize":28,"font":"SimHei","color":"#69BB63","bold":true},
@@ -332,9 +349,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label,actrule",
-                            "props":{"y":44,"x":-10,"wordWrap":true,"width":763,"var":"actrule","text":"活动规则：","right":10,"overflow":"hidden","left":10,"leading":5,"height":98,"fontSize":20,"font":"SimHei","color":"#ed3731","bold":false},
+                            "props":{"y":38,"x":0,"wordWrap":true,"width":759,"var":"actrule","text":"活动规则：","overflow":"hidden","leading":5,"height":98,"fontSize":20,"font":"SimHei","color":"#ed3731","bold":false},
                             "nodeParent":46,
                             "label":"actrule",
                             "isDirectory":false,
@@ -345,6 +363,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Label",
                             "searchKey":"Label",
                             "props":{"y":157,"text":"充值金额：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -358,6 +377,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"TextInput",
                             "searchKey":"TextInput,chargeamount",
                             "props":{"y":229,"x":573,"width":178,"var":"chargeamount","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#E9E3E3","prompt":"请输入金额","height":44,"fontSize":20,"color":"#FF7b01"},
@@ -371,6 +391,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Box",
                             "searchKey":"Box",
                             "props":{"y":301,"x":285,"width":192,"height":40},
@@ -383,6 +404,7 @@
                             "compId":29,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"y":11,"x":0,"text":"充值方式：","fontSize":18,"font":"SimHei","color":"#262b2e"},
@@ -396,6 +418,7 @@
                                         ]
                                 },
                                 {
+                                    "x":60,
                                     "type":"Button",
                                     "searchKey":"Button,zhiufbaobtn",
                                     "props":{"y":0,"x":90,"width":100,"var":"zhiufbaobtn","stateNum":"2","skin":"commers1/按钮1.png","height":40},
@@ -408,6 +431,7 @@
                                     "compId":45,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Image",
                                             "searchKey":"Image",
                                             "props":{"y":8,"x":18,"skin":"chargeact/支付宝.jpg"},
@@ -423,6 +447,7 @@
                                 }]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,joinact",
                             "props":{"y":360,"x":301,"width":160,"var":"joinact","stateNum":"2","skin":"commers1/btnact1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFF4EF,#FFF4EF,#FFF4EF","label":"确认支付","height":48},
@@ -436,6 +461,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn0",
                             "props":{"y":150,"x":90,"var":"moneybtn0","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
@@ -449,6 +475,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn1",
                             "props":{"y":150,"x":251,"var":"moneybtn1","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"2000元"},
@@ -462,9 +489,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn2",
-                            "props":{"y":150,"x":413,"var":"moneybtn2","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"5000元"},
+                            "props":{"y":150,"x":413,"var":"moneybtn2","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"3000元"},
                             "nodeParent":46,
                             "label":"moneybtn2",
                             "isDirectory":false,
@@ -475,9 +503,10 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn3",
-                            "props":{"y":150,"x":574,"var":"moneybtn3","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
+                            "props":{"y":150,"x":574,"var":"moneybtn3","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"5000元"},
                             "nodeParent":46,
                             "label":"moneybtn3",
                             "isDirectory":false,
@@ -488,6 +517,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn4",
                             "props":{"y":229,"x":90,"var":"moneybtn4","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"10000元"},
@@ -501,6 +531,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn5",
                             "props":{"y":229,"x":251,"var":"moneybtn5","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"20000元"},
@@ -514,6 +545,7 @@
                                 ]
                         },
                         {
+                            "x":45,
                             "type":"Button",
                             "searchKey":"Button,moneybtn6",
                             "props":{"y":229,"x":413,"var":"moneybtn6","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"50000元"},
@@ -526,7 +558,7 @@
                             "child":[
                                 ]
                         }],
-                    "$HIDDEN":true
+                    "$HIDDEN":false
                 },
                 {
                     "x":30,
@@ -566,7 +598,8 @@
                             "compId":48,
                             "child":[
                                 ]
-                        }]
+                        }],
+                    "$HIDDEN":true
                 }]
         }],
     "animations":[

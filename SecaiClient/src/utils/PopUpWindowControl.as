@@ -5,6 +5,8 @@ package utils
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.utils.Browser;
+	import laya.utils.Ease;
+	import laya.utils.Tween;
 	
 	import script.ViewManager;
 	
@@ -22,6 +24,12 @@ package utils
 		override public function onStart():void
 		{
 			uiSkin = this.owner as PopUpDialogUI;
+			
+			uiSkin.mainview.scaleX = 0.2;
+			uiSkin.mainview.scaleY = 0.2;
+			
+			Tween.to(uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
+			
 			uiSkin.closebtn.on(Event.CLICK,this,onCloseScene);
 			
 			uiSkin.msgtxt.text = param.msg;

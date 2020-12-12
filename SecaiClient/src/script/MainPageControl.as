@@ -44,6 +44,9 @@ package script {
 		private var txtReg:Label;
 		
 		private var versioninfo:Box;
+		
+		private var actbtn:Button;
+				
 		public function MainPageControl():void {
 			//关闭多点触控，否则就无敌了
 			MouseManager.multiTouchEnabled = false;
@@ -82,6 +85,10 @@ package script {
 			var btnlinkto:Button = this.owner["linktobus"];
 			btnlinkto.on(Event.CLICK,this,onOpenGongshang);
 			
+			actbtn = this.owner["btnact"];
+			actbtn.visible = false;
+			actbtn.on(Event.CLICK,this,onGotoCharge);
+
 			(this.owner as LoginViewUI).linkicp.on(Event.CLICK,this,onOpenOficial);
 			EventCenter.instance.on(EventCenter.LOGIN_SUCESS, this,onSucessLogin);
 			EventCenter.instance.on(EventCenter.BROWER_WINDOW_RESIZE,this,onResizeBrower);
@@ -97,6 +104,7 @@ package script {
 			{
 				txtLogin.text = Userdata.instance.userAccount;
 				txtReg.text = "[退出]";
+				getActivityInfo();
 			}
 			
 
@@ -123,6 +131,38 @@ package script {
 
 		}
 		
+		private function onGotoCharge():void
+		{
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,5);
+
+		}
+		private function getActivityInfo():void
+		{
+			//if(!Userdata.instance.hashowact)
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
+
+		}
+		
+		private function getActivityInfoBack(data:*):void
+		{
+			if(this.destroyed)
+				return;
+			
+			var result:Object = JSON.parse(data as String);
+			if(result.status == 0)
+			{
+				if(result.data != null && result.data.length > 0)
+				{
+					actbtn.visible = true;
+					if(!Userdata.instance.hashowact)
+					{
+						ViewManager.instance.openView(ViewManager.VIEW_ACTIVITY_ADVETISE_PANEL,false,result.data[0]);
+						Userdata.instance.hashowact = true;
+
+					}
+				}
+			}
+		}
 		private function onLoginBack(data:Object):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -143,6 +183,7 @@ package script {
 				Userdata.instance.loginTime = (new Date()).getTime();
 				UtilTool.setLocalVar("loginTime",Userdata.instance.loginTime);
 				
+				getActivityInfo();
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 
 			}

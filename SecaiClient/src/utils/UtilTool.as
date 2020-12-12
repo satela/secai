@@ -912,6 +912,45 @@ package utils
 			return str;
 		}
 		
+		private var _serverTime:Number = 0;//服务器时间
+		
+		public function get unixSeverTime():Number
+		{
+			return _serverTime;
+		}
+		
+		public function set unixSeverTime(value:Number):void
+		{
+			_serverTime = value;
+			
+
+		}
+		
+		private function startTimeTick():void
+		{
+			
+			Laya.timer.loop(1000,this,timeTick);
+			
+		}
+		
+		private function stopTimeTick():void
+		{
+			Laya.timer.clear(this,timeTick);
+
+		}
+		private function timeTick():void
+		{
+			_serverTime += 1;
+		}
+		//获取服务器时间 星期几
+		public function getSerVerDay():int
+		{
+			var date:Date = new Date(_serverTime * 1000);
+			
+			return date.getDay();
+		}
+
+		
 
 	}
 }

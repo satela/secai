@@ -25,6 +25,9 @@ package script.usercenter
 		override public function onStart():void
 		{
 			uiSkin = this.owner as ChargePanelUI;
+			
+			
+			
 			uiSkin.accout.text = Userdata.instance.userAccount;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getCompanyInfo,this,getCompanyInfoBack,null,"post");
@@ -34,13 +37,19 @@ package script.usercenter
 			
 			uiSkin.chargeinput.restrict = "0-9" + ".";
 			uiSkin.chargeinput.maxChars = 8;
-			uiSkin.tyepgrp.selectedIndex = 0;
+			uiSkin.paytypezfb.selected = true;
 			
-			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
 
 			uiSkin.confirmcharge.on(Event.CLICK,this,onChargeNow);
 			
 			uiSkin.actpanel.visible = false;
+			uiSkin.noactbox.visible = false;
+			
+			for(var i:int=0;i < 7;i++)
+			{
+				uiSkin["moneybtn" + i].on(Event.CLICK,this,onChangeMoney,[i]);
+			}
 			//uiSkin.chargeamount.restrict = "0-9";
 			uiSkin.chargeamount.maxChars = 4;
 			
@@ -83,6 +92,12 @@ package script.usercenter
 
 		}
 		
+		private function onChangeMoney(index:int):void
+		{
+			var numarr:Array = [1000,2000,3000,5000,10000,20000,50000];
+			uiSkin.chargeamount.text = numarr[index].toString();
+			
+		}
 		private function getActivityInfoBack(data:*):void
 		{
 			var result:Object = JSON.parse(data as String);
@@ -93,12 +108,14 @@ package script.usercenter
 					curactinfo = result.data[0];
 					
 					uiSkin.actpanel.visible = true;
-					uiSkin.paytype.selectedIndex = 0 ;
+					uiSkin.zhiufbaobtn.selected = true ;
 					var actinfo:Object = result.data[0];
 					uiSkin.acttitle.text = actinfo.ra_name;
 					uiSkin.actrule.text = "活动规则：" + actinfo.ra_text;
 					uiSkin.chargeamount.text = "1"; 
 				}
+				else
+					uiSkin.noactbox.visible = true;
 			}
 		}
 		

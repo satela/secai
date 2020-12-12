@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":3,
-    "selecteID":6,
+    "selectedBox":2,
+    "selecteID":3,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":8,
+    "maxID":9,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -17,10 +17,10 @@
         {
             "x":15,
             "type":"Image",
-            "searchKey":"Image",
-            "props":{"y":140,"x":420,"width":1080,"skin":"order1/vipbg.png","sizeGrid":"4,4,4,4","height":702},
+            "searchKey":"Image,mainview",
+            "props":{"y":440,"x":959,"var":"mainview","skin":"chargeact/返现底.png","sizeGrid":"4,4,4,4","anchorY":0.5,"anchorX":0.5},
             "nodeParent":2,
-            "label":"Image",
+            "label":"mainview",
             "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
@@ -29,25 +29,11 @@
             "child":[
                 {
                     "x":30,
-                    "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"y":10,"x":442,"text":"充值返现活动","fontSize":32,"font":"SimHei","color":"#f40c08","bold":true},
-                    "nodeParent":3,
-                    "label":"Label",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":4,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"top":5,"skin":"commers1/btnclose.png","right":5},
+                    "searchKey":"Button,closebtn",
+                    "props":{"var":"closebtn","top":5,"stateNum":"1","skin":"chargeact/关闭 .png","right":7},
                     "nodeParent":3,
-                    "label":"Button",
+                    "label":"closebtn",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -58,10 +44,10 @@
                 {
                     "x":30,
                     "type":"Label",
-                    "searchKey":"Label",
-                    "props":{"wordWrap":true,"width":1040,"top":77,"text":"活动规则：每充1000，返现1200，分期十二个月，每月1号返还，每期返还100，活动总量100万，先到先得，名额有限，快来参加吧","right":20,"left":20,"leading":10,"height":100,"fontSize":20,"font":"SimHei","bold":false},
+                    "searchKey":"Label,ruletxt",
+                    "props":{"y":300,"x":299,"wordWrap":true,"width":694,"var":"ruletxt","text":"活动规则：每充1000，返现1200，分期十二个月，每月1号返还，每期返还100，活动总量100万，先到先得，名额有限，快来参加吧","leading":10,"height":150,"fontSize":30,"font":"SimHei","color":"#f9f6f6","bold":false},
                     "nodeParent":3,
-                    "label":"Label",
+                    "label":"ruletxt",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -72,10 +58,10 @@
                 {
                     "x":30,
                     "type":"Button",
-                    "searchKey":"Button",
-                    "props":{"y":638,"x":502,"width":200,"skin":"commers1/btn3.png","sizeGrid":"3,3,3,3","labelSize":30,"labelColors":"#221346,#FFFFFF,#FFFFFF","label":"立即前往","height":50},
+                    "searchKey":"Button,gotocharge",
+                    "props":{"y":577,"x":472,"width":256,"var":"gotocharge","stateNum":"2","skin":"commers1/btnact1.png","sizeGrid":"3,3,3,3","labelSize":38,"labelFont":"SimHei","labelColors":"#FFE4FE,#FFE4FE,#FFE4FE","label":"立即前往","height":78},
                     "nodeParent":3,
-                    "label":"Button",
+                    "label":"gotocharge",
                     "isDirectory":false,
                     "isAniNode":true,
                     "hasChild":false,
@@ -83,6 +69,23 @@
                     "child":[
                         ]
                 }]
+        },
+        {
+            "x":15,
+            "type":"Script",
+            "switchAble":true,
+            "source":"src/script/activity/ActivityAdvertiseController.as",
+            "searchKey":"Script,ActivityAdvertiseController",
+            "removeAble":true,
+            "props":{},
+            "nodeParent":2,
+            "label":"ActivityAdvertiseController",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":8,
+            "child":[
+                ]
         }],
     "animations":[
         {

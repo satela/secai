@@ -9,6 +9,7 @@ package script
 	
 	import script.carving.CarvingOrderControl;
 	
+	import ui.ChargeAdvertisePanelUI;
 	import ui.LoginViewUI;
 	import ui.PaintOrderPanelUI;
 	import ui.PicManagePanelUI;
@@ -101,6 +102,9 @@ package script
 
 
 		public static const VIEW_CARVING_ORDER_PANEL:String = "VIEW_CARVING_ORDER_PANEL";//字牌下单主界面
+		
+		public static const VIEW_ACTIVITY_ADVETISE_PANEL:String = "VIEW_ACTIVITY_ADVETISE_PANEL";//活动广告
+
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
 
@@ -169,6 +173,7 @@ package script
 			viewDict[VIEW_CARVING_ORDER_PANEL] = CarvingOrderPanelUI;
 			viewDict[VIEW_CHOOSE_DELIVERY_TIME_PANEL] = ChooseDeliveryTimePanelUI;
 			viewDict[VIEW_PACKAGE_ORDER_PANEL] = PackagePanelUI;
+			viewDict[VIEW_ACTIVITY_ADVETISE_PANEL] = ChargeAdvertisePanelUI;
 
 
 		}
@@ -209,6 +214,7 @@ package script
 //			var control:Script = view.getComponent(Script);
 //			if(control != null)
 //			control["param"] = params;
+			
 			viewContainer.addChild(view);
 			openViewList[viewClass] = view;
 		}

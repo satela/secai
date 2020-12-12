@@ -40,6 +40,8 @@ package model
 		
 	
 		public var privilege:Object;//用户权限
+		
+		public var hashowact:Boolean = false;
 		public static function get instance():Userdata
 		{
 			if(_instance == null)

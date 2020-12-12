@@ -7,6 +7,8 @@ package script.order
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.utils.Browser;
+	import laya.utils.Ease;
+	import laya.utils.Tween;
 	
 	import model.Constast;
 	import model.HttpRequestUtil;
@@ -35,6 +37,11 @@ package script.order
 		override public function onStart():void
 		{
 			uiSkin = this.owner as ConfirmOrderPanelUI;
+			
+			uiSkin.mainview.scaleX = 0.2;
+			uiSkin.mainview.scaleY = 0.2;
+			
+			Tween.to(uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
 			
 			uiSkin.payall.selected = true;
 			
@@ -115,8 +122,14 @@ package script.order
 				
 				uiSkin.accountmoney.text = Userdata.instance.money.toString() + "元";
 				
+				uiSkin.actmoney.text = Userdata.instance.actMoney.toString() + "元";
+				
 				if(Userdata.instance.isHidePrice())
+				{
 					uiSkin.accountmoney.text = "****";
+					uiSkin.actmoney.text = "****";
+
+				}
 			}
 		}	
 		private function onPayOrder():void
@@ -142,12 +155,20 @@ package script.order
 					return;
 				}
 				
-				if(Userdata.instance.money < param.amount)
+				if(uiSkin.paytype.selectedIndex == 1 && Userdata.instance.money < param.amount)
 				{
-					ViewManager.showAlert("余额不足");
+					ViewManager.showAlert("账户余额不足");
 					return;
 				}
-				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + ordrid + "&kind=0","post");
+				
+				if(uiSkin.paytype.selectedIndex == 2 && Userdata.instance.actMoney < param.amount)
+				{
+					ViewManager.showAlert("活动余额不足");
+					return;
+				}
+				var paykind:int = uiSkin.paytype.selectedIndex - 1;
+				
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.payOrderByMoney,this,payMoneyBack,"orderid=" + ordrid + "&kind=" + paykind ,"post");
 
 			}
 		}
