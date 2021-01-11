@@ -9,6 +9,7 @@ package script.order
 	
 	import model.HttpRequestUtil;
 	import model.orderModel.DeliveryTypeVo;
+	import model.orderModel.OrderConstant;
 	import model.orderModel.PaintOrderModel;
 	
 	import script.ViewManager;
@@ -64,7 +65,7 @@ package script.order
 				for(var i:int=0;i < result.length;i++)
 				{
 					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
-					if(tempdevo.delivery_name == "送货上门")
+					if(tempdevo.delivery_name == OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER)
 						tempSelect = tempdevo;
 					PaintOrderModel.instance.deliveryList.push(tempdevo);
 				}

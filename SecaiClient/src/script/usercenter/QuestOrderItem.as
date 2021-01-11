@@ -9,6 +9,8 @@ package script.usercenter
 	
 	import ui.usercenter.OrderQuestItemUI;
 	
+	import utils.UtilTool;
+	
 	public class QuestOrderItem extends OrderQuestItemUI
 	{
 		public var adjustHeight:Function;
@@ -28,6 +30,10 @@ package script.usercenter
 			this.itemseq.text = orderdata.item_seq;
 			this.picimg.skin = orderdata.thumbnails_path;
 			
+			
+			
+			this.isurgent.visible = orderdata.is_urgent;
+			
 			ordata = orderdata;
 			ordersn = orderid;
 			//this.fileimg.skin = 
@@ -35,8 +41,30 @@ package script.usercenter
 			this.matname.text = orderdata.prod_name;
 			var sizearr:Array = (orderdata.LWH as String).split("/");
 			
+			if(orderdata.delivery_date != null)
+				this.deliverydate.text = UtilTool.getNextDayStr(orderdata.delivery_date + " 00:00:00");
+			else
+				this.deliverydate.text = "";
+
+			
 			this.widthtxt.text = sizearr[0];
 			this.heighttxt.text = sizearr[1];
+			
+			var picwidth:Number = parseFloat(sizearr[0]);
+			var picheight:Number = parseFloat(sizearr[1]);
+			
+			if(picwidth > picheight)
+			{
+				this.picimg.width = 80;					
+				this.picimg.height = 80/picwidth * picheight;
+				
+			}
+			else
+			{
+				this.picimg.height = 80;
+				this.picimg.width = 80/picheight * picwidth;
+				
+			}
 			
 			this.pronum.text = orderdata.item_number + "";
 			var techstr:String =  "";

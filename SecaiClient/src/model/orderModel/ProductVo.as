@@ -16,7 +16,7 @@ package model.orderModel
 		public var  min_length:Number = 0;//  最小长度
 		public var  max_length: Number = 0;//  最大长度
 		public var  min_width: Number = 0;//  最小宽度
-		//public var  max_width: Number = 0;//  最大宽度
+		public var  max_width: Number = 0;//  最大宽度
 		public var  material_code: String = "";//  材料编码
 		public var  material_name: String = "";//  材料名称
 		public var  material_color: String = "";//  颜色
@@ -30,7 +30,7 @@ package model.orderModel
 		public var additional_unitfee: Number = 0;//  单位附加金额
 		public var is_merchandise:Boolean = false;
 
-		public var max_width:Number = 0;
+		public var mat_width:Number = 0;
 		public var mat_length:Number = 0;
 		
 		public var mat_thickness:Number = 0;
@@ -117,7 +117,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border> this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || ignoreWidth || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width && picheight + border> this.mat_width))
 					{
 						var peijian:String = "";
 						if(arr[i].selectAttachVoList != null)
@@ -207,7 +207,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width && picheight + border > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width && picheight + border > this.mat_width))
 					{
 						var totalprice:Number = 0;
 						
@@ -289,7 +289,7 @@ package model.orderModel
 			{
 				if(arr[i].selected)
 				{
-					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.max_width  && picheight + border > this.max_width))
+					if( arr[i].preProc_attachmentTypeList.toUpperCase() !=  OrderConstant.CUTOFF_H_V || (arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.CUTOFF_H_V && picwidth + border > this.mat_width  && picheight + border > this.mat_width))
 					{
 						var procname:String = arr[i].preProc_Name + UtilTool.getAttachDesc(arr[i]);
 						if(arr[i].selectAttachVoList != null && arr[i].selectAttachVoList.length > 0)
@@ -306,6 +306,15 @@ package model.orderModel
 						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.AVERAGE_CUTOFF)
 						{
 							var procname:String = procname + "(H-" + orderitemvo.horiCutNum + ",V-" + orderitemvo.verCutNum+  ")";
+							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
+						}
+						else if(arr[i].preProc_attachmentTypeList.toUpperCase() == OrderConstant.RIGHTUP_DAKOU)
+						{
+							if(orderitemvo.dakouNum == 1)
+								var procname:String = procname + "(" + orderitemvo.dakouNum + "-" + orderitemvo.dkleftpos.toFixed(2)+ ")";
+							else
+								procname = procname + "(" + orderitemvo.dakouNum + "-" + orderitemvo.dkleftpos.toFixed(2) +  "-" + orderitemvo.dkrightpos.toFixed(2) + ")";
+
 							prolist.push({proc_Code:arr[i].preProc_Code,proc_description:procname,proc_attachpath:arr[i].attchMentFileId});
 						}
 						else

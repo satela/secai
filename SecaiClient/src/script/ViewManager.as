@@ -25,6 +25,7 @@ package script
 	import ui.order.AverageCutPanelUI;
 	import ui.order.ChooseDeliveryTimePanelUI;
 	import ui.order.ConfirmOrderPanelUI;
+	import ui.order.DakouPanelUI;
 	import ui.order.InputCutNumPanelUI;
 	import ui.order.PackagePanelUI;
 	import ui.order.SelectAddressPanelUI;
@@ -100,6 +101,8 @@ package script
 
 		public static const VIEW_PACKAGE_ORDER_PANEL:String = "VIEW_PACKAGE_ORDER_PANEL";//订单打包设置界面
 
+		public static const VIEW_DAKOU_PANEL:String = "VIEW_DAKOU_PANEL";//正上方打扣设置界面
+
 
 		public static const VIEW_CARVING_ORDER_PANEL:String = "VIEW_CARVING_ORDER_PANEL";//字牌下单主界面
 		
@@ -174,6 +177,7 @@ package script
 			viewDict[VIEW_CHOOSE_DELIVERY_TIME_PANEL] = ChooseDeliveryTimePanelUI;
 			viewDict[VIEW_PACKAGE_ORDER_PANEL] = PackagePanelUI;
 			viewDict[VIEW_ACTIVITY_ADVETISE_PANEL] = ChargeAdvertisePanelUI;
+			viewDict[VIEW_DAKOU_PANEL] = DakouPanelUI;
 
 
 		}

@@ -36,7 +36,8 @@ package model.orderModel
 		public static const CUTOFF_H_V:String = "SPPJ"; //横向竖直拼接
 		public static const AVERAGE_CUTOFF:String = "SPDFCQ"; //等份裁切
 	
-		
+		public static const RIGHTUP_DAKOU:String = "SPDKWZ"; //正上方打扣
+
 		public static const DOUBLE_SIDE_SAME_TECHNO:String = "SPTE10320";//双面相同
 		public static const DOUBLE_SIDE_UNSAME_TECHNO:String = "SPTE10330";//双面不同
 
@@ -68,8 +69,11 @@ package model.orderModel
 		
 		public static const OCCUPY_CAPACITY_COUNTDOWN:int = 150;
 		
+		public static const DELIVERY_TYPE_BY_MANUFACTURER:String = "送货上门";
+		public static const DELIVERY_TYPE_BY_SELF:String = "工厂自提";
+		public static const DELIVERY_TYPE_BY_OTHER:String = "专车配送";
 
-
+		
 
 	}
 }

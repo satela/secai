@@ -11,6 +11,8 @@ package ui.usercenter {
 		public var closebtn:Button;
 		public var filename:Label;
 		public var outputtxt:Label;
+		public var comondeltype:Label;
+		public var urgentdelType:Label;
 
 		override protected function createChildren():void {
 			super.createChildren();

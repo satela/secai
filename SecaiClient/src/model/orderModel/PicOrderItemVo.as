@@ -45,6 +45,11 @@ package model.orderModel
 		public var horiCutNum:int = 1;
 		public var verCutNum:int = 1;
 		
+		public var dakouNum:int = 1;
+		public var dkleftpos:int = 5;//左边打扣位置
+		
+		public var dkrightpos:int = 50;//右边打扣位置
+		
 		public function PicOrderItemVo(picvo:PicInfoVo)
 		{
 			picinfo = picvo;

@@ -41,7 +41,7 @@ package model.orderModel
 			{
 				//if(proclist[i].procLvl  == 1)
 				{
-					if(proclist[i].is_mandatory == 1)
+					if(proclist[i].is_startProc == "是")
 						nextMatList.push(new MaterialItemVo(proclist[i]));
 				}
 			}

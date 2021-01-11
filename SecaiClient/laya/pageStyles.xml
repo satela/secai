@@ -82,4 +82,6 @@
    <item name="order/OrderPackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/PackageItem.scene" props="" ifExport="内嵌模式" aName=""/>
    <item name="order/ChooseDeliveryTimePanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/DakouPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="order/DakouItem.scene" props="" ifExport="内嵌模式" aName=""/>
 </page>

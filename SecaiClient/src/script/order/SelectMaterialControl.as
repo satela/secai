@@ -143,26 +143,29 @@ package script.order
 			uiSkin.matlist.array = [];
 			
 			var temp:Array = [];
-			for(var i:int=0;i < PaintOrderModel.instance.productList.length;i++)
+			if(PaintOrderModel.instance.productList != null)
 			{
-				if(PaintOrderModel.instance.productList[i].matclassname == "户内写真")
-					temp.unshift(PaintOrderModel.instance.productList[i]);
-				else if(PaintOrderModel.instance.productList[i].matclassname == "户外写真")
+				for(var i:int=0;i < PaintOrderModel.instance.productList.length;i++)
 				{
-					if(temp.length > 0 && temp[0].matclassname == "户内写真")
-					{
-						var hueni:* = temp.shift();
+					if(PaintOrderModel.instance.productList[i].matclassname == "户内写真")
 						temp.unshift(PaintOrderModel.instance.productList[i]);
-						temp.unshift(hueni);
-
+					else if(PaintOrderModel.instance.productList[i].matclassname == "户外写真")
+					{
+						if(temp.length > 0 && temp[0].matclassname == "户内写真")
+						{
+							var hueni:* = temp.shift();
+							temp.unshift(PaintOrderModel.instance.productList[i]);
+							temp.unshift(hueni);
+	
+						}
+						else
+							temp.unshift(PaintOrderModel.instance.productList[i]);
+						
 					}
 					else
-						temp.unshift(PaintOrderModel.instance.productList[i]);
-					
+						temp.push(PaintOrderModel.instance.productList[i]);
+	
 				}
-				else
-					temp.push(PaintOrderModel.instance.productList[i]);
-
 			}
 			uiSkin.tablist.array = temp;//PaintOrderModel.instance.productList;
 			
@@ -555,6 +558,12 @@ package script.order
 			
 			hasFinishAllFlow = false;
 
+			for(var i:int=0;i < hasShowItemList.length;i++)
+			{
+				hasShowItemList[i].stopshine();
+			}
+			curclickItem = parentitem;
+
 			if(parentitem.isSelected)
 			{
 				//hideItems(parentitem.x,true);
@@ -587,7 +596,6 @@ package script.order
 				hideItems(parentitem.x,true);
 			}
 			
-			curclickItem = parentitem;
 			parentitem.setSelected(true);
 			parentitem.setTechSelected(true);
 			
@@ -606,6 +614,14 @@ package script.order
 					itembox.setData(arr[i]);
 					hasShowItemList.push(itembox);
 					itembox.on(Event.CLICK,this,onClickMat,[itembox,arr[i]]);		
+					
+					if(curclickItem.techmainvo.is_mandatory)
+					{
+						itembox.startshine();
+					}
+					else
+						itembox.stopshine();
+
 					
 					itembox.x = starpox;
 					
@@ -693,6 +709,8 @@ package script.order
 			
 			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.AVERAGE_CUTOFF)
 				ViewManager.instance.openView(ViewManager.AVG_CUT_VIEW,false,matvo);
+			else if(matvo.preProc_attachmentTypeList.toLocaleUpperCase() == OrderConstant.RIGHTUP_DAKOU)
+				ViewManager.instance.openView(ViewManager.VIEW_DAKOU_PANEL,false,matvo);
 			
 			updateSelectedTech();
 		}
@@ -784,6 +802,7 @@ package script.order
 				if(hasShowItemList[i].x > curposx)
 				{
 					hasShowItemList[i].setSelected(false);
+					
 					if(hasShowItemList[i].techmainvo != null)
 						hasShowItemList[i].techmainvo.selected = false;			
 					if(matvo.nextMatList.indexOf(hasShowItemList[i].techmainvo) < 0)
@@ -794,6 +813,13 @@ package script.order
 						(hasShowItemList[i] as TechBoxItem).offAll();
 						hasShowItemList.splice(i,1);
 						i--;
+					}
+					else
+					{
+						if(curclickItem.techmainvo.is_mandatory)
+						{
+							hasShowItemList[i].startshine();
+						}
 					}
 				}
 				
@@ -922,6 +948,12 @@ package script.order
 				ViewManager.showAlert("请选择一个工艺");
 				return;
 
+			}
+			
+			if(curclickItem.techmainvo.is_mandatory)
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"后置工艺必须选一个"});
+				return;
 			}
 			
 			var hasSelectedTech:Array = PaintOrderModel.instance.curSelectMat.getAllSelectedTech();

@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"y":0,"x":0,"width":773,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","height":28},
+            "props":{"y":0,"x":0,"width":773,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":28},
             "nodeParent":2,
             "label":"Image",
             "isDirectory":false,

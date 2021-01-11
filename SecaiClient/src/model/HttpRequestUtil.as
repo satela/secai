@@ -175,11 +175,10 @@ package model
 			function checkOver(url:String,caller:Object,complete:Function,param:Object,requestType:String,request:HttpRequest){
 				onHttpRequestError(url,caller,complete,param,requestType,request);
 			}
-			Laya.timer.once(5000,request,checkOver,[url,caller,complete,param,requestType,request]);
-			
-			
-			
+			Laya.timer.once(60000,request,checkOver,[url,caller,complete,param,requestType,request]);			
+					
 			request.on(Event.ERROR, this, onHttpRequestError,[url,caller,complete,param,requestType,request]);
+			
 			if(param!=null){
 				if(param is String){
 					
@@ -202,6 +201,9 @@ package model
 		private function onHttpRequestError(url:String,caller:Object,complete:Function,param:Object,requestType:String,request:HttpRequest,e:Object=null):void
 		{
 			//ViewManager.showAlert("您的网络出了个小差，请重试！");
+			var data:Object = {'status':10001};
+			//ViewManager.showAlert("网络出了个小差，请重试！");
+			if(caller&&complete)complete.call(caller,JSON.stringify(data));
 		}
 		
 		private function onHttpRequestProgress(e:Object=null):void

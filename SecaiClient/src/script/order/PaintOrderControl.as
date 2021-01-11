@@ -242,6 +242,8 @@ package script.order
 		}
 		private function resetOrderInfo():void
 		{
+			if(this.destroyed)
+				return;
 			var total:Number = 0;
 //			for(var i:int=0;i < orderlist.length;i++)
 //			{
@@ -361,7 +363,7 @@ package script.order
 						outputitem.qqContact.on(Event.CLICK,this,onClickOpenQQ);
 						outputitem.factorytxt.text = PaintOrderModel.instance.selectFactoryAddress[i].name;
 						outputitem.holaday.text = "";
-						outputitem.outicon.skin = "commers1/" + OrderConstant.OUTPUT_ICON[i];
+						outputitem.outicon.skin = "commers/" + OrderConstant.OUTPUT_ICON[i];
 						
 					}
 
@@ -408,27 +410,37 @@ package script.order
 			if(!result.hasOwnProperty("status"))
 			{
 				PaintOrderModel.instance.deliveryList = [];
+				
+//				var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[0]);
+//				tempdevo.delivery_name = "专车配送";
+//				tempdevo.firstweight_price = 50;
+				
+				//PaintOrderModel.instance.deliveryList.push(tempdevo);
+				
 				for(var i:int=0;i < result.length;i++)
 				{
 					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
-					var deliveritem:OrderAddressItemUI = new OrderAddressItemUI();
-					deliveritem.addresstxt.text = tempdevo.deliveryDesc;
-					if(tempdevo.delivery_name == "送货上门")
+					//var deliveritem:OrderAddressItemUI = new OrderAddressItemUI();
+					//deliveritem.addresstxt.text = tempdevo.deliveryDesc;
+					PaintOrderModel.instance.deliveryList.push(tempdevo);
+					//PaintOrderModel.instance.selectDelivery = tempdevo;
+
+					if(tempdevo.delivery_name == OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER)
 					{
-						deliveritem.btnsel.selected = true;
-						deliveritem.selCheck.selected = true;
+						//deliveritem.btnsel.selected = true;
+						//deliveritem.selCheck.selected = true;
 						PaintOrderModel.instance.selectDelivery = tempdevo;
 					}
-					
-					deliveritem.on(Event.CLICK,this,onSelectDeliverAdd,[deliveritem,tempdevo]);
-					uiSkin.deliverbox.addChild(deliveritem);
+//					
+//					deliveritem.on(Event.CLICK,this,onSelectDeliverAdd,[deliveritem,tempdevo]);
+//					uiSkin.deliverbox.addChild(deliveritem);
 					//PaintOrderModel.instance.deliveryList.push(tempdevo);
 				}
 			}
-			Laya.timer.frameOnce(2,this,function(){
-				uiSkin.deliversp.size(1280,uiSkin.deliverbox.height);
-				uiSkin.mainvbox.refresh();
-			});
+//			Laya.timer.frameOnce(2,this,function(){
+//				uiSkin.deliversp.size(1280,uiSkin.deliverbox.height);
+//				uiSkin.mainvbox.refresh();
+//			});
 		}
 		private function onSelectDeliverAdd(deliitem:OrderAddressItemUI,delivervo:DeliveryTypeVo):void
 		{
@@ -706,18 +718,13 @@ package script.order
 			PaintOrderModel.instance.finalOrderData = arr;
 			
 			
-//			for(var i:int=0;i < arr.length;i++)
-//			{
-//				var datas:String = PaintOrderModel.instance.getOrderCapcaityData(arr[i]);
-//				//trace("orderdeldata:" + datas);
-//			}
 			
 			var params:String = "count=" + itemlist.length;
 			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getProductUids,this,ongetUidsBack,params,"post");
 			
 			
-		//	HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onPlaceOrderBack,{data:JSON.stringify(arr)},"post");
 
 		}
 		
@@ -848,6 +855,8 @@ package script.order
 					orderdata.consignee = Userdata.instance.companyShort + "#" + PaintOrderModel.instance.selectAddress.receiverName;
 					orderdata.tel = PaintOrderModel.instance.selectAddress.phone;
 					orderdata.address = PaintOrderModel.instance.selectAddress.proCityArea;
+					orderdata.addressId = PaintOrderModel.instance.selectAddress.searchZoneid;
+					
 					orderdata.order_amountStr = 0;
 					orderdata.shipping_feeStr = "0";
 					orderdata.money_paidStr = "0";

@@ -21,6 +21,7 @@ package {
 	import script.order.AvgCutPanelControl;
 	import script.order.ChooseDeliveryTimeControl;
 	import script.order.PayTypeSelectControl;
+	import script.order.DakouSettingController;
 	import script.order.InputCutNumControl;
 	import script.order.PackageOrderControl;
 	import script.order.SelectAddressControl;
@@ -84,6 +85,7 @@ package {
 			reg("script.order.AvgCutPanelControl",AvgCutPanelControl);
 			reg("script.order.ChooseDeliveryTimeControl",ChooseDeliveryTimeControl);
 			reg("script.order.PayTypeSelectControl",PayTypeSelectControl);
+			reg("script.order.DakouSettingController",DakouSettingController);
 			reg("script.order.InputCutNumControl",InputCutNumControl);
 			reg("script.order.PackageOrderControl",PackageOrderControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);

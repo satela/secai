@@ -813,7 +813,13 @@ package utils
 			for(var i:int=1;i <= 5;i++)
 			{
 				var date:Date = new Date(curdate.getTime() + 24 * 3600 * i * 1000);
-				arr.push(date.getDate());
+				var curmonth:int =  date.getMonth() + 1;
+				var tempstr:String = curmonth > 9?curmonth.toString():("0" + curmonth.toString()) + "";
+				
+				tempstr += "-";
+				
+				tempstr += date.getDate() > 9 ?date.getDate():("0" + date.getDate());
+				arr.push(tempstr);
 			}
 			
 			return arr;

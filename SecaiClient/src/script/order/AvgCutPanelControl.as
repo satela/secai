@@ -25,7 +25,7 @@ package script.order
 		
 		private var cuttype:int;
 		
-		private var linelist:Vector.<Sprite>;
+		//private var linelist:Vector.<Sprite>;
 		
 		public function AvgCutPanelControl()
 		{
@@ -44,7 +44,7 @@ package script.order
 			uiSkin.mainpanel.width = Browser.width;
 			
 			matvo = param as MaterialItemVo;
-			linelist = new Vector.<Sprite>();
+			//linelist = new Vector.<Sprite>();
 			uiSkin.okbtn.on(Event.CLICK,this,closeView);
 			
 			uiSkin.productlist.itemRender = AvgCutImage;

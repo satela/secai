@@ -159,12 +159,12 @@ package script.order
 		{
 			if(locked)
 			{
-				this.lockratio.skin = "commers1/unlock.png";
+				this.lockratio.skin = "commers/unlock.png";
 				locked = false;
 			}
 			else
 			{
-				this.lockratio.skin = "commers1/lock.png";
+				this.lockratio.skin = "commers/lock.png";
 				locked = true;
 			}
 		}
@@ -180,6 +180,19 @@ package script.order
 				
 				this.editheight.text = heightration.toFixed(2);
 			}
+//			if(finalHeight != 0)
+//			{
+//				if(Math.abs(finalWidth/finalHeight - ordervo.picinfo.picPhysicWidth/ordervo.picinfo.picPhysicHeight) > 0.05)
+//				{
+//					ViewManager.showAlert("修改图片比例不能超过原图比例的5%");
+//					finalWidth = ordervo.picinfo.picPhysicWidth;
+//					finalHeight = ordervo.picinfo.picPhysicHeight;
+//					this.editwidth.text = ordervo.picinfo.picPhysicWidth.toString();
+//					this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
+//
+//				}
+//					
+//			}
 			reset();
 
 			updatePrice();
@@ -196,6 +209,19 @@ package script.order
 
 				this.editwidth.text = widthration.toFixed(2);
 			}
+			
+//			if(finalHeight != 0)
+//			{
+//				if(Math.abs(finalWidth/finalHeight - ordervo.picinfo.picPhysicWidth/ordervo.picinfo.picPhysicHeight) > 0.05)
+//				{
+//					ViewManager.showAlert("修改图片比例不能超过原图比例的5%");
+//					finalWidth = ordervo.picinfo.picPhysicWidth;
+//					finalHeight = ordervo.picinfo.picPhysicHeight;
+//					this.editwidth.text = ordervo.picinfo.picPhysicWidth.toString();
+//					this.editheight.text = ordervo.picinfo.picPhysicHeight.toString();
+//				}
+//				
+//			}
 			
 			reset();
 			updatePrice();
@@ -389,7 +415,7 @@ package script.order
 			
 			this.manuicon.visible = true;
 
-			 this.manuicon.skin = "commers1/" + OrderConstant.OUTPUT_ICON[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)]
+			 this.manuicon.skin = "commers/" + OrderConstant.OUTPUT_ICON[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)]
 			//this.estimatelbl.color = OrderConstant.OUTPUT_COLOR[PaintOrderModel.instance.getManuFactureIndex(provo.manufacturer_code)];
 			//this.timebox.visible = true;
 			//var colors:String = this.estimatelbl.color + "," + "," + this.estimatelbl.color;
@@ -482,6 +508,14 @@ package script.order
 			if(tech.indexOf("小块裁切") >= 0)
 				tech = tech.replace("小块裁切","小块裁切"+ "(H-" + this.ordervo.horiCutNum+ ",V-" + this.ordervo.verCutNum + ")");
 			
+			if(tech.indexOf("正上方打扣") >= 0)
+			{
+				if(this.ordervo.dakouNum == 1)
+					tech = tech.replace("正上方打扣","正上方打扣"+ "(" + this.ordervo.dakouNum+ "-" + this.ordervo.dkleftpos.toFixed(2) + ")");
+				else
+					tech = tech.replace("正上方打扣","正上方打扣"+ "(" + this.ordervo.dakouNum+ "-" + this.ordervo.dkleftpos.toFixed(2) + "-" + this.ordervo.dkrightpos.toFixed(2) + ")");
+			
+			}
 			this.architype.text = tech;
 						
 
@@ -534,8 +568,9 @@ package script.order
 			orderitemdata.weightStr = 1;
 			orderitemdata.item_number = parseInt(this.inputnum.text);
 			orderitemdata.item_priceStr = this.ordervo.orderPrice.toString();
-			orderitemdata.is_merchandise = 0;
-			orderitemdata.item_status = "1";
+			orderitemdata.is_merchandise = 1;
+			orderitemdata.item_status = "0";
+			//orderitemdata.is_urgent = false;
 			
 			var tempstr:String = "";
 			var hasfinddot:Boolean = false;
