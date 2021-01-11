@@ -20,6 +20,7 @@ package {
 	import script.order.AvgCutPanelControl;
 	import script.order.ChooseDeliveryTimeControl;
 	import script.order.PayTypeSelectControl;
+	import script.order.DakouSettingController;
 	import script.order.InputCutNumControl;
 	import script.order.PackageOrderControl;
 	import script.order.SelectAddressControl;
@@ -55,7 +56,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "usercenter/ChargePanel.scene";
+		public static var startScene:* = "carving/CarvingOrderPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -82,6 +83,7 @@ package {
 			reg("script.order.AvgCutPanelControl",AvgCutPanelControl);
 			reg("script.order.ChooseDeliveryTimeControl",ChooseDeliveryTimeControl);
 			reg("script.order.PayTypeSelectControl",PayTypeSelectControl);
+			reg("script.order.DakouSettingController",DakouSettingController);
 			reg("script.order.InputCutNumControl",InputCutNumControl);
 			reg("script.order.PackageOrderControl",PackageOrderControl);
 			reg("script.order.SelectAddressControl",SelectAddressControl);

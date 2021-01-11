@@ -7,7 +7,7 @@ package ui.usercenter {
 		public var hotbtm:Button;
 		public var deltbn:Button;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":112,"var":"hotbtm","staticCache":false,"skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","selected":false,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"浦东三点瑞普","height":40},"compId":3},{"type":"Button","props":{"y":1,"x":92,"var":"deltbn","skin":"commers1/btnclose.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":4}],"loadList":["commers1/btn2.png","commers1/btnclose.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Button","props":{"y":0,"x":0,"width":112,"var":"hotbtm","staticCache":false,"skin":"commers/btn2.png","sizeGrid":"3,3,3,3","selected":false,"labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"浦东三点瑞普","height":40},"compId":3},{"type":"Button","props":{"y":1,"x":92,"var":"deltbn","skin":"commers/btnclose.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF"},"compId":4}],"loadList":["commers/btn2.png","commers/btnclose.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

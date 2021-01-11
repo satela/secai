@@ -18,7 +18,7 @@
             "x":15,
             "type":"Button",
             "searchKey":"Button,confirmcharge",
-            "props":{"y":101.5,"x":547,"width":140,"var":"confirmcharge","stateNum":"2","skin":"commers1/btnact1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFF4EF,#FFF4EF,#FFF4EF","label":"确认支付","height":40},
+            "props":{"y":101.5,"x":547,"width":140,"var":"confirmcharge","stateNum":"2","skin":"commers/btnact1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFF4EF,#FFF4EF,#FFF4EF","label":"确认支付","height":40},
             "nodeParent":2,
             "label":"confirmcharge",
             "isDirectory":false,
@@ -241,7 +241,7 @@
                 {
                     "type":"TextInput",
                     "searchKey":"TextInput,chargeinput",
-                    "props":{"x":90,"var":"chargeinput","text":"100","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","fontSize":18,"color":"#ef1511"},
+                    "props":{"x":90,"var":"chargeinput","text":"100","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","fontSize":18,"color":"#ef1511"},
                     "nodeParent":16,
                     "label":"chargeinput",
                     "isDirectory":false,
@@ -281,7 +281,7 @@
                 {
                     "type":"RadioGroup",
                     "searchKey":"RadioGroup,tyepgrp",
-                    "props":{"x":98,"width":140,"var":"tyepgrp","space":5,"skin":"commers1/checksingle.png","labels":"支付宝","labelSize":18,"labelFont":"SimHei","labelColors":"#262b2e,#262b2e,#262b2e","height":21},
+                    "props":{"x":98,"width":140,"var":"tyepgrp","space":5,"skin":"commers/checksingle.png","labels":"支付宝","labelSize":18,"labelFont":"SimHei","labelColors":"#262b2e,#262b2e,#262b2e","height":21},
                     "nodeParent":19,
                     "label":"tyepgrp",
                     "isDirectory":false,
@@ -360,7 +360,7 @@
                         {
                             "type":"TextInput",
                             "searchKey":"TextInput,chargeamount",
-                            "props":{"y":229,"x":573,"width":178,"var":"chargeamount","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#E9E3E3","prompt":"请输入金额","height":44,"fontSize":20,"color":"#FF7b01"},
+                            "props":{"y":229,"x":573,"width":178,"var":"chargeamount","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#E9E3E3","prompt":"请输入金额","height":44,"fontSize":20,"color":"#FF7b01"},
                             "nodeParent":46,
                             "label":"chargeamount",
                             "isDirectory":false,
@@ -398,7 +398,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button,zhiufbaobtn",
-                                    "props":{"y":0,"x":90,"width":100,"var":"zhiufbaobtn","stateNum":"2","skin":"commers1/按钮1.png","height":40},
+                                    "props":{"y":0,"x":90,"width":100,"var":"zhiufbaobtn","stateNum":"2","skin":"commers/按钮1.png","height":40},
                                     "nodeParent":29,
                                     "label":"zhiufbaobtn",
                                     "isOpen":true,
@@ -425,7 +425,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,joinact",
-                            "props":{"y":360,"x":301,"width":160,"var":"joinact","stateNum":"2","skin":"commers1/btnact1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFF4EF,#FFF4EF,#FFF4EF","label":"确认支付","height":48},
+                            "props":{"y":360,"x":301,"width":160,"var":"joinact","stateNum":"2","skin":"commers/btnact1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFF4EF,#FFF4EF,#FFF4EF","label":"确认支付","height":48},
                             "nodeParent":46,
                             "label":"joinact",
                             "isDirectory":false,
@@ -438,7 +438,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn0",
-                            "props":{"y":150,"x":90,"var":"moneybtn0","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
+                            "props":{"y":150,"x":90,"var":"moneybtn0","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
                             "nodeParent":46,
                             "label":"moneybtn0",
                             "isDirectory":false,
@@ -451,7 +451,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn1",
-                            "props":{"y":150,"x":251,"var":"moneybtn1","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"2000元"},
+                            "props":{"y":150,"x":251,"var":"moneybtn1","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"2000元"},
                             "nodeParent":46,
                             "label":"moneybtn1",
                             "isDirectory":false,
@@ -464,7 +464,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn2",
-                            "props":{"y":150,"x":413,"var":"moneybtn2","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"5000元"},
+                            "props":{"y":150,"x":413,"var":"moneybtn2","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"5000元"},
                             "nodeParent":46,
                             "label":"moneybtn2",
                             "isDirectory":false,
@@ -477,7 +477,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn3",
-                            "props":{"y":150,"x":574,"var":"moneybtn3","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
+                            "props":{"y":150,"x":574,"var":"moneybtn3","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"1000元"},
                             "nodeParent":46,
                             "label":"moneybtn3",
                             "isDirectory":false,
@@ -490,7 +490,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn4",
-                            "props":{"y":229,"x":90,"var":"moneybtn4","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"10000元"},
+                            "props":{"y":229,"x":90,"var":"moneybtn4","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"10000元"},
                             "nodeParent":46,
                             "label":"moneybtn4",
                             "isDirectory":false,
@@ -503,7 +503,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn5",
-                            "props":{"y":229,"x":251,"var":"moneybtn5","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"20000元"},
+                            "props":{"y":229,"x":251,"var":"moneybtn5","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"20000元"},
                             "nodeParent":46,
                             "label":"moneybtn5",
                             "isDirectory":false,
@@ -516,7 +516,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,moneybtn6",
-                            "props":{"y":229,"x":413,"var":"moneybtn6","stateNum":"2","skin":"commers1/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"50000元"},
+                            "props":{"y":229,"x":413,"var":"moneybtn6","stateNum":"2","skin":"commers/btnact3.png","sizeGrid":"3,3,3,3","labelSize":20,"labelColors":"#FF7b01,#FF7b01,#FF7b01","label":"50000元"},
                             "nodeParent":46,
                             "label":"moneybtn6",
                             "isDirectory":false,

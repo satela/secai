@@ -1,8 +1,8 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":2,
-    "selecteID":3,
+    "selectedBox":3,
+    "selecteID":12,
     "searchKey":"Scene",
     "props":{"width":1920,"sceneColor":"#fdf8f8","height":1080},
     "nodeParent":-1,
@@ -48,13 +48,14 @@
             "props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},
             "nodeParent":2,
             "label":"panel_main",
-            "isOpen":false,
+            "isOpen":true,
             "isDirectory":true,
             "isAniNode":true,
             "hasChild":true,
             "compId":3,
             "child":[
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
                     "props":{"y":0,"width":1920,"texture":"mainpage1/mainbg.jpg","height":1080},
@@ -68,9 +69,10 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Sprite",
                     "searchKey":"Sprite",
-                    "props":{"y":22,"x":320,"texture":"commers1/logotxt.png","scaleY":1,"scaleX":1},
+                    "props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},
                     "nodeParent":3,
                     "label":"Sprite",
                     "isDirectory":false,
@@ -81,6 +83,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},
@@ -94,6 +97,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUpload",
@@ -134,6 +138,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,paintOrderBtn",
@@ -174,6 +179,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnproduct",
@@ -214,6 +220,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text",
@@ -254,6 +261,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,btnUserCenter",
@@ -294,6 +302,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_login",
@@ -334,6 +343,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,txt_reg",
@@ -374,6 +384,7 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},
@@ -387,6 +398,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
                     "props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},
@@ -400,6 +412,7 @@
                         ]
                 },
                 {
+                    "x":30,
                     "type":"Text",
                     "selectedBox":3,
                     "searchKey":"Text,characBtn",
@@ -440,9 +453,10 @@
                         }]
                 },
                 {
+                    "x":30,
                     "type":"Label",
                     "searchKey":"Label",
-                    "props":{"y":150,"x":375,"visible":false,"text":"升级导致错误，正在抓紧修复，预计14点恢复访问，由升级期间导致的价格差异，我们后续做出弥补。 由此带来的不便，深感抱歉。","fontSize":20,"font":"SimHei","color":"#ff0905"},
+                    "props":{"y":150,"x":0,"width":1920,"visible":false,"text":"系统将于今晚11点（1月4号23:00)升级维护，预计维护1小时，请避开此时间段下单，敬请谅解！","fontSize":20,"font":"SimHei","color":"#ff0905","align":"center"},
                     "nodeParent":3,
                     "label":"Label",
                     "isDirectory":false,
@@ -487,7 +501,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"skin":"commers1/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},
+                    "props":{"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},
                     "nodeParent":65,
                     "label":"Image",
                     "isOpen":true,
@@ -530,7 +544,7 @@
                     "x":30,
                     "type":"Button",
                     "searchKey":"Button,linktobus",
-                    "props":{"x":314,"var":"linktobus","stateNum":"1","skin":"commers1/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},
+                    "props":{"x":314,"var":"linktobus","stateNum":"1","skin":"commers/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},
                     "nodeParent":65,
                     "label":"linktobus",
                     "isDirectory":false,

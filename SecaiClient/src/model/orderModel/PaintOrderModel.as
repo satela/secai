@@ -11,6 +11,7 @@ package model.orderModel
 	import script.order.MaterialItem;
 	import script.order.PicOrderItem;
 	
+	import utils.TimeManager;
 	import utils.UtilTool;
 
 	public class PaintOrderModel
@@ -59,6 +60,13 @@ package model.orderModel
 		public var orderType:int;//当前下单类型 
 		
 		public var curTimePrefer:int = 0;//当前选择的交付策略
+		
+		public var curCommmonDeliveryType:String = "";//当前选择的普通配送方式
+		public var curUrgentDeliveryType:String = "";//当前选择的加急配送方式
+		
+		public var currentDayStr:String = "";
+
+		public var batchOrders:Object = {};
 		public function PaintOrderModel()
 		{
 		}
@@ -76,7 +84,9 @@ package model.orderModel
 			packageList = new Vector.<PackageVo>();
 			finalOrderData = [];
 			availableDeliveryDates = {};
-			
+			curCommmonDeliveryType = "";
+			curUrgentDeliveryType = "";
+			batchOrders = {};
 			
 		}
 		public function initOutputAddr(addrobj:Array):void
@@ -402,22 +412,61 @@ package model.orderModel
 		
 		public function checkExceedMaterialSize(material:ProductVo):Boolean
 		{
-//			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
-//			
-//			for(var i:int=0;i < picorderitems.length;i++)
-//			{
-//				var minside:Number = Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-//				var longside:Number = Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
-//				
-//				if(minside > material.max_width || longside > material.max_length)
-//					return true;
-//				
-//				if(minside < material.min_width || longside < material.min_length)
-//					return true;
-//			}
+			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
+			
+			for(var i:int=0;i < picorderitems.length;i++)
+			{
+				var minside:Number = Math.min(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+				var longside:Number = Math.max(picorderitems[i].finalWidth,picorderitems[i].finalHeight);
+				
+				if(minside > material.max_width || longside > material.max_length)
+					return true;
+				
+				if(minside < material.min_width || longside < material.min_length)
+					return true;
+			}
 			
 			return false;
 		}
+		
+		public function checkUnFitFileType(material:ProductVo,showtip:Boolean=true):Boolean
+		{
+			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
+			if(material.prod_code == "SPPR60100" || material.prod_code == "SPPR60110")
+			{
+				for(var i:int=0;i < picorderitems.length;i++)
+				{
+					if(picorderitems[i].ordervo.picinfo.colorspace.toUpperCase() != "GRAY")
+					{
+						if(showtip)
+						{
+							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"只有颜色格式为GRAY的图片才能使用条幅材料下单"});
+						}
+						return true;
+						
+					}
+//					else if(picorderitems[i].ordervo.picinfo.iswhitebg == false)
+//					{
+//						if(showtip)
+//						{
+//							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"只有黑色文字的图片才能使用条幅材料下单"});
+//						}
+//						return true;
+//					}
+//					else if(picorderitems[i].ordervo.picinfo.iswhitebg && picorderitems[i].ordervo.picinfo.istiaofuValid == false)
+//					{
+//						if(showtip)
+//						{
+//							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片条幅宽度不能大于50cm"});
+//						}
+//						return true;
+//					}
+				}
+			
+			}
+			return false;
+		}
+		
 		public function getManuFactureIndex(manucode:String):int
 		{
 			for(var i:int=0;i < outPutAddr.length;i++)
@@ -494,12 +543,15 @@ package model.orderModel
 			
 			var orderitems:Array = orderdata.orderItemList;
 			
+			var productProcMap:Object = {};
 			for(var i:int=0;i < orderitems.length;i++)
 			{
 				var itemdata:Object = {};
 				itemdata.orderItem_sn = orderitems[i].orderItem_sn;
-				itemdata.prod_code = orderitems[i].prod_code;
 				
+				itemdata.prod_code = orderitems[i].prod_code;
+				var tempkey:String = itemdata.prod_code + "-";
+
 				itemdata.processList = [];
 
 				for(var j:int=0;j < orderitems[i].procInfoList.length;j++)
@@ -510,6 +562,7 @@ package model.orderModel
 					
 					var picwidth:Number = parseFloat(size[0]);
 					var picheight:Number = parseFloat(size[1]);
+					tempkey += procedata.proc_code + "-";
 					
 					procedata.cap_occupy = orderitems[i].item_number * getProcessNeedCapacity(orderdata.manufacturer_code,orderitems[i].material_code,picwidth,picheight,orderitems[i].procInfoList[j].proc_Code);
 					
@@ -517,10 +570,37 @@ package model.orderModel
 					
 					itemdata.processList.push(procedata);
 				}
-				resultdata.orderItemList.push(itemdata);
+//				if(productProcMap.hasOwnProperty(tempkey))
+//				{
+//					var prococcupydata:Array = productProcMap[tempkey].processList;
+//					for(var k:int=0;k < prococcupydata.length;k++)
+//					{
+//						prococcupydata[k].cap_occupy += itemdata.processList[k].cap_occupy;
+//					}
+//					orderitems[i].batchOrderItem_sn = productProcMap[tempkey].orderItem_sn;
+//					
+//					batchOrders[productProcMap[tempkey].orderItem_sn]++;
+//
+//				}
+//				else
+//				{
+					productProcMap[tempkey] = itemdata;
+					resultdata.orderItemList.push(itemdata);
+					batchOrders[orderitems[i].orderItem_sn] = 1;
+					orderitems[i].batchOrderItem_sn = orderitems[i].orderItem_sn;
+				//}
+				//resultdata.orderItemList.push(itemdata);
 				
 			}
 			
+			for(i=0;i < orderitems.length;i++)
+			{
+				if(batchOrders[orderitems[i].batchOrderItem_sn] == 1)
+				{
+					orderitems[i].batchOrderItem_sn = "";
+				}
+				
+			}
 			return JSON.stringify(resultdata);
 			
 			
@@ -582,7 +662,7 @@ package model.orderModel
 			var amout:Number = UtilTool.getAmoutByUnit(picwidth/100.0,picheight/100.0,capacitydata[0]);
 			
 			if(capacitydata[1] > 0)
-				return parseFloat((amout/capacitydata[1] as Number).toFixed(2));
+				return parseFloat((amout/capacitydata[1] as Number).toFixed(4));
 			else
 				return 0;
 			
@@ -604,6 +684,22 @@ package model.orderModel
 			return "";
 		}
 		
+		public function getManufacturerNameBySn(orderitemsn:String):String{
+			
+			var arr:Array = finalOrderData;
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].orderItem_sn == orderitemsn)
+						return arr[i].manufacturer_name;
+				}
+			}
+			
+			return "";
+		}
+		
 		public function getSingleProductOrderData(orderitemsn:String):Object{
 			
 			var arr:Array = finalOrderData;
@@ -618,7 +714,95 @@ package model.orderModel
 			}
 			
 			return null;
-		}		
+		}	
 		
+		public function getProductOrderDataList(orderitemsn:String):Array{
+			
+			var arr:Array = finalOrderData;
+			var batchItemDatas:Array = [];
+			for(var i:int=0;i < arr.length;i++)
+			{
+				var orderitems:Array = arr[i].orderItemList;
+				for(var j:int=0;j < orderitems.length;j++)
+				{
+					if(orderitems[j].batchOrderItem_sn == orderitemsn || orderitems[j].orderItem_sn == orderitemsn)
+					{
+						batchItemDatas.push(orderitems[j]);
+					}
+				}
+			}
+			
+			return batchItemDatas;
+		}	
+		
+		public function getDeliveryTypeStr(needurgetn:Boolean):String
+		{
+			if(deliveryList == null || deliveryList.length <= 0)
+				return "";
+			
+			var typestr:String = "";
+			var servertime:Date = new Date(TimeManager.instance.serverDate*1000);
+			
+			for(var i:int=0;i < deliveryList.length;i++)
+			{
+				var deliveryVO:DeliveryTypeVo = deliveryList[i] as DeliveryTypeVo;
+				if(!needurgetn  || deliveryVO.canbeslected(servertime))
+				{
+					if(i < deliveryList.length - 1)
+						typestr += deliveryVO.delivery_name + "(" + deliveryVO.firstweight_price + "元)" + ",";
+					else
+						typestr += deliveryVO.delivery_name + "(" + deliveryVO.firstweight_price + "元)";
+
+				}
+			}
+			
+			return typestr;
+		}
+		
+		public function isValidDeliveryType(deliveryname:String):Boolean
+		{
+			if(deliveryname.indexOf(OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER) < 0)
+				return true;
+			
+			var servertime:Date = new Date(TimeManager.instance.serverDate*1000);
+			for(var i:int=0;i < deliveryList.length;i++)
+			{
+				var deliveryVO:DeliveryTypeVo = deliveryList[i] as DeliveryTypeVo;
+				if(deliveryVO.delivery_name == deliveryname && deliveryVO.canbeslected(servertime))
+				{
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
+		public function getDeliveryPrice(deliveryname:String):Number
+		{
+			
+			//var servertime:Date = new Date(TimeManager.instance.serverDate);
+			if(deliveryname == "")
+				return 0;
+			
+			for(var i:int=0;i < deliveryList.length;i++)
+			{
+				var deliveryVO:DeliveryTypeVo = deliveryList[i] as DeliveryTypeVo;
+				if(deliveryVO.delivery_name == deliveryname)
+				{
+					return deliveryVO.firstweight_price;
+				}
+			}
+			
+			return 0;
+		}
+		
+		public function getDeliveryOrgCode():String
+		{
+			if(deliveryList.length > 0)
+			{
+				return (deliveryList[0] as DeliveryTypeVo).deliverynet_code;
+			}
+			return "";
+		}
 	}
 }

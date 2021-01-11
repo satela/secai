@@ -56,6 +56,7 @@ package script.order
 			
 			paylefttime = param.lefttime;
 			uiSkin.paytime.text = UtilTool.getCountDownString(paylefttime);
+			//uiSkin.paytime.visible = false;
 			Laya.timer.loop(1000,this,countdownpay);
 			//uiSkin.needpay.visible = !Userdata.instance.isHidePrice();
 			//uiSkin.realpay.visible = !Userdata.instance.isHidePrice();

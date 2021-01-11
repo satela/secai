@@ -7,7 +7,7 @@ package ui.picManager {
 		public var outimg:Image;
 		public var foldname:Label;
 
-		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers1/blackbg.png","sizeGrid":"5,5,5,5","height":30,"alpha":0.7},"compId":3},{"type":"Label","props":{"y":4,"x":0,"width":159,"var":"foldname","valign":"middle","text":"我的图片","height":24,"fontSize":20,"color":"#eff8f1","alpha":1,"align":"center"},"compId":5}],"loadList":["commers1/blackbg.png"],"loadList3D":[]};
+		public static var uiView:Object =/*[STATIC SAFE]*/{"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":160,"var":"outimg","skin":"commers/blackbg.png","sizeGrid":"5,5,5,5","height":30,"alpha":0.7},"compId":3},{"type":"Label","props":{"y":4,"x":0,"width":159,"var":"foldname","valign":"middle","text":"我的图片","height":24,"fontSize":20,"color":"#eff8f1","alpha":1,"align":"center"},"compId":5}],"loadList":["commers/blackbg.png"],"loadList3D":[]};
 		override protected function createChildren():void {
 			super.createChildren();
 			createView(uiView);

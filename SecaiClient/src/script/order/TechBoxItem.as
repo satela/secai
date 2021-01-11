@@ -1,6 +1,9 @@
 package script.order
 {
 	import laya.events.Event;
+	import laya.utils.Ease;
+	import laya.utils.Handler;
+	import laya.utils.Tween;
 	
 	import model.orderModel.AttchCatVo;
 	import model.orderModel.MaterialItemVo;
@@ -56,9 +59,33 @@ package script.order
 			this.mouseEnabled = true;
 			this.grayimg.visible = false;
 
+			this.shineimg.visible = false;
+			
 					
 		}
 		
+		public function startshine():void
+		{
+			this.shineimg.visible = true;
+			startTween();
+		}
+		
+		private function startTween():void
+		{
+			Tween.to(this.shineimg,{alpha:0},300,Ease.elasticIn,new Handler(this,onCompleteShine));
+
+		}
+		public function onCompleteShine():void
+		{
+			Tween.to(this.shineimg,{alpha:1},300,Ease.elasticIn,new Handler(this,startshine));
+
+		}
+		
+		public function stopshine():void
+		{
+			this.shineimg.visible = false;
+			Tween.clearAll(this.shineimg);
+		}
 		public function setAttachVo(attachvo:AttchCatVo):void
 		{
 			processCatVo = null;

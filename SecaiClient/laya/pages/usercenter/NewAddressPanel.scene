@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"top":0,"skin":"commers1/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},
+            "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},
             "nodeParent":2,
             "label":"Image",
             "isDirectory":false,
@@ -46,7 +46,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":0,"x":0,"width":1920,"top":0,"skin":"commers1/blackbg.png","sizeGrid":"3,3,3,3","height":1080,"alpha":0.5},
+                    "props":{"y":0,"x":0,"width":1920,"top":0,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","height":1080,"alpha":0.5},
                     "nodeParent":4,
                     "label":"Image",
                     "isDirectory":false,
@@ -61,7 +61,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":105,"x":467,"width":986,"skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":611},
+                    "props":{"y":105,"x":467,"width":986,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":611},
                     "nodeParent":4,
                     "label":"Image",
                     "isOpen":false,
@@ -73,7 +73,7 @@
                         {
                             "type":"Image",
                             "searchKey":"Image",
-                            "props":{"y":87,"skin":"commers1/cutline.png","right":0,"left":0,"height":1,"alpha":1},
+                            "props":{"y":87,"skin":"commers/cutline.png","right":0,"left":0,"height":1,"alpha":1},
                             "nodeParent":6,
                             "label":"Image",
                             "isOpen":true,
@@ -112,7 +112,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button,btnok",
-                                    "props":{"y":1,"x":0,"width":142,"var":"btnok","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"确定","height":42},
+                                    "props":{"y":1,"x":0,"width":142,"var":"btnok","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"确定","height":42},
                                     "nodeParent":13,
                                     "label":"btnok",
                                     "isDirectory":false,
@@ -125,7 +125,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button,btncancel",
-                                    "props":{"y":0,"x":199,"width":142,"var":"btncancel","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"取消","height":42},
+                                    "props":{"y":0,"x":199,"width":142,"var":"btncancel","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":18,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"取消","height":42},
                                     "nodeParent":13,
                                     "label":"btncancel",
                                     "isDirectory":false,
@@ -164,7 +164,7 @@
                                 {
                                     "type":"TextInput",
                                     "searchKey":"TextInput,input_username",
-                                    "props":{"y":0,"x":188,"width":327,"var":"input_username","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入收货人姓名","height":40,"fontSize":20,"font":"SimHei"},
+                                    "props":{"y":0,"x":188,"width":327,"var":"input_username","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入收货人姓名","height":40,"fontSize":20,"font":"SimHei"},
                                     "nodeParent":56,
                                     "label":"input_username",
                                     "isDirectory":false,
@@ -216,7 +216,7 @@
                                 {
                                     "type":"TextInput",
                                     "searchKey":"TextInput,input_phone",
-                                    "props":{"y":0,"x":188,"width":327,"var":"input_phone","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入收货人联系电话","height":40,"fontSize":20,"font":"SimHei"},
+                                    "props":{"y":0,"x":188,"width":327,"var":"input_phone","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入收货人联系电话","height":40,"fontSize":20,"font":"SimHei"},
                                     "nodeParent":96,
                                     "label":"input_phone",
                                     "isDirectory":false,
@@ -271,7 +271,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,btnSelProv",
-                            "props":{"y":236,"x":207,"width":170,"var":"btnSelProv","stateNum":"3","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","height":35},
+                            "props":{"y":236,"x":207,"width":170,"var":"btnSelProv","stateNum":"3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","height":35},
                             "nodeParent":6,
                             "label":"btnSelProv",
                             "isOpen":true,
@@ -283,7 +283,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button",
-                                    "props":{"y":12,"x":142,"skin":"commers1/pagedown.png"},
+                                    "props":{"y":12,"x":142,"skin":"commers/pagedown.png"},
                                     "nodeParent":102,
                                     "label":"Button",
                                     "isDirectory":false,
@@ -312,7 +312,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,btnSelCity",
-                            "props":{"y":236,"x":396,"width":170,"var":"btnSelCity","stateNum":"3","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","height":35},
+                            "props":{"y":236,"x":396,"width":170,"var":"btnSelCity","stateNum":"3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","height":35},
                             "nodeParent":6,
                             "label":"btnSelCity",
                             "isOpen":true,
@@ -339,7 +339,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button",
-                                    "props":{"y":12,"x":142,"skin":"commers1/pagedown.png"},
+                                    "props":{"y":12,"x":142,"skin":"commers/pagedown.png"},
                                     "nodeParent":103,
                                     "label":"Button",
                                     "isDirectory":false,
@@ -354,7 +354,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,btnSelArea",
-                            "props":{"y":236,"x":585,"width":170,"var":"btnSelArea","stateNum":"3","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","height":35},
+                            "props":{"y":236,"x":585,"width":170,"var":"btnSelArea","stateNum":"3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","height":35},
                             "nodeParent":6,
                             "label":"btnSelArea",
                             "isOpen":true,
@@ -380,7 +380,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button",
-                                    "props":{"y":12,"x":142,"skin":"commers1/pagedown.png"},
+                                    "props":{"y":12,"x":142,"skin":"commers/pagedown.png"},
                                     "nodeParent":104,
                                     "label":"Button",
                                     "isDirectory":false,
@@ -435,7 +435,7 @@
                                 {
                                     "type":"TextInput",
                                     "searchKey":"TextInput,input_address",
-                                    "props":{"y":-3,"x":160,"width":620,"var":"input_address","valign":"top","skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业详细地址，如道路、门牌号、小区、楼栋号、单元等信息","height":92,"fontSize":20,"font":"SimHei"},
+                                    "props":{"y":-3,"x":160,"width":620,"var":"input_address","valign":"top","skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","promptColor":"#BBBDBA","prompt":"请输入企业详细地址，如道路、门牌号、小区、楼栋号、单元等信息","height":92,"fontSize":20,"font":"SimHei"},
                                     "nodeParent":126,
                                     "label":"input_address",
                                     "isDirectory":false,
@@ -451,7 +451,7 @@
                         {
                             "type":"Image",
                             "searchKey":"Image,provbox",
-                            "props":{"y":273,"x":203,"width":172,"var":"provbox","skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
+                            "props":{"y":273,"x":203,"width":172,"var":"provbox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
                             "nodeParent":6,
                             "label":"provbox",
                             "isOpen":true,
@@ -463,7 +463,7 @@
                                 {
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"top":0,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
+                                    "props":{"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
                                     "nodeParent":105,
                                     "label":"Image",
                                     "isDirectory":false,
@@ -492,7 +492,7 @@
                         {
                             "type":"Image",
                             "searchKey":"Image,citybox",
-                            "props":{"y":273,"x":396,"width":172,"var":"citybox","skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
+                            "props":{"y":273,"x":396,"width":172,"var":"citybox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":1},
                             "nodeParent":6,
                             "label":"citybox",
                             "isOpen":true,
@@ -504,7 +504,7 @@
                                 {
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"top":0,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
+                                    "props":{"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
                                     "nodeParent":106,
                                     "label":"Image",
                                     "isDirectory":false,
@@ -534,7 +534,7 @@
                         {
                             "type":"Image",
                             "searchKey":"Image,areabox",
-                            "props":{"y":273,"x":584,"width":172,"var":"areabox","skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":0.8},
+                            "props":{"y":273,"x":584,"width":172,"var":"areabox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":0.8},
                             "nodeParent":6,
                             "label":"areabox",
                             "isOpen":true,
@@ -546,7 +546,7 @@
                                 {
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"y":0,"x":0,"top":0,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
+                                    "props":{"y":0,"x":0,"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
                                     "nodeParent":107,
                                     "label":"Image",
                                     "isDirectory":false,
@@ -575,7 +575,7 @@
                         {
                             "type":"Button",
                             "searchKey":"Button,btnSelTown",
-                            "props":{"y":236,"x":774,"width":170,"var":"btnSelTown","stateNum":"3","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","height":35},
+                            "props":{"y":236,"x":774,"width":170,"var":"btnSelTown","stateNum":"3","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","height":35},
                             "nodeParent":6,
                             "label":"btnSelTown",
                             "isOpen":true,
@@ -601,7 +601,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button",
-                                    "props":{"y":12,"x":142,"skin":"commers1/pagedown.png"},
+                                    "props":{"y":12,"x":142,"skin":"commers/pagedown.png"},
                                     "nodeParent":108,
                                     "label":"Button",
                                     "isDirectory":false,
@@ -616,7 +616,7 @@
                         {
                             "type":"Image",
                             "searchKey":"Image,townbox",
-                            "props":{"y":273,"x":773,"width":172,"var":"townbox","skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":0.8},
+                            "props":{"y":273,"x":773,"width":172,"var":"townbox","skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":278,"alpha":0.8},
                             "nodeParent":6,
                             "label":"townbox",
                             "isOpen":true,
@@ -628,7 +628,7 @@
                                 {
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"top":0,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
+                                    "props":{"top":0,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},
                                     "nodeParent":109,
                                     "label":"Image",
                                     "isDirectory":false,

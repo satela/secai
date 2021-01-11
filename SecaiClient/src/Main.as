@@ -121,7 +121,11 @@
 			
 			Userdata.instance.version =  Laya.loader.getRes(Userdata.instance.curRandomStr);
 			console.log("版本号:" + Userdata.instance.version);
-			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/order1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/upload1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/usercenter1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/mainpage1.atlas?" + Userdata.instance.version,type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
+			Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers.atlas?" + Userdata.instance.version,type:Loader.ATLAS},{url:"res/atlas/order1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},
+				{url:"res/atlas/upload1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},
+				{url:"res/atlas/usercenter1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},
+				{url:"res/atlas/mainpage1.atlas?" + Userdata.instance.version,type:Loader.ATLAS},
+				{url:"res/atlas/chargeact.atlas?" + Userdata.instance.version,type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 
 			//Laya.loader.load([{url:"res/atlas/comp.atlas",type:Loader.ATLAS},{url:"res/atlas/commers1.atlas",type:Loader.ATLAS},{url:"res/atlas/order1.atlas",type:Loader.ATLAS},{url:"res/atlas/upload1.atlas",type:Loader.ATLAS},{url:"res/atlas/usercenter1.atlas",type:Loader.ATLAS},{url:"res/atlas/mainpage1.atlas",type:Loader.ATLAS}], Handler.create(this, onLoadedComp), null, Loader.ATLAS);
 

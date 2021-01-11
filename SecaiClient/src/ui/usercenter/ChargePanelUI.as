@@ -13,6 +13,7 @@ package ui.usercenter {
 		public var chargeinput:TextInput;
 		public var tyepgrp:RadioGroup;
 		public var actpanel:Image;
+		public var actbox:Box;
 		public var acttitle:Label;
 		public var actrule:Label;
 		public var chargeamount:TextInput;
@@ -25,6 +26,7 @@ package ui.usercenter {
 		public var moneybtn4:Button;
 		public var moneybtn5:Button;
 		public var moneybtn6:Button;
+		public var noactbox:Box;
 
 		override protected function createChildren():void {
 			super.createChildren();

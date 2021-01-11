@@ -2,11 +2,11 @@
     "x":0,
     "type":"View",
     "selectedBox":7,
-    "selecteID":51,
+    "selecteID":54,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#000000","height":1080},
     "nodeParent":-1,
-    "maxID":52,
+    "maxID":63,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image",
-            "props":{"top":0,"skin":"commers1/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},
+            "props":{"top":0,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0,"alpha":0.5},
             "nodeParent":2,
             "label":"Image",
             "isOpen":true,
@@ -46,7 +46,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":0,"x":0,"width":1920,"skin":"commers1/blackbg.png","sizeGrid":"3,3,3,3","height":1080,"alpha":0.5},
+                    "props":{"y":0,"x":0,"width":1920,"skin":"commers/blackbg.png","sizeGrid":"3,3,3,3","height":1080,"alpha":0.5},
                     "nodeParent":4,
                     "label":"Image",
                     "isOpen":true,
@@ -61,7 +61,7 @@
                     "x":30,
                     "type":"Image",
                     "searchKey":"Image",
-                    "props":{"y":50,"x":320,"width":1280,"skin":"commers1/commonpopbg.png","sizeGrid":"3,3,3,3","height":836},
+                    "props":{"y":50,"x":320,"width":1280,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":836},
                     "nodeParent":4,
                     "label":"Image",
                     "isOpen":true,
@@ -74,7 +74,7 @@
                             "x":45,
                             "type":"Image",
                             "searchKey":"Image",
-                            "props":{"y":60,"x":0,"width":1280,"skin":"commers1/cutline.png","height":1,"alpha":1},
+                            "props":{"y":60,"x":0,"width":1280,"skin":"commers/cutline.png","height":1,"alpha":1},
                             "nodeParent":7,
                             "label":"Image",
                             "isOpen":true,
@@ -118,7 +118,7 @@
                             "x":45,
                             "type":"Sprite",
                             "searchKey":"Sprite",
-                            "props":{"y":777,"x":473},
+                            "props":{"y":788,"x":678},
                             "nodeParent":7,
                             "label":"Sprite",
                             "isOpen":false,
@@ -130,7 +130,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button,paybtn",
-                                    "props":{"y":0,"x":194,"width":140,"var":"paybtn","skin":"commers1/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF,","label":"结算","height":42},
+                                    "props":{"y":0,"x":194,"width":140,"var":"paybtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF,","label":"结算","height":42},
                                     "nodeParent":10,
                                     "label":"paybtn",
                                     "isDirectory":false,
@@ -143,7 +143,7 @@
                                 {
                                     "type":"Button",
                                     "searchKey":"Button,savebtn",
-                                    "props":{"y":0,"x":0,"width":140,"var":"savebtn","skin":"commers1/btn2.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"保存订单","height":42},
+                                    "props":{"y":0,"x":0,"width":140,"var":"savebtn","skin":"commers/btn2.png","sizeGrid":"3,3,3,3","labelSize":20,"labelFont":"SimHei","labelColors":"#262B2E,#52B232,#49AA2D","label":"保存订单","height":42},
                                     "nodeParent":10,
                                     "label":"savebtn",
                                     "isDirectory":false,
@@ -153,62 +153,6 @@
                                     "child":[
                                         ]
                                 }]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":791,"x":59,"text":"原价：","fontSize":20,"font":"SimHei"},
-                            "nodeParent":7,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":13,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label,rawprice",
-                            "props":{"y":791,"x":113,"width":95,"var":"rawprice","text":"100元","height":24,"fontSize":20,"font":"SimHei","color":"#f8120e","align":"left"},
-                            "nodeParent":7,
-                            "label":"rawprice",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":14,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label,disountprice",
-                            "props":{"y":791,"x":297,"width":95,"var":"disountprice","text":"100元","height":24,"fontSize":20,"font":"SimHei","color":"#f8120e","align":"left"},
-                            "nodeParent":7,
-                            "label":"disountprice",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":41,
-                            "child":[
-                                ]
-                        },
-                        {
-                            "x":45,
-                            "type":"Label",
-                            "searchKey":"Label",
-                            "props":{"y":791,"x":204,"text":"折后总额：","fontSize":20,"font":"SimHei"},
-                            "nodeParent":7,
-                            "label":"Label",
-                            "isDirectory":false,
-                            "isAniNode":true,
-                            "hasChild":false,
-                            "compId":40,
-                            "child":[
-                                ]
                         },
                         {
                             "x":45,
@@ -227,7 +171,7 @@
                                     "x":60,
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"y":0,"x":0,"width":1280,"skin":"commers1/grayback.jpg","height":44},
+                                    "props":{"y":0,"x":0,"width":1280,"skin":"commers/grayback.jpg","height":44},
                                     "nodeParent":17,
                                     "label":"Image",
                                     "isOpen":true,
@@ -243,7 +187,7 @@
                                     "x":60,
                                     "type":"Image",
                                     "searchKey":"Image",
-                                    "props":{"y":0,"x":0,"width":1280,"skin":"commers1/inputbg.png","sizeGrid":"3,3,3,3","height":44,"alpha":1},
+                                    "props":{"y":0,"x":0,"width":1280,"skin":"commers/inputbg.png","sizeGrid":"3,3,3,3","height":44,"alpha":1},
                                     "nodeParent":17,
                                     "label":"Image",
                                     "isDirectory":false,
@@ -400,7 +344,7 @@
                             "x":45,
                             "type":"List",
                             "searchKey":"List,orderlist",
-                            "props":{"y":173,"x":4,"width":1271,"var":"orderlist","vScrollBarSkin":"upload1/vscroll.png","height":596},
+                            "props":{"y":173,"x":4,"width":1271,"var":"orderlist","vScrollBarSkin":"upload1/vscroll.png","height":560},
                             "nodeParent":7,
                             "label":"orderlist",
                             "isOpen":true,
@@ -415,7 +359,7 @@
                             "x":45,
                             "type":"Button",
                             "searchKey":"Button,closebtn",
-                            "props":{"y":3,"x":1258,"var":"closebtn","skin":"commers1/btnclose.png"},
+                            "props":{"y":3,"x":1258,"var":"closebtn","skin":"commers/btnclose.png"},
                             "nodeParent":7,
                             "label":"closebtn",
                             "isDirectory":false,
@@ -429,7 +373,7 @@
                             "x":45,
                             "type":"RadioGroup",
                             "searchKey":"RadioGroup,timepreferRdo",
-                            "props":{"y":72,"x":102,"var":"timepreferRdo","skin":"commers1/checksingle.png","scaleY":1,"scaleX":1,"labels":"加急当天,交期优先 , 省钱优先\\n(2天内交付), 省钱优先\\n(3天内交付), 省钱优先\\n(4天内交付), 省钱优先\\n(5天内交付) ","labelSize":20,"labelFont":"SimHei","labelAlign":"center"},
+                            "props":{"y":72,"x":102,"var":"timepreferRdo","skin":"commers/checksingle.png","scaleY":1,"scaleX":1,"labels":"加急当天,交期优先 , 省钱优先\\n(2天内交付), 省钱优先\\n(3天内交付), 省钱优先\\n(4天内交付), 省钱优先\\n(5天内交付) ","labelSize":20,"labelFont":"SimHei","labelAlign":"center"},
                             "nodeParent":7,
                             "label":"timepreferRdo",
                             "isDirectory":false,
@@ -446,6 +390,7 @@
                             "props":{"y":70,"x":4,"text":"交付策略:","fontSize":20,"font":"SimHei"},
                             "nodeParent":7,
                             "label":"Label",
+                            "isOpen":true,
                             "isDirectory":false,
                             "isAniNode":true,
                             "hasChild":false,
@@ -457,7 +402,7 @@
                             "x":45,
                             "type":"Button",
                             "searchKey":"Button,setdefaultbtn",
-                            "props":{"y":75,"x":1073,"width":100,"var":"setdefaultbtn","skin":"commers1/btn1.png","sizeGrid":"3,3,3,3","labelStrokeColor":"#749041","labelStroke":1,"labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"设为默认策略","height":30},
+                            "props":{"y":75,"x":1073,"width":100,"var":"setdefaultbtn","skin":"commers/btn1.png","sizeGrid":"3,3,3,3","labelStrokeColor":"#749041","labelStroke":1,"labelSize":16,"labelFont":"SimHei","labelColors":"#FFFFFF,#FFFFFF,#FFFFFF","label":"设为默认策略","height":30},
                             "nodeParent":7,
                             "label":"setdefaultbtn",
                             "isDirectory":false,
@@ -480,6 +425,218 @@
                             "compId":51,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":744,"x":4},
+                            "nodeParent":7,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":54,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"普通配送方式:","fontSize":20,"font":"SimHei"},
+                                    "nodeParent":54,
+                                    "label":"Label",
+                                    "isOpen":true,
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":53,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"RadioGroup",
+                                    "searchKey":"RadioGroup,commondelType",
+                                    "props":{"y":1,"x":136,"var":"commondelType","skin":"commers/checksingle.png","scaleY":1,"scaleX":1,"labels":"送货上门,工厂自提,转成配送(60元)","labelSize":20,"labelFont":"SimHei","labelAlign":"center"},
+                                    "nodeParent":54,
+                                    "label":"commondelType",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":52,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":744,"x":640},
+                            "nodeParent":7,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":55,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"加急配送方式:","fontSize":20,"font":"SimHei"},
+                                    "nodeParent":55,
+                                    "label":"Label",
+                                    "isOpen":true,
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":56,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"RadioGroup",
+                                    "searchKey":"RadioGroup,urgentdeltype",
+                                    "props":{"y":1,"x":136,"var":"urgentdeltype","skin":"commers/checksingle.png","scaleY":1,"scaleX":1,"labels":"送货上门,工厂自提,转成配送(60元)","labelSize":20,"labelFont":"SimHei","labelAlign":"center"},
+                                    "nodeParent":55,
+                                    "label":"urgentdeltype",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":57,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":800,"x":4},
+                            "nodeParent":7,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":60,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"原价：","fontSize":20,"font":"SimHei"},
+                                    "nodeParent":60,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":13,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label,rawprice",
+                                    "props":{"x":54,"width":95,"var":"rawprice","text":"100元","height":24,"fontSize":20,"font":"SimHei","color":"#f8120e","align":"left"},
+                                    "nodeParent":60,
+                                    "label":"rawprice",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":14,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":800,"x":183},
+                            "nodeParent":7,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":61,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label,delmoney",
+                                    "props":{"y":0,"x":79,"width":95,"var":"delmoney","text":"100元","height":24,"fontSize":20,"font":"SimHei","color":"#f8120e","align":"left"},
+                                    "nodeParent":61,
+                                    "label":"delmoney",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":58,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"配送费：","fontSize":20,"font":"SimHei","align":"right"},
+                                    "nodeParent":61,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":59,
+                                    "child":[
+                                        ]
+                                }]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":800,"x":387},
+                            "nodeParent":7,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":62,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label,disountprice",
+                                    "props":{"x":93,"width":95,"var":"disountprice","text":"100元","height":24,"fontSize":20,"font":"SimHei","color":"#f8120e","align":"left"},
+                                    "nodeParent":62,
+                                    "label":"disountprice",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":41,
+                                    "child":[
+                                        ]
+                                },
+                                {
+                                    "x":60,
+                                    "type":"Label",
+                                    "searchKey":"Label",
+                                    "props":{"text":"折后总额：","fontSize":20,"font":"SimHei"},
+                                    "nodeParent":62,
+                                    "label":"Label",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":40,
+                                    "child":[
+                                        ]
+                                }]
                         }]
                 }]
         },

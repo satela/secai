@@ -47,6 +47,12 @@ package script.order
 				return;
 			}
 			
+			if(PaintOrderModel.instance.checkUnFitFileType(matvo))
+			{
+				//ViewManager.showAlert("图片格式不符合产品要求");
+				return;
+			}
+			
 			// TODO Auto Generated method stub
 			if(matvo.prcessCatList != null && matvo.prcessCatList.length > 0)
 			{

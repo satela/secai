@@ -4,11 +4,13 @@ package script.order
 	
 	import laya.components.Script;
 	import laya.events.Event;
+	import laya.ui.RadioGroup;
 	import laya.utils.Handler;
 	
 	import model.Constast;
 	import model.HttpRequestUtil;
 	import model.Userdata;
+	import model.orderModel.DeliveryTypeVo;
 	import model.orderModel.OrderConstant;
 	import model.orderModel.PackageVo;
 	import model.orderModel.PaintOrderModel;
@@ -18,6 +20,7 @@ package script.order
 	
 	import ui.order.ChooseDeliveryTimePanelUI;
 	
+	import utils.TimeManager;
 	import utils.UtilTool;
 	
 	public class ChooseDeliveryTimeControl extends Script
@@ -39,6 +42,9 @@ package script.order
 		private var canoccypay:Boolean = true;
 		
 		private var leftforbidtime:int = 0;
+		
+		private var placeorderNum:int = 0;
+		
 		public function ChooseDeliveryTimeControl()
 		{
 			super();
@@ -57,6 +63,8 @@ package script.order
 			uiSkin.paybtn.on(Event.CLICK,this,onPayOrder);
 			uiSkin.closebtn.on(Event.CLICK,this,onGiveUpOrder);
 
+			uiSkin.paybtn.on(Event.CLICK,this,onPayOrder);
+
 			orderDatas = param.orders as Array;
 			delaypay = param.delaypay;
 			
@@ -69,6 +77,29 @@ package script.order
 			//uiSkin.confirmpreferbtn.on(Event.CLICK,this,resetTimePrefer);
 			uiSkin.setdefaultbtn.on(Event.CLICK,this,setDefaultTimePrefer);
 			uiSkin.timepreferRdo.on(Event.CHANGE,this,resetTimePrefer);
+			
+			PaintOrderModel.instance.curCommmonDeliveryType = "";
+			PaintOrderModel.instance.curUrgentDeliveryType = "";
+			
+			uiSkin.commondelType.labels = "";
+			uiSkin.urgentdeltype.labels = "";
+			
+			var manufactcode:String = "";
+			var searchzoneid:String = "";
+			for(var i:int=0;i < PaintOrderModel.instance.finalOrderData.length;i++)
+			{
+				manufactcode = PaintOrderModel.instance.finalOrderData[i].manufacturer_code;
+				searchzoneid = PaintOrderModel.instance.finalOrderData[i].addressId;
+				break;
+			}
+			if(PaintOrderModel.instance.deliveryList == null || PaintOrderModel.instance.deliveryList.length == 0)
+			{
+				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getDeliveryList + manufactcode + "&addr_id=" + searchzoneid,this,onGetDeliveryBack,null,null);
+			}
+			else
+				initDeliveryInfo();
+			
+	
 
 			var total:Number = 0;
 			for(var i:int=0;i < orderDatas.length;i++)
@@ -96,6 +127,65 @@ package script.order
 			
 		}
 		
+		private function onGetDeliveryBack(data:Object):void
+		{
+			if(this.destroyed)
+				return;
+			var result:Object = JSON.parse(data as String);
+			
+			if(!result.hasOwnProperty("status"))
+			{
+				PaintOrderModel.instance.deliveryList = [];
+				
+				for(var i:int=0;i < result.length;i++)
+				{
+					var tempdevo:DeliveryTypeVo = new DeliveryTypeVo(result[i]);
+					PaintOrderModel.instance.deliveryList.push(tempdevo);
+					PaintOrderModel.instance.selectDelivery = tempdevo;
+				}
+				initDeliveryInfo();
+			}
+		}
+		
+		private function initDeliveryInfo():void
+		{
+			uiSkin.commondelType.labels = PaintOrderModel.instance.getDeliveryTypeStr(false);
+			
+			uiSkin.urgentdeltype.labels = PaintOrderModel.instance.getDeliveryTypeStr(true);
+			
+			PaintOrderModel.instance.curCommmonDeliveryType = "";
+			PaintOrderModel.instance.curUrgentDeliveryType = "";
+			
+			uiSkin.commondelType.on(Event.CHANGE,this,selectCommonDelType);
+			
+			//uiSkin.urgentdeltype.on(Event.CHANGE,this,selectUrgentDelType);
+			
+			var deltypelist:Array = uiSkin.commondelType.labels.split(",");
+			
+			for(var i:int=0;i < deltypelist.length;i++)
+			{
+				if(deltypelist[i].indexOf(OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER) >= 0)
+				{
+					uiSkin.commondelType.selectedIndex = i;
+					PaintOrderModel.instance.curCommmonDeliveryType = OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER;
+					break;
+				}
+			}
+			
+			var deltypelisturgent:Array = uiSkin.urgentdeltype.labels.split(",");
+			
+			for(i=0;i < deltypelisturgent.length;i++)
+			{
+				if(deltypelisturgent[i].indexOf(OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER) >= 0)
+				{
+					uiSkin.urgentdeltype.selectedIndex = i;
+					PaintOrderModel.instance.curUrgentDeliveryType = OrderConstant.DELIVERY_TYPE_BY_MANUFACTURER;
+					break;
+				}
+			}
+			
+			uiSkin.urgentdeltype.selectHandler = new Handler(this,selectUrgentDelType);
+		}
 		private function onCountDownTime():void
 		{
 			var arr:Array = orderDatas;
@@ -111,7 +201,7 @@ package script.order
 							orderDatas[i].is_urgent = 0;
 							orderDatas[i].delivery_date = null;
 							orderDatas[i].outtime = true;
-							retryGetAvailableDate(orderDatas[i]);
+							//retryGetAvailableDate(orderDatas[i]);
 						}
 					}
 				}
@@ -151,9 +241,21 @@ package script.order
 				{
 					
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
-					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
 					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
 					
+					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+					orderdata.delivery_date = null;
+					orderdata.is_urgent = false;
+					
+					var currentdate:String = alldates[i].current_date;
+					
+					var curtime:Number = Date.parse(currentdate.replace("-","/"));
+					TimeManager.instance.serverDate = curtime/1000;
+					
+					currentdate = currentdate.split(" ")[0];
+					PaintOrderModel.instance.currentDayStr = currentdate;
+
+										
 					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
 					{
 						if(alldates[i].deliveryDateList[j].urgent == false)
@@ -161,15 +263,28 @@ package script.order
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
 							
+//							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false)
+//							{
+//								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+//							}
+//							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
 						}
-						else
+						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
 						{
 							if(alldates[i].deliveryDateList[j].discount == 0)
 								alldates[i].deliveryDateList[j].discount = 1;
+							
+//							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+//							{
+//								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+//							}
+							
 							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
 						}
-					}	
+						
+						
+					}						
 					
 					for(var j:int=0;j < uiSkin.orderlist.cells.length;j++)
 					{
@@ -189,6 +304,8 @@ package script.order
 		private function updatePrice():void
 		{
 			var total:Number = 0;
+			var commomitemManuNum:Array = [];
+			var urgentitemManuNum:Array = []
 			for(var i:int=0;i < orderDatas.length;i++)
 			{
 				var ordermoney:Number = Number(orderDatas[i].item_priceStr) * Number(orderDatas[i].item_number);
@@ -198,12 +315,34 @@ package script.order
 					ordermoney = ordermoney*orderDatas[i].discount;
 					
 				}
+				var manucode:String = PaintOrderModel.instance.getManufacturerCode(orderDatas[i].orderItem_sn);
+				if(orderDatas[i].is_urgent == 1 && urgentitemManuNum.indexOf(manucode) < 0)
+				{
+					urgentitemManuNum.push(manucode);
+				}
+				else if(orderDatas[i].is_urgent == 0 && commomitemManuNum.indexOf(manucode) < 0)
+				{
+					commomitemManuNum.push(manucode);
+
+				}
 				ordermoney = parseFloat(ordermoney.toFixed(1));
 				total += ordermoney;
 			}
 			
-			uiSkin.disountprice.text = total.toFixed(1) + "元";
+			var commondelprice:Number = PaintOrderModel.instance.getDeliveryPrice(PaintOrderModel.instance.curCommmonDeliveryType) * commomitemManuNum.length;
+			var urgentdelprice:Number = PaintOrderModel.instance.getDeliveryPrice(PaintOrderModel.instance.curUrgentDeliveryType) * urgentitemManuNum.length;
+			
+			//if(hasUrgentOrderItem() == false)
+			//	urgentdelprice = 0;
+
+			//if(hasCommonOrderItem() == false)
+			//	commondelprice = 0;
+			
+			uiSkin.delmoney.text = (commondelprice + urgentdelprice).toFixed(1) + "元";
+			var totals:Number = parseFloat((commondelprice + urgentdelprice).toFixed(1)) + parseFloat(total.toFixed(1));
+			uiSkin.disountprice.text = totals + "元";
 		}
+		
 		private function onPayOrder():void
 		{
 			//trace("oderdara:" + JSON.stringify(PaintOrderModel.instance.finalOrderData));
@@ -211,6 +350,7 @@ package script.order
 			var arr:Array = getOrderData();
 			if(arr == null)
 				return;
+			uiSkin.paybtn.disabled = true;
 			
 			if(delaypay)
 				HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.updateOrder,this,onUpdateOrderBack,{data:JSON.stringify(arr)},"post");
@@ -240,6 +380,8 @@ package script.order
 					ViewManager.showAlert("支付超时，请重新选择交付时间");
 				
 			}
+			uiSkin.paybtn.disabled = false;
+
 		}
 		private function onPlaceOrderBack(data:Object):void
 		{
@@ -262,6 +404,8 @@ package script.order
 					ViewManager.showAlert("支付超时，请重新选择交付时间");
 				
 			}
+			uiSkin.paybtn.disabled = false;
+
 		}
 		
 		private function getPayLeftTime():int
@@ -300,6 +444,79 @@ package script.order
 			
 			
 		}
+		
+		private function hasUrgentOrderItem():Boolean
+		{
+			for(var i:int=0;i < orderDatas.length;i++)
+			{
+				if(orderDatas[i].is_urgent == 1  &&  orderDatas[i].delivery_date != null)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private function hasCommonOrderItem():Boolean
+		{
+			for(var i:int=0;i < orderDatas.length;i++)
+			{
+				if(orderDatas[i].is_urgent == false  &&  orderDatas[i].delivery_date != null)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		private function selectUrgentDelType(index:int):void
+		{
+			if(index == -1)
+				return;
+
+			var temptype:String = getDelivertyType(uiSkin.urgentdeltype);
+			if(PaintOrderModel.instance.isValidDeliveryType(temptype))
+			{
+				PaintOrderModel.instance.curUrgentDeliveryType = temptype;
+				updatePrice();
+			}
+			else
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"送货上门班次没有了，请选择其他配送方式"});
+				Laya.timer.frameOnce(2,this,function(){
+					uiSkin.urgentdeltype.selectedIndex = -1;
+				});
+				
+				PaintOrderModel.instance.curUrgentDeliveryType = "";
+
+				//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"送货上门班次没有了，请选择其他配送方式"});
+//				for(var i=0;i < deltypelisturgent.length;i++)
+//				{
+//					if(deltypelisturgent[i].indexOf(OrderConstant.DELIVERY_TYPE_BY_SELF) >= 0)
+//					{
+//						uiSkin.urgentdeltype.selectedIndex = -1;
+//						PaintOrderModel.instance.curUrgentDeliveryType = OrderConstant.DELIVERY_TYPE_BY_SELF;
+//						break;
+//					}
+//				}
+			}
+		}
+		
+		private function selectCommonDelType():void
+		{
+			PaintOrderModel.instance.curCommmonDeliveryType = getDelivertyType(uiSkin.commondelType);
+
+			updatePrice();
+		}
+		
+		private function getDelivertyType(radgroup:RadioGroup):String
+		{
+			var labellst:Array = radgroup.labels.split(",");
+			var index:int = radgroup.selectedIndex;
+			
+			return labellst[index].split("(")[0];
+			
+		}
+			
 		
 		private function setDefaultTimePrefer():void
 		{
@@ -363,59 +580,127 @@ package script.order
 			if(!result.hasOwnProperty("status"))
 			{
 				var alldates:Array = result as Array;
+//				for(var i:int=0;i < alldates.length;i++)
+//				{
+//					
+//					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
+//					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
+//					
+//					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
+//					orderdata.delivery_date = null;
+//					orderdata.is_urgent = false;
+//					
+//					var currentdate:String = alldates[i].current_date;
+//					
+//					var curtime:Number = Date.parse(currentdate.replace("-","/"));
+//					TimeManager.instance.serverDate = curtime/1000;
+//					
+//					currentdate = currentdate.split(" ")[0];
+//					PaintOrderModel.instance.currentDayStr = currentdate;
+//
+//					
+//					if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
+//					{
+//						orderdata.delivery_date = alldates[i].default_deliveryDate;
+//						
+//						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+//						
+//						orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
+//
+//					}
+//					
+//					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+//					{
+//						if(alldates[i].deliveryDateList[j].urgent == false)
+//						{
+//							if(alldates[i].deliveryDateList[j].discount == 0)
+//								alldates[i].deliveryDateList[j].discount = 1;
+//							
+//							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false)
+//							{
+//								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+//							}
+//							
+//							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+//						}
+//						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
+//						{
+//							if(alldates[i].deliveryDateList[j].discount == 0)
+//								alldates[i].deliveryDateList[j].discount = 1;
+//							
+//							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+//							{
+//								orderdata.discount = alldates[i].deliveryDateList[j].discount;
+//							}
+//							
+//							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+//						}
+//						
+//						
+//					}										
+//					
+//				}
 				for(var i:int=0;i < alldates.length;i++)
 				{
 					
-					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn] = {};
-					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].canUrgent = false;
-					PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList = [];
-					
-					var orderdata:Object = PaintOrderModel.instance.getSingleProductOrderData(alldates[i].orderItem_sn);
-					orderdata.delivery_date = null;
-					orderdata.is_urgent = false;
-					
 					var currentdate:String = alldates[i].current_date;
 					
-					if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
+					var curtime:Number = Date.parse(currentdate.replace("-","/"));
+					TimeManager.instance.serverDate = curtime/1000;
+					
+					currentdate = currentdate.split(" ")[0];
+					
+					PaintOrderModel.instance.currentDayStr = currentdate;
+					
+					
+					
+					var orderdataList:Array = PaintOrderModel.instance.getProductOrderDataList(alldates[i].orderItem_sn);
+					
+					for(var k:int=0;k < orderdataList.length;k++)
 					{
-						orderdata.delivery_date = alldates[i].default_deliveryDate;
+						var orderdata:Object = orderdataList[k];
 						
-						orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+						PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn] = {};
+						PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList = [];
 						
-						orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
-
+						if(orderdata != null && alldates[i].default_deliveryDate != null && alldates[i].default_deliveryDate != "")
+						{
+							orderdata.delivery_date = alldates[i].default_deliveryDate;
+							
+							orderdata.is_urgent = (orderdata.delivery_date == currentdate && PaintOrderModel.instance.curTimePrefer == Constast.ORDER_TIME_PREFER_URGENT);
+							orderdata.lefttime = OrderConstant.OCCUPY_CAPACITY_COUNTDOWN;
+						}
+						
+						for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
+						{
+							if(alldates[i].deliveryDateList[j].urgent == false)
+							{
+								if(alldates[i].deliveryDateList[j].discount == 0)
+									alldates[i].deliveryDateList[j].discount = 1;
+								
+								PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
+								
+								if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent == false)
+								{
+									orderdata.discount = alldates[i].deliveryDateList[j].discount;
+								}
+							}
+							else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
+							{
+								if(alldates[i].deliveryDateList[j].discount == 0)
+									alldates[i].deliveryDateList[j].discount = 1;
+								
+								if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
+								{
+									orderdata.discount = alldates[i].deliveryDateList[j].discount;
+								}
+								
+								PaintOrderModel.instance.availableDeliveryDates[orderdata.orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
+							}
+							
+							
+						}										
 					}
-					
-					for(var j:int=0;j < alldates[i].deliveryDateList.length;j++)
-					{
-						if(alldates[i].deliveryDateList[j].urgent == false)
-						{
-							if(alldates[i].deliveryDateList[j].discount == 0)
-								alldates[i].deliveryDateList[j].discount = 1;
-							
-							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent==false)
-							{
-								orderdata.discount = alldates[i].deliveryDateList[j].discount;
-							}
-							
-							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].deliveryDateList.push(alldates[i].deliveryDateList[j]);
-						}
-						else if(currentdate == alldates[i].deliveryDateList[j].availableDate)
-						{
-							if(alldates[i].deliveryDateList[j].discount == 0)
-								alldates[i].deliveryDateList[j].discount = 1;
-							
-							if(orderdata.delivery_date == alldates[i].deliveryDateList[j].availableDate && orderdata.is_urgent)
-							{
-								orderdata.discount = alldates[i].deliveryDateList[j].discount;
-							}
-							
-							PaintOrderModel.instance.availableDeliveryDates[alldates[i].orderItem_sn].urgentDate = alldates[i].deliveryDateList[j];
-						}
-						
-						
-					}										
-					
 				}
 				requestnum++;
 				if(requestnum == PaintOrderModel.instance.finalOrderData.length)
@@ -430,10 +715,42 @@ package script.order
 		{
 			var manuarr:Array = PaintOrderModel.instance.finalOrderData;
 			
+			if(hasUrgentOrderItem() && (PaintOrderModel.instance.curUrgentDeliveryType == null || PaintOrderModel.instance.curUrgentDeliveryType == ""))
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"请选择加急配送方式"});
+				return null;
+			}
+			
+			if(hasCommonOrderItem() && (PaintOrderModel.instance.curCommmonDeliveryType == null || PaintOrderModel.instance.curCommmonDeliveryType == ""))
+			{
+				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"请选择普通配送方式"});
+				return null;
+			}
+			var commondelName:String = PaintOrderModel.instance.getDeliveryOrgCode() + "#" + PaintOrderModel.instance.curCommmonDeliveryType;
+			var urgentdelName:String = PaintOrderModel.instance.getDeliveryOrgCode() + "#" + PaintOrderModel.instance.curUrgentDeliveryType;
+
+			var commondelprice:Number = PaintOrderModel.instance.getDeliveryPrice(PaintOrderModel.instance.curCommmonDeliveryType);
+			var urgentdelprice:Number = PaintOrderModel.instance.getDeliveryPrice(PaintOrderModel.instance.curUrgentDeliveryType);
+			
+			if(hasUrgentOrderItem() == false)
+				urgentdelprice = 0;
+			
+			if(hasCommonOrderItem == false)
+				commondelprice = 0;
+			
 			for(var i:int=0;i < manuarr.length;i++)
 			{
 				var itemlist:Array = manuarr[i].orderItemList;
 				var totalprice:Number = 0;
+				
+				manuarr[i].logistic_code  = commondelName;
+				
+				//manuarr[i].paydelay = delaypay?1:0;
+				
+				manuarr[i].placeorderNum = itemlist[0].orderItem_sn;
+				
+				var hascommonDelItem:Boolean = false;
+				var hsurgentDelItem:Boolean = false;
 				for(var j:int=0;j < itemlist.length;j++)
 				{
 					if(itemlist[j].is_urgent == null || (itemlist[j].is_urgent == false && itemlist[j].delivery_date == null))
@@ -447,6 +764,18 @@ package script.order
 						ViewManager.showAlert("请重新选择交货时间");
 						return null;
 					}
+					
+					if(itemlist[j].is_urgent == 1)
+					{
+						itemlist[j].logistics_type = urgentdelName;
+						hsurgentDelItem = true
+					}
+					else
+					{
+						delete itemlist[j].logistics_type;
+						hascommonDelItem = true;
+					}
+					
 					var ordermoney:Number = Number(itemlist[j].item_priceStr) * Number(itemlist[j].item_number) * itemlist[j].discount;
 					
 					ordermoney = parseFloat(ordermoney.toFixed(1));
@@ -480,8 +809,9 @@ package script.order
 					}									
 					
 				}
-				manuarr[i].money_paidStr = (manuarr[i].order_amountStr as Number).toFixed(1);
-				manuarr[i].order_amountStr = (manuarr[i].order_amountStr as Number).toFixed(1);
+				manuarr[i].shipping_feeStr = (commondelprice * (hascommonDelItem?1:0) + urgentdelprice * (hsurgentDelItem?1:0) as Number).toFixed(1);
+				manuarr[i].money_paidStr = (manuarr[i].order_amountStr + commondelprice * (hascommonDelItem?1:0) + urgentdelprice * (hsurgentDelItem?1:0)).toFixed(1);
+				manuarr[i].order_amountStr = (manuarr[i].order_amountStr).toFixed(1);
 			}
 			
 			for(var i:int=0;i < manuarr.length;i++)
@@ -524,6 +854,8 @@ package script.order
 			var arr:Array = PaintOrderModel.instance.finalOrderData;
 			if(arr == null)
 				return;
+			uiSkin.savebtn.disabled = true;
+			
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.placeOrder,this,onSaveOrderBack,{data:JSON.stringify(arr)},"post");
 		}
 		
@@ -536,6 +868,8 @@ package script.order
 				ViewManager.instance.openView(ViewManager.VIEW_FIRST_PAGE,true);
 				
 			}
+			uiSkin.savebtn.disabled = false;
+
 		}
 		
 		private function onGiveUpOrder():void
@@ -569,6 +903,7 @@ package script.order
 		public override function onDestroy():void
 		{
 			EventCenter.instance.off(EventCenter.UPDATE_PRICE_BY_DELIVERYDATE,this,updatePrice);
+			PaintOrderModel.instance.resetData();
 			Laya.timer.clearAll(this);
 
 		}

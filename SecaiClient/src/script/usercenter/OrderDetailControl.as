@@ -27,7 +27,7 @@ package script.usercenter
 			
 			uiSkin.orderoanel.vScrollBarSkin = "";
 
-			uiSkin.mainpanel.vScrollBarSkin = "";
+			//uiSkin.mainpanel.vScrollBarSkin = "";
 			uiSkin.mainpanel.hScrollBarSkin = "";
 			
 			uiSkin.mainpanel.height = Browser.height;
@@ -40,6 +40,10 @@ package script.usercenter
 			uiSkin.outputtxt.text = orderdata.manufacturer_name;
 
 			uiSkin.orderbox.autoSize = true;
+			
+			uiSkin.comondeltype.text = orderdata.logistic_code.split("#")[1];
+			uiSkin.urgentdelType.text = "";
+			
 			for(var i:int=0;i < allproduct.length;i++)
 			{
 				var product:QuestOrderItem = new QuestOrderItem();
@@ -48,6 +52,10 @@ package script.usercenter
 				product.setData(allproduct[i],param.or_id);
 				product.adjustHeight = refrshVbox;
 				product.caller = this;
+				if(allproduct[i].is_urgent == 1 && allproduct[i].logistics_type != null && allproduct[i].logistics_type != "")
+				{
+					uiSkin.urgentdelType.text =  allproduct[i].logistics_type.split("#")[1];
+				}
 								
 			}
 			

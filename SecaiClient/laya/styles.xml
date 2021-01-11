@@ -1,13 +1,13 @@
 <res>
    <item name="button/clubDayoption.png" type="Button" compress="0" pack="0" quality="80" props="" picType="0" scale="0"/>
-   <item name="commers1/inputbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,39,19,46" picType="0" scale="0"/>
+   <item name="commers/inputbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,39,19,46" picType="0" scale="0"/>
    <item name="comp/textinput.png" type="TextInput" compress="0" pack="0" quality="80" props="sizeGrid=6,15,7,14" picType="0" scale="0"/>
-   <item name="commers1/blackbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,17,16,17" picType="0" scale="0"/>
+   <item name="commers/blackbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=22,17,16,17" picType="0" scale="0"/>
    <item name="mainpage/lenovo.png" type="Sprite" compress="0" pack="2" quality="80" props="" picType="0" scale="0"/>
    <item name="mainpage/通用资源_03.png" type="Image" compress="0" pack="0" quality="80" props="sizeGrid=63,130,8,6" picType="0" scale="0"/>
-   <item name="commers1/commonpopbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=3,5,3,3" picType="0" scale="0"/>
+   <item name="commers/commonpopbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=3,5,3,3" picType="0" scale="0"/>
    <item name="upload1/prgbg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=2,2,2,2" picType="0" scale="0"/>
-   <item name="commers1/choosebg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=9,15,12,9" picType="0" scale="0"/>
+   <item name="commers/choosebg.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=9,15,12,9" picType="0" scale="0"/>
    <item name="commers/graydis.jpg" type="Sprite" compress="0" pack="1" quality="80" props="" picType="0" scale="0"/>
    <item name="chargeact/底框.png" type="Sprite" compress="0" pack="0" quality="80" props="sizeGrid=0,0,0,217" picType="0" scale="0"/>
 </res>

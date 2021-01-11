@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":3,
-    "selecteID":55,
+    "selectedBox":33,
+    "selecteID":42,
     "searchKey":"Scene",
     "props":{"width":1175,"sceneColor":"#fdf9f9","height":0},
     "nodeParent":-1,
-    "maxID":56,
+    "maxID":60,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -18,7 +18,7 @@
             "x":15,
             "type":"Image",
             "searchKey":"Image,bgimg",
-            "props":{"y":0,"x":0,"width":1175,"var":"bgimg","skin":"commers1/inputbg.png","sizeGrid":"5,5,5,5","height":165},
+            "props":{"y":0,"x":0,"width":1175,"var":"bgimg","skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":165},
             "nodeParent":2,
             "label":"bgimg",
             "isOpen":true,
@@ -45,6 +45,20 @@
                 {
                     "x":30,
                     "type":"Label",
+                    "searchKey":"Label,isurgent",
+                    "props":{"y":6.5,"x":8,"var":"isurgent","valign":"middle","text":"加急","fontSize":18,"font":"SimHei","color":"#f3300b","align":"center"},
+                    "nodeParent":3,
+                    "label":"isurgent",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":58,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
                     "searchKey":"Label,itemseq",
                     "props":{"y":35,"x":41,"width":30,"var":"itemseq","text":"1","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                     "nodeParent":3,
@@ -60,7 +74,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,money",
-                    "props":{"y":26.5,"x":944,"width":58,"var":"money","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},
+                    "props":{"y":26.5,"x":856,"width":58,"var":"money","text":"175.2","fontSize":16,"font":"SimHei","color":"#152326","bold":true,"align":"center"},
                     "nodeParent":3,
                     "label":"money",
                     "isDirectory":false,
@@ -110,6 +124,34 @@
                             "compId":37,
                             "child":[
                                 ]
+                        },
+                        {
+                            "x":45,
+                            "type":"Box",
+                            "searchKey":"Box",
+                            "props":{"y":26,"x":1034},
+                            "nodeParent":31,
+                            "label":"Box",
+                            "isOpen":true,
+                            "isDirectory":true,
+                            "isAniNode":true,
+                            "hasChild":true,
+                            "compId":56,
+                            "child":[
+                                {
+                                    "x":60,
+                                    "type":"Text",
+                                    "searchKey":"Text",
+                                    "props":{"text":"备注","fontSize":16,"font":"SimHei","color":"#262B2E"},
+                                    "nodeParent":56,
+                                    "label":"Text",
+                                    "isDirectory":false,
+                                    "isAniNode":true,
+                                    "hasChild":false,
+                                    "compId":57,
+                                    "child":[
+                                        ]
+                                }]
                         }]
                 },
                 {
@@ -129,7 +171,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":1,"width":58,"text":"宽(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                            "props":{"y":1,"x":0,"width":30,"text":"宽","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                             "nodeParent":32,
                             "label":"Label",
                             "isOpen":true,
@@ -144,7 +186,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label",
-                            "props":{"y":29,"x":0,"width":58,"text":"高(cm)","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                            "props":{"y":29,"x":0,"width":30,"text":"高","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                             "nodeParent":32,
                             "label":"Label",
                             "isDirectory":false,
@@ -158,7 +200,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label,widthtxt",
-                            "props":{"y":1,"x":58,"width":46,"var":"widthtxt","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                            "props":{"y":1,"x":30,"width":46,"var":"widthtxt","text":"10000","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                             "nodeParent":32,
                             "label":"widthtxt",
                             "isDirectory":false,
@@ -172,7 +214,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label,heighttxt",
-                            "props":{"y":29,"x":58,"width":46,"var":"heighttxt","text":"10","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                            "props":{"y":29,"x":30,"width":46,"var":"heighttxt","text":"10","height":21,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                             "nodeParent":32,
                             "label":"heighttxt",
                             "isDirectory":false,
@@ -200,7 +242,7 @@
                             "x":45,
                             "type":"Label",
                             "searchKey":"Label,matname",
-                            "props":{"y":0,"x":0,"wordWrap":true,"width":187,"var":"matname","valign":"middle","text":"展架专用布","height":42,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                            "props":{"y":0,"x":0,"wordWrap":true,"width":187,"var":"matname","valign":"middle","text":"展架专用布","overflow":"hidden","height":42,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                             "nodeParent":33,
                             "label":"matname",
                             "isOpen":true,
@@ -216,7 +258,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,pronum",
-                    "props":{"y":21,"x":884,"width":53,"var":"pronum","valign":"middle","text":"10","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                    "props":{"y":21,"x":796,"width":53,"var":"pronum","valign":"middle","text":"10","height":30,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                     "nodeParent":3,
                     "label":"pronum",
                     "isDirectory":false,
@@ -271,7 +313,7 @@
                     "x":30,
                     "type":"Label",
                     "searchKey":"Label,tech",
-                    "props":{"y":5,"x":663,"wordWrap":true,"width":203,"var":"tech","valign":"middle","text":"10","height":60,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
+                    "props":{"y":5,"x":626,"wordWrap":true,"width":162,"var":"tech","valign":"middle","text":"10","height":60,"fontSize":16,"font":"SimHei","color":"#262B2E","align":"center"},
                     "nodeParent":3,
                     "label":"tech",
                     "isDirectory":false,
@@ -293,6 +335,20 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":55,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Label",
+                    "searchKey":"Label,deliverydate",
+                    "props":{"y":28,"x":930,"width":86,"var":"deliverydate","text":"2012-12-25","height":16,"fontSize":16,"font":"SimHei","color":"#152326","bold":false,"align":"center"},
+                    "nodeParent":3,
+                    "label":"deliverydate",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":59,
                     "child":[
                         ]
                 }]

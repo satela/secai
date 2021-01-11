@@ -48,6 +48,11 @@ package model.picmanagerModel
 		
 		public var leftDeleteDays:int = 0;
 		
+		public var istiaofuValid:Boolean = false;
+		
+		public var iswhitebg:Boolean = false;
+		//public var max
+		
 		public function PicInfoVo(fileinfo:Object,dtype:int)
 		{
 			picType = dtype;
@@ -85,6 +90,28 @@ package model.picmanagerModel
 							leftDeleteDays = 0;
 					}
 					
+					if(fattr.hasOwnProperty("whitebg") && fattr.hasOwnProperty("vsize") && fattr.hasOwnProperty("hsize"))
+					{
+						iswhitebg = fattr.whitebg;
+						if(iswhitebg)
+						{
+							var longside:Number = Math.max(picWidth,picHeight);
+
+							if(this.picHeight > this.picWidth)
+							{
+								var hside:Number = (fattr.hsize/this.picWidth)*longside/1000*this.picPhysicWidth;
+								if(hside <= 51)
+									istiaofuValid = true;
+							}
+							else
+							{
+								var vside:Number = (fattr.vsize/this.picHeight)*longside/1000*this.picPhysicHeight;
+								if(hside <= 51)
+									istiaofuValid = true;
+							}
+						}
+						
+					}
 					if(fattr.hasOwnProperty("roadnum")) 
 					{
 						roadNum = fattr.roadnum;

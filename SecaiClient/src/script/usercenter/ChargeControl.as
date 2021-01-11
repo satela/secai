@@ -93,7 +93,7 @@ package script.usercenter
 					curactinfo = result.data[0];
 					
 					uiSkin.actpanel.visible = true;
-					uiSkin.paytype.selectedIndex = 0 ;
+					//uiSkin.paytype.selectedIndex = 0 ;
 					var actinfo:Object = result.data[0];
 					uiSkin.acttitle.text = actinfo.ra_name;
 					uiSkin.actrule.text = "活动规则：" + actinfo.ra_text;

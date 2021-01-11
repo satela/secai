@@ -16,7 +16,7 @@ package model.orderModel
 
 		public var baseprice: Number = 0;//  底价
 
-		public var is_mandatory:int = 0;// 是否必选工艺
+		public var is_mandatory:int = 0;// 后置工艺是否必选
 		public var measure_unit:String = "";//计价单位
 		public var procLvl:int = 0;//工艺层级
 		
@@ -114,7 +114,7 @@ package model.orderModel
 							vec.push(this);
 							var border:Number = UtilTool.getBorderDistance(vec);
 							
-							if(allpics[i].finalWidth + border > curselectProduct.max_width && allpics[i].finalHeight + border > curselectProduct.max_width)
+							if(allpics[i].finalWidth + border > curselectProduct.mat_width && allpics[i].finalHeight + border > curselectProduct.mat_width)
 							{
 								hasBeyongd = true;
 								break;
