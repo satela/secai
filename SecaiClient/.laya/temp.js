@@ -706,7 +706,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="LoginView.scene";
+	GameConfig.startScene="order/ChooseDeliveryTimePanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -2816,9 +2816,36 @@ var ProductVo=(function(){
 var UtilTool=(function(){
 	function UtilTool(){
 		this.tipspanel=null;
+		this._serverTime=0;
 	}
 
 	__class(UtilTool,'utils.UtilTool');
+	var __proto=UtilTool.prototype;
+	__proto.startTimeTick=function(){
+		Laya.timer.loop(1000,this,this.timeTick);
+	}
+
+	__proto.stopTimeTick=function(){
+		Laya.timer.clear(this,this.timeTick);
+	}
+
+	__proto.timeTick=function(){
+		this._serverTime+=1;
+	}
+
+	//获取服务器时间 星期几
+	__proto.getSerVerDay=function(){
+		var date=new Date(this._serverTime *1000);
+		return date.getDay();
+	}
+
+	//服务器时间
+	__getset(0,__proto,'unixSeverTime',function(){
+		return this._serverTime;
+		},function(value){
+		this._serverTime=value;
+	});
+
 	UtilTool.oneCutNineAdd=function(fnum){
 		var numstr=fnum.toFixed(1);
 		var dotnum=parseInt(numstr.split(".")[1]);
@@ -39217,7 +39244,7 @@ var ChooseDeliveryTimeControl=(function(_super){
 				}
 			}
 			manuarr[i].money_paidStr=(manuarr[i] .order_amountStr).toFixed(1);
-			manuarr[i].order_amountStr=(manuarr[i] .order_amountStr).toFixed(1);
+			manuarr[i].order_amountStr=1;
 		}
 		for(var i=0;i < manuarr.length;i++){
 			var itemlist=manuarr[i].orderItemList;
@@ -57376,13 +57403,16 @@ var ChooseDeliveryTimePanelUI=(function(_super){
 	function ChooseDeliveryTimePanelUI(){
 		this.paybtn=null;
 		this.savebtn=null;
-		this.rawprice=null;
-		this.disountprice=null;
 		this.orderlist=null;
 		this.closebtn=null;
 		this.timepreferRdo=null;
 		this.setdefaultbtn=null;
 		this.countdown=null;
+		this.commondelType=null;
+		this.urgentdeltype=null;
+		this.rawprice=null;
+		this.delmoney=null;
+		this.disountprice=null;
 		ChooseDeliveryTimePanelUI.__super.call(this);
 	}
 

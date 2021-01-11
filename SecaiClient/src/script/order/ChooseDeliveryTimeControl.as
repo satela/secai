@@ -481,7 +481,7 @@ package script.order
 					
 				}
 				manuarr[i].money_paidStr = (manuarr[i].order_amountStr as Number).toFixed(1);
-				manuarr[i].order_amountStr = (manuarr[i].order_amountStr as Number).toFixed(1);
+				manuarr[i].order_amountStr = 1;//(manuarr[i].order_amountStr as Number).toFixed(1);
 			}
 			
 			for(var i:int=0;i < manuarr.length;i++)
