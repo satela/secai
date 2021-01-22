@@ -48,7 +48,7 @@ package model.picmanagerModel
 		
 		public var leftDeleteDays:int = 0;
 		
-		public var istiaofuValid:Boolean = false;
+		public var tiaofuwidth:Number = 100;
 		
 		public var iswhitebg:Boolean = false;
 		//public var max
@@ -99,15 +99,13 @@ package model.picmanagerModel
 
 							if(this.picHeight > this.picWidth)
 							{
-								var hside:Number = (fattr.hsize/this.picWidth)*longside/1000*this.picPhysicWidth;
-								if(hside <= 51)
-									istiaofuValid = true;
+								tiaofuwidth = (fattr.hsize/this.picWidth)*longside/1000*this.picPhysicWidth;
+								
 							}
 							else
 							{
-								var vside:Number = (fattr.vsize/this.picHeight)*longside/1000*this.picPhysicHeight;
-								if(hside <= 51)
-									istiaofuValid = true;
+								tiaofuwidth = (fattr.vsize/this.picHeight)*longside/1000*this.picPhysicHeight;
+								
 							}
 						}
 						

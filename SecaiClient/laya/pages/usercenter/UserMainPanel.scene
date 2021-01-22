@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"View",
-    "selectedBox":2,
-    "selecteID":3,
+    "selectedBox":75,
+    "selecteID":103,
     "searchKey":"View",
     "props":{"width":1920,"sceneColor":"#ffffff","height":1080},
     "nodeParent":-1,
-    "maxID":103,
+    "maxID":104,
     "label":"View",
     "isOpen":true,
     "isDirectory":true,
@@ -505,13 +505,14 @@
                             "props":{"y":506},
                             "nodeParent":87,
                             "label":"Box",
-                            "isOpen":false,
+                            "isOpen":true,
                             "isDirectory":true,
                             "isAniNode":true,
                             "hasChild":true,
                             "compId":72,
                             "child":[
                                 {
+                                    "x":60,
                                     "type":"Image",
                                     "searchKey":"Image",
                                     "props":{"skin":"usercenter1/accounticon.png"},
@@ -526,6 +527,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"Label",
                                     "searchKey":"Label",
                                     "props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},
@@ -541,6 +543,7 @@
                                     "$HIDDEN":false
                                 },
                                 {
+                                    "x":60,
                                     "type":"VBox",
                                     "searchKey":"VBox",
                                     "props":{"y":59,"x":29,"space":20},
@@ -553,6 +556,7 @@
                                     "compId":75,
                                     "child":[
                                         {
+                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt5",
                                             "props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
@@ -567,6 +571,7 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
                                             "type":"Label",
                                             "searchKey":"Label,btntxt6",
                                             "props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
@@ -581,6 +586,22 @@
                                             "$HIDDEN":false
                                         },
                                         {
+                                            "x":75,
+                                            "type":"Label",
+                                            "searchKey":"Label,btntxt11",
+                                            "props":{"y":0,"x":0,"var":"btntxt11","text":"活动充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},
+                                            "nodeParent":75,
+                                            "label":"btntxt11",
+                                            "isDirectory":false,
+                                            "isAniNode":true,
+                                            "hasChild":false,
+                                            "compId":103,
+                                            "child":[
+                                                ],
+                                            "$HIDDEN":false
+                                        },
+                                        {
+                                            "x":75,
                                             "type":"Image",
                                             "searchKey":"Image",
                                             "props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},

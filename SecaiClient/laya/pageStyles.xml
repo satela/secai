@@ -84,4 +84,8 @@
    <item name="order/ChooseDeliveryTimePanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/DakouPanel.scene" props="" ifExport="分离模式" aName=""/>
    <item name="order/DakouItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="common/PicturePopDialog.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="usercenter/ChargeActivityPanel.scene" props="" ifExport="分离模式" aName=""/>
+   <item name="chargeActivity/ChargeRecordItem.scene" props="" ifExport="内嵌模式" aName=""/>
+   <item name="chargeActivity/ChargeActRecordPanel.scene" props="" ifExport="分离模式" aName=""/>
 </page>

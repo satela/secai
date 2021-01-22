@@ -14,7 +14,7 @@ package model
 		public static const PRIVILEGE_CHECK_TRANSACTION:int = 5;//查看账单
 
 
-		public static const TYPE_NAME:Array = ["","充值","账户余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值","","活动余额支付订单"];
+		public static const TYPE_NAME:Array = ["","充值","账户余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值","","活动余额支付订单","","","","","","","撤单退款"];
 
 		
 		public static const ORDER_TIME_PREFER_URGENT = 1;//加急当天

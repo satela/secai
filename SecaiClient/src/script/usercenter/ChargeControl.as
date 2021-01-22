@@ -39,21 +39,11 @@ package script.usercenter
 			uiSkin.chargeinput.maxChars = 8;
 			uiSkin.paytypezfb.selected = true;
 			
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
+			//HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.getChargeActivity,this,getActivityInfoBack,null,"post");
 
 			uiSkin.confirmcharge.on(Event.CLICK,this,onChargeNow);
 			
-			uiSkin.actpanel.visible = false;
-			uiSkin.noactbox.visible = false;
 			
-			for(var i:int=0;i < 7;i++)
-			{
-				uiSkin["moneybtn" + i].on(Event.CLICK,this,onChangeMoney,[i]);
-			}
-			//uiSkin.chargeamount.restrict = "0-9";
-			uiSkin.chargeamount.maxChars = 4;
-			
-			uiSkin.joinact.on(Event.CLICK,this,onjoinActivity);
 		}
 		
 		private function onChargeNow():void
@@ -92,58 +82,6 @@ package script.usercenter
 
 		}
 		
-		private function onChangeMoney(index:int):void
-		{
-			var numarr:Array = [1000,2000,3000,5000,10000,20000,50000];
-			uiSkin.chargeamount.text = numarr[index].toString();
-			
-		}
-		private function getActivityInfoBack(data:*):void
-		{
-			var result:Object = JSON.parse(data as String);
-			if(result.status == 0)
-			{
-				if(result.data != null && result.data.length > 0)
-				{
-					curactinfo = result.data[0];
-					
-					uiSkin.actpanel.visible = true;
-					uiSkin.zhiufbaobtn.selected = true ;
-					var actinfo:Object = result.data[0];
-					uiSkin.acttitle.text = actinfo.ra_name;
-					uiSkin.actrule.text = "活动规则：" + actinfo.ra_text;
-					uiSkin.chargeamount.text = "1"; 
-				}
-				else
-					uiSkin.noactbox.visible = true;
-			}
-		}
-		
-		private function onjoinActivity():void
-		{
-			if(uiSkin.chargeamount.text == "" || uiSkin.chargeamount.text == "0")
-			{
-				ViewManager.showAlert("请输入充值金额");
-				return;
-			}
-			//var num:int = parseInt(uiSkin.chargeamount.text);// * 1000;
-			var num:Number = parseFloat(uiSkin.chargeamount.text);// * 1000;
-
-			var params:String = "rid=" + curactinfo.ra_id + "&amount=" + num;
-			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.joinChargeActivity,this,joinActBack,params,"post");
-
-		}
-		private function joinActBack(data:Object):void
-		{
-			var result:Object = JSON.parse(data as String);
-			if(result.status == 0)
-			{
-				Browser.window.open(HttpRequestUtil.httpUrl + HttpRequestUtil.payChargeActivity + "rarid=" +result.data.rar_id,null,null,true);
-				ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
-
-			}
-			
-		}
 		
 		private function getCompanyInfoBack(data:Object):void
 		{

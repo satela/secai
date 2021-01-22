@@ -276,7 +276,7 @@ package script.order
 						orderdata.order_amountStr = 0;
 						orderdata.shipping_feeStr = "0";
 						orderdata.money_paidStr = "0";
-						orderdata.discountStr = "0";
+						orderdata.discountStr = "1";
 						orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
 						orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
 						
@@ -860,7 +860,7 @@ package script.order
 					orderdata.order_amountStr = 0;
 					orderdata.shipping_feeStr = "0";
 					orderdata.money_paidStr = "0";
-					orderdata.discountStr = "0";
+					orderdata.discountStr = "1";
 					orderdata.pay_timeStr = UtilTool.formatFullDateTime(new Date());
 					orderdata.delivery_dateStr = UtilTool.formatFullDateTime(new Date(),false);
 					

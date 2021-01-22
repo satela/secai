@@ -133,7 +133,7 @@ package script {
 		
 		private function onGotoCharge():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,5);
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,11);
 
 		}
 		private function getActivityInfo():void
@@ -310,6 +310,7 @@ package script {
 		{
 			txtLogin.text = e as String;
 			txtReg.text = "[退出]";
+			getActivityInfo();
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl + HttpRequestUtil.addressManageUrl,this,getMyAddressBack,"opt=list&page=1","post");
 
 		}

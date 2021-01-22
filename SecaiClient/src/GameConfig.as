@@ -11,7 +11,9 @@ package {
 	import script.order.SelectMaterialControl;
 	import script.characterpaint.CharacterMainControl;
 	import script.characterpaint.CharacterTypeChooseControl;
+	import script.activity.ChargeActRecordController;
 	import script.activity.ActivityAdvertiseController;
+	import utils.PicturePopUpController;
 	import utils.LoadingPrgControl;
 	import script.login.LogPanelControl;
 	import script.login.RegisterCntrol;
@@ -39,6 +41,7 @@ package {
 	import script.picUpload.UpLoadAndOrderContrl;
 	import script.usercenter.AddressMgrControl;
 	import script.usercenter.ApplyJoinMgrControl;
+	import script.usercenter.ChargeActivityController;
 	import script.usercenter.ChargeControl;
 	import script.usercenter.EnterPrizeInfoControl;
 	import script.usercenter.MyOrderControl;
@@ -57,7 +60,7 @@ package {
 		public static var screenMode:String = "none";
 		public static var alignV:String = "top";
 		public static var alignH:String = "left";
-		public static var startScene:* = "order/ChooseDeliveryTimePanel.scene";
+		public static var startScene:* = "chargeActivity/ChargeActRecordPanel.scene";
 		public static var sceneRoot:String = "";
 		public static var debug:Boolean = false;
 		public static var stat:Boolean = false;
@@ -75,7 +78,9 @@ package {
 			reg("script.order.SelectMaterialControl",SelectMaterialControl);
 			reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 			reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
+			reg("script.activity.ChargeActRecordController",ChargeActRecordController);
 			reg("script.activity.ActivityAdvertiseController",ActivityAdvertiseController);
+			reg("utils.PicturePopUpController",PicturePopUpController);
 			reg("utils.LoadingPrgControl",LoadingPrgControl);
 			reg("script.login.LogPanelControl",LogPanelControl);
 			reg("script.login.RegisterCntrol",RegisterCntrol);
@@ -103,6 +108,7 @@ package {
 			reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 			reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 			reg("script.usercenter.ApplyJoinMgrControl",ApplyJoinMgrControl);
+			reg("script.usercenter.ChargeActivityController",ChargeActivityController);
 			reg("script.usercenter.ChargeControl",ChargeControl);
 			reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
 			reg("script.usercenter.MyOrderControl",MyOrderControl);

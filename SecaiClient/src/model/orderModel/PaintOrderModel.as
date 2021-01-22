@@ -432,35 +432,43 @@ package model.orderModel
 		public function checkUnFitFileType(material:ProductVo,showtip:Boolean=true):Boolean
 		{
 			var picorderitems:Vector.<PicOrderItem> = getCurPicOrderItems();
+			
+			var limitwidth:Number = 0;
+			
 			if(material.prod_code == "SPPR60100" || material.prod_code == "SPPR60110")
 			{
+				if(material.prod_code == "SPPR60100")
+					limitwidth = 42.5;
+				else
+					limitwidth = 52.5;
+				
 				for(var i:int=0;i < picorderitems.length;i++)
 				{
 					if(picorderitems[i].ordervo.picinfo.colorspace.toUpperCase() != "GRAY")
 					{
 						if(showtip)
 						{
-							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"只有颜色格式为GRAY的图片才能使用条幅材料下单"});
+							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG_WITH_PICTURE,false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
 						}
 						return true;
 						
 					}
-//					else if(picorderitems[i].ordervo.picinfo.iswhitebg == false)
-//					{
-//						if(showtip)
-//						{
-//							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"只有黑色文字的图片才能使用条幅材料下单"});
-//						}
-//						return true;
-//					}
-//					else if(picorderitems[i].ordervo.picinfo.iswhitebg && picorderitems[i].ordervo.picinfo.istiaofuValid == false)
-//					{
-//						if(showtip)
-//						{
-//							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"图片条幅宽度不能大于50cm"});
-//						}
-//						return true;
-//					}
+					else if(picorderitems[i].ordervo.picinfo.iswhitebg == false)
+					{
+						if(showtip)
+						{
+							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG_WITH_PICTURE,false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
+						}
+						return true;
+					}
+					else if(picorderitems[i].ordervo.picinfo.iswhitebg && picorderitems[i].ordervo.picinfo.tiaofuwidth > limitwidth)
+					{
+						if(showtip)
+						{
+							ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG_WITH_PICTURE,false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
+						}
+						return true;
+					}
 				}
 			
 			}

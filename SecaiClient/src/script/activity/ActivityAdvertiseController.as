@@ -3,6 +3,7 @@ package script.activity
 	import laya.components.Script;
 	import laya.events.Event;
 	import laya.utils.Ease;
+	import laya.utils.Handler;
 	import laya.utils.Tween;
 	
 	import script.ViewManager;
@@ -34,16 +35,24 @@ package script.activity
 			}
 			uiSkin.gotocharge.on(Event.CLICK,this,gotoChargePanel);
 			uiSkin.closebtn.on(Event.CLICK,this,closeView);
+			
+			Laya.timer.once(3000,this,onCloseAuto);
 
 		}
 		
+		private function onCloseAuto():void
+		{
+			Tween.to(uiSkin.mainview,{scaleX:0.1,scaleY:0.1,x:1248,y:44},300,Ease.linearIn,new Handler(this,closeView));
+		}
 		private function gotoChargePanel():void
 		{
-			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,5);
+			ViewManager.instance.openView(ViewManager.VIEW_USERCENTER,true,11);
 		}
 		
 		private function closeView():void
 		{
+			Laya.timer.clear(this,onCloseAuto);
+
 			ViewManager.instance.closeView(ViewManager.VIEW_ACTIVITY_ADVETISE_PANEL);
 		}
 	}

@@ -12,21 +12,6 @@ package ui.usercenter {
 		public var frezeMoney:Label;
 		public var chargeinput:TextInput;
 		public var paytypezfb:Button;
-		public var actpanel:Image;
-		public var actbox:Box;
-		public var acttitle:Label;
-		public var actrule:Label;
-		public var chargeamount:TextInput;
-		public var zhiufbaobtn:Button;
-		public var joinact:Button;
-		public var moneybtn0:Button;
-		public var moneybtn1:Button;
-		public var moneybtn2:Button;
-		public var moneybtn3:Button;
-		public var moneybtn4:Button;
-		public var moneybtn5:Button;
-		public var moneybtn6:Button;
-		public var noactbox:Box;
 
 		override protected function createChildren():void {
 			super.createChildren();

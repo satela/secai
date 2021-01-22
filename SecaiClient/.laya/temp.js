@@ -206,8 +206,8 @@ var Laya=window.Laya=(function(window,document){
 (function(window,document,Laya){
 	var __un=Laya.un,__uns=Laya.uns,__static=Laya.static,__class=Laya.class,__getset=Laya.getset,__newvec=Laya.__newvec;
 Laya.interface('laya.ui.IItem');
-Laya.interface('laya.ui.IRender');
 Laya.interface('laya.ui.ISelect');
+Laya.interface('laya.ui.IRender');
 Laya.interface('laya.runtime.IMarket');
 Laya.interface('laya.filters.IFilter');
 Laya.interface('laya.resource.IDestroy');
@@ -663,7 +663,9 @@ var GameConfig=(function(){
 		reg("script.order.SelectMaterialControl",SelectMaterialControl);
 		reg("script.characterpaint.CharacterMainControl",CharacterMainControl);
 		reg("script.characterpaint.CharacterTypeChooseControl",CharacterTypeChooseControl);
+		reg("script.activity.ChargeActRecordController",ChargeActRecordController);
 		reg("script.activity.ActivityAdvertiseController",ActivityAdvertiseController);
+		reg("utils.PicturePopUpController",PicturePopUpController);
 		reg("utils.LoadingPrgControl",LoadingPrgControl);
 		reg("script.login.LogPanelControl",LogPanelControl);
 		reg("script.login.RegisterCntrol",RegisterCntrol);
@@ -691,6 +693,7 @@ var GameConfig=(function(){
 		reg("script.picUpload.UpLoadAndOrderContrl",UpLoadAndOrderContrl);
 		reg("script.usercenter.AddressMgrControl",AddressMgrControl);
 		reg("script.usercenter.ApplyJoinMgrControl",ApplyJoinMgrControl);
+		reg("script.usercenter.ChargeActivityController",ChargeActivityController);
 		reg("script.usercenter.ChargeControl",ChargeControl);
 		reg("script.usercenter.EnterPrizeInfoControl",EnterPrizeInfoControl);
 		reg("script.usercenter.MyOrderControl",MyOrderControl);
@@ -707,7 +710,7 @@ var GameConfig=(function(){
 	GameConfig.screenMode="none";
 	GameConfig.alignV="top";
 	GameConfig.alignH="left";
-	GameConfig.startScene="order/ChooseDeliveryTimePanel.scene";
+	GameConfig.startScene="chargeActivity/ChargeActRecordPanel.scene";
 	GameConfig.sceneRoot="";
 	GameConfig.debug=false;
 	GameConfig.stat=false;
@@ -1042,7 +1045,7 @@ var ViewManager=(function(){
 	function ViewManager(){
 		this.viewContainer=null;
 		this.openViewList=null;
-		//确认框
+		//活动记录
 		this.viewDict=null;
 		this.viewContainer=new Sprite();
 		Laya.stage.addChild(this.viewContainer);
@@ -1057,6 +1060,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_USERCENTER"]=UserMainPanelUI;
 		this.viewDict["VIEW_PICTURE_CHECK"]=PicCheckPanelUI;
 		this.viewDict["VIEW_POPUPDIALOG"]=PopUpDialogUI;
+		this.viewDict["VIEW_POPUPDIALOG_WITH_PICTURE"]=PicturePopDialogUI;
 		this.viewDict["VIEW_PAINT_ORDER"]=PaintOrderPanelUI;
 		this.viewDict["VIEW_SELECT_ADDRESS"]=SelectAddressPanelUI;
 		this.viewDict["VIEW_SELECT_FACTORY"]=SelectFactoryPanelUI;
@@ -1080,6 +1084,7 @@ var ViewManager=(function(){
 		this.viewDict["VIEW_PACKAGE_ORDER_PANEL"]=PackagePanelUI;
 		this.viewDict["VIEW_ACTIVITY_ADVETISE_PANEL"]=ChargeAdvertisePanelUI;
 		this.viewDict["VIEW_DAKOU_PANEL"]=DakouPanelUI;
+		this.viewDict["VIEW_CHARGE_RECORD_PANEL"]=ChargeActRecordPanelUI;;
 	}
 
 	__class(ViewManager,'script.ViewManager');
@@ -1175,6 +1180,8 @@ var ViewManager=(function(){
 	ViewManager.VIEW_CARVING_ORDER_PANEL="VIEW_CARVING_ORDER_PANEL";
 	ViewManager.VIEW_ACTIVITY_ADVETISE_PANEL="VIEW_ACTIVITY_ADVETISE_PANEL";
 	ViewManager.VIEW_POPUPDIALOG="VIEW_POPUPDIALOG";
+	ViewManager.VIEW_POPUPDIALOG_WITH_PICTURE="VIEW_POPUPDIALOG_WITH_PICTURE";
+	ViewManager.VIEW_CHARGE_RECORD_PANEL="VIEW_CHARGE_RECORD_PANEL";
 	return ViewManager;
 })()
 
@@ -1445,7 +1452,6 @@ var Main=(function(){
 			HttpRequestUtil.httpUrl="../scfy/";
 		else
 		HttpRequestUtil.httpUrl="http://www.cmyk.com.cn/scfy/";
-		HttpRequestUtil.httpUrl="http://47.111.13.238/scfy/";
 		ViewManager.instance.openView("VIEW_FIRST_PAGE");
 	}
 
@@ -1523,7 +1529,7 @@ var Constast=(function(){
 	Constast.ORDER_TIME_PREFER_URGENT=1;
 	Constast.ORDER_TIME_PREFER_EARLY=2;
 	__static(Constast,
-	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","账户余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值","","活动余额支付订单"];}
+	['TYPE_NAME',function(){return this.TYPE_NAME=["","充值","账户余额支付订单","退款","","取消异常订单","直接支付订单","撤单退款","活动充值","","活动余额支付订单","","","","","","","撤单退款"];}
 	]);
 	return Constast;
 })()
@@ -1861,11 +1867,28 @@ var PaintOrderModel=(function(){
 	__proto.checkUnFitFileType=function(material,showtip){
 		(showtip===void 0)&& (showtip=true);
 		var picorderitems=this.getCurPicOrderItems();
+		var limitwidth=0;
 		if(material.prod_code=="SPPR60100" || material.prod_code=="SPPR60110"){
+			if(material.prod_code=="SPPR60100")
+				limitwidth=42.5;
+			else
+			limitwidth=52.5;
 			for(var i=0;i < picorderitems.length;i++){
 				if(picorderitems[i].ordervo.picinfo.colorspace.toUpperCase()!="GRAY"){
 					if(showtip){
-						ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"只有颜色格式为GRAY的图片才能使用条幅材料下单"});
+						ViewManager.instance.openView("VIEW_POPUPDIALOG_WITH_PICTURE",false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
+					}
+					return true;
+				}
+				else if(picorderitems[i].ordervo.picinfo.iswhitebg==false){
+					if(showtip){
+						ViewManager.instance.openView("VIEW_POPUPDIALOG_WITH_PICTURE",false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
+					}
+					return true;
+				}
+				else if(picorderitems[i].ordervo.picinfo.iswhitebg && picorderitems[i].ordervo.picinfo.tiaofuwidth > limitwidth){
+					if(showtip){
+						ViewManager.instance.openView("VIEW_POPUPDIALOG_WITH_PICTURE",false,{msg:"图片不符合条幅材料下单要求",picurl:"bigpic/tiaofutp.jpg"});
 					}
 					return true;
 				}
@@ -2314,7 +2337,7 @@ var PicInfoVo=(function(){
 		this.area=0;
 		//面积
 		this.leftDeleteDays=0;
-		this.istiaofuValid=false;
+		this.tiaofuwidth=100;
 		this.iswhitebg=false;
 		this.picType=dtype;
 		if(this.picType==0){
@@ -2346,14 +2369,10 @@ var PicInfoVo=(function(){
 					if(this.iswhitebg){
 						var longside=Math.max(this.picWidth,this.picHeight);
 						if(this.picHeight > this.picWidth){
-							var hside=(fattr.hsize/this.picWidth)*longside/1000*this.picPhysicWidth;
-							if(hside <=51)
-								this.istiaofuValid=true;
+							this.tiaofuwidth=(fattr.hsize/this.picWidth)*longside/1000*this.picPhysicWidth;
 						}
 						else{
-							var vside=(fattr.vsize/this.picHeight)*longside/1000*this.picPhysicHeight;
-							if(hside <=51)
-								this.istiaofuValid=true;
+							this.tiaofuwidth=(fattr.vsize/this.picHeight)*longside/1000*this.picPhysicHeight;
 						}
 					}
 				}
@@ -31136,231 +31155,6 @@ var Loader=(function(_super){
 
 
 /**
-*<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
-*<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
-*/
-//class laya.filters.ColorFilter extends laya.filters.Filter
-var ColorFilter=(function(_super){
-	function ColorFilter(mat){
-		/**@private */
-		//this._mat=null;
-		/**@private */
-		//this._alpha=null;
-		/**当前使用的矩阵*/
-		//this._matrix=null;
-		ColorFilter.__super.call(this);
-		if (!mat)mat=this._copyMatrix(ColorFilter.IDENTITY_MATRIX);
-		this._mat=new Float32Array(16);
-		this._alpha=new Float32Array(4);
-		this.setByMatrix(mat);
-		this._action=new ColorFilterAction();
-		this._action.data=this;
-	}
-
-	__class(ColorFilter,'laya.filters.ColorFilter',_super);
-	var __proto=ColorFilter.prototype;
-	Laya.imps(__proto,{"laya.filters.IFilter":true})
-	/**
-	*设置为灰色滤镜
-	*/
-	__proto.gray=function(){
-		return this.setByMatrix(ColorFilter.GRAY_MATRIX);
-	}
-
-	/**
-	*设置为变色滤镜
-	*@param red 红色增量,范围:0~255
-	*@param green 绿色增量,范围:0~255
-	*@param blue 蓝色增量,范围:0~255
-	*@param alpha alpha,范围:0~1
-	*/
-	__proto.color=function(red,green,blue,alpha){
-		(red===void 0)&& (red=0);
-		(green===void 0)&& (green=0);
-		(blue===void 0)&& (blue=0);
-		(alpha===void 0)&& (alpha=1);
-		return this.setByMatrix([1,0,0,0,red,0,1,0,0,green,0,0,1,0,blue,0,0,0,1,alpha]);
-	}
-
-	/**
-	*设置矩阵数据
-	*@param matrix 由 20 个项目（排列成 4 x 5 矩阵）组成的数组
-	*@return this
-	*/
-	__proto.setByMatrix=function(matrix){
-		if (this._matrix !=matrix)this._copyMatrix(matrix);
-		var j=0;
-		var z=0;
-		for (var i=0;i < 20;i++){
-			if (i % 5 !=4){
-				this._mat[j++]=matrix[i];
-				}else {
-				this._alpha[z++]=matrix[i];
-			}
-		}
-		return this;
-	}
-
-	/**
-	*调整颜色，包括亮度，对比度，饱和度和色调
-	*@param brightness 亮度,范围:-100~100
-	*@param contrast 对比度,范围:-100~100
-	*@param saturation 饱和度,范围:-100~100
-	*@param hue 色调,范围:-180~180
-	*@return this
-	*/
-	__proto.adjustColor=function(brightness,contrast,saturation,hue){
-		this.adjustHue(hue);
-		this.adjustContrast(contrast);
-		this.adjustBrightness(brightness);
-		this.adjustSaturation(saturation);
-		return this;
-	}
-
-	/**
-	*调整亮度
-	*@param brightness 亮度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustBrightness=function(brightness){
-		brightness=this._clampValue(brightness,100);
-		if (brightness==0 || isNaN(brightness))return this;
-		return this._multiplyMatrix([1,0,0,0,brightness,0,1,0,0,brightness,0,0,1,0,brightness,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整对比度
-	*@param contrast 对比度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustContrast=function(contrast){
-		contrast=this._clampValue(contrast,100);
-		if (contrast==0 || isNaN(contrast))return this;
-		var x=NaN;
-		if (contrast < 0){
-			x=127+contrast / 100 *127
-			}else {
-			x=contrast % 1;
-			if (x==0){
-				x=ColorFilter.DELTA_INDEX[contrast];
-				}else {
-				x=ColorFilter.DELTA_INDEX[(contrast << 0)] *(1-x)+ColorFilter.DELTA_INDEX[(contrast << 0)+1] *x;
-			}
-			x=x *127+127;
-		};
-		var x1=x / 127;
-		var x2=(127-x)*0.5;
-		return this._multiplyMatrix([x1,0,0,0,x2,0,x1,0,0,x2,0,0,x1,0,x2,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整饱和度
-	*@param saturation 饱和度,范围:-100~100
-	*@return this
-	*/
-	__proto.adjustSaturation=function(saturation){
-		saturation=this._clampValue(saturation,100);
-		if (saturation==0 || isNaN(saturation))return this;
-		var x=1+((saturation > 0)? 3 *saturation / 100 :saturation / 100);
-		var dx=1-x;
-		var r=0.3086 *dx;
-		var g=0.6094 *dx;
-		var b=0.0820 *dx;
-		return this._multiplyMatrix([r+x,g,b,0,0,r,g+x,b,0,0,r,g,b+x,0,0,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*调整色调
-	*@param hue 色调,范围:-180~180
-	*@return this
-	*/
-	__proto.adjustHue=function(hue){
-		hue=this._clampValue(hue,180)/ 180 *Math.PI;
-		if (hue==0 || isNaN(hue))return this;
-		var cos=Math.cos(hue);
-		var sin=Math.sin(hue);
-		var r=0.213;
-		var g=0.715;
-		var b=0.072;
-		return this._multiplyMatrix([r+cos *(1-r)+sin *(-r),g+cos *(-g)+sin *(-g),b+cos *(-b)+sin *(1-b),0,0,r+cos *(-r)+sin *(0.143),g+cos *(1-g)+sin *(0.140),b+cos *(-b)+sin *(-0.283),0,0,r+cos *(-r)+sin *(-(1-r)),g+cos *(-g)+sin *(g),b+cos *(1-b)+sin *(b),0,0,0,0,0,1,0,0,0,0,0,1]);
-	}
-
-	/**
-	*重置成单位矩阵，去除滤镜效果
-	*/
-	__proto.reset=function(){
-		return this.setByMatrix(this._copyMatrix(ColorFilter.IDENTITY_MATRIX));
-	}
-
-	/**
-	*矩阵乘法
-	*@param matrix
-	*@return this
-	*/
-	__proto._multiplyMatrix=function(matrix){
-		var col=[];
-		this._matrix=this._fixMatrix(this._matrix);
-		for (var i=0;i < 5;i++){
-			for (var j=0;j < 5;j++){
-				col[j]=this._matrix[j+i *5];
-			}
-			for (j=0;j < 5;j++){
-				var val=0;
-				for (var k=0;k < 5;k++){
-					val+=matrix[j+k *5] *col[k];
-				}
-				this._matrix[j+i *5]=val;
-			}
-		}
-		return this.setByMatrix(this._matrix);
-	}
-
-	/**
-	*规范值的范围
-	*@param val 当前值
-	*@param limit 值的范围-limit~limit
-	*/
-	__proto._clampValue=function(val,limit){
-		return Math.min(limit,Math.max(-limit,val));
-	}
-
-	/**
-	*规范矩阵,将矩阵调整到正确的大小
-	*@param matrix 需要调整的矩阵
-	*/
-	__proto._fixMatrix=function(matrix){
-		if (matrix==null)return ColorFilter.IDENTITY_MATRIX;
-		if (matrix.length < 25)matrix=matrix.slice(0,matrix.length).concat(ColorFilter.IDENTITY_MATRIX.slice(matrix.length,25));
-		else if (matrix.length > 25)matrix=matrix.slice(0,25);
-		return matrix;
-	}
-
-	/**
-	*复制矩阵
-	*/
-	__proto._copyMatrix=function(matrix){
-		var len=25;
-		if (!this._matrix)this._matrix=[];
-		for (var i=0;i < len;i++){
-			this._matrix[i]=matrix[i];
-		}
-		return this._matrix;
-	}
-
-	/**@private */
-	__getset(0,__proto,'type',function(){
-		return 0x20;
-	});
-
-	ColorFilter.LENGTH=25;
-	__static(ColorFilter,
-	['DELTA_INDEX',function(){return this.DELTA_INDEX=[0,0.01,0.02,0.04,0.05,0.06,0.07,0.08,0.1,0.11,0.12,0.14,0.15,0.16,0.17,0.18,0.20,0.21,0.22,0.24,0.25,0.27,0.28,0.30,0.32,0.34,0.36,0.38,0.40,0.42,0.44,0.46,0.48,0.5,0.53,0.56,0.59,0.62,0.65,0.68,0.71,0.74,0.77,0.80,0.83,0.86,0.89,0.92,0.95,0.98,1.0,1.06,1.12,1.18,1.24,1.30,1.36,1.42,1.48,1.54,1.60,1.66,1.72,1.78,1.84,1.90,1.96,2.0,2.12,2.25,2.37,2.50,2.62,2.75,2.87,3.0,3.2,3.4,3.6,3.8,4.0,4.3,4.7,4.9,5.0,5.5,6.0,6.5,6.8,7.0,7.3,7.5,7.8,8.0,8.4,8.7,9.0,9.4,9.6,9.8,10.0];},'GRAY_MATRIX',function(){return this.GRAY_MATRIX=[0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0,0,0,1,0];},'IDENTITY_MATRIX',function(){return this.IDENTITY_MATRIX=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1];}
-	]);
-	return ColorFilter;
-})(Filter)
-
-
-/**
 *<code>Texture</code> 是一个纹理处理类。
 */
 //class laya.resource.Texture extends laya.events.EventDispatcher
@@ -31689,110 +31483,229 @@ var Texture=(function(_super){
 })(EventDispatcher)
 
 
-//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
-var TextureSV=(function(_super){
-	function TextureSV(subID){
-		this.u_colorMatrix=null;
-		this.strength=0;
-		this.blurInfo=null;
-		this.colorMat=null;
-		this.colorAlpha=null;
-		(subID===void 0)&& (subID=0);
-		TextureSV.__super.call(this,0x01,subID);
-		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
-	}
-
-	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
-	var __proto=TextureSV.prototype;
-	// ,'clipDir',3,'clipRect',4];
-	__proto.clear=function(){
-		this.texture=null;
-		this.shader=null;
-		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
-	}
-
-	return TextureSV;
-})(Value2D)
-
-
 /**
-*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
+*<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
 */
-//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
-var MeshQuadTexture=(function(_super){
-	//private static var _num;
-	function MeshQuadTexture(){
-		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
-		this.canReuse=true;
-		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
-		if(!laya.webgl.utils.MeshQuadTexture._fixib){
-			this.createQuadIB(MeshQuadTexture._maxIB);
-			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
+//class laya.filters.ColorFilter extends laya.filters.Filter
+var ColorFilter=(function(_super){
+	function ColorFilter(mat){
+		/**@private */
+		//this._mat=null;
+		/**@private */
+		//this._alpha=null;
+		/**当前使用的矩阵*/
+		//this._matrix=null;
+		ColorFilter.__super.call(this);
+		if (!mat)mat=this._copyMatrix(ColorFilter.IDENTITY_MATRIX);
+		this._mat=new Float32Array(16);
+		this._alpha=new Float32Array(4);
+		this.setByMatrix(mat);
+		this._action=new ColorFilterAction();
+		this._action.data=this;
+	}
+
+	__class(ColorFilter,'laya.filters.ColorFilter',_super);
+	var __proto=ColorFilter.prototype;
+	Laya.imps(__proto,{"laya.filters.IFilter":true})
+	/**
+	*设置为灰色滤镜
+	*/
+	__proto.gray=function(){
+		return this.setByMatrix(ColorFilter.GRAY_MATRIX);
+	}
+
+	/**
+	*设置为变色滤镜
+	*@param red 红色增量,范围:0~255
+	*@param green 绿色增量,范围:0~255
+	*@param blue 蓝色增量,范围:0~255
+	*@param alpha alpha,范围:0~1
+	*/
+	__proto.color=function(red,green,blue,alpha){
+		(red===void 0)&& (red=0);
+		(green===void 0)&& (green=0);
+		(blue===void 0)&& (blue=0);
+		(alpha===void 0)&& (alpha=1);
+		return this.setByMatrix([1,0,0,0,red,0,1,0,0,green,0,0,1,0,blue,0,0,0,1,alpha]);
+	}
+
+	/**
+	*设置矩阵数据
+	*@param matrix 由 20 个项目（排列成 4 x 5 矩阵）组成的数组
+	*@return this
+	*/
+	__proto.setByMatrix=function(matrix){
+		if (this._matrix !=matrix)this._copyMatrix(matrix);
+		var j=0;
+		var z=0;
+		for (var i=0;i < 20;i++){
+			if (i % 5 !=4){
+				this._mat[j++]=matrix[i];
+				}else {
+				this._alpha[z++]=matrix[i];
+			}
+		}
+		return this;
+	}
+
+	/**
+	*调整颜色，包括亮度，对比度，饱和度和色调
+	*@param brightness 亮度,范围:-100~100
+	*@param contrast 对比度,范围:-100~100
+	*@param saturation 饱和度,范围:-100~100
+	*@param hue 色调,范围:-180~180
+	*@return this
+	*/
+	__proto.adjustColor=function(brightness,contrast,saturation,hue){
+		this.adjustHue(hue);
+		this.adjustContrast(contrast);
+		this.adjustBrightness(brightness);
+		this.adjustSaturation(saturation);
+		return this;
+	}
+
+	/**
+	*调整亮度
+	*@param brightness 亮度,范围:-100~100
+	*@return this
+	*/
+	__proto.adjustBrightness=function(brightness){
+		brightness=this._clampValue(brightness,100);
+		if (brightness==0 || isNaN(brightness))return this;
+		return this._multiplyMatrix([1,0,0,0,brightness,0,1,0,0,brightness,0,0,1,0,brightness,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*调整对比度
+	*@param contrast 对比度,范围:-100~100
+	*@return this
+	*/
+	__proto.adjustContrast=function(contrast){
+		contrast=this._clampValue(contrast,100);
+		if (contrast==0 || isNaN(contrast))return this;
+		var x=NaN;
+		if (contrast < 0){
+			x=127+contrast / 100 *127
 			}else {
-			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
-			this._quadNum=MeshQuadTexture._maxIB;
-		}
-	}
-
-	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
-	var __proto=MeshQuadTexture.prototype;
-	/**
-	*把本对象放到回收池中，以便getMesh能用。
-	*/
-	__proto.releaseMesh=function(){
-		this._vb.setByteLength(0);
-		this.vertNum=0;
-		this.indexNum=0;
-		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
-	}
-
-	__proto.destroy=function(){
-		this._vb.destroy();
-		this._vb.deleteBuffer();
+			x=contrast % 1;
+			if (x==0){
+				x=ColorFilter.DELTA_INDEX[contrast];
+				}else {
+				x=ColorFilter.DELTA_INDEX[(contrast << 0)] *(1-x)+ColorFilter.DELTA_INDEX[(contrast << 0)+1] *x;
+			}
+			x=x *127+127;
+		};
+		var x1=x / 127;
+		var x2=(127-x)*0.5;
+		return this._multiplyMatrix([x1,0,0,0,x2,0,x1,0,0,x2,0,0,x1,0,x2,0,0,0,1,0,0,0,0,0,1]);
 	}
 
 	/**
-	*
-	*@param pos
-	*@param uv
-	*@param color
-	*@param clip ox,oy,xx,xy,yx,yy
-	*@param useTex 是否使用贴图。false的话是给fillRect用的
+	*调整饱和度
+	*@param saturation 饱和度,范围:-100~100
+	*@return this
 	*/
-	__proto.addQuad=function(pos,uv,color,useTex){
-		var vb=this._vb;
-		var vpos=(vb._byteLength >> 2);
-		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
-		var vbdata=vb._floatArray32 || vb.getFloat32Array();
-		var vbu32Arr=vb._uint32Array;
-		var cpos=vpos;
-		var useTexVal=useTex?0xff:0;
-		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
-		vb._upload=true;
+	__proto.adjustSaturation=function(saturation){
+		saturation=this._clampValue(saturation,100);
+		if (saturation==0 || isNaN(saturation))return this;
+		var x=1+((saturation > 0)? 3 *saturation / 100 :saturation / 100);
+		var dx=1-x;
+		var r=0.3086 *dx;
+		var g=0.6094 *dx;
+		var b=0.0820 *dx;
+		return this._multiplyMatrix([r+x,g,b,0,0,r,g+x,b,0,0,r,g,b+x,0,0,0,0,0,1,0,0,0,0,0,1]);
 	}
 
-	MeshQuadTexture.getAMesh=function(){
-		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
-			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
+	/**
+	*调整色调
+	*@param hue 色调,范围:-180~180
+	*@return this
+	*/
+	__proto.adjustHue=function(hue){
+		hue=this._clampValue(hue,180)/ 180 *Math.PI;
+		if (hue==0 || isNaN(hue))return this;
+		var cos=Math.cos(hue);
+		var sin=Math.sin(hue);
+		var r=0.213;
+		var g=0.715;
+		var b=0.072;
+		return this._multiplyMatrix([r+cos *(1-r)+sin *(-r),g+cos *(-g)+sin *(-g),b+cos *(-b)+sin *(1-b),0,0,r+cos *(-r)+sin *(0.143),g+cos *(1-g)+sin *(0.140),b+cos *(-b)+sin *(-0.283),0,0,r+cos *(-r)+sin *(-(1-r)),g+cos *(-g)+sin *(g),b+cos *(1-b)+sin *(b),0,0,0,0,0,1,0,0,0,0,0,1]);
+	}
+
+	/**
+	*重置成单位矩阵，去除滤镜效果
+	*/
+	__proto.reset=function(){
+		return this.setByMatrix(this._copyMatrix(ColorFilter.IDENTITY_MATRIX));
+	}
+
+	/**
+	*矩阵乘法
+	*@param matrix
+	*@return this
+	*/
+	__proto._multiplyMatrix=function(matrix){
+		var col=[];
+		this._matrix=this._fixMatrix(this._matrix);
+		for (var i=0;i < 5;i++){
+			for (var j=0;j < 5;j++){
+				col[j]=this._matrix[j+i *5];
+			}
+			for (j=0;j < 5;j++){
+				var val=0;
+				for (var k=0;k < 5;k++){
+					val+=matrix[j+k *5] *col[k];
+				}
+				this._matrix[j+i *5]=val;
+			}
 		}
-		return new MeshQuadTexture();
+		return this.setByMatrix(this._matrix);
 	}
 
-	MeshQuadTexture.const_stride=24;
-	MeshQuadTexture._fixib=null;
-	MeshQuadTexture._maxIB=16 *1024;
-	MeshQuadTexture._POOL=[];
-	__static(MeshQuadTexture,
-	['_fixattriInfo',function(){return this._fixattriInfo=[
-		0x1406,4,0,
-		0x1401,4,16,
-		0x1401,4,20];}
+	/**
+	*规范值的范围
+	*@param val 当前值
+	*@param limit 值的范围-limit~limit
+	*/
+	__proto._clampValue=function(val,limit){
+		return Math.min(limit,Math.max(-limit,val));
+	}
+
+	/**
+	*规范矩阵,将矩阵调整到正确的大小
+	*@param matrix 需要调整的矩阵
+	*/
+	__proto._fixMatrix=function(matrix){
+		if (matrix==null)return ColorFilter.IDENTITY_MATRIX;
+		if (matrix.length < 25)matrix=matrix.slice(0,matrix.length).concat(ColorFilter.IDENTITY_MATRIX.slice(matrix.length,25));
+		else if (matrix.length > 25)matrix=matrix.slice(0,25);
+		return matrix;
+	}
+
+	/**
+	*复制矩阵
+	*/
+	__proto._copyMatrix=function(matrix){
+		var len=25;
+		if (!this._matrix)this._matrix=[];
+		for (var i=0;i < len;i++){
+			this._matrix[i]=matrix[i];
+		}
+		return this._matrix;
+	}
+
+	/**@private */
+	__getset(0,__proto,'type',function(){
+		return 0x20;
+	});
+
+	ColorFilter.LENGTH=25;
+	__static(ColorFilter,
+	['DELTA_INDEX',function(){return this.DELTA_INDEX=[0,0.01,0.02,0.04,0.05,0.06,0.07,0.08,0.1,0.11,0.12,0.14,0.15,0.16,0.17,0.18,0.20,0.21,0.22,0.24,0.25,0.27,0.28,0.30,0.32,0.34,0.36,0.38,0.40,0.42,0.44,0.46,0.48,0.5,0.53,0.56,0.59,0.62,0.65,0.68,0.71,0.74,0.77,0.80,0.83,0.86,0.89,0.92,0.95,0.98,1.0,1.06,1.12,1.18,1.24,1.30,1.36,1.42,1.48,1.54,1.60,1.66,1.72,1.78,1.84,1.90,1.96,2.0,2.12,2.25,2.37,2.50,2.62,2.75,2.87,3.0,3.2,3.4,3.6,3.8,4.0,4.3,4.7,4.9,5.0,5.5,6.0,6.5,6.8,7.0,7.3,7.5,7.8,8.0,8.4,8.7,9.0,9.4,9.6,9.8,10.0];},'GRAY_MATRIX',function(){return this.GRAY_MATRIX=[0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0.3086,0.6094,0.082,0,0,0,0,0,1,0];},'IDENTITY_MATRIX',function(){return this.IDENTITY_MATRIX=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1];}
 	]);
-	return MeshQuadTexture;
-})(Mesh2D)
+	return ColorFilter;
+})(Filter)
 
 
 /**
@@ -31922,6 +31835,112 @@ var SceneLoader=(function(_super){
 	]);
 	return SceneLoader;
 })(EventDispatcher)
+
+
+//class laya.webgl.shader.d2.value.TextureSV extends laya.webgl.shader.d2.value.Value2D
+var TextureSV=(function(_super){
+	function TextureSV(subID){
+		this.u_colorMatrix=null;
+		this.strength=0;
+		this.blurInfo=null;
+		this.colorMat=null;
+		this.colorAlpha=null;
+		(subID===void 0)&& (subID=0);
+		TextureSV.__super.call(this,0x01,subID);
+		this._attribLocation=['posuv',0,'attribColor',1,'attribFlags',2];
+	}
+
+	__class(TextureSV,'laya.webgl.shader.d2.value.TextureSV',_super);
+	var __proto=TextureSV.prototype;
+	// ,'clipDir',3,'clipRect',4];
+	__proto.clear=function(){
+		this.texture=null;
+		this.shader=null;
+		this.defines._value=this.subID+(WebGL.shaderHighPrecision?0x400:0);
+	}
+
+	return TextureSV;
+})(Value2D)
+
+
+/**
+*drawImage，fillRect等会用到的简单的mesh。每次添加必然是一个四边形。
+*/
+//class laya.webgl.utils.MeshQuadTexture extends laya.webgl.utils.Mesh2D
+var MeshQuadTexture=(function(_super){
+	//private static var _num;
+	function MeshQuadTexture(){
+		MeshQuadTexture.__super.call(this,laya.webgl.utils.MeshQuadTexture.const_stride,4,4);
+		this.canReuse=true;
+		this.setAttributes(laya.webgl.utils.MeshQuadTexture._fixattriInfo);
+		if(!laya.webgl.utils.MeshQuadTexture._fixib){
+			this.createQuadIB(MeshQuadTexture._maxIB);
+			laya.webgl.utils.MeshQuadTexture._fixib=this._ib;
+			}else {
+			this._ib=laya.webgl.utils.MeshQuadTexture._fixib;
+			this._quadNum=MeshQuadTexture._maxIB;
+		}
+	}
+
+	__class(MeshQuadTexture,'laya.webgl.utils.MeshQuadTexture',_super);
+	var __proto=MeshQuadTexture.prototype;
+	/**
+	*把本对象放到回收池中，以便getMesh能用。
+	*/
+	__proto.releaseMesh=function(){
+		this._vb.setByteLength(0);
+		this.vertNum=0;
+		this.indexNum=0;
+		laya.webgl.utils.MeshQuadTexture._POOL.push(this);
+	}
+
+	__proto.destroy=function(){
+		this._vb.destroy();
+		this._vb.deleteBuffer();
+	}
+
+	/**
+	*
+	*@param pos
+	*@param uv
+	*@param color
+	*@param clip ox,oy,xx,xy,yx,yy
+	*@param useTex 是否使用贴图。false的话是给fillRect用的
+	*/
+	__proto.addQuad=function(pos,uv,color,useTex){
+		var vb=this._vb;
+		var vpos=(vb._byteLength >> 2);
+		vb.setByteLength((vpos+laya.webgl.utils.MeshQuadTexture.const_stride)<<2);
+		var vbdata=vb._floatArray32 || vb.getFloat32Array();
+		var vbu32Arr=vb._uint32Array;
+		var cpos=vpos;
+		var useTexVal=useTex?0xff:0;
+		vbdata[cpos++]=pos[0];vbdata[cpos++]=pos[1];vbdata[cpos++]=uv[0];vbdata[cpos++]=uv[1];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[2];vbdata[cpos++]=pos[3];vbdata[cpos++]=uv[2];vbdata[cpos++]=uv[3];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[4];vbdata[cpos++]=pos[5];vbdata[cpos++]=uv[4];vbdata[cpos++]=uv[5];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vbdata[cpos++]=pos[6];vbdata[cpos++]=pos[7];vbdata[cpos++]=uv[6];vbdata[cpos++]=uv[7];vbu32Arr[cpos++]=color;vbu32Arr[cpos++]=useTexVal;
+		vb._upload=true;
+	}
+
+	MeshQuadTexture.getAMesh=function(){
+		if (laya.webgl.utils.MeshQuadTexture._POOL.length){
+			return laya.webgl.utils.MeshQuadTexture._POOL.pop();
+		}
+		return new MeshQuadTexture();
+	}
+
+	MeshQuadTexture.const_stride=24;
+	MeshQuadTexture._fixib=null;
+	MeshQuadTexture._maxIB=16 *1024;
+	MeshQuadTexture._POOL=[];
+	__static(MeshQuadTexture,
+	['_fixattriInfo',function(){return this._fixattriInfo=[
+		0x1406,4,0,
+		0x1401,4,16,
+		0x1401,4,20];}
+	]);
+	return MeshQuadTexture;
+})(Mesh2D)
 
 
 /**
@@ -36460,7 +36479,7 @@ var MainPageControl=(function(_super){
 	}
 
 	__proto.onGotoCharge=function(){
-		ViewManager.instance.openView("VIEW_USERCENTER",true,5);
+		ViewManager.instance.openView("VIEW_USERCENTER",true,11);
 	}
 
 	__proto.getActivityInfo=function(){
@@ -36588,6 +36607,7 @@ var MainPageControl=(function(_super){
 	__proto.onSucessLogin=function(e){
 		this.txtLogin.text=e;
 		this.txtReg.text="[退出]";
+		this.getActivityInfo();
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/opt-group-express?",this,this.getMyAddressBack,"opt=list&page=1","post");
 	}
 
@@ -36966,10 +36986,10 @@ var UserMainControl=(function(_super){
 		this.uiSkin=this.owner;
 		this.uiSkin.panel_main.vScrollBarSkin="";
 		this.uiSkin.panel_main.hScrollBarSkin="";
-		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,TransactionPanelUI,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI];
+		this.viewArr=[EnterPrizeInfoPaneUI,AddressMgrPanelUI,null,MyOrdersPanelUI,null,ChargePanelUI,TransactionPanelUI,null,null,OrganizeMgrPanelUI,ApplyJoinMgrPanelUI,ChargeActivityPanelUI];
 		this.btntxtArr=[];
-		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的账单","","","组织管理","申请列表"];
-		for(var i=0;i < 11;i++){
+		this.titleTxt=["企业资料","收货地址","购物车","我的订单","委托订单","账户充值","我的账单","","","组织管理","申请列表","活动充值"];
+		for(var i=0;i < 12;i++){
 			this.uiSkin["btntxt"+i].on("click",this,this.onShowEditView,[i]);
 			this.uiSkin["btntxt"+i].on("mouseover",this,this.onMouseOverHandler);
 			this.uiSkin["btntxt"+i].on("mouseout",this,this.onMouseOutHandler);
@@ -37418,13 +37438,19 @@ var ActivityAdvertiseController=(function(_super){
 		}
 		this.uiSkin.gotocharge.on("click",this,this.gotoChargePanel);
 		this.uiSkin.closebtn.on("click",this,this.closeView);
+		Laya.timer.once(3000,this,this.onCloseAuto);
+	}
+
+	__proto.onCloseAuto=function(){
+		Tween.to(this.uiSkin.mainview,{scaleX:0.1,scaleY:0.1,x:1248,y:44},300,Ease.linearIn,new Handler(this,this.closeView));
 	}
 
 	__proto.gotoChargePanel=function(){
-		ViewManager.instance.openView("VIEW_USERCENTER",true,5);
+		ViewManager.instance.openView("VIEW_USERCENTER",true,11);
 	}
 
 	__proto.closeView=function(){
+		Laya.timer.clear(this,this.onCloseAuto);
 		ViewManager.instance.closeView("VIEW_ACTIVITY_ADVETISE_PANEL");
 	}
 
@@ -38651,7 +38677,7 @@ var PaintOrderControl=(function(_super){
 					orderdata.order_amountStr=0;
 					orderdata.shipping_feeStr="0";
 					orderdata.money_paidStr="0";
-					orderdata.discountStr="0";
+					orderdata.discountStr="1";
 					orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
 					orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
 					orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
@@ -39039,7 +39065,7 @@ var PaintOrderControl=(function(_super){
 				orderdata.order_amountStr=0;
 				orderdata.shipping_feeStr="0";
 				orderdata.money_paidStr="0";
-				orderdata.discountStr="0";
+				orderdata.discountStr="1";
 				orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
 				orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
 				orderdata.manufacturer_code=orderitem.ordervo.manufacturer_code;
@@ -39130,6 +39156,115 @@ var PaintOrderControl=(function(_super){
 })(Script)
 
 
+//class script.usercenter.ChargeActivityController extends laya.components.Script
+var ChargeActivityController=(function(_super){
+	function ChargeActivityController(){
+		this.uiSkin=null;
+		ChargeActivityController.__super.call(this);
+	}
+
+	__class(ChargeActivityController,'script.usercenter.ChargeActivityController',_super);
+	var __proto=ChargeActivityController.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.accout.text=Userdata.instance.userAccount;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+		this.uiSkin.moneytxt.text="--";
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
+		this.uiSkin.actpanel.visible=true;
+		this.uiSkin.noactbox.visible=false;
+		this.uiSkin.actbox.visible=false;
+		this.uiSkin.totalreturn.editable=false;
+		this.uiSkin.chargeamount.editable=false;
+		for(var i=0;i < 8;i++){
+			this.uiSkin["moneybtn"+i].on("click",this,this.onChangeMoney,[i]);
+		}
+		this.uiSkin.chargeamount.maxChars=8;
+		this.uiSkin.chargeamount.restrict="0-9";
+		this.uiSkin.joinact.on("click",this,this.onjoinActivity);
+		this.uiSkin.recordbtn.on("click",this,this.showRecordView);
+	}
+
+	__proto.showRecordView=function(){
+		ViewManager.instance.openView("VIEW_CHARGE_RECORD_PANEL",false);
+	}
+
+	__proto.onChangeMoney=function(index){
+		var numarr=[1000,2000,3000,5000,10000,20000,30000,50000];
+		this.uiSkin.chargeamount.text=numarr[index].toString();
+		this.uiSkin.totalreturn.text=(numarr[index] *1.15).toFixed(0);
+	}
+
+	__proto.getActivityInfoBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			if(result.data !=null && result.data.length > 0){
+				this.curactinfo=result.data[0];
+				this.uiSkin.actbox.visible=true;
+				this.uiSkin.noactbox.visible=false;
+				this.uiSkin.zhiufbaobtn.selected=true;
+				var actinfo=result.data[0];
+				this.uiSkin.acttitle.text=actinfo.ra_name;
+				this.uiSkin.actrule.text="活动规则："+actinfo.ra_text;
+				this.uiSkin.chargeamount.text="10000";
+				this.uiSkin.totalreturn.text="11500";
+			}
+			else{
+				this.uiSkin.noactbox.visible=true;
+				this.uiSkin.actbox.visible=false;
+			}
+		}
+	}
+
+	__proto.onjoinActivity=function(){
+		if(this.uiSkin.chargeamount.text=="" || this.uiSkin.chargeamount.text=="0"){
+			ViewManager.showAlert("请输入充值金额");
+			return;
+		};
+		var num=parseFloat(this.uiSkin.chargeamount.text);
+		if(num%1000 !=0){
+			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"充值金额必须是1000的倍数。"});
+			return;
+		};
+		var params="rid="+this.curactinfo.ra_id+"&amount="+num;
+		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-activity?",this,this.joinActBack,params,"post");
+	}
+
+	__proto.joinActBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Browser.window.open("about:self","_self").location.href=HttpRequestUtil.httpUrl+"group/pay-activity?"+"rarid="+result.data.rar_id;
+		}
+	}
+
+	//ViewManager.instance.openView(ViewManager.VIEW_POPUPDIALOG,false,{msg:"是否支付成功？",caller:this,callback:confirmSucess,ok:"是",cancel:"否"});
+	__proto.confirmSucess=function(result){
+		if(result){
+			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
+		}
+	}
+
+	__proto.getCompanyInfoBack=function(data){
+		var result=JSON.parse(data);
+		if(result.status==0){
+			Userdata.instance.money=Number(result.balance);
+			Userdata.instance.actMoney=Number(result.activity_balance);
+			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
+			this.uiSkin.moneytxt.text=Userdata.instance.money.toString()+"元";
+			this.uiSkin.actMoney.text=Userdata.instance.actMoney.toString()+"元";
+			this.uiSkin.frezeMoney.text=Userdata.instance.frezeMoney.toString()+"元";
+			if(Userdata.instance.isHidePrice()){
+				this.uiSkin.moneytxt.text="****";
+				this.uiSkin.actMoney.text="****";
+				this.uiSkin.frezeMoney.text="****";
+			}
+		}
+	}
+
+	return ChargeActivityController;
+})(Script)
+
+
 //class script.prefabScript.LinkTextControl extends laya.components.Script
 var LinkTextControl=(function(_super){
 	function LinkTextControl(){
@@ -39210,8 +39345,9 @@ var PayTypeSelectControl=(function(_super){
 		Tween.to(this.uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
 		this.uiSkin.payall.selected=true;
 		this.uiSkin.paytype.selectedIndex=0;
-		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0" && Userdata.instance.privilege[2]=="1")
+		if(Userdata.instance.accountType==0 && Userdata.instance.privilege[1]=="0" && Userdata.instance.privilege[2]=="1"){
 			this.uiSkin.paytype.selectedIndex=1;
+		}
 		this.uiSkin.accountmoney.text="0元";
 		this.uiSkin.needpay.text=this.param.amount+"元";
 		this.uiSkin.realpay.text=this.param.amount+"元";
@@ -39255,6 +39391,10 @@ var PayTypeSelectControl=(function(_super){
 			Userdata.instance.frezeMoney=Number(result.activity_locked_balance);
 			this.uiSkin.accountmoney.text=Userdata.instance.money.toString()+"元";
 			this.uiSkin.actmoney.text=Userdata.instance.actMoney.toString()+"元";
+			if(Userdata.instance.actMoney >=this.param.amount)
+				this.uiSkin.paytype.selectedIndex=2;
+			else if(Userdata.instance.money >=this.param.amount)
+			this.uiSkin.paytype.selectedIndex=1;
 			if(Userdata.instance.isHidePrice()){
 				this.uiSkin.accountmoney.text="****";
 				this.uiSkin.actmoney.text="****";
@@ -41225,7 +41365,7 @@ var ProductMarketControl=(function(_super){
 				orderdata.order_amountStr=0;
 				orderdata.shipping_feeStr="0";
 				orderdata.money_paidStr="0";
-				orderdata.discountStr="0";
+				orderdata.discountStr="1";
 				orderdata.pay_timeStr=UtilTool.formatFullDateTime(new Date());
 				orderdata.delivery_dateStr=UtilTool.formatFullDateTime(new Date(),false);
 				orderdata.manufacturer_code=this.goodsInCar[i].manufacturer_code;
@@ -41349,15 +41489,7 @@ var ChargeControl=(function(_super){
 		this.uiSkin.chargeinput.restrict="0-9"+".";
 		this.uiSkin.chargeinput.maxChars=8;
 		this.uiSkin.paytypezfb.selected=true;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-activities?",this,this.getActivityInfoBack,null,"post");
 		this.uiSkin.confirmcharge.on("click",this,this.onChargeNow);
-		this.uiSkin.actpanel.visible=false;
-		this.uiSkin.noactbox.visible=false;
-		for(var i=0;i < 7;i++){
-			this.uiSkin["moneybtn"+i].on("click",this,this.onChangeMoney,[i]);
-		}
-		this.uiSkin.chargeamount.maxChars=4;
-		this.uiSkin.joinact.on("click",this,this.onjoinActivity);
 	}
 
 	__proto.onChargeNow=function(){
@@ -41380,46 +41512,6 @@ var ChargeControl=(function(_super){
 	__proto.confirmSucess=function(result){
 		if(result){
 			HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
-		}
-	}
-
-	__proto.onChangeMoney=function(index){
-		var numarr=[1000,2000,3000,5000,10000,20000,50000];
-		this.uiSkin.chargeamount.text=numarr[index].toString();
-	}
-
-	__proto.getActivityInfoBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			if(result.data !=null && result.data.length > 0){
-				this.curactinfo=result.data[0];
-				this.uiSkin.actpanel.visible=true;
-				this.uiSkin.zhiufbaobtn.selected=true;
-				var actinfo=result.data[0];
-				this.uiSkin.acttitle.text=actinfo.ra_name;
-				this.uiSkin.actrule.text="活动规则："+actinfo.ra_text;
-				this.uiSkin.chargeamount.text="1";
-			}
-			else
-			this.uiSkin.noactbox.visible=true;
-		}
-	}
-
-	__proto.onjoinActivity=function(){
-		if(this.uiSkin.chargeamount.text=="" || this.uiSkin.chargeamount.text=="0"){
-			ViewManager.showAlert("请输入充值金额");
-			return;
-		};
-		var num=parseFloat(this.uiSkin.chargeamount.text);
-		var params="rid="+this.curactinfo.ra_id+"&amount="+num;
-		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/join-activity?",this,this.joinActBack,params,"post");
-	}
-
-	__proto.joinActBack=function(data){
-		var result=JSON.parse(data);
-		if(result.status==0){
-			Browser.window.open(HttpRequestUtil.httpUrl+"group/pay-activity?"+"rarid="+result.data.rar_id,null,null,true);
-			ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"是否支付成功？",caller:this,callback:this.confirmSucess,ok:"是",cancel:"否"});
 		}
 	}
 
@@ -42830,6 +42922,63 @@ var SelectMaterialControl=(function(_super){
 })(Script)
 
 
+//class utils.PicturePopUpController extends laya.components.Script
+var PicturePopUpController=(function(_super){
+	function PicturePopUpController(){
+		this.uiSkin=null;
+		this.param=null;
+		PicturePopUpController.__super.call(this);
+	}
+
+	__class(PicturePopUpController,'utils.PicturePopUpController',_super);
+	var __proto=PicturePopUpController.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.mainview.scaleX=0.2;
+		this.uiSkin.mainview.scaleY=0.2;
+		Tween.to(this.uiSkin.mainview,{scaleX:1,scaleY:1},300,Ease.backOut);
+		this.uiSkin.closebtn.on("click",this,this.onCloseScene);
+		this.uiSkin.msgtxt.text=this.param.msg;
+		this.uiSkin.tipimg.skin=this.param.picurl;
+		if(this.param.ok !=null)
+			this.uiSkin.okbtn.label=this.param.ok;
+		if(this.param.cancel !=null)
+			this.uiSkin.cancelbtn.label=this.param.cancel;
+		this.uiSkin.mainpanel.vScrollBarSkin="";
+		this.uiSkin.mainpanel.hScrollBarSkin="";
+		this.uiSkin.mainpanel.height=Browser.height;
+		this.uiSkin.mainpanel.width=Browser.width;
+		EventCenter.instance.on("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+		this.uiSkin.okbtn.on("click",this,this.onConfirmHandler);
+		this.uiSkin.cancelbtn.on("click",this,this.onCancelHandler);
+	}
+
+	__proto.onResizeBrower=function(){
+		this.uiSkin.mainpanel.height=Browser.height;
+		this.uiSkin.mainpanel.width=Browser.width;
+	}
+
+	__proto.onConfirmHandler=function(){
+		if(this.param.callback !=null)
+			(this.param.callback).call(this.param.caller,true);
+		this.onCloseScene();
+	}
+
+	__proto.onCancelHandler=function(){
+		if(this.param.callback !=null)
+			(this.param.callback).call(this.param.caller,false);
+		this.onCloseScene();
+	}
+
+	__proto.onCloseScene=function(){
+		ViewManager.instance.closeView("VIEW_POPUPDIALOG_WITH_PICTURE");
+		EventCenter.instance.off("BROWER_WINDOW_RESIZE",this,this.onResizeBrower);
+	}
+
+	return PicturePopUpController;
+})(Script)
+
+
 //class script.order.PackageOrderControl extends laya.components.Script
 var PackageOrderControl=(function(_super){
 	function PackageOrderControl(){
@@ -43092,6 +43241,8 @@ var EnterPrizeInfoControl=(function(_super){
 		this.uiSkin.createAccountInput.restrict="0-9";
 		this.uiSkin.commentInput.maxChars=8;
 		this.uiSkin.moneytxt.text="0元";
+		this.uiSkin.actMoney.text="0元";
+		this.uiSkin.frezeMoney.text="0元";
 		this.uiSkin.applyokbtn.on("click",this,this.onJoinOrganize);
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-request?" ,this,this.getCompanyInfo,null,"post");
 		HttpRequestUtil.instance.Request(HttpRequestUtil.httpUrl+"group/get-info?",this,this.getCompanyInfoBack,null,"post");
@@ -44573,6 +44724,39 @@ var SelectPicControl=(function(_super){
 	}
 
 	return SelectPicControl;
+})(Script)
+
+
+//class script.activity.ChargeActRecordController extends laya.components.Script
+var ChargeActRecordController=(function(_super){
+	function ChargeActRecordController(){
+		this.uiSkin=null;
+		this.param=null;
+		ChargeActRecordController.__super.call(this);
+	}
+
+	__class(ChargeActRecordController,'script.activity.ChargeActRecordController',_super);
+	var __proto=ChargeActRecordController.prototype;
+	__proto.onStart=function(){
+		this.uiSkin=this.owner;
+		this.uiSkin.recordlist.itemRender=ChargeRecordCell;
+		this.uiSkin.recordlist.repeatX=1;
+		this.uiSkin.recordlist.spaceY=5;
+		this.uiSkin.recordlist.renderHandler=new Handler(this,this.updateRecordList);
+		this.uiSkin.recordlist.selectEnable=false;
+		this.uiSkin.recordlist.array=new Array(12);
+		this.uiSkin.closebtn.on("click",this,this.closePanel);
+	}
+
+	__proto.updateRecordList=function(cell,index){
+		cell.setData(cell.dataSource);
+	}
+
+	__proto.closePanel=function(){
+		ViewManager.instance.closeView("VIEW_CHARGE_RECORD_PANEL");
+	}
+
+	return ChargeActRecordController;
 })(Script)
 
 
@@ -50653,7 +50837,7 @@ var LoginViewUI=(function(_super){
 		this.createView(LoginViewUI.uiView);
 	}
 
-	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage1/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":654,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":879,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":991,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1104,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1238,"width":92,"var":"btnact","text":"充值活动","strokeColor":"#FFFAB1A0","stroke":3,"presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#FF2400","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":73,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":74},{"type":"Image","props":{"y":0,"x":-27,"skin":"chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png"},"compId":75}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59},{"type":"Text","props":{"y":34,"x":766,"width":92,"var":"characBtn","text":"字牌雕刻","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":70,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":71}]},{"type":"Label","props":{"y":150,"x":0,"width":1920,"visible":false,"text":"系统将于今晚11点（1月4号23:00)升级维护，预计维护1小时，请避开此时间段下单，敬请谅解！","fontSize":20,"font":"SimHei","color":"#ff0905","align":"center"},"compId":72}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage1/mainbg.jpg","commers/logotxt.png","prefabs/LinksText.prefab","chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png","commers/blackbg.png","commers/lz2.jpg"],"loadList3D":[]};
+	LoginViewUI.uiView={"type":"Scene","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"sizeGrid":"5,5,5,5","right":0,"left":0,"bottom":0},"compId":29,"child":[{"type":"Rect","props":{"width":1920,"lineWidth":1,"height":1080,"fillColor":"#f8f6f6"},"compId":60}]},{"type":"Panel","props":{"x":0,"width":1920,"var":"panel_main","top":0,"height":1080},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"width":1920,"texture":"mainpage1/mainbg.jpg","height":1080},"compId":12},{"type":"Sprite","props":{"y":22,"x":320,"texture":"commers/logotxt.png","scaleY":1,"scaleX":1},"compId":11},{"type":"Label","props":{"y":370,"x":680,"width":560,"text":"广告全产业链生态平台","height":77,"fontSize":56,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":18},{"type":"Text","props":{"y":34,"x":541,"width":92,"var":"btnUpload","text":"我的图库","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":40,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":41}]},{"type":"Text","props":{"y":34,"x":654,"width":92,"var":"paintOrderBtn","text":"喷印下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":42,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":43}]},{"type":"Text","props":{"y":34,"x":879,"width":92,"var":"btnproduct","text":"商品下单","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":48,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":49}]},{"type":"Text","props":{"y":34,"x":991,"width":92,"text":"视觉资料","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":50,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":51}]},{"type":"Text","props":{"y":34,"x":1104,"width":92,"var":"btnUserCenter","text":"用户中心","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":52,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":53}]},{"type":"Text","props":{"y":34,"x":1238,"width":92,"var":"btnact","text":"充值活动","strokeColor":"#FFFAB1A0","stroke":3,"presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#FF2400","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":73,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":74},{"type":"Image","props":{"y":0,"x":-27,"skin":"chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png"},"compId":75}]},{"type":"Text","props":{"y":34,"x":1365,"width":140,"var":"txt_login","text":"登陆","presetID":1,"overflow":"hidden","height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"right","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":54,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":55}]},{"type":"Text","props":{"y":34,"x":1512,"width":73,"var":"txt_reg","text":"[注册]","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","align":"left","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":56,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":57}]},{"type":"Label","props":{"y":464,"x":525,"width":869,"text":"All-in Industrial Internet Platform of Advertising Industry","height":42,"fontSize":32,"font":"Microsoft YaHei","color":"#EDFFEC"},"compId":58},{"type":"Label","props":{"y":534,"x":443,"width":1033,"text":"开放 Open/智能 Intelligent/协同 Collaborative/共享 Shared","height":55,"fontSize":38,"font":"Helvetica","color":"#FCFA64","bold":true},"compId":59},{"type":"Text","props":{"y":34,"x":766,"width":92,"var":"characBtn","text":"字牌雕刻","presetID":1,"height":26,"fontSize":20,"font":"Microsoft YaHei","color":"#EDFFEC","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":70,"child":[{"type":"Script","props":{"txttype":1,"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":71}]},{"type":"Label","props":{"y":150,"x":0,"width":1920,"visible":false,"text":"今晚24点至明天凌晨1点半，系统升级维护，请避开此时间段下单，敬请谅解！","fontSize":20,"font":"SimHei","color":"#ff0905","align":"center"},"compId":72}]},{"type":"Script","props":{"runtime":"script.MainPageControl"},"compId":27},{"type":"Box","props":{"y":940,"x":0,"var":"enterinfo","right":0,"left":0},"compId":65,"child":[{"type":"Image","props":{"skin":"commers/blackbg.png","sizeGrid":"2,2,2,2","right":0,"left":0,"height":80,"bottom":0,"alpha":0.5},"compId":62},{"type":"Label","props":{"y":5,"x":460,"wordWrap":true,"width":1000,"text":"Copyright  2019 CMYK.vip All Rights Reserved版权所有-色彩飞扬 ","leading":20,"height":25,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":63},{"type":"Label","props":{"y":40,"x":623,"wordWrap":true,"width":1000,"text":" 本站法律顾问：夏瑜律师    色彩飞扬是网络服务平台，若您的权利被侵害，请联系 wwwcmykvip@163.com","leading":20,"height":33,"fontSize":20,"font":"Arial","color":"#f6f6ee","bold":false,"align":"center"},"compId":67},{"type":"Button","props":{"x":314,"var":"linktobus","stateNum":1,"skin":"commers/lz2.jpg","scaleY":0.8,"scaleX":0.8,"label":"label","bottom":9},"compId":66},{"type":"Text","props":{"y":40,"x":421,"var":"linkicp","text":"沪ICP备19015835号-2","presetID":1,"fontSize":20,"font":"Arial","color":"#f6eeee","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":68,"child":[{"type":"Script","props":{"undercolor":"#FFFFFF","presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":4}]}]}],"loadList":["mainpage1/mainbg.jpg","commers/logotxt.png","prefabs/LinksText.prefab","chargeact/3f7c41316cc1f4f05f63532abc9e4fa.png","commers/blackbg.png","commers/lz2.jpg"],"loadList3D":[]};
 	return LoginViewUI;
 })(Scene)
 
@@ -57390,6 +57574,7 @@ var UserMainPanelUI=(function(_super){
 		this.btntxt10=null;
 		this.btntxt5=null;
 		this.btntxt6=null;
+		this.btntxt11=null;
 		this.btntxt2=null;
 		this.btntxt3=null;
 		this.btntxt4=null;
@@ -57406,7 +57591,7 @@ var UserMainPanelUI=(function(_super){
 		this.createView(UserMainPanelUI.uiView);
 	}
 
-	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"texture":"commers/bgimg.jpg","presetID":2,"y":0,"x":0,"height":50},"compId":54},{"type":"Sprite","props":{"texture":"commers/logotxt.png","presetID":3,"y":2,"x":332},"compId":55},{"type":"Label","props":{"presetID":4,"y":11,"x":524,"width":10,"text":"|","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":11,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":11,"x":1320,"isPresetRoot":true,"width":80,"var":"myorder","text":"我的订单","name":"myorder","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":11,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":11,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":11,"x":1405,"text":"|","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":25},"compId":87,"child":[{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":26,"child":[{"type":"Box","props":{"y":-59,"x":-29},"compId":102,"child":[{"type":"Image","props":{"skin":"usercenter1/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17}]},{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Label","props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":100},{"type":"Label","props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":101},{"type":"Image","props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":61}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter1/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter1/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter1/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/bgimg.jpg","commers/logotxt.png","commers/commonpopbg.png","usercenter1/setting.png","commers/cutline.png","usercenter1/accounticon.png","usercenter1/ordericon.png","usercenter1/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
+	UserMainPanelUI.uiView={"type":"View","props":{"width":1920,"height":1080},"compId":2,"child":[{"type":"Image","props":{"top":0,"skin":"commers/grayback.jpg","sizeGrid":"3,3,3,3","right":0,"left":0,"bottom":0},"compId":3},{"type":"Panel","props":{"y":0,"x":0,"width":1920,"var":"panel_main","height":1080},"compId":4,"child":[{"type":"Box","props":{"presetID":1,"y":0,"x":0,"isPresetRoot":true},"compId":53,"child":[{"type":"Sprite","props":{"texture":"commers/bgimg.jpg","presetID":2,"y":0,"x":0,"height":50},"compId":54},{"type":"Sprite","props":{"texture":"commers/logotxt.png","presetID":3,"y":2,"x":332},"compId":55},{"type":"Label","props":{"presetID":4,"y":11,"x":524,"width":10,"text":"|","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":5},{"type":"Text","props":{"presetID":5,"y":11,"x":540,"isPresetRoot":true,"width":40,"var":"firstPage","text":"首页","rotation":0,"name":"firstPage","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":6,"child":[{"type":"Script","props":{"presetID":6,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":7}]},{"type":"Text","props":{"presetID":7,"y":11,"x":1320,"isPresetRoot":true,"width":80,"var":"myorder","text":"我的订单","name":"myorder","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","runtime":"laya.display.Text"},"compId":8,"child":[{"type":"Script","props":{"presetID":8,"undercolor":"#FFFFFF","txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":9}]},{"type":"Text","props":{"presetID":9,"y":11,"x":1417,"isPresetRoot":true,"width":140,"var":"userName","text":"13800000000","overflow":"hidden","name":"userName","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"right","runtime":"laya.display.Text"},"compId":10,"child":[{"type":"Script","props":{"presetID":10,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":12}]},{"type":"Text","props":{"presetID":11,"y":11,"x":1562,"isPresetRoot":true,"width":73,"var":"logout","text":"[退出]","name":"logout","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF","align":"left","runtime":"laya.display.Text"},"compId":11,"child":[{"type":"Script","props":{"presetID":12,"txttype":1,"runtime":"script.prefabScript.LinkTextControl"},"compId":13}]},{"type":"Label","props":{"presetID":13,"y":11,"x":1405,"text":"|","height":27,"fontSize":20,"font":"Microsoft YaHei","color":"#FFFFFF"},"compId":14},{"type":"Script","props":{"presetID":14,"runtime":"script.prefabScript.TopBannerControl"},"compId":15}]},{"type":"Image","props":{"y":108,"x":340,"width":278,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":940,"alpha":1},"compId":59},{"type":"Label","props":{"y":114,"x":757,"var":"bannertitile","text":"企业资料","fontSize":14,"font":"SimHei","color":"#BEBDBD"},"compId":49},{"type":"Sprite","props":{"y":229,"x":637,"width":963,"var":"sp_container","height":725},"compId":50},{"type":"VBox","props":{"y":138,"x":364,"space":25},"compId":87,"child":[{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":26,"child":[{"type":"Box","props":{"y":-59,"x":-29},"compId":102,"child":[{"type":"Image","props":{"skin":"usercenter1/setting.png"},"compId":60},{"type":"Label","props":{"x":28,"text":"企业设置","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":17}]},{"type":"Label","props":{"var":"btntxt0","text":"企业资料","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":18},{"type":"Label","props":{"y":64,"var":"btntxt1","text":"收货地址","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":19},{"type":"Label","props":{"y":128,"x":0,"var":"btntxt9","text":"组织管理","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":100},{"type":"Label","props":{"y":192,"x":0,"var":"btntxt10","text":"申请列表","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":101},{"type":"Image","props":{"y":200,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":61}]},{"type":"Box","props":{"y":506},"compId":72,"child":[{"type":"Image","props":{"skin":"usercenter1/accounticon.png"},"compId":73},{"type":"Label","props":{"x":28,"text":"账户管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":74},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":75,"child":[{"type":"Label","props":{"x":0,"var":"btntxt5","text":"账户充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":76},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt6","text":"我的账单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":77},{"type":"Label","props":{"y":0,"x":0,"var":"btntxt11","text":"活动充值","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":103},{"type":"Image","props":{"y":100,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":79}]}]},{"type":"Box","props":{"y":221},"compId":63,"child":[{"type":"Image","props":{"skin":"usercenter1/ordericon.png"},"compId":64},{"type":"Label","props":{"x":28,"text":"订单管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":65},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":66,"child":[{"type":"Label","props":{"x":0,"var":"btntxt2","text":"购物车","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":67},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt3","text":"我的订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":68},{"type":"Label","props":{"y":110,"x":0,"var":"btntxt4","text":"委托订单","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":71},{"type":"Image","props":{"y":150,"x":0,"width":190,"skin":"commers/cutline.png"},"compId":69}]}]},{"type":"Box","props":{"y":723},"compId":80,"child":[{"type":"Image","props":{"skin":"usercenter1/personmanage.png"},"compId":81},{"type":"Label","props":{"x":28,"text":"个人管理","fontSize":22,"font":"SimHei","color":"#5b6779","bold":true},"compId":82},{"type":"VBox","props":{"y":59,"x":29,"space":20},"compId":83,"child":[{"type":"Label","props":{"x":0,"var":"btntxt7","text":"我的图库","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":84},{"type":"Label","props":{"y":64,"x":0,"var":"btntxt8","text":"修改密码","fontSize":24,"font":"SimHei","color":"#272524","align":"center"},"compId":85}]}]}]},{"type":"Sprite","props":{"y":110,"x":636,"texture":"commers/firstpagicon.png"},"compId":95},{"type":"Label","props":{"y":114,"x":669,"text":"/ 用户中心","fontSize":14,"font":"SimHei","color":"#52B232"},"compId":96},{"type":"Image","props":{"y":157,"x":637,"width":200,"skin":"commers/commonpopbg.png","sizeGrid":"3,3,3,3","height":72},"compId":98},{"type":"Label","props":{"y":182,"x":694,"var":"toptitle","text":"企业资料","fontSize":22,"font":"SimHei","color":"#52B232"},"compId":97}]},{"type":"Script","props":{"runtime":"script.usercenter.UserMainControl"},"compId":51}],"loadList":["commers/grayback.jpg","prefabs/TopBanner.prefab","commers/bgimg.jpg","commers/logotxt.png","commers/commonpopbg.png","usercenter1/setting.png","commers/cutline.png","usercenter1/accounticon.png","usercenter1/ordericon.png","usercenter1/personmanage.png","commers/firstpagicon.png"],"loadList3D":[]};
 	return UserMainPanelUI;
 })(View)
 
@@ -57599,6 +57784,30 @@ var TechorItemUI=(function(_super){
 
 	TechorItemUI.uiView={"type":"View","props":{},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":140,"var":"grayimg","skin":"commers/graydisable.jpg","sizeGrid":"2,2,2,2","height":40,"gray":true},"compId":10},{"type":"Image","props":{"y":0,"x":0,"width":140,"var":"shineimg","skin":"commers/inputfocus.png","sizeGrid":"5,5,5,5","height":40},"compId":11},{"type":"Button","props":{"y":0,"x":0,"width":140,"var":"techBtn","skin":"order1/selection.png","sizeGrid":"3,3,3,3","labelSize":16,"labelFont":"SimHei","labelColors":"#262B2E,#262B2E,#262B2E","label":"户内PP背胶","height":40},"compId":9}],"loadList":["commers/graydisable.jpg","commers/inputfocus.png","order1/selection.png"],"loadList3D":[]};
 	return TechorItemUI;
+})(View)
+
+
+//class ui.chargeActivity.ChargeRecordItemUI extends laya.ui.View
+var ChargeRecordItemUI=(function(_super){
+	function ChargeRecordItemUI(){
+		this.chargemoney=null;
+		this.currentval=null;
+		this.totalval=null;
+		this.totalreturn=null;
+		this.chargetime=null;
+		this.cancelbtn=null;
+		ChargeRecordItemUI.__super.call(this);
+	}
+
+	__class(ChargeRecordItemUI,'ui.chargeActivity.ChargeRecordItemUI',_super);
+	var __proto=ChargeRecordItemUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.createView(ChargeRecordItemUI.uiView);
+	}
+
+	ChargeRecordItemUI.uiView={"type":"View","props":{"width":0,"height":0},"compId":2,"child":[{"type":"Image","props":{"y":0,"x":0,"width":1000,"skin":"commers/inputbg.png","sizeGrid":"5,5,5,5","height":60},"compId":3,"child":[{"type":"Sprite","props":{"y":0,"x":0},"compId":21,"child":[{"type":"Rect","props":{"width":1000,"lineWidth":1,"height":60,"fillColor":"#eff4ef"},"compId":22}]}]},{"type":"Label","props":{"y":5,"x":16,"wordWrap":true,"width":118,"var":"chargemoney","valign":"middle","text":"15000","overflow":"hidden","height":50,"fontSize":20,"font":"Arial","color":"#262B2E","align":"center"},"compId":7},{"type":"Label","props":{"y":5,"x":177,"wordWrap":true,"width":153,"var":"currentval","valign":"middle","text":"2","height":50,"fontSize":20,"font":"Arial","color":"#262B2E","align":"center"},"compId":27},{"type":"Label","props":{"y":5,"x":360,"wordWrap":true,"width":118,"var":"totalval","valign":"middle","text":"12","overflow":"hidden","height":50,"fontSize":20,"font":"Arial","color":"#262B2E","align":"center"},"compId":58},{"type":"Label","props":{"y":5,"x":520,"wordWrap":true,"width":118,"var":"totalreturn","valign":"middle","text":"15000","overflow":"hidden","height":50,"fontSize":20,"font":"Arial","color":"#262B2E","align":"center"},"compId":59},{"type":"Label","props":{"y":5,"x":695,"wordWrap":true,"width":200,"var":"chargetime","valign":"middle","text":"2021-12-12 15:00:00","overflow":"hidden","height":50,"fontSize":20,"font":"Arial","color":"#262B2E","align":"center"},"compId":60},{"type":"Text","props":{"y":3,"x":938,"var":"cancelbtn","valign":"middle","text":"退款","presetID":1,"height":50,"fontSize":20,"font":"SimHei","color":"#e25e52","isPresetRoot":true,"runtime":"laya.display.Text"},"compId":61,"child":[{"type":"Script","props":{"presetID":2,"runtime":"script.prefabScript.LinkTextControl"},"compId":62}]}],"loadList":["commers/inputbg.png","prefabs/LinksText.prefab"],"loadList3D":[]};
+	return ChargeRecordItemUI;
 })(View)
 
 
@@ -57808,6 +58017,45 @@ var RegisterPanelUI=(function(_super){
 	}
 
 	return RegisterPanelUI;
+})(View)
+
+
+//class ui.usercenter.ChargeActivityPanelUI extends laya.ui.View
+var ChargeActivityPanelUI=(function(_super){
+	function ChargeActivityPanelUI(){
+		this.actpanel=null;
+		this.actbox=null;
+		this.acttitle=null;
+		this.actrule=null;
+		this.chargeamount=null;
+		this.totalreturn=null;
+		this.moneybtn0=null;
+		this.moneybtn1=null;
+		this.moneybtn2=null;
+		this.moneybtn3=null;
+		this.moneybtn4=null;
+		this.moneybtn5=null;
+		this.moneybtn6=null;
+		this.moneybtn7=null;
+		this.zhiufbaobtn=null;
+		this.joinact=null;
+		this.noactbox=null;
+		this.accout=null;
+		this.moneytxt=null;
+		this.actMoney=null;
+		this.frezeMoney=null;
+		this.recordbtn=null;
+		ChargeActivityPanelUI.__super.call(this);
+	}
+
+	__class(ChargeActivityPanelUI,'ui.usercenter.ChargeActivityPanelUI',_super);
+	var __proto=ChargeActivityPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("usercenter/ChargeActivityPanel");
+	}
+
+	return ChargeActivityPanelUI;
 })(View)
 
 
@@ -58157,21 +58405,6 @@ var ChargePanelUI=(function(_super){
 		this.frezeMoney=null;
 		this.chargeinput=null;
 		this.paytypezfb=null;
-		this.actpanel=null;
-		this.actbox=null;
-		this.acttitle=null;
-		this.actrule=null;
-		this.chargeamount=null;
-		this.zhiufbaobtn=null;
-		this.joinact=null;
-		this.moneybtn0=null;
-		this.moneybtn1=null;
-		this.moneybtn2=null;
-		this.moneybtn3=null;
-		this.moneybtn4=null;
-		this.moneybtn5=null;
-		this.moneybtn6=null;
-		this.noactbox=null;
 		ChargePanelUI.__super.call(this);
 	}
 
@@ -58334,6 +58567,49 @@ var SelectAddressPanelUI=(function(_super){
 	}
 
 	return SelectAddressPanelUI;
+})(View)
+
+
+//class ui.chargeActivity.ChargeActRecordPanelUI extends laya.ui.View
+var ChargeActRecordPanelUI=(function(_super){
+	function ChargeActRecordPanelUI(){
+		this.recordlist=null;
+		this.closebtn=null;
+		ChargeActRecordPanelUI.__super.call(this);
+	}
+
+	__class(ChargeActRecordPanelUI,'ui.chargeActivity.ChargeActRecordPanelUI',_super);
+	var __proto=ChargeActRecordPanelUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("chargeActivity/ChargeActRecordPanel");
+	}
+
+	return ChargeActRecordPanelUI;
+})(View)
+
+
+//class ui.common.PicturePopDialogUI extends laya.ui.View
+var PicturePopDialogUI=(function(_super){
+	function PicturePopDialogUI(){
+		this.mainpanel=null;
+		this.mainview=null;
+		this.msgtxt=null;
+		this.okbtn=null;
+		this.cancelbtn=null;
+		this.closebtn=null;
+		this.tipimg=null;
+		PicturePopDialogUI.__super.call(this);
+	}
+
+	__class(PicturePopDialogUI,'ui.common.PicturePopDialogUI',_super);
+	var __proto=PicturePopDialogUI.prototype;
+	__proto.createChildren=function(){
+		laya.display.Scene.prototype.createChildren.call(this);
+		this.loadScene("common/PicturePopDialog");
+	}
+
+	return PicturePopDialogUI;
 })(View)
 
 
@@ -61994,6 +62270,111 @@ var Tree=(function(_super){
 
 
 /**
+*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
+*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
+*
+*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
+*package
+*{
+	*import laya.ui.HSlider;
+	*import laya.utils.Handler;
+	*public class HSlider_Example
+	*{
+		*private var hSlider:HSlider;
+		*public function HSlider_Example()
+		*{
+			*Laya.init(640,800);//设置游戏画布宽高。
+			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
+			*}
+		*private function onLoadComplete():void
+		*{
+			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+			*hSlider.min=0;//设置 hSlider 最低位置值。
+			*hSlider.max=10;//设置 hSlider 最高位置值。
+			*hSlider.value=2;//设置 hSlider 当前位置值。
+			*hSlider.tick=1;//设置 hSlider 刻度值。
+			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
+			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+			*}
+		*private function onChange(value:Number):void
+		*{
+			*trace("滑块的位置： value="+value);
+			*}
+		*}
+	*}
+*@example
+*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
+*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
+*var hSlider;
+*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
+*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
+*function onLoadComplete(){
+	*console.log("资源加载完成！");
+	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+	*hSlider.min=0;//设置 hSlider 最低位置值。
+	*hSlider.max=10;//设置 hSlider 最高位置值。
+	*hSlider.value=2;//设置 hSlider 当前位置值。
+	*hSlider.tick=1;//设置 hSlider 刻度值。
+	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
+	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
+	*}
+*function onChange(value)
+*{
+	*console.log("滑块的位置： value="+value);
+	*}
+*@example
+*import Handler=laya.utils.Handler;
+*import HSlider=laya.ui.HSlider;
+*class HSlider_Example {
+	*private hSlider:HSlider;
+	*constructor(){
+		*Laya.init(640,800);//设置游戏画布宽高。
+		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
+		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
+		*}
+	*private onLoadComplete():void {
+		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
+		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
+		*this.hSlider.min=0;//设置 hSlider 最低位置值。
+		*this.hSlider.max=10;//设置 hSlider 最高位置值。
+		*this.hSlider.value=2;//设置 hSlider 当前位置值。
+		*this.hSlider.tick=1;//设置 hSlider 刻度值。
+		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
+		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
+		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
+		*}
+	*private onChange(value:number):void {
+		*console.log("滑块的位置： value="+value);
+		*}
+	*}
+*
+*@see laya.ui.Slider
+*/
+//class laya.ui.HSlider extends laya.ui.Slider
+var HSlider=(function(_super){
+	/**
+	*创建一个 <code>HSlider</code> 类实例。
+	*@param skin 皮肤。
+	*/
+	function HSlider(skin){
+		HSlider.__super.call(this,skin);
+		this.isVertical=false;
+	}
+
+	__class(HSlider,'laya.ui.HSlider',_super);
+	return HSlider;
+})(Slider)
+
+
+/**
 *<code>List</code> 控件可显示项目列表。默认为垂直方向列表。可通过UI编辑器自定义列表。
 *
 *@example <caption>以下示例代码，创建了一个 <code>List</code> 实例。</caption>
@@ -62945,111 +63326,6 @@ var List=(function(_super){
 
 	return List;
 })(Box)
-
-
-/**
-*使用 <code>HSlider</code> 控件，用户可以通过在滑块轨道的终点之间移动滑块来选择值。
-*<p> <code>HSlider</code> 控件采用水平方向。滑块轨道从左向右扩展，而标签位于轨道的顶部或底部。</p>
-*
-*@example <caption>以下示例代码，创建了一个 <code>HSlider</code> 实例。</caption>
-*package
-*{
-	*import laya.ui.HSlider;
-	*import laya.utils.Handler;
-	*public class HSlider_Example
-	*{
-		*private var hSlider:HSlider;
-		*public function HSlider_Example()
-		*{
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,onLoadComplete));//加载资源。
-			*}
-		*private function onLoadComplete():void
-		*{
-			*hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-			*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-			*hSlider.min=0;//设置 hSlider 最低位置值。
-			*hSlider.max=10;//设置 hSlider 最高位置值。
-			*hSlider.value=2;//设置 hSlider 当前位置值。
-			*hSlider.tick=1;//设置 hSlider 刻度值。
-			*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-			*hSlider.changeHandler=new Handler(this,onChange);//设置 hSlider 位置变化处理器。
-			*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-			*}
-		*private function onChange(value:Number):void
-		*{
-			*trace("滑块的位置： value="+value);
-			*}
-		*}
-	*}
-*@example
-*Laya.init(640,800,"canvas");//设置游戏画布宽高、渲染模式
-*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-*var hSlider;
-*var res=["resource/ui/hslider.png","resource/ui/hslider$bar.png"];
-*Laya.loader.load(res,laya.utils.Handler.create(this,onLoadComplete));
-*function onLoadComplete(){
-	*console.log("资源加载完成！");
-	*hSlider=new laya.ui.HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-	*hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-	*hSlider.min=0;//设置 hSlider 最低位置值。
-	*hSlider.max=10;//设置 hSlider 最高位置值。
-	*hSlider.value=2;//设置 hSlider 当前位置值。
-	*hSlider.tick=1;//设置 hSlider 刻度值。
-	*hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-	*hSlider.changeHandler=new laya.utils.Handler(this,onChange);//设置 hSlider 位置变化处理器。
-	*Laya.stage.addChild(hSlider);//把 hSlider 添加到显示列表。
-	*}
-*function onChange(value)
-*{
-	*console.log("滑块的位置： value="+value);
-	*}
-*@example
-*import Handler=laya.utils.Handler;
-*import HSlider=laya.ui.HSlider;
-*class HSlider_Example {
-	*private hSlider:HSlider;
-	*constructor(){
-		*Laya.init(640,800);//设置游戏画布宽高。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*Laya.loader.load(["resource/ui/hslider.png","resource/ui/hslider$bar.png"],Handler.create(this,this.onLoadComplete));//加载资源。
-		*}
-	*private onLoadComplete():void {
-		*this.hSlider=new HSlider();//创建一个 HSlider 类的实例对象 hSlider 。
-		*this.hSlider.skin="resource/ui/hslider.png";//设置 hSlider 的皮肤。
-		*this.hSlider.min=0;//设置 hSlider 最低位置值。
-		*this.hSlider.max=10;//设置 hSlider 最高位置值。
-		*this.hSlider.value=2;//设置 hSlider 当前位置值。
-		*this.hSlider.tick=1;//设置 hSlider 刻度值。
-		*this.hSlider.x=100;//设置 hSlider 对象的属性 x 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.y=100;//设置 hSlider 对象的属性 y 的值，用于控制 hSlider 对象的显示位置。
-		*this.hSlider.changeHandler=new Handler(this,this.onChange);//设置 hSlider 位置变化处理器。
-		*Laya.stage.addChild(this.hSlider);//把 hSlider 添加到显示列表。
-		*}
-	*private onChange(value:number):void {
-		*console.log("滑块的位置： value="+value);
-		*}
-	*}
-*
-*@see laya.ui.Slider
-*/
-//class laya.ui.HSlider extends laya.ui.Slider
-var HSlider=(function(_super){
-	/**
-	*创建一个 <code>HSlider</code> 类实例。
-	*@param skin 皮肤。
-	*/
-	function HSlider(skin){
-		HSlider.__super.call(this,skin);
-		this.isVertical=false;
-	}
-
-	__class(HSlider,'laya.ui.HSlider',_super);
-	return HSlider;
-})(Slider)
 
 
 /**
@@ -64728,100 +65004,6 @@ var ColorItem=(function(_super){
 })(ColorLblItemUI)
 
 
-//class script.order.SelectAttachBtn extends ui.order.TabChooseBtnUI
-var SelectAttachBtn=(function(_super){
-	function SelectAttachBtn(){
-		this.attachCatVo=null;
-		SelectAttachBtn.__super.call(this);
-	}
-
-	__class(SelectAttachBtn,'script.order.SelectAttachBtn',_super);
-	var __proto=SelectAttachBtn.prototype;
-	__proto.setData=function(matName){
-		this.attachCatVo=matName;
-		this.selbtn.label=this.attachCatVo.accessory_name;
-		this.selbtn.on("doubleclick",this,this.onSelectSure);
-	}
-
-	//this.selbtn.on(Event.CLICK,this,ShowSelected);
-	__proto.onSelectSure=function(){
-		EventCenter.instance.event("ADD_TECH_ATTACH",this.attachCatVo);
-	}
-
-	__proto.ShowSelected=function(sel){
-		this.selbtn.selected=sel;
-	}
-
-	return SelectAttachBtn;
-})(TabChooseBtnUI)
-
-
-//class script.product.AdvertiseProItem extends ui.product.AdvertiseItemUI
-var AdvertiseProItem=(function(_super){
-	function AdvertiseProItem(){
-		this.productvo=null;
-		this.goodsOrCard=false;
-		AdvertiseProItem.__super.call(this);
-	}
-
-	__class(AdvertiseProItem,'script.product.AdvertiseProItem',_super);
-	var __proto=AdvertiseProItem.prototype;
-	__proto.setData=function(data){
-		this.productvo=data;
-		if(data.goodsNum==null){
-			this.btnok.label="加入购物车";
-			this.proNum.text="1";
-			this.proPrice.text=this.productvo.mer_price+"";
-			this.goodsOrCard=true;
-		}
-		else{
-			this.btnok.label="移出购物车";
-			this.proNum.text=data.goodsNum+"";
-			this.proPrice.text=this.productvo.mer_price *data.goodsNum+"";
-			this.goodsOrCard=false;
-		}
-		this.proName.text=this.productvo.prod_name+"";
-		this.btnadd.on("click",this,this.onAddNum);
-		this.btnsub.on("click",this,this.onSubNum);
-		this.btnok.on("click",this,this.onClickOk);
-	}
-
-	__proto.onAddNum=function(){
-		var curNum=parseInt(this.proNum.text);
-		curNum++;
-		this.proNum.text=curNum.toString();
-		if(this.goodsOrCard==false){
-			(this.productvo).goodsNum=curNum;
-			this.proPrice.text=(this.productvo.mer_price *curNum).toFixed(2)+"";
-		}
-	}
-
-	__proto.onSubNum=function(){
-		var curNum=parseInt(this.proNum.text);
-		if(curNum > 1)
-			curNum--;
-		this.proNum.text=curNum.toString();
-		if(this.goodsOrCard==false){
-			(this.productvo).goodsNum=curNum;
-			this.proPrice.text=(this.productvo.mer_price *curNum).toFixed(2)+"";
-		}
-	}
-
-	__proto.onClickOk=function(){
-		if(!this.goodsOrCard){
-			EventCenter.instance.event("PRODUCT_DELETE_GOODS",this);
-		}
-		else{
-			var newgoods=new ProductInShopCar(this.productvo);
-			newgoods.goodsNum=parseInt(this.proNum.text);
-			EventCenter.instance.event("PRODUCT_ADD_GOODS",newgoods);
-		}
-	}
-
-	return AdvertiseProItem;
-})(AdvertiseItemUI)
-
-
 //class script.order.AvgCutImage extends ui.order.AvgCutImageItemUI
 var AvgCutImage=(function(_super){
 	function AvgCutImage(){
@@ -64990,6 +65172,124 @@ var AvgCutImage=(function(_super){
 })(AvgCutImageItemUI)
 
 
+//class script.order.SelectAttachBtn extends ui.order.TabChooseBtnUI
+var SelectAttachBtn=(function(_super){
+	function SelectAttachBtn(){
+		this.attachCatVo=null;
+		SelectAttachBtn.__super.call(this);
+	}
+
+	__class(SelectAttachBtn,'script.order.SelectAttachBtn',_super);
+	var __proto=SelectAttachBtn.prototype;
+	__proto.setData=function(matName){
+		this.attachCatVo=matName;
+		this.selbtn.label=this.attachCatVo.accessory_name;
+		this.selbtn.on("doubleclick",this,this.onSelectSure);
+	}
+
+	//this.selbtn.on(Event.CLICK,this,ShowSelected);
+	__proto.onSelectSure=function(){
+		EventCenter.instance.event("ADD_TECH_ATTACH",this.attachCatVo);
+	}
+
+	__proto.ShowSelected=function(sel){
+		this.selbtn.selected=sel;
+	}
+
+	return SelectAttachBtn;
+})(TabChooseBtnUI)
+
+
+//class script.product.AdvertiseProItem extends ui.product.AdvertiseItemUI
+var AdvertiseProItem=(function(_super){
+	function AdvertiseProItem(){
+		this.productvo=null;
+		this.goodsOrCard=false;
+		AdvertiseProItem.__super.call(this);
+	}
+
+	__class(AdvertiseProItem,'script.product.AdvertiseProItem',_super);
+	var __proto=AdvertiseProItem.prototype;
+	__proto.setData=function(data){
+		this.productvo=data;
+		if(data.goodsNum==null){
+			this.btnok.label="加入购物车";
+			this.proNum.text="1";
+			this.proPrice.text=this.productvo.mer_price+"";
+			this.goodsOrCard=true;
+		}
+		else{
+			this.btnok.label="移出购物车";
+			this.proNum.text=data.goodsNum+"";
+			this.proPrice.text=this.productvo.mer_price *data.goodsNum+"";
+			this.goodsOrCard=false;
+		}
+		this.proName.text=this.productvo.prod_name+"";
+		this.btnadd.on("click",this,this.onAddNum);
+		this.btnsub.on("click",this,this.onSubNum);
+		this.btnok.on("click",this,this.onClickOk);
+	}
+
+	__proto.onAddNum=function(){
+		var curNum=parseInt(this.proNum.text);
+		curNum++;
+		this.proNum.text=curNum.toString();
+		if(this.goodsOrCard==false){
+			(this.productvo).goodsNum=curNum;
+			this.proPrice.text=(this.productvo.mer_price *curNum).toFixed(2)+"";
+		}
+	}
+
+	__proto.onSubNum=function(){
+		var curNum=parseInt(this.proNum.text);
+		if(curNum > 1)
+			curNum--;
+		this.proNum.text=curNum.toString();
+		if(this.goodsOrCard==false){
+			(this.productvo).goodsNum=curNum;
+			this.proPrice.text=(this.productvo.mer_price *curNum).toFixed(2)+"";
+		}
+	}
+
+	__proto.onClickOk=function(){
+		if(!this.goodsOrCard){
+			EventCenter.instance.event("PRODUCT_DELETE_GOODS",this);
+		}
+		else{
+			var newgoods=new ProductInShopCar(this.productvo);
+			newgoods.goodsNum=parseInt(this.proNum.text);
+			EventCenter.instance.event("PRODUCT_ADD_GOODS",newgoods);
+		}
+	}
+
+	return AdvertiseProItem;
+})(AdvertiseItemUI)
+
+
+//class script.activity.ChargeRecordCell extends ui.chargeActivity.ChargeRecordItemUI
+var ChargeRecordCell=(function(_super){
+	function ChargeRecordCell(){
+		ChargeRecordCell.__super.call(this);
+		this.cancelbtn.on("click",this,this.onCancelCharge);
+	}
+
+	__class(ChargeRecordCell,'script.activity.ChargeRecordCell',_super);
+	var __proto=ChargeRecordCell.prototype;
+	__proto.setData=function(data){}
+	__proto.onCancelCharge=function(){
+		ViewManager.instance.openView("VIEW_POPUPDIALOG",false,{msg:"撤回的金额将不享受活动额外的返现金额,确定撤回这次充值吗?",caller:this,callback:this.onConfirmCancle});
+	}
+
+	__proto.onConfirmCancle=function(sure){
+		if(sure){
+			console.log("jjkkkk");
+		}
+	}
+
+	return ChargeRecordCell;
+})(ChargeRecordItemUI)
+
+
 //class script.order.DeliveryTypeItem extends ui.order.OrderAddressItemUI
 var DeliveryTypeItem=(function(_super){
 	function DeliveryTypeItem(){
@@ -65012,6 +65312,98 @@ var DeliveryTypeItem=(function(_super){
 
 	return DeliveryTypeItem;
 })(OrderAddressItemUI)
+
+
+//class script.order.TechBoxItem extends ui.order.TechorItemUI
+var TechBoxItem=(function(_super){
+	function TechBoxItem(){
+		this.techmainvo=null;
+		this.isSelected=false;
+		this.processCatVo=null;
+		this.attachVo=null;
+		TechBoxItem.__super.call(this);
+	}
+
+	__class(TechBoxItem,'script.order.TechBoxItem',_super);
+	var __proto=TechBoxItem.prototype;
+	__proto.setData=function(tvo){
+		this.processCatVo=null;
+		this.techmainvo=tvo;
+		this.initView();
+		if(tvo.selected)
+			this.setSelected(true);
+		else
+		this.setSelected(false);
+		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
+			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
+				this.techBtn.disabled=true;
+				this.mouseEnabled=!this.techBtn.disabled;
+				this.grayimg.visible=!this.mouseEnabled;
+				return;
+			}
+		}
+		this.techBtn.disabled=false;
+		this.mouseEnabled=true;
+		this.grayimg.visible=false;
+		this.shineimg.visible=false;
+	}
+
+	__proto.startshine=function(){
+		this.shineimg.visible=true;
+		this.startTween();
+	}
+
+	__proto.startTween=function(){
+		Tween.to(this.shineimg,{alpha:0},300,Ease.elasticIn,new Handler(this,this.onCompleteShine));
+	}
+
+	__proto.onCompleteShine=function(){
+		Tween.to(this.shineimg,{alpha:1},300,Ease.elasticIn,new Handler(this,this.startshine));
+	}
+
+	__proto.stopshine=function(){
+		this.shineimg.visible=false;
+		Tween.clearAll(this.shineimg);
+	}
+
+	__proto.setAttachVo=function(attachvo){
+		this.processCatVo=null;
+		this.techmainvo=null;
+		this.attachVo=attachvo;
+		this.techBtn.label=this.attachVo.accessory_name;
+		this.setSelected(false);
+	}
+
+	__proto.setProcessData=function(pvo){
+		this.techmainvo=null;
+		this.processCatVo=pvo;
+		this.techBtn.label=pvo.procCat_Name.split("-")[0];
+	}
+
+	// setSelected(false);
+	__proto.initView=function(){
+		this.techBtn.label=this.techmainvo.preProc_Name;
+	}
+
+	__proto.setSelected=function(sel){
+		this.techBtn.selected=sel;;
+		this.isSelected=sel;
+	}
+
+	__proto.setTechSelected=function(sel){
+		if(this.techmainvo !=null){
+			this.techmainvo.selected=sel;
+			this.techmainvo.attchMentFileId="";
+			this.techmainvo.attchFileId="";
+			this.techmainvo.selectAttachVoList=null;
+		}
+		else
+		this.processCatVo.selected=sel;
+	}
+
+	__proto.onClickTech=function(index){}
+	return TechBoxItem;
+})(TechorItemUI)
 
 
 //class script.usercenter.OrderCheckListItem extends ui.usercenter.OrderListItemUI
@@ -65218,98 +65610,6 @@ var OrderCheckListItem=(function(_super){
 
 	return OrderCheckListItem;
 })(OrderListItemUI)
-
-
-//class script.order.TechBoxItem extends ui.order.TechorItemUI
-var TechBoxItem=(function(_super){
-	function TechBoxItem(){
-		this.techmainvo=null;
-		this.isSelected=false;
-		this.processCatVo=null;
-		this.attachVo=null;
-		TechBoxItem.__super.call(this);
-	}
-
-	__class(TechBoxItem,'script.order.TechBoxItem',_super);
-	var __proto=TechBoxItem.prototype;
-	__proto.setData=function(tvo){
-		this.processCatVo=null;
-		this.techmainvo=tvo;
-		this.initView();
-		if(tvo.selected)
-			this.setSelected(true);
-		else
-		this.setSelected(false);
-		if(this.techmainvo.preProc_attachmentTypeList.toUpperCase()=="SPDFCQ"){
-			if(UtilTool.hasChaofuProcess(PaintOrderModel.instance.curSelectMat.getAllSelectedTech())|| PaintOrderModel.instance.checkIslongerForDfcq()){
-				this.techBtn.disabled=true;
-				this.mouseEnabled=!this.techBtn.disabled;
-				this.grayimg.visible=!this.mouseEnabled;
-				return;
-			}
-		}
-		this.techBtn.disabled=false;
-		this.mouseEnabled=true;
-		this.grayimg.visible=false;
-		this.shineimg.visible=false;
-	}
-
-	__proto.startshine=function(){
-		this.shineimg.visible=true;
-		this.startTween();
-	}
-
-	__proto.startTween=function(){
-		Tween.to(this.shineimg,{alpha:0},300,Ease.elasticIn,new Handler(this,this.onCompleteShine));
-	}
-
-	__proto.onCompleteShine=function(){
-		Tween.to(this.shineimg,{alpha:1},300,Ease.elasticIn,new Handler(this,this.startshine));
-	}
-
-	__proto.stopshine=function(){
-		this.shineimg.visible=false;
-		Tween.clearAll(this.shineimg);
-	}
-
-	__proto.setAttachVo=function(attachvo){
-		this.processCatVo=null;
-		this.techmainvo=null;
-		this.attachVo=attachvo;
-		this.techBtn.label=this.attachVo.accessory_name;
-		this.setSelected(false);
-	}
-
-	__proto.setProcessData=function(pvo){
-		this.techmainvo=null;
-		this.processCatVo=pvo;
-		this.techBtn.label=pvo.procCat_Name.split("-")[0];
-	}
-
-	// setSelected(false);
-	__proto.initView=function(){
-		this.techBtn.label=this.techmainvo.preProc_Name;
-	}
-
-	__proto.setSelected=function(sel){
-		this.techBtn.selected=sel;;
-		this.isSelected=sel;
-	}
-
-	__proto.setTechSelected=function(sel){
-		if(this.techmainvo !=null){
-			this.techmainvo.selected=sel;
-			this.techmainvo.attchMentFileId="";
-			this.techmainvo.attchFileId="";
-			this.techmainvo.selectAttachVoList=null;
-		}
-		else
-		this.processCatVo.selected=sel;
-	}
-
-	__proto.onClickTech=function(index){}
-	return TechBoxItem;
-})(TechorItemUI)
 
 
 //class script.picUpload.FileUpLoadItem extends ui.uploadpic.UpLoadItemUI

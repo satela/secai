@@ -17,6 +17,8 @@ package script
 	import ui.carving.CarvingOrderPanelUI;
 	import ui.characterpaint.CharactTypePanelUI;
 	import ui.characterpaint.CharacterPaintUI;
+	import ui.chargeActivity.ChargeActRecordPanelUI;
+	import ui.common.PicturePopDialogUI;
 	import ui.login.LoadingPanelUI;
 	import ui.login.LogPanelUI;
 	import ui.login.RegisterPanelUI;
@@ -110,6 +112,11 @@ package script
 
 
 		public static const VIEW_POPUPDIALOG:String = "VIEW_POPUPDIALOG";//确认框
+		public static const VIEW_POPUPDIALOG_WITH_PICTURE:String = "VIEW_POPUPDIALOG_WITH_PICTURE";//带图片的确认框
+
+		
+		public static const VIEW_CHARGE_RECORD_PANEL:String = "VIEW_CHARGE_RECORD_PANEL";//活动记录
+
 
 		public var viewDict:Object;
 		public static function get instance():ViewManager
@@ -152,6 +159,8 @@ package script
 			viewDict[VIEW_USERCENTER] = UserMainPanelUI;
 			viewDict[VIEW_PICTURE_CHECK] = PicCheckPanelUI;
 			viewDict[VIEW_POPUPDIALOG] = PopUpDialogUI;
+			viewDict[VIEW_POPUPDIALOG_WITH_PICTURE] = PicturePopDialogUI;
+
 			viewDict[VIEW_PAINT_ORDER] = PaintOrderPanelUI;
 
 			viewDict[VIEW_SELECT_ADDRESS] = SelectAddressPanelUI;
@@ -178,8 +187,9 @@ package script
 			viewDict[VIEW_PACKAGE_ORDER_PANEL] = PackagePanelUI;
 			viewDict[VIEW_ACTIVITY_ADVETISE_PANEL] = ChargeAdvertisePanelUI;
 			viewDict[VIEW_DAKOU_PANEL] = DakouPanelUI;
+			viewDict[VIEW_CHARGE_RECORD_PANEL] = ChargeActRecordPanelUI;;
 
-
+			
 		}
 		
 		public static function showAlert(mesg:String):void

@@ -49,7 +49,12 @@ package script.order
 			uiSkin.paytype.selectedIndex = 0 ;
 			
 			if(Userdata.instance.accountType == Constast.ACCOUNT_EMPLOYEE && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_SCAN] == "0" && Userdata.instance.privilege[Constast.PRIVILEGE_PAYORDER_BY_AMOUNT] == "1")
+			{
+				
 				uiSkin.paytype.selectedIndex = 1;
+				
+				
+			}
 //			else
 //			{
 //				uiSkin.paytype.selectedIndex = 1 ;
@@ -124,6 +129,13 @@ package script.order
 				uiSkin.accountmoney.text = Userdata.instance.money.toString() + "元";
 				
 				uiSkin.actmoney.text = Userdata.instance.actMoney.toString() + "元";
+				
+				
+				if(Userdata.instance.actMoney >= param.amount)
+					uiSkin.paytype.selectedIndex = 2;
+				else if(Userdata.instance.money >= param.amount)
+					uiSkin.paytype.selectedIndex = 1;
+			
 				
 				if(Userdata.instance.isHidePrice())
 				{
